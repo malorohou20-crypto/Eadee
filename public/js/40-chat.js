@@ -312,4 +312,3 @@ function toggleSidebar() {
   sidebar?.classList.toggle('open');
   backdrop?.classList.toggle('visible');
 }
-</script>
