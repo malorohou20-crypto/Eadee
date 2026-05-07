@@ -451,4 +451,65 @@
 }
 .mock-float-left  { left: -220px !important; top: 80px !important; }
 .mock-float-right { right: -220px !important; top: 60px !important; }
+/* ========== SECTORS BAND ========== */
+.sectors-band-wrapper {
+  padding: 28px 0;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  background: rgba(255,255,255,0.012);
+  overflow: hidden;
+  position: relative;
+}
+.sectors-label {
+  text-align: center;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.38);
+  margin-bottom: 16px;
+}
+.sectors-band {
+  position: relative;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 7%, black 93%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, black 7%, black 93%, transparent 100%);
+}
+.sectors-track {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  animation: sectorsScroll 50s linear infinite;
+}
+.sectors-item {
+  display: inline-block;
+  padding: 0 24px;
+  font-family: 'Geist', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: rgba(255,255,255,0.52);
+  transition: color 0.2s ease;
+  cursor: default;
+}
+.sectors-item:hover { color: #ecedf2; }
+.sectors-sep {
+  color: rgba(107,143,239,0.3);
+  font-size: 16px;
+  user-select: none;
+  flex-shrink: 0;
+}
+.sectors-band:hover .sectors-track { animation-play-state: paused; }
+@keyframes sectorsScroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+@media (max-width: 768px) {
+  .sectors-item { font-size: 12px; padding: 0 16px; }
+  .sectors-track { animation-duration: 38s; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sectors-track { animation: none; flex-wrap: wrap; justify-content: center; }
+}
+
 /* Cacher les cards sur petits écrans */
