@@ -10,6 +10,7 @@
   .hero-mock-app { width: 100% !important; max-width: 400px !important; transform: none !important; }
   .hero { padding: 60px 40px 48px !important; }
   .stats-band { grid-template-columns: repeat(2, 1fr) !important; }
+  .pricing-grid { grid-template-columns: repeat(2, 1fr) !important; }
 }
 
 /* Mobile & Tablette (max 768px) */
