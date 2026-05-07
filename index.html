@@ -23,6 +23,7 @@
 <link rel="stylesheet" href="/public/css/11-landing-sections.css">
 
 <link rel="stylesheet" href="/public/css/13-landing-footer.css">
+<link rel="stylesheet" href="/public/css/16-sections-grid.css">
 <link rel="stylesheet" href="/public/css/20-dashboard.css">
 <link rel="stylesheet" href="/public/css/21-generator.css">
 <link rel="stylesheet" href="/public/css/22-plan.css">
@@ -548,318 +549,158 @@
       </div>
     </div>
 
-    <!-- SECTION 4 — 20 sections complètes -->
-    <div class="tr-section tr-section-rev">
-      <div class="tr-text">
-        <h2 class="tr-h2">20 sections.<em>Rien n'est laissé au hasard.</em></h2>
-        <p class="tr-p">Un business plan EADEE couvre tout ce qu'un investisseur, une banque ou un conseiller BPI France attend — dans un seul document généré en 60 secondes.</p>
-        <div class="tr-sections-grid">
-          <div class="tr-sec-item"><span class="tr-sec-num">01</span><span class="tr-sec-name">Résumé Exécutif</span></div>
-          <div class="tr-sec-item"><span class="tr-sec-num">11</span><span class="tr-sec-name">KPIs à Suivre</span></div>
-          <div class="tr-sec-item"><span class="tr-sec-num">02</span><span class="tr-sec-name">Marché &amp; Opportunité</span></div>
-          <div class="tr-sec-item"><span class="tr-sec-num">12</span><span class="tr-sec-name">Pitch 30 Secondes</span></div>
-          <div class="tr-sec-item"><span class="tr-sec-num">03</span><span class="tr-sec-name">Modèle Économique</span></div>
-          <div class="tr-sec-item"><span class="tr-sec-num">13</span><span class="tr-sec-name">Client Idéal (Persona)</span></div>
-          <div class="tr-sec-item"><span class="tr-sec-num">04</span><span class="tr-sec-name">Analyse Concurrentielle</span></div>
-          <div class="tr-sec-item"><span class="tr-sec-num">14</span><span class="tr-sec-name">Démarches Administratives</span></div>
-          <div class="tr-sec-item"><span class="tr-sec-num">05</span><span class="tr-sec-name">Projections Financières</span></div>
-          <div class="tr-sec-item"><span class="tr-sec-num">15</span><span class="tr-sec-name">Email Fournisseur</span></div>
-          <div class="tr-sec-item"><span class="tr-sec-num">06</span><span class="tr-sec-name">Acquisition Client</span></div>
-          <div class="tr-sec-item"><span class="tr-sec-num">16</span><span class="tr-sec-name">Email Prospection</span></div>
-          <div class="tr-sec-item"><span class="tr-sec-num">07</span><span class="tr-sec-name">Plan d'Action 90 Jours</span></div>
-          <div class="tr-sec-item"><span class="tr-sec-num">17</span><span class="tr-sec-name">Email Relance (J+7)</span></div>
-          <div class="tr-sec-item"><span class="tr-sec-num">08</span><span class="tr-sec-name">Investissement &amp; Charges</span></div>
-          <div class="tr-sec-item"><span class="tr-sec-num">18</span><span class="tr-sec-name">Documents Téléchargeables</span></div>
-          <div class="tr-sec-item"><span class="tr-sec-num">09</span><span class="tr-sec-name" style="color:#9db8f8;">Risques &amp; Mitigation</span></div>
-          <div class="tr-sec-item"><span class="tr-sec-num">19</span><span class="tr-sec-name">Checklist Bancabilité</span></div>
-          <div class="tr-sec-item"><span class="tr-sec-num">10</span><span class="tr-sec-name">Ressources &amp; Outils</span></div>
-          <div class="tr-sec-item" style="border-color:rgba(167,139,250,0.2); background:rgba(167,139,250,0.04);"><span class="tr-sec-num">20</span><span class="tr-sec-name" style="color:#a78bfa;">Score Fiabilité IA</span></div>
+    <!-- SECTION 4 — Grille 20 sections -->
+    </div><!-- close tr-wrap early to break out -->
+    <section class="sections-grid-section fade-up">
+      <div class="section-tag">CE QUE TU OBTIENS</div>
+      <h2 class="section-h2">20 sections.<em>Rien n'est laissé au hasard.</em></h2>
+      <p class="sections-grid-sub">Chaque plan Eadee contient ces 20 sections, complètes et personnalisées à ton projet. Aucun copier-coller, aucune section vide.</p>
+
+      <div class="grid-filters">
+        <button class="grid-filter active" data-cat="all">Toutes (20)</button>
+        <button class="grid-filter" data-cat="strategie">Stratégie (6)</button>
+        <button class="grid-filter" data-cat="marche">Marché (2)</button>
+        <button class="grid-filter" data-cat="finance">Finance (5)</button>
+        <button class="grid-filter" data-cat="juridique">Juridique (4)</button>
+        <button class="grid-filter" data-cat="action">Action (3)</button>
+      </div>
+
+      <div class="sections-grid">
+        <!-- STRATÉGIE -->
+        <div class="grid-card grid-card-strategie" data-cat="strategie">
+          <div class="grid-card-num">01</div>
+          <h3 class="grid-card-title">Résumé exécutif</h3>
+          <p class="grid-card-desc">La synthèse de ton projet en 1 paragraphe percutant pour accrocher banquiers et investisseurs.</p>
+          <span class="grid-card-cat-tag">Stratégie</span>
         </div>
+        <div class="grid-card grid-card-strategie" data-cat="strategie">
+          <div class="grid-card-num">03</div>
+          <h3 class="grid-card-title">Présentation du projet</h3>
+          <p class="grid-card-desc">Origine, vision, mission. Le pourquoi de ton entreprise raconté de façon mémorable.</p>
+          <span class="grid-card-cat-tag">Stratégie</span>
+        </div>
+        <div class="grid-card grid-card-strategie" data-cat="strategie">
+          <div class="grid-card-num">06</div>
+          <h3 class="grid-card-title">Proposition de valeur unique</h3>
+          <p class="grid-card-desc">Ton USP clairement formulée : pourquoi un client te choisit toi et pas un autre.</p>
+          <span class="grid-card-cat-tag">Stratégie</span>
+        </div>
+        <div class="grid-card grid-card-strategie" data-cat="strategie">
+          <div class="grid-card-num">07</div>
+          <h3 class="grid-card-title">Modèle économique</h3>
+          <p class="grid-card-desc">Tes offres, tes prix, comment tu génères de la marge. Avec exemples chiffrés.</p>
+          <span class="grid-card-cat-tag">Stratégie</span>
+        </div>
+        <div class="grid-card grid-card-strategie" data-cat="strategie">
+          <div class="grid-card-num">08</div>
+          <h3 class="grid-card-title">Stratégie commerciale</h3>
+          <p class="grid-card-desc">Ton positionnement marketing, ton tunnel de vente, ta promesse de marque.</p>
+          <span class="grid-card-cat-tag">Stratégie</span>
+        </div>
+        <div class="grid-card grid-card-strategie" data-cat="strategie">
+          <div class="grid-card-num">09</div>
+          <h3 class="grid-card-title">Plan d'acquisition</h3>
+          <p class="grid-card-desc">Tes canaux d'acquisition (SEO, ads, partenariats) avec CAC et LTV estimés.</p>
+          <span class="grid-card-cat-tag">Stratégie</span>
+        </div>
+        <!-- MARCHÉ -->
+        <div class="grid-card grid-card-marche" data-cat="marche">
+          <div class="grid-card-num">04</div>
+          <h3 class="grid-card-title">Étude de marché</h3>
+          <p class="grid-card-desc">Taille du marché français, croissance, tendances. Sources INSEE et études sectorielles citées.</p>
+          <span class="grid-card-cat-tag">Marché</span>
+        </div>
+        <div class="grid-card grid-card-marche" data-cat="marche">
+          <div class="grid-card-num">05</div>
+          <h3 class="grid-card-title">Analyse concurrentielle</h3>
+          <p class="grid-card-desc">Tes 3–5 concurrents principaux, leurs forces/faiblesses, ton positionnement différenciant.</p>
+          <span class="grid-card-cat-tag">Marché</span>
+        </div>
+        <!-- FINANCE -->
+        <div class="grid-card grid-card-finance" data-cat="finance">
+          <div class="grid-card-num">12</div>
+          <h3 class="grid-card-title">Compte de résultat 3 ans</h3>
+          <p class="grid-card-desc">CA, charges, résultat sur 3 années glissantes. An 1 mensuel + années 2–3 annuelles.</p>
+          <span class="grid-card-cat-tag">Finance</span>
+        </div>
+        <div class="grid-card grid-card-finance" data-cat="finance">
+          <div class="grid-card-num">13</div>
+          <h3 class="grid-card-title">Plan de trésorerie</h3>
+          <p class="grid-card-desc">Entrées et sorties mensuelles sur 12 mois. Le document préféré des banques.</p>
+          <span class="grid-card-cat-tag">Finance</span>
+        </div>
+        <div class="grid-card grid-card-finance" data-cat="finance">
+          <div class="grid-card-num">14</div>
+          <h3 class="grid-card-title">Plan d'investissement &amp; financement</h3>
+          <p class="grid-card-desc">Tes besoins (matériel, BFR) vs tes ressources (apport, prêt, subventions).</p>
+          <span class="grid-card-cat-tag">Finance</span>
+        </div>
+        <div class="grid-card grid-card-finance" data-cat="finance">
+          <div class="grid-card-num">15</div>
+          <h3 class="grid-card-title">Bilan prévisionnel 3 ans</h3>
+          <p class="grid-card-desc">Actif et passif simplifié à fin d'an 1, 2 et 3. Vision patrimoniale de l'entreprise.</p>
+          <span class="grid-card-cat-tag">Finance</span>
+        </div>
+        <div class="grid-card grid-card-finance" data-cat="finance">
+          <div class="grid-card-num">16</div>
+          <h3 class="grid-card-title">Seuil de rentabilité</h3>
+          <p class="grid-card-desc">Calcul détaillé du point mort : à partir de quand tu deviens rentable.</p>
+          <span class="grid-card-cat-tag">Finance</span>
+        </div>
+        <!-- JURIDIQUE -->
+        <div class="grid-card grid-card-juridique" data-cat="juridique">
+          <div class="grid-card-num">02</div>
+          <h3 class="grid-card-title">Présentation du porteur</h3>
+          <p class="grid-card-desc">Template structuré pour présenter ton parcours, tes compétences, ta légitimité.</p>
+          <span class="grid-card-cat-tag">Juridique</span>
+        </div>
+        <div class="grid-card grid-card-juridique" data-cat="juridique">
+          <div class="grid-card-num">10</div>
+          <h3 class="grid-card-title">Aspects juridiques</h3>
+          <p class="grid-card-desc">Statut recommandé pour ton projet (SAS, EI, micro…) avec justification chiffrée.</p>
+          <span class="grid-card-cat-tag">Juridique</span>
+        </div>
+        <div class="grid-card grid-card-juridique" data-cat="juridique">
+          <div class="grid-card-num">11</div>
+          <h3 class="grid-card-title">Aspects organisationnels</h3>
+          <p class="grid-card-desc">Équipe, locaux, sous-traitance. Comment ton activité s'organise au quotidien.</p>
+          <span class="grid-card-cat-tag">Juridique</span>
+        </div>
+        <div class="grid-card grid-card-juridique" data-cat="juridique">
+          <div class="grid-card-num">19</div>
+          <h3 class="grid-card-title">Aides &amp; subventions</h3>
+          <p class="grid-card-desc">BPI, ACRE, Pôle Emploi, prêts d'honneur : ce à quoi tu as droit avec montants et liens.</p>
+          <span class="grid-card-cat-tag">Juridique</span>
+        </div>
+        <!-- ACTION -->
+        <div class="grid-card grid-card-action" data-cat="action">
+          <div class="grid-card-num">17</div>
+          <h3 class="grid-card-title">Analyse des risques</h3>
+          <p class="grid-card-desc">Risques marché, opérationnels, financiers, légaux. Avec plan de mitigation pour chacun.</p>
+          <span class="grid-card-cat-tag">Action</span>
+        </div>
+        <div class="grid-card grid-card-action" data-cat="action">
+          <div class="grid-card-num">18</div>
+          <h3 class="grid-card-title">Plan d'action 90 jours</h3>
+          <p class="grid-card-desc">Tes 12 actions prioritaires sur les 3 premiers mois. Concret, daté, mesurable.</p>
+          <span class="grid-card-cat-tag">Action</span>
+        </div>
+        <div class="grid-card grid-card-action" data-cat="action">
+          <div class="grid-card-num">20</div>
+          <h3 class="grid-card-title">Annexes à compléter</h3>
+          <p class="grid-card-desc">Checklist des documents à ajouter (CV, devis, lettres d'intention) avec templates prêts.</p>
+          <span class="grid-card-cat-tag">Action</span>
+        </div>
+      </div><!-- /sections-grid -->
+
+      <div class="grid-footer">
+        <div class="grid-footer-text">
+          <strong>20 sections, 1 plan, 60 secondes.</strong>
+          Chaque section est <span class="hl">générée et personnalisée</span> à partir de ton idée et de tes données. Aucune section n'est un copier-coller.
+        </div>
+        <button class="grid-footer-cta" onclick="showAuth('signup')">Générer mon plan →</button>
       </div>
-      <div class="tr-visual">
-        <div class="tr-full-card">
-          <div class="tr-full-card-hd">
-            <span class="tr-full-card-title">Plan VélôBretagne · 20 sections</span>
-            <span class="tr-full-card-badge">EMPIRE ✦</span>
-          </div>
-          <div style="padding:8px 22px;background:rgba(107,143,239,0.06);border-bottom:1px solid rgba(107,143,239,0.12);display:flex;align-items:center;gap:7px;">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" stroke="#6b8fef" stroke-opacity=".5"/><path d="M6 5v4M6 4V3" stroke="#6b8fef" stroke-width="1.2" stroke-linecap="round"/></svg>
-            <span style="font-family:'DM Mono',monospace;font-size:9px;color:#7a7f9a;letter-spacing:.05em">Aperçu simplifié — le plan réel généré est bien plus complet et personnalisé</span>
-          </div>
-          <div class="tr-full-card-body">
-
-            <!-- 01 Résumé Exécutif -->
-            <div class="tr-pb">
-              <div class="tr-pb-title">01 — Résumé Exécutif</div>
-              <div style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.75;">VélôBretagne est un service de location de vélos électriques premium basé à Brest, ciblant les touristes et actifs locaux. Notre proposition de valeur : accès immédiat via app, assistance 7j/7, flotte 100% électrique. Objectif an 1 : 68 000€ de CA avec break-even au 4ème mois.</div>
-            </div>
-
-            <!-- 02 Marché & Opportunité -->
-            <div class="tr-pb">
-              <div class="tr-pb-title">02 — Marché &amp; Opportunité</div>
-              <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px;">
-                <div class="mh-stat-sm"><span class="mh-stat">1,8 Mds€</span><span class="mh-mono9b">Marché FR</span></div>
-                <div class="mh-stat-sm"><span class="mh-stat">+22%</span><span class="mh-mono9b">Croissance/an</span></div>
-                <div class="mh-stat-sm"><span class="mh-stat">8 400</span><span class="mh-mono9b">Clients potentiels</span></div>
-                <div class="mh-stat-sm"><span class="mh-stat">2,3%</span><span class="mh-mono9b">Part de marché cible</span></div>
-              </div>
-              <div style="font-size:12px;color:rgba(255,255,255,0.55);line-height:1.65">Marché porté par le tourisme vert (+18% en Bretagne) et la mobilité douce. Opportunité renforcée par le manque d'offre premium locale. Sources : INSEE, Atout France 2024.</div>
-            </div>
-
-            <!-- 03 Modèle Économique / Offres -->
-            <div class="tr-pb">
-              <div class="tr-pb-title">03 — Modèle Économique &amp; Offres</div>
-              <div class="tr-offre-row">
-                <div><div class="tr-offre-name">Abonnement Mensuel</div><div class="tr-offre-desc">Vélo + entretien + assistance inclus</div></div>
-                <div class="tr-offre-price">89€/mois</div>
-              </div>
-              <div class="tr-offre-row">
-                <div><div class="tr-offre-name">Pack Découverte</div><div class="tr-offre-desc">Location 3 jours, casque fourni</div></div>
-                <div class="tr-offre-price">149€</div>
-              </div>
-              <div class="tr-offre-row">
-                <div><div class="tr-offre-name">Partenariat Hôtels</div><div class="tr-offre-desc">Flotte dédiée, commission 15%</div></div>
-                <div class="tr-offre-price">B2B</div>
-              </div>
-            </div>
-
-            <!-- 04 Concurrents -->
-            <div class="tr-pb">
-              <div class="tr-pb-title">04 — Analyse Concurrentielle</div>
-              <div class="tr-cc-row">
-                <div style="flex:1"><div class="tr-cc-name">BretagneLoc Vélo</div><div class="tr-cc-desc">Présent sur Brest &amp; Quimper, prix élevés, zéro app</div></div>
-                <span class="tr-cc-menace-high">Menace haute</span>
-              </div>
-              <div class="tr-cc-row">
-                <div style="flex:1"><div class="tr-cc-name">VéloSud Finistère</div><div class="tr-cc-desc">Saisonnier uniquement, flotte vieillissante</div></div>
-                <span class="tr-cc-menace-med">Menace moy.</span>
-              </div>
-              <div class="tr-cc-row">
-                <div style="flex:1"><div class="tr-cc-name">Decathlon Location</div><div class="tr-cc-desc">Grandes surfaces, pas de service terrain</div></div>
-                <span class="tr-cc-menace-low">Menace faible</span>
-              </div>
-            </div>
-
-            <!-- 05 Projections Financières -->
-            <div class="tr-pb">
-              <div class="tr-pb-title">05 — Projections Financières</div>
-              <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:8px;">
-                <div style="background:rgba(107,143,239,0.06);border:1px solid rgba(107,143,239,0.15);border-radius:10px;padding:12px;text-align:center"><span class="mh-stat">1 200€</span><span class="mh-mono9b">Mois 1</span></div>
-                <div style="background:rgba(107,143,239,0.06);border:1px solid rgba(107,143,239,0.15);border-radius:10px;padding:12px;text-align:center"><span class="mh-stat">4 800€</span><span class="mh-mono9b">Mois 3</span></div>
-                <div style="background:rgba(107,143,239,0.06);border:1px solid rgba(107,143,239,0.15);border-radius:10px;padding:12px;text-align:center"><span class="mh-stat">9 500€</span><span class="mh-mono9b">Mois 6</span></div>
-                <div style="background:linear-gradient(135deg,rgba(107,143,239,0.15),rgba(167,139,250,0.1));border:1px solid rgba(107,143,239,0.35);border-radius:10px;padding:12px;text-align:center;position:relative;overflow:hidden"><div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#6b8fef,#a78bfa)"></div><span class="mh-stat">68 000€</span><span class="mh-mono9b">An 1</span></div>
-              </div>
-              <div style="background:linear-gradient(135deg,rgba(167,139,250,0.12),rgba(107,143,239,0.08));border:1px solid rgba(167,139,250,0.3);border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><span style="font-family:'DM Mono',monospace;font-size:10px;color:#a78bfa;letter-spacing:.08em">PROJECTION AN 3</span><span style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:#a78bfa;letter-spacing:.05em">185 000€</span></div>
-              <div style="display:flex;flex-direction:column;gap:6px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:rgba(255,255,255,0.03);border-radius:7px;font-size:12px;"><span style="color:#7a7f9a">Marge brute</span><span style="font-family:'Bebas Neue',sans-serif;font-size:15px;color:#9db8f8">71%</span></div>
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:rgba(255,255,255,0.03);border-radius:7px;font-size:12px;"><span style="color:#7a7f9a">Break-even</span><span style="font-family:'Bebas Neue',sans-serif;font-size:15px;color:#9db8f8">Mois 4</span></div>
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:rgba(255,255,255,0.03);border-radius:7px;font-size:12px;"><span style="color:#7a7f9a">ROI investissement</span><span style="font-family:'Bebas Neue',sans-serif;font-size:15px;color:#9db8f8">340%</span></div>
-              </div>
-            </div>
-
-            <!-- 06 Acquisition Client -->
-            <div class="tr-pb">
-              <div class="tr-pb-title">06 — Stratégie d'Acquisition Client</div>
-              <div style="display:flex;flex-direction:column;gap:7px;">
-                <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:8px;padding:10px 12px;">
-                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;"><span style="font-size:12px;font-weight:600;color:#ecedf2">Google My Business + SEO local</span><span style="font-family:'DM Mono',monospace;font-size:9px;color:#34d399;background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.2);border-radius:20px;padding:2px 8px">CAC 0€</span></div>
-                  <div style="font-size:11px;color:#7a7f9a">Fiche optimisée, photos, avis — 40% du trafic qualifié estimé</div>
-                </div>
-                <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:8px;padding:10px 12px;">
-                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;"><span style="font-size:12px;font-weight:600;color:#ecedf2">Partenariats hôtels &amp; offices tourisme</span><span style="font-family:'DM Mono',monospace;font-size:9px;color:#9db8f8;background:rgba(107,143,239,0.1);border:1px solid rgba(107,143,239,0.2);border-radius:20px;padding:2px 8px">CAC 12€</span></div>
-                  <div style="font-size:11px;color:#7a7f9a">Commission 15%, clients déjà présents sur zone, zéro acquisition froide</div>
-                </div>
-                <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:8px;padding:10px 12px;">
-                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;"><span style="font-size:12px;font-weight:600;color:#ecedf2">Meta Ads géolocalisées</span><span style="font-family:'DM Mono',monospace;font-size:9px;color:#fbbf24;background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.2);border-radius:20px;padding:2px 8px">CAC 28€</span></div>
-                  <div style="font-size:11px;color:#7a7f9a">Budget 300€/mois, ciblage touristes 25–45 ans, ROAS estimé 4,2×</div>
-                </div>
-              </div>
-            </div>
-
-            <!-- 07 Plan 90 Jours -->
-            <div class="tr-pb">
-              <div class="tr-pb-title">07 — Plan d'Action 90 Jours</div>
-              <div class="tr-phase-row">
-                <span class="tr-phase-tag">J1–30</span>
-                <div><div class="tr-phase-title">Lancement &amp; premiers clients</div><div class="tr-phase-detail">Immatriculation, achat 5 vélos, partenariat 2 hôtels, profil Google My Business, 10 premières réservations.</div></div>
-              </div>
-              <div class="tr-phase-row">
-                <span class="tr-phase-tag">J31–60</span>
-                <div><div class="tr-phase-title">Croissance &amp; visibilité</div><div class="tr-phase-detail">Campagne Meta Ads 300€, extension flotte à 12 vélos, intégration plateforme Airbnb Expériences.</div></div>
-              </div>
-              <div class="tr-phase-row">
-                <span class="tr-phase-tag">J61–90</span>
-                <div><div class="tr-phase-title">Optimisation &amp; break-even</div><div class="tr-phase-detail">Atteinte du seuil de rentabilité mois 4, recrutement 1 assistant saisonnier, ouverture 2ème point dépôt.</div></div>
-              </div>
-            </div>
-
-            <!-- 08 Investissements -->
-            <div class="tr-pb">
-              <div class="tr-pb-title">08 — Investissement &amp; Charges</div>
-              <div class="tr-inv-row"><span class="tr-inv-label">Flotte initiale (10 vélos électriques)</span><span class="tr-inv-amount">6 200€</span></div>
-              <div class="tr-inv-row"><span class="tr-inv-label">Casques, antivols &amp; accessoires</span><span class="tr-inv-amount">480€</span></div>
-              <div class="tr-inv-row"><span class="tr-inv-label">Site web + système réservation</span><span class="tr-inv-amount">390€</span></div>
-              <div class="tr-inv-row"><span class="tr-inv-label">Assurance professionnelle (an 1)</span><span class="tr-inv-amount">720€</span></div>
-              <div class="tr-inv-row"><span class="tr-inv-label">Budget marketing lancement</span><span class="tr-inv-amount">600€</span></div>
-              <div class="tr-inv-row total"><span class="tr-inv-label">Total investissement initial</span><span class="tr-inv-amount">8 390€</span></div>
-            </div>
-
-            <!-- 10 Outils -->
-            <div class="tr-pb">
-              <div class="tr-pb-title">10 — Ressources &amp; Outils Recommandés</div>
-              <div class="tr-outil-row">
-                <div><div class="tr-outil-name">Planity</div><div class="tr-outil-usage">Réservations en ligne + paiement</div></div>
-                <span class="tr-outil-prix">29€/mois</span>
-              </div>
-              <div class="tr-outil-row">
-                <div><div class="tr-outil-name">Canva Pro</div><div class="tr-outil-usage">Supports marketing, réseaux sociaux</div></div>
-                <span class="tr-outil-prix">13€/mois</span>
-              </div>
-              <div class="tr-outil-row">
-                <div><div class="tr-outil-name">Pennylane</div><div class="tr-outil-usage">Comptabilité + facturation auto</div></div>
-                <span class="tr-outil-prix">35€/mois</span>
-              </div>
-              <div class="tr-outil-row">
-                <div><div class="tr-outil-name">Google My Business</div><div class="tr-outil-usage">Référencement local, avis clients</div></div>
-                <span class="tr-outil-prix">Gratuit</span>
-              </div>
-            </div>
-
-            <!-- 09 Risques & Mitigation -->
-            <div class="tr-pb">
-              <div class="tr-pb-title">09 — Risques &amp; Mitigation</div>
-              <div style="display:flex;flex-direction:column;gap:7px;">
-                <div class="mh-risk">
-                  <div style="font-size:12px;font-weight:600;color:#c4b5fd;margin-bottom:4px">Saisonnalité forte (oct–mars)</div>
-                  <div style="font-size:11px;color:#7a7f9a"><strong style="color:rgba(255,255,255,0.5)">Solution :</strong> Abonnements annuels à tarif réduit + partenariats entreprises hiver (livraisons, coursiers locaux)</div>
-                </div>
-                <div class="mh-risk">
-                  <div style="font-size:12px;font-weight:600;color:#c4b5fd;margin-bottom:4px">Vol ou dégradation flotte</div>
-                  <div style="font-size:11px;color:#7a7f9a"><strong style="color:rgba(255,255,255,0.5)">Solution :</strong> Antivols AXA + assurance tout-risque, caution client 150€ à la réservation, GPS intégré</div>
-                </div>
-                <div class="mh-risk">
-                  <div style="font-size:12px;font-weight:600;color:#c4b5fd;margin-bottom:4px">Concurrent national (Lime, Bird)</div>
-                  <div style="font-size:11px;color:#7a7f9a"><strong style="color:rgba(255,255,255,0.5)">Solution :</strong> Positionnement premium local, offre longue durée non couverte par trottinettes</div>
-                </div>
-                <div class="mh-risk">
-                  <div style="font-size:12px;font-weight:600;color:#c4b5fd;margin-bottom:4px">Trésorerie insuffisante mois 1–3</div>
-                  <div style="font-size:11px;color:#7a7f9a"><strong style="color:rgba(255,255,255,0.5)">Solution :</strong> ACRE auto-entrepreneur (50% de réduction cotisations), prêt BPI Création 5 000€</div>
-                </div>
-                <div class="mh-risk">
-                  <div style="font-size:12px;font-weight:600;color:#c4b5fd;margin-bottom:4px">Réglementation mobilité douce</div>
-                  <div style="font-size:11px;color:#7a7f9a"><strong style="color:rgba(255,255,255,0.5)">Solution :</strong> Veille réglementaire mensuelle, conformité CE des vélos, affiliation FFC (Fédération Française Cyclisme)</div>
-                </div>
-              </div>
-            </div>
-
-            <!-- 11 KPIs -->
-            <div class="tr-pb">
-              <div class="tr-pb-title">11 — KPIs à Suivre</div>
-              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
-                <div class="mh-stat-sm"><span class="mh-stat">85%</span><span style="font-family:'DM Mono',monospace;font-size:8px;color:#7a7f9a;text-transform:uppercase;letter-spacing:.1em;margin-top:4px;display:block">Taux occu.</span><span class="mh-faint">Hebdo</span></div>
-                <div class="mh-stat-sm"><span class="mh-stat">4,8/5</span><span style="font-family:'DM Mono',monospace;font-size:8px;color:#7a7f9a;text-transform:uppercase;letter-spacing:.1em;margin-top:4px;display:block">Note Google</span><span class="mh-faint">Continu</span></div>
-                <div class="mh-stat-sm"><span class="mh-stat">40%</span><span style="font-family:'DM Mono',monospace;font-size:8px;color:#7a7f9a;text-transform:uppercase;letter-spacing:.1em;margin-top:4px;display:block">Récurrence</span><span class="mh-faint">Mensuel</span></div>
-                <div class="mh-stat-sm"><span class="mh-stat">28€</span><span style="font-family:'DM Mono',monospace;font-size:8px;color:#7a7f9a;text-transform:uppercase;letter-spacing:.1em;margin-top:4px;display:block">CAC moyen</span><span class="mh-faint">Mensuel</span></div>
-                <div class="mh-stat-sm"><span class="mh-stat">71%</span><span style="font-family:'DM Mono',monospace;font-size:8px;color:#7a7f9a;text-transform:uppercase;letter-spacing:.1em;margin-top:4px;display:block">Marge brute</span><span class="mh-faint">Mensuel</span></div>
-                <div class="mh-stat-sm"><span class="mh-stat">3,2×</span><span style="font-family:'DM Mono',monospace;font-size:8px;color:#7a7f9a;text-transform:uppercase;letter-spacing:.1em;margin-top:4px;display:block">LTV / CAC</span><span class="mh-faint">Trimestriel</span></div>
-              </div>
-            </div>
-
-            <!-- 12 Pitch 30s -->
-            <div class="tr-pb">
-              <div class="tr-pb-title">12 — Pitch 30 Secondes</div>
-              <div style="background:rgba(107,143,239,0.06);border:1px solid rgba(107,143,239,0.2);border-radius:10px;padding:16px 18px;">
-                <div style="font-family:'DM Mono',monospace;font-size:9px;color:#6b8fef;text-transform:uppercase;letter-spacing:.15em;margin-bottom:10px">Pitch investisseur / banque</div>
-                <div style="font-size:14px;color:#ecedf2;line-height:1.75;font-style:italic">"VélôBretagne est le premier service premium de vélos électriques en Bretagne. Face à une offre vieillissante et impratique, nous proposons réservation via app, assistance 7j/7 et flotte 100% électrique. Sur un marché de 1,8 milliard d'euros en croissance de 22% par an, nous visons 68 000€ de CA la première année avec break-even au 4ème mois. Nous cherchons un partenaire bancaire pour accompagner notre lancement."</div>
-              </div>
-            </div>
-
-            <!-- 13 Persona -->
-            <div class="tr-pb">
-              <div class="tr-pb-title">13 — Client Idéal (Persona)</div>
-              <div class="tr-persona-grid">
-                <div class="tr-persona-cell"><div class="tr-persona-lbl">Prénom / Âge</div><div class="tr-persona-val" style="font-weight:700;font-size:14px;color:#fff">Sophie, 36 ans</div></div>
-                <div class="tr-persona-cell"><div class="tr-persona-lbl">Situation</div><div class="tr-persona-val">Cadre parisienne, séjour éco-tourisme Bretagne</div></div>
-                <div class="tr-persona-cell span2"><div class="tr-persona-lbl">Douleurs principales</div><div class="tr-persona-val">Pas de voiture en vacances, veut explorer sans contrainte, offre actuelle trop chère et peu pratique</div></div>
-                <div class="tr-persona-cell"><div class="tr-persona-lbl">Motivations</div><div class="tr-persona-val">Liberté, éco-responsabilité, découverte locale</div></div>
-                <div class="tr-persona-cell"><div class="tr-persona-lbl">Où la trouver</div><div class="tr-persona-val" style="color:#9db8f8">Instagram, Airbnb Expériences, Google Maps</div></div>
-              </div>
-            </div>
-
-            <!-- 14 Démarches Admin -->
-            <div class="tr-pb">
-              <div class="tr-pb-title">14 — Démarches Administratives</div>
-              <div class="tr-demarche-row">
-                <div class="tr-dem-num">1</div>
-                <div>
-                  <div class="tr-dem-etape">Immatriculation SIREN — INPI</div>
-                  <div class="tr-dem-detail">Déclaration auto-entrepreneur sur guichet-entreprises.fr. Activité : location de vélos (code NAF 7721Z).</div>
-                  <div class="tr-dem-meta"><span class="tr-dem-tag">3–5 jours</span><span class="tr-dem-tag">Gratuit</span><span class="tr-dem-tag">guichet-entreprises.fr</span></div>
-                </div>
-              </div>
-              <div class="tr-demarche-row">
-                <div class="tr-dem-num">2</div>
-                <div>
-                  <div class="tr-dem-etape">Affiliation URSSAF &amp; CFE</div>
-                  <div class="tr-dem-detail">Cotisations sociales 22% du CA. Cotisation foncière des entreprises due dès la 2ème année d'activité.</div>
-                  <div class="tr-dem-meta"><span class="tr-dem-tag">Automatique</span><span class="tr-dem-tag">urssaf.fr</span></div>
-                </div>
-              </div>
-              <div class="tr-demarche-row">
-                <div class="tr-dem-num">3</div>
-                <div>
-                  <div class="tr-dem-etape">Assurance Responsabilité Civile Pro</div>
-                  <div class="tr-dem-detail">Obligatoire avant toute mise en location. Couverture matériel + dommages tiers. Demande de devis à Hiscox ou AXA Pro.</div>
-                  <div class="tr-dem-meta"><span class="tr-dem-tag">1 semaine</span><span class="tr-dem-tag">~60€/mois</span></div>
-                </div>
-              </div>
-            </div>
-
-            <!-- 15-17 Emails -->
-            <div class="tr-pb">
-              <div class="tr-pb-title">15-16-17 — Emails Prêts à Envoyer</div>
-              <div class="tr-email-card" style="margin-bottom:8px">
-                <div class="tr-email-hd">
-                  <span class="tr-email-type">Email Fournisseur</span>
-                  <span class="tr-email-badge">Prêt à copier</span>
-                </div>
-                <div class="tr-email-body">
-                  <div class="tr-email-subject">Demande de devis — Flotte 10 vélos électriques</div>
-                  <div class="tr-email-preview">Bonjour, je lance VélôBretagne, service de location de vélos électriques sur Brest et Quimper. Je recherche un fournisseur pour une flotte initiale de 10 vélos avec option de renouvellement...</div>
-                </div>
-              </div>
-              <div class="tr-email-card" style="margin-bottom:8px">
-                <div class="tr-email-hd">
-                  <span class="tr-email-type">Email Prospection Hôtels</span>
-                  <span class="tr-email-badge">Partenariat B2B</span>
-                </div>
-                <div class="tr-email-body">
-                  <div class="tr-email-subject">Partenariat vélos électriques — Offre exclusive hôtels</div>
-                  <div class="tr-email-preview">Bonjour [Responsable], je propose aux hôtels de la région une flotte de vélos électriques en dépôt. Vos clients profitent d'un service premium, vous touchez 15% sur chaque location...</div>
-                </div>
-              </div>
-              <div class="tr-email-card">
-                <div class="tr-email-hd">
-                  <span class="tr-email-type">Email Relance J+7</span>
-                  <span class="tr-email-badge">Automatique</span>
-                </div>
-                <div class="tr-email-body">
-                  <div class="tr-email-subject">Re : Partenariat VélôBretagne — Toujours intéressé ?</div>
-                  <div class="tr-email-preview">Bonjour [Prénom], je reviens vers vous suite à mon message de la semaine dernière. Pour vous donner un aperçu concret : nos vélos sont déjà déployés chez 3 hôtels partenaires cette saison...</div>
-                </div>
-              </div>
-            </div>
-
-          </div><!-- end tr-full-card-body -->
-          <div style="padding:14px 22px;border-top:1px solid rgba(107,143,239,0.2);background:rgba(107,143,239,0.07);display:flex;align-items:center;justify-content:space-between;gap:12px;">
-            <span style="font-size:12px;color:rgba(255,255,255,0.6);line-height:1.55;">Chaque section est <strong style="color:#9db8f8">bien plus détaillée</strong> dans un vrai plan généré, avec des données 100% adaptées à ton projet.</span>
-            <button onclick="showAuth('signup')" style="flex-shrink:0;padding:8px 18px;background:linear-gradient(135deg,#6b8fef,#a78bfa);border:none;border-radius:20px;font-family:'DM Mono',monospace;font-size:10px;font-weight:600;color:#fff;cursor:pointer;white-space:nowrap;letter-spacing:.05em">Générer le mien</button>
-          </div>
-        </div><!-- end tr-full-card -->
-      </div>
-    </div><!-- end SECTION 4 -->
-
-  </div>
+    </section>
 
   <!-- ========== COMPARATIF ========== -->
   <section class="comp-section fade-up">
@@ -2338,6 +2179,7 @@
 <script src="/public/js/81-misc.js"></script>
 <script src="/public/js/82-pricing-stats.js"></script>
 <script src="/public/js/83-promo.js"></script>
+<script src="/public/js/84-sections-grid.js"></script>
 <script src="/public/js/40-chat.js"></script>
 <script src="/public/js/main.js"></script>
 <!-- ========== CHAT DRAWER ========== -->
@@ -2408,3 +2250,4 @@
 </script>
 </body>
 </html>
+
