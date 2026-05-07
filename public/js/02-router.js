@@ -2,7 +2,9 @@
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
+  document.documentElement.style.scrollBehavior = 'auto';
   window.scrollTo(0, 0);
+  document.documentElement.style.scrollBehavior = '';
   updateNav(); initChat();
 }
 
