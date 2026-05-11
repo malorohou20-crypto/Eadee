@@ -51,32 +51,36 @@
   max-width: 640px;
 }
 
-/* Badge */
-.hero-badge {
+/* Badge pill */
+.hero-pill-badge {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  color: #9db8f8;
-  font-weight: 500;
-  background: rgba(107,143,239,0.12);
-  border: 1px solid rgba(107,143,239,0.28);
-  padding: 6px 16px;
-  border-radius: 20px;
+  gap: 0;
+  background: rgba(20,22,32,0.75);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 999px;
+  padding: 4px 14px 4px 4px;
   margin-bottom: 32px;
+  backdrop-filter: blur(8px);
 }
-.badge-live {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: #34d399; position: relative; flex-shrink: 0;
+.hero-pill-new {
+  background: linear-gradient(135deg, #6b8fef, #a78bfa);
+  color: #fff;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 999px;
+  margin-right: 10px;
+  flex-shrink: 0;
 }
-.badge-live::after {
-  content: ''; position: absolute; inset: 0; border-radius: 50%;
-  background: #34d399;
-  animation: pingDot 1.6s ease infinite;
-}
-@keyframes pingDot {
-  0% { transform: scale(1); opacity: 1; }
-  75%, 100% { transform: scale(2.4); opacity: 0; }
+.hero-pill-text {
+  font-size: 13px;
+  color: rgba(255,255,255,0.75);
+  font-weight: 400;
+  white-space: nowrap;
 }
 
 /* Titre */
