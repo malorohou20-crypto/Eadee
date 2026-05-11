@@ -106,15 +106,8 @@ function checkDraft() {
         if (banner) {
           if (preview) preview.textContent = '"' + last.idea.substring(0, 60) + (last.idea.length > 60 ? '…' : '') + '"';
           banner.style.display = 'flex';
-          // Reconstruit un objet draft-compatible depuis le dernier plan
-          banner._draft = {
-            idea: last.idea,
-            budget: last.budget || '',
-            profile: last.profile || '',
-            sector: last.sector || '',
-            time: last.time || '',
-            planName: last.name || ''
-          };
+          banner._fromHistory = true;
+          banner._draft = { idea: last.idea };
         }
         return;
       }
@@ -137,6 +130,13 @@ function checkDraft() {
 function resumeDraft() {
   const banner = document.getElementById('draft-resume-banner');
   if (!banner || !banner._draft) return;
+  banner.style.display = 'none';
+  // Si ça vient de l'historique → ouvre directement le dernier plan généré
+  if (banner._fromHistory) {
+    openFromHistory(0);
+    return;
+  }
+  // Sinon → remplit le formulaire avec le brouillon
   const d = banner._draft;
   const ta = document.getElementById('dashIdea');
   if (ta) { ta.value = d.idea; ta.dispatchEvent(new Event('input')); }
@@ -145,7 +145,6 @@ function resumeDraft() {
   if (d.sector) document.getElementById('dashSector').value = d.sector;
   if (d.time) document.getElementById('dashTime').value = d.time;
   if (d.planName) document.getElementById('dashPlanName').value = d.planName;
-  banner.style.display = 'none';
 }
 
 function discardDraft() {
