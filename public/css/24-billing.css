@@ -120,8 +120,8 @@
 }
 .os-line:last-child { border-bottom: none; }
 
-.os-label { color: rgba(255,255,255,0.5); }
-.os-value { font-weight: 600; }
+.os-label { color: rgba(255,255,255,0.75); }
+.os-value { font-weight: 600; color: rgba(255,255,255,0.9); }
 .os-total .os-label { color: var(--paper); font-weight: 700; }
 .os-total .os-value {
   font-family: 'Bebas Neue', sans-serif;
@@ -136,7 +136,7 @@
 
 .os-feat {
   display: flex; align-items: center; gap: 8px;
-  font-size: 12px; color: rgba(255,255,255,0.5);
+  font-size: 12px; color: rgba(255,255,255,0.78);
   padding: 5px 0;
 }
 .os-feat::before { content:'✓'; color: var(--acid); font-weight: 700; }
