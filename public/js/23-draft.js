@@ -95,6 +95,8 @@ function showDraftIndicator() {
 
 function checkDraft() {
   try {
+    // Si un plan est déjà affiché, ne pas montrer la bannière
+    if (currentResult) return;
     // Priorité 1 : dernier plan réellement généré (eadee_history)
     const histRaw = localStorage.getItem('eadee_history');
     if (histRaw) {
