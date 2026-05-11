@@ -47,6 +47,12 @@
     <span style="font-family:'Fraunces',serif;font-size:20px;color:#9db8f8;letter-spacing:0.5px">EADEE</span>
     <span class="logo-pulse" style="margin-left:2px"></span>
   </div>
+  <div class="nav-links" id="navLinks">
+    <a class="nav-link" onclick="scrollToSection('howSection')">Comment ça marche</a>
+    <a class="nav-link" onclick="scrollToSection('featuresSection')">Fonctionnalités</a>
+    <a class="nav-link" onclick="scrollToSection('pricingSection')">Tarifs</a>
+    <a class="nav-link" onclick="scrollToSection('faqSection')">FAQ</a>
+  </div>
   <div class="nav-right" id="navRight">
     <button class="nav-btn btn-ghost" onclick="showAuth('login')">Connexion</button>
     <button class="nav-btn btn-dark" onclick="showAuth('signup')">Commencer →</button>
@@ -117,7 +123,7 @@
   </div>
 
   <!-- ========== COMMENT CA MARCHE ========== -->
-  <section class="how-section fade-up">
+  <section class="how-section fade-up" id="howSection">
     <div class="how-inner">
       <div class="how-tag">Le process</div>
       <h2 class="how-h2">De l'idée au plan signé. En 3 étapes.</h2>
@@ -151,7 +157,7 @@
   </section>
 
   <!-- FEATURES TR STYLE — 3 sections alternantes -->
-  <div class="tr-features">
+  <div class="tr-features" id="featuresSection">
 
     <!-- SECTION 1 — Score de viabilité -->
     <div class="tr-section">
@@ -460,7 +466,7 @@
   </div>
 
   <!-- ========== FAQ ========== -->
-  <section class="faq-section fade-up">
+  <section class="faq-section fade-up" id="faqSection">
     <div class="faq-inner">
       <div class="faq-tag">Questions fréquentes</div>
       <h2 class="faq-h2">Tout ce que tu veux savoir.<br><em>Avant de te lancer.</em></h2>

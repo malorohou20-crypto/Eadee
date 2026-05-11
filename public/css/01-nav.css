@@ -1,9 +1,10 @@
 /* ========== NAV ========== */
 nav {
   position: sticky; top: 0; z-index: 200;
-  background: rgba(245,242,235,0.92);
-  backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--border);
+  background: rgba(10,11,16,0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
   padding: 0 40px;
   display: flex; align-items: center; justify-content: space-between;
   height: 60px;
@@ -15,17 +16,41 @@ nav {
   letter-spacing: 0.05em;
   cursor: pointer;
   display: flex; align-items: center; gap: 8px;
+  flex-shrink: 0;
 }
 
 .logo-pulse {
   width: 8px; height: 8px;
-  background: var(--acid);
+  background: #6b8fef;
   border-radius: 50%;
   animation: lp 2s ease-in-out infinite;
 }
 @keyframes lp { 0%,100%{transform:scale(1)} 50%{transform:scale(1.5)} }
 
-.nav-right { display: flex; align-items: center; gap: 16px; }
+/* Centre : liens sections */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.nav-link {
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.55);
+  cursor: pointer;
+  padding: 6px 14px;
+  border-radius: 8px;
+  transition: color .18s, background .18s;
+  white-space: nowrap;
+  user-select: none;
+}
+.nav-link:hover {
+  color: #ecedf2;
+  background: rgba(255,255,255,0.06);
+}
+
+/* Droite */
+.nav-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
 
 .nav-plan {
   font-family: 'DM Mono', monospace;
@@ -35,22 +60,46 @@ nav {
   border-radius: 2px;
   text-transform: uppercase;
 }
-
-.plan-free { background: var(--cream); color: var(--muted); border: 1px solid var(--border); }
-.plan-builder { background: var(--ink); color: var(--acid); }
-.plan-empire { background: var(--rust); color: #fff; }
+.plan-free { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.1); }
+.plan-builder { background: rgba(107,143,239,0.15); color: #9db8f8; border: 1px solid rgba(107,143,239,0.3); }
+.plan-empire { background: rgba(167,139,250,0.15); color: #c4b5fd; border: 1px solid rgba(167,139,250,0.3); }
 
 .nav-btn {
-  padding: 8px 20px;
-  border-radius: 2px;
+  padding: 8px 18px;
+  border-radius: 8px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
   border: none;
-  transition: all 0.2s;
+  transition: all 0.18s;
+  font-family: 'Geist', sans-serif;
 }
+.btn-ghost {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.7);
+}
+.btn-ghost:hover { border-color: rgba(255,255,255,0.3); color: #ecedf2; }
+.btn-dark {
+  background: linear-gradient(135deg, #6b8fef, #a78bfa);
+  color: white;
+  box-shadow: 0 2px 12px rgba(107,143,239,0.35);
+}
+.btn-dark:hover { box-shadow: 0 4px 20px rgba(107,143,239,0.5); transform: translateY(-1px); }
 
-.btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--ink); }
-.btn-ghost:hover { border-color: var(--ink); }
-.btn-dark { background: var(--ink); color: var(--acid); }
-.btn-dark:hover { background: #222; }
+/* Dropdown */
+.nav-dd-item {
+  padding: 9px 14px; border-radius: 8px; font-size: 13px;
+  color: rgba(255,255,255,0.7); cursor: pointer; transition: all .15s;
+}
+.nav-dd-item:hover { background: rgba(255,255,255,0.06); color: #ecedf2; }
+
+/* Cacher les liens de nav sur dashboard */
+.nav-links.hidden { display: none; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  nav { padding: 0 16px; }
+  .nav-links { display: none; }
+  .nav-btn { padding: 7px 12px; font-size: 12px; }
+}

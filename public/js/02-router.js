@@ -8,8 +8,24 @@ function showPage(name) {
   updateNav(); initChat();
 }
 
+function scrollToSection(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  // S'assurer qu'on est sur la landing
+  if (!document.getElementById('page-landing').classList.contains('active')) showPage('landing');
+  setTimeout(function() {
+    document.documentElement.style.scrollBehavior = 'smooth';
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setTimeout(function() { document.documentElement.style.scrollBehavior = ''; }, 600);
+  }, 50);
+}
+
 function updateNav() {
   const nr = document.getElementById('navRight');
+  const nl = document.getElementById('navLinks');
+  // Afficher les liens de nav seulement sur landing
+  const onLanding = document.getElementById('page-landing') && document.getElementById('page-landing').classList.contains('active');
+  if (nl) nl.classList.toggle('hidden', !onLanding);
   if (user) {
     const planBadge = currentPlan === 'pro' ? 'plan-builder' : currentPlan === 'empire' ? 'plan-empire' : 'plan-free';
     const planLabel = currentPlan === 'pro' ? 'Pro' : currentPlan === 'empire' ? 'Empire' : currentPlan === 'solo' ? 'Solo' : 'Découverte';
