@@ -1,0 +1,391 @@
+/* ═══════════════════════════════════════════════════════════════════
+   29-plan-visual.css — Composants visuels enrichis du plan Eadee v3
+   Reliability chips, crescendo, timeline, gauges, scores, aides
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── COMPTEUR COMPLÉTUDE 20/20 ──────────────────────────────────── */
+.plan-completeness {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  border: 1px solid;
+}
+.plan-completeness.complete {
+  background: rgba(52,211,153,0.1);
+  border-color: rgba(52,211,153,0.3);
+  color: #34d399;
+}
+.plan-completeness.incomplete {
+  background: rgba(251,191,36,0.1);
+  border-color: rgba(251,191,36,0.3);
+  color: #fbbf24;
+}
+.pc-icon { font-size: 14px; }
+.pc-count { letter-spacing: 0.05em; }
+.pc-action {
+  font-size: 11px;
+  cursor: pointer;
+  text-decoration: underline;
+  opacity: 0.8;
+}
+.pc-action:hover { opacity: 1; }
+
+/* ── SCORE FIABILITÉ GLOBAL ─────────────────────────────────────── */
+.rel-score-card {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+}
+.rsc-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+  margin-bottom: 12px;
+}
+.rsc-bars { display: flex; flex-direction: column; gap: 6px; }
+.rsc-bar-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.rsc-bar-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.55);
+  width: 80px;
+  flex-shrink: 0;
+}
+.rsc-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.rsc-bar-track {
+  flex: 1;
+  height: 4px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.rsc-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.6s ease;
+}
+.rsc-bar-pct {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: rgba(255,255,255,0.4);
+  width: 32px;
+  text-align: right;
+  flex-shrink: 0;
+}
+.rsc-note {
+  font-size: 10px;
+  color: rgba(255,255,255,0.25);
+  margin-top: 10px;
+  font-family: 'DM Mono', monospace;
+}
+
+/* ── RELIABILITY CHIPS INLINE ───────────────────────────────────── */
+.rel-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px 1px 5px;
+  border-radius: 100px;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.88em;
+  font-weight: 600;
+  position: relative;
+  cursor: help;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.rel-chip:hover { opacity: 0.85; }
+
+.rel-chip-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.rel-chip-tooltip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #0a0a0f;
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #ecedf2;
+  font-size: 11px;
+  font-weight: 400;
+  padding: 8px 12px;
+  border-radius: 8px;
+  white-space: normal;
+  max-width: 220px;
+  width: max-content;
+  z-index: 200;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  pointer-events: none;
+}
+.rel-chip:hover .rel-chip-tooltip { display: block; }
+
+@media (max-width: 768px) {
+  .rel-chip-tooltip { display: none !important; }
+}
+
+/* ── CRESCENDO GRID (7 jalons) ──────────────────────────────────── */
+.crescendo-wrap {
+  margin-bottom: 16px;
+}
+.crescendo-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin-bottom: 0;
+}
+.crescendo-cell {
+  background: linear-gradient(135deg, rgba(107,143,239,0.1), rgba(107,143,239,0.04));
+  border: 1px solid rgba(107,143,239,0.2);
+  border-radius: 8px;
+  padding: 10px 6px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.crescendo-cell::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: #6b8fef;
+}
+.crescendo-cell-proj { border-color: rgba(167,139,250,0.25); }
+.crescendo-cell-proj::before { background: #a78bfa; }
+
+.crescendo-cell-last {
+  border-color: rgba(167,139,250,0.4);
+  background: linear-gradient(135deg, rgba(167,139,250,0.12), rgba(107,143,239,0.06));
+}
+.crescendo-cell-last::before { background: linear-gradient(90deg, #6b8fef, #a78bfa); }
+
+.crescendo-period {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: rgba(255,255,255,0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+}
+.crescendo-amount {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  color: #6b8fef;
+  line-height: 1;
+}
+.crescendo-cell-last .crescendo-amount,
+.crescendo-cell-proj .crescendo-amount { color: #a78bfa; }
+
+@media (max-width: 640px) {
+  .crescendo-grid { grid-template-columns: repeat(4, 1fr); }
+}
+@media (max-width: 400px) {
+  .crescendo-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ── CONCURRENT CARDS (améliorées) ─────────────────────────────── */
+.cc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.cc-threat {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid;
+  white-space: nowrap;
+}
+.cc-prix {
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  font-family: 'DM Mono', monospace;
+  margin-top: 6px;
+}
+
+/* ── RISK CARDS (améliorées) ────────────────────────────────────── */
+.risk-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.risk-level {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  padding: 3px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+/* ── TIMELINE 90 JOURS ──────────────────────────────────────────── */
+.timeline-90j {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.timeline-col { display: flex; flex-direction: column; gap: 8px; }
+.timeline-col-header {
+  border-top: 2px solid;
+  padding-top: 8px;
+  margin-bottom: 2px;
+}
+.timeline-col-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.timeline-item {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 8px;
+  padding: 10px 12px;
+  transition: background 0.2s;
+}
+.timeline-item:hover { background: rgba(255,255,255,0.055); }
+.timeline-item-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #ecedf2;
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+.timeline-item-detail {
+  font-size: 11px;
+  color: rgba(255,255,255,0.55);
+  line-height: 1.55;
+}
+.timeline-item-phase {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: rgba(255,255,255,0.25);
+  margin-top: 5px;
+  letter-spacing: 0.06em;
+}
+
+@media (max-width: 640px) {
+  .timeline-90j { grid-template-columns: 1fr; }
+}
+
+/* ── AIDES & SUBVENTIONS ────────────────────────────────────────── */
+.aide-card {
+  background: rgba(52,211,153,0.05);
+  border: 1px solid rgba(52,211,153,0.2);
+  border-radius: 10px;
+  padding: 12px 14px;
+  transition: background 0.2s;
+}
+.aide-card:hover { background: rgba(52,211,153,0.08); }
+.aide-card.aide-disabled {
+  background: rgba(255,255,255,0.02);
+  border-color: rgba(255,255,255,0.07);
+  opacity: 0.6;
+}
+.aide-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.aide-nom {
+  font-weight: 700;
+  font-size: 13px;
+  color: #ecedf2;
+}
+.aide-montant {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: #34d399;
+  text-align: right;
+  flex-shrink: 0;
+}
+.aide-conditions {
+  font-size: 11px;
+  color: rgba(255,255,255,0.55);
+  line-height: 1.5;
+  margin-bottom: 4px;
+}
+.aide-lien {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: #6b8fef;
+  text-decoration: none;
+  opacity: 0.8;
+}
+.aide-lien:hover { opacity: 1; }
+
+/* ── ANNEXES CHECKLIST ──────────────────────────────────────────── */
+.annexe-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px 10px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 6px;
+}
+.annexe-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: rgba(107,143,239,0.7);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.annexe-text {
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+  line-height: 1.45;
+}
+
+/* ── PLAN BLOCK ANIMATION ───────────────────────────────────────── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── SECTION COACH BTN — visible dès le survol (défini dans 25-chat.css) ── */
+@media (hover: none) {
+  .section-coach-btn { opacity: 1; }
+}
