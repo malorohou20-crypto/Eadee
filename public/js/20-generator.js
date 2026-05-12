@@ -310,6 +310,9 @@ async function generateDashPlan() {
 }
 
 function resetGenerator() {
+  // Retirer le mode plein-écran du plan
+  const genLayout = document.querySelector('.gen-layout');
+  if (genLayout) genLayout.classList.remove('plan-visible');
   setPreviewState('A');
   document.getElementById('dashEmptyState').style.display = 'none';
   document.getElementById('dashResult').style.display = 'none';
@@ -573,11 +576,341 @@ function drawBarChart(canvasId, labels, values, label) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// FILL PLAN — Rendu complet 20 sections
+// FILL PLAN — Rendu complet 20 sections (fresh rebuild)
 // ═══════════════════════════════════════════════════════════════════
 
+// Helper: bloc section
+function planBlock(title, content, chatQ) {
+  const btn = chatQ
+    ? `<button class="section-coach-btn" onclick="openChatDrawer(chatState.activePlanId,${JSON.stringify(chatQ)})" title="Expert Eadee">💬</button>`
+    : '';
+  return `<div class="plan-block"><div class="plan-block-title">${title}${btn}</div>${content}</div>`;
+}
+
+// Helper: card concurrent
+function renderConcurrentCard(c) {
+  const tc = c.menace==='haute' ? '#ef4444' : c.menace==='moyenne' ? '#fbbf24' : '#34d399';
+  const tl = c.menace==='haute' ? 'Menace haute' : c.menace==='moyenne' ? 'Menace moyenne' : 'Menace faible';
+  return `<div class="concurrent-card">
+    <div class="cc-header">
+      <div class="cc-name">${esc(c.nom)}</div>
+      <div class="cc-threat" style="color:${tc};background:${tc}18;border:1px solid ${tc}40;display:inline-flex;align-items:center;gap:5px;font-family:'DM Mono',monospace;font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px">
+        <span style="background:${tc};width:6px;height:6px;border-radius:50%;display:inline-block;flex-shrink:0"></span>${tl}
+      </div>
+    </div>
+    <div class="cc-desc">${esc(c.description)}</div>
+    ${c.prix_moyen ? `<div class="cc-prix">Prix moyen : ${relText(c.prix_moyen)}</div>` : ''}
+  </div>`;
+}
+
+// Helper: risk card
+function renderRiskCard(r) {
+  const lc = r.niveau==='élevé' ? '#ef4444' : r.niveau==='moyen' ? '#fbbf24' : '#34d399';
+  return `<div class="risk-card">
+    <div class="risk-header">
+      <div class="risk-title">${esc(r.titre)}</div>
+      <div class="risk-level" style="color:${lc};background:${lc}18;border:1px solid ${lc}40">${esc(r.niveau||'')}</div>
+    </div>
+    <div class="risk-solution"><strong>Mitigation :</strong> ${esc(r.solution)}</div>
+  </div>`;
+}
+
+// Helper: aide card
+function renderAideCard(a) {
+  return `<div class="aide-card${a.applicable===false?' aide-disabled':''}">
+    <div class="aide-header">
+      <div class="aide-nom">${esc(a.nom)}</div>
+      <div class="aide-montant">${relText(a.montant||'')}</div>
+    </div>
+    <div class="aide-conditions">${esc(a.conditions||'')}</div>
+    ${a.lien ? `<a href="https://${esc(a.lien)}" target="_blank" rel="noopener" class="aide-lien">→ ${esc(a.lien)}</a>` : ''}
+  </div>`;
+}
+
+// Helper: persona mini
+function renderPersonaMini(p) {
+  if (!p) return '';
+  return `<div style="margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.06)">
+    <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:14px">Client idéal (Persona)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="stat-mini"><div class="stat-mini-label">Prénom / Âge</div><div style="font-size:15px;font-weight:700;color:#fff;margin-top:4px">${esc(p.nom)}, ${esc(p.age)}</div></div>
+      <div class="stat-mini"><div class="stat-mini-label">Situation</div><div style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:4px;line-height:1.5">${esc(p.situation)}</div></div>
+      <div class="stat-mini" style="grid-column:span 2"><div class="stat-mini-label">Douleurs</div><div style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:4px;line-height:1.6">${esc(p.douleurs)}</div></div>
+      <div class="stat-mini"><div class="stat-mini-label">Motivations</div><div style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:4px;line-height:1.5">${esc(p.motivations)}</div></div>
+      <div class="stat-mini"><div class="stat-mini-label">Où le trouver</div><div style="font-size:13px;color:var(--acid);margin-top:4px;line-height:1.5">${esc(p.ou_le_trouver)}</div></div>
+    </div>
+  </div>`;
+}
+
+// Helper: email block
+function renderEmailBlock(label, data) {
+  return `<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;overflow:hidden">
+    <div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:space-between">
+      <div style="font-weight:700;font-size:14px;color:#fff">${esc(label)}</div>
+      <button onclick="copyEmail(this)" data-text="${encodeURIComponent('Objet: '+(data.sujet||'')+'\n\n'+(data.corps||''))}"
+        style="font-family:'DM Mono',monospace;font-size:11px;background:rgba(107,143,239,0.1);color:var(--acid);border:1px solid rgba(107,143,239,0.2);border-radius:20px;padding:4px 12px;cursor:pointer">Copier</button>
+    </div>
+    <div style="padding:14px 16px">
+      <div style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:6px">OBJET</div>
+      <div style="font-size:13px;color:var(--acid);font-weight:600;margin-bottom:12px">${esc(data.sujet||'')}</div>
+      <div style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:6px">CORPS</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.75);line-height:1.75;white-space:pre-wrap">${esc(data.corps||'')}</div>
+    </div>
+  </div>`;
+}
+
+// Helper: démarches admin
+function renderDemarchesHtml(demarches) {
+  if (!demarches?.length) return '';
+  return `<div style="margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.06)">
+    <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:14px">Démarches administratives</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      ${demarches.map(d => `
+        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:8px;padding:14px 16px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px">
+            <div style="font-weight:700;font-size:13px;color:#fff">${esc(d.etape)}</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <span style="font-family:'DM Mono',monospace;font-size:10px;background:rgba(107,143,239,0.1);color:var(--acid);padding:2px 8px;border-radius:20px">${esc(d.delai)}</span>
+              <span style="font-family:'DM Mono',monospace;font-size:10px;background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.5);padding:2px 8px;border-radius:20px">${esc(d.cout)}</span>
+            </div>
+          </div>
+          <div style="font-size:13px;color:rgba(255,255,255,0.65);line-height:1.65;margin-bottom:6px">${esc(d.detail)}</div>
+          <a href="https://${esc(d.lien)}" target="_blank" rel="noopener noreferrer" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--acid);text-decoration:none;opacity:0.7">→ ${esc(d.lien)}</a>
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+// ── Construit tout le HTML des 20 sections dans l'ordre ──────────────
+function buildAllSections(plan) {
+  const crescendo7 = `
+    <div class="crescendo-grid" style="margin-bottom:20px">
+      ${[
+        {k:'rev_m1',l:'M1'},{k:'rev_m3',l:'M3'},{k:'rev_m6',l:'M6'},
+        {k:'rev_m12',l:'An 1'},{k:'rev_m18',l:'1.5 an'},{k:'rev_m24',l:'An 2'},{k:'rev_m36',l:'An 3'}
+      ].map((j,i) => `
+        <div class="crescendo-cell${i>=4?' crescendo-cell-proj':''}${i===6?' crescendo-cell-last':''}">
+          <div class="crescendo-period">${j.l}</div>
+          <div class="crescendo-amount">${relText(plan[j.k]||'—')}</div>
+        </div>`).join('')}
+    </div>`;
+
+  let h = `<div style="max-width:960px;margin:0 auto;padding:0 40px 60px">`;
+
+  // ── Meta top ──
+  h += `<div style="padding-top:28px">${renderCompletenessCounter(plan)}${renderReliabilityScoreCard(plan)}</div>`;
+
+  // ── 01 Résumé Exécutif ──
+  h += planBlock('01 — Résumé Exécutif',
+    `<div class="plan-block-content">${relText(plan.resume_executif||'')}</div>
+    ${plan.pitch_30s ? `<div style="margin-top:20px;font-size:15px;line-height:1.85;color:#ecedf2;background:rgba(107,143,239,0.06);border:1px solid rgba(107,143,239,0.2);border-radius:10px;padding:20px;font-style:italic">${esc(plan.pitch_30s)}</div>` : ''}`,
+    'Peux-tu améliorer mon résumé exécutif pour le rendre plus percutant ?');
+
+  // ── 02 Porteur de Projet ──
+  if (plan.porteur_projet) h += planBlock('02 — Porteur de Projet',
+    `<div class="plan-block-content">${relText(plan.porteur_projet)}</div>`,
+    'Comment renforcer ma crédibilité en tant que porteur de projet ?');
+
+  // ── 03 Présentation du Projet ──
+  if (plan.presentation_projet) h += planBlock('03 — Présentation du Projet',
+    `<div class="plan-block-content">${relText(plan.presentation_projet)}</div>`,
+    'Comment renforcer la vision de mon projet ?');
+
+  // ── 04 Étude de Marché ──
+  h += planBlock('04 — Étude de Marché', `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+      <div class="stat-mini"><div class="stat-mini-label">Taille du marché</div><div class="stat-mini-val">${relText(plan.marche_taille||'—')}</div></div>
+      <div class="stat-mini"><div class="stat-mini-label">Croissance annuelle</div><div class="stat-mini-val">${relText(plan.marche_croissance||'—')}</div></div>
+      <div class="stat-mini"><div class="stat-mini-label">Part cible (an 1)</div><div class="stat-mini-val">${relText(plan.marche_part_cible||'—')}</div></div>
+      <div class="stat-mini"><div class="stat-mini-label">Clients potentiels</div><div class="stat-mini-val">${relText(plan.marche_clients_potentiels||'—')}</div></div>
+    </div>
+    <div class="plan-block-content">${relText(plan.marche_analyse||'')}</div>
+    ${renderPersonaMini(plan.persona)}`,
+    'Comment mieux analyser mon marché cible ?');
+
+  // ── 05 Analyse Concurrentielle ──
+  h += planBlock('05 — Analyse Concurrentielle', `
+    <div class="plan-block-content" style="margin-bottom:16px">${relText(plan.concurrence_intro||'')}</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      ${(plan.concurrents||[]).map(c => renderConcurrentCard(c)).join('')}
+    </div>
+    ${plan.concurrents?.length ? `<div style="margin-top:20px;height:130px"><canvas id="concChart"></canvas></div>` : ''}`,
+    'Comment me différencier de mes concurrents ?');
+
+  // ── 06 Proposition de Valeur ──
+  if (plan.proposition_valeur) h += planBlock('06 — Proposition de Valeur Unique',
+    `<div class="plan-block-content plan-usp">${relText(plan.proposition_valeur)}</div>`,
+    'Mon USP est-elle assez différenciante ?');
+
+  // ── 07 Modèle Économique ──
+  h += planBlock('07 — Modèle Économique', `
+    <div class="plan-block-content" style="margin-bottom:16px">${relText(plan.modele_economique||'')}</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      ${(plan.offres||[]).map(o => `
+        <div class="offre-card">
+          <div><div class="offre-name">${esc(o.nom)}</div><div class="offre-desc">${esc(o.description)}</div></div>
+          <div class="offre-price">${relText(o.prix||'')}</div>
+        </div>`).join('')}
+    </div>`,
+    'Mon modèle économique est-il solide ?');
+
+  // ── 08 Stratégie Commerciale ──
+  if (plan.strategie_commerciale) h += planBlock('08 — Stratégie Commerciale',
+    `<div class="plan-block-content">${relText(plan.strategie_commerciale)}</div>`,
+    'Quelle stratégie commerciale prioriser en premier ?');
+
+  // ── 09 Plan d'Acquisition ──
+  h += planBlock('09 — Plan d\'Acquisition Client', `
+    <div style="display:flex;flex-direction:column;gap:10px">
+      ${(plan.acquisition||[]).map(a => `
+        <div class="acq-card">
+          <div class="acq-canal">${esc(a.canal)}</div>
+          <div class="acq-desc">${esc(a.description)}</div>
+          <div class="acq-cac">${relText(a.cac||'')}</div>
+        </div>`).join('')}
+    </div>`,
+    'Quels canaux d\'acquisition prioriser ?');
+
+  // ── 10 Aspects Juridiques ──
+  if (plan.aspects_juridiques) h += planBlock('10 — Aspects Juridiques', `
+    <div class="plan-block-content">${relText(plan.aspects_juridiques)}</div>
+    ${renderDemarchesHtml(plan.demarches_admin)}`,
+    'Quel statut juridique me conseilles-tu pour ce projet ?');
+
+  // ── 11 Aspects Organisationnels ──
+  if (plan.aspects_organisationnels) h += planBlock('11 — Aspects Organisationnels',
+    `<div class="plan-block-content">${relText(plan.aspects_organisationnels)}</div>`);
+
+  // ── 12 Projections Financières ──
+  h += planBlock('12 — Projections Financières', `
+    ${crescendo7}
+    <div style="height:140px;margin-bottom:24px"><canvas id="crescendoChart"></canvas></div>
+    <div style="height:170px;margin-bottom:24px"><canvas id="revenueChart"></canvas></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      ${(plan.finances_detail||[]).map(f => `
+        <div class="stat-mini">
+          <div class="stat-mini-label">${esc(f.label)}</div>
+          <div class="stat-mini-val" style="font-size:18px">${relText(f.valeur||'')}</div>
+        </div>`).join('')}
+    </div>`,
+    'Mes projections financières sont-elles réalistes ?');
+
+  // ── 13 Plan de Trésorerie ──
+  if (plan.tresorerie_detail) h += planBlock('13 — Plan de Trésorerie', `
+    <div class="plan-block-content">${relText(plan.tresorerie_detail)}</div>
+    ${plan.tresorerie_soldes?.length ? `<div style="height:120px;margin-top:20px"><canvas id="tresoChart"></canvas></div>` : ''}`,
+    'Comment optimiser ma trésorerie les 6 premiers mois ?');
+
+  // ── 14 Plan d'Investissement ──
+  h += planBlock('14 — Plan d\'Investissement', `
+    <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px">
+      ${(plan.investissements||[]).map(i => `
+        <div class="invest-row${i.total?' total':''}">
+          <span class="invest-label">${esc(i.label)}</span>
+          <span class="invest-amount">${relText(i.montant||'')}</span>
+        </div>`).join('')}
+    </div>
+    ${(plan.investissements||[]).filter(i=>!i.total).length ? `<div style="height:160px"><canvas id="investDonut"></canvas></div>` : ''}`);
+
+  // ── 15 Bilan Prévisionnel ──
+  if (plan.bilan_previsionnel) h += planBlock('15 — Bilan Prévisionnel 3 Ans',
+    `<div class="plan-block-content">${relText(plan.bilan_previsionnel)}</div>`);
+
+  // ── 16 Seuil de Rentabilité ──
+  if (plan.seuil_rentabilite) {
+    const sr = plan.seuil_rentabilite;
+    h += planBlock('16 — Seuil de Rentabilité', `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+        <div class="stat-mini"><div class="stat-mini-label">Charges fixes/mois</div><div class="stat-mini-val">${relText(sr.charges_fixes_mensuelles||'—')}</div></div>
+        <div class="stat-mini"><div class="stat-mini-label">Taux marge/CV</div><div class="stat-mini-val">${relText(sr.taux_marge_sur_cv||'—')}</div></div>
+        <div class="stat-mini"><div class="stat-mini-label">Point mort CA/mois</div><div class="stat-mini-val" style="color:#34d399">${relText(sr.point_mort_ca||'—')}</div></div>
+        <div class="stat-mini"><div class="stat-mini-label">Break-even atteint</div><div class="stat-mini-val" style="color:#a78bfa">${relText(sr.break_even_mois||'—')}</div></div>
+      </div>
+      ${sr.detail ? `<div class="plan-block-content">${relText(sr.detail)}</div>` : ''}`,
+      'Comment atteindre plus vite mon seuil de rentabilité ?');
+  }
+
+  // ── 17 Risques & Mitigation ──
+  h += planBlock('17 — Risques &amp; Mitigation', `
+    <div style="display:flex;flex-direction:column;gap:12px">
+      ${(plan.risques||[]).map(r => renderRiskCard(r)).join('')}
+    </div>`,
+    'Quels sont mes 3 plus gros risques et comment les mitiger ?');
+
+  // ── 18 Plan d'Action 90 Jours ──
+  h += planBlock('18 — Plan d\'Action 90 Jours',
+    `<div id="dActions90j"></div>`,
+    'Comment prioriser mon plan d\'action sur les 30 premiers jours ?');
+
+  // ── 19 Aides & Subventions ──
+  if (plan.aides_subventions?.length) h += planBlock('19 — Aides &amp; Subventions', `
+    <div style="display:flex;flex-direction:column;gap:10px">
+      ${plan.aides_subventions.map(a => renderAideCard(a)).join('')}
+    </div>`,
+    'Quelles aides puis-je obtenir pour mon projet ?');
+
+  // ── 20 Annexes & Checklist ──
+  if (plan.annexes_checklist?.length) h += planBlock('20 — Annexes à Préparer', `
+    <div style="display:flex;flex-direction:column;gap:8px">
+      ${plan.annexes_checklist.map((item,i) => `
+        <div class="annexe-item">
+          <div class="annexe-num">${String(i+1).padStart(2,'0')}</div>
+          <div class="annexe-text">${esc(item)}</div>
+        </div>`).join('')}
+    </div>`);
+
+  // ── Bonus : KPIs ──
+  if (plan.kpis?.length) h += planBlock('✦ KPIs à Suivre', `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      ${plan.kpis.map(k => `
+        <div class="stat-mini">
+          <div class="stat-mini-label">${esc(k.nom)}</div>
+          <div class="stat-mini-val" style="font-size:18px">${relText(k.cible||'')}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,0.3);margin-top:6px">${esc(k.frequence||'')}</div>
+        </div>`).join('')}
+    </div>`);
+
+  // ── Bonus : Outils ──
+  if (plan.outils?.length) h += planBlock('✦ Ressources & Outils', `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      ${plan.outils.map(o => `
+        <div class="outil-card">
+          <div class="outil-name">${esc(o.nom)}</div>
+          <div class="outil-usage">${esc(o.usage)}</div>
+          <div class="outil-prix">${relText(o.prix||'')}</div>
+        </div>`).join('')}
+    </div>`);
+
+  // ── Bonus : Emails ──
+  if (plan.email_fournisseur || plan.email_prospection) {
+    const emails = [
+      plan.email_fournisseur  && ['Email Fournisseur',   plan.email_fournisseur],
+      plan.email_prospection  && ['Email Prospection',   plan.email_prospection],
+      plan.email_relance      && ['Email Relance J+7',   plan.email_relance],
+    ].filter(Boolean);
+    h += planBlock('✦ Emails Prêts à Envoyer', `
+      <div style="display:flex;flex-direction:column;gap:16px">
+        ${emails.map(([l,d]) => renderEmailBlock(l,d)).join('')}
+      </div>`);
+  }
+
+  // Placeholder IDs pour fillDocumentsAnnexes + fillBancabilite
+  h += `<div class="plan-block" id="dDocsBlock">
+    <div class="plan-block-title">✦ Documents Annexes</div>
+    <p style="font-size:12px;color:rgba(255,255,255,0.35);margin-bottom:14px;line-height:1.5">Génère les pièces justificatives prêtes à soumettre à ta banque ou à BPI France.</p>
+    <div class="docs-grid" id="dDocsGrid"></div>
+  </div>`;
+  h += `<div class="plan-block" id="dBancBlock">
+    <div class="plan-block-title">✦ Checklist Bancabilité</div>
+    <div id="dBancabilite"></div>
+  </div>`;
+
+  h += `</div>`; // close max-width wrapper
+  return h;
+}
+
 function fillPlan(plan) {
-  // ── Header ────────────────────────────────────────────────────────
+  // ── Header (hors scrollBody) ──────────────────────────────────────
   document.getElementById('dBizName').textContent = plan.nom_business || '—';
   document.getElementById('dBizTagline').textContent = plan.tagline || '';
 
@@ -597,34 +930,47 @@ function fillPlan(plan) {
     if (bar) { bar.style.width = score + '%'; bar.style.background = score >= 80 ? '#34d399' : score >= 60 ? '#fbbf24' : '#ef4444'; }
   }, 300);
 
-  // ── Compteur + Score fiabilité (top du plan) ────────────────────
+  // ── Plan full-width ───────────────────────────────────────────────
+  const genLayout = document.querySelector('.gen-layout');
+  if (genLayout) genLayout.classList.add('plan-visible');
+
+  // ── Rebuild complet planScrollBody dans l'ordre 01→20 ───────────
   const scrollBody = document.getElementById('planScrollBody');
   if (scrollBody) {
-    // Injecter avant le premier plan-block
-    const firstBlock = scrollBody.querySelector('.plan-block');
-    const metaHtml = `
-      ${renderCompletenessCounter(plan)}
-      ${renderReliabilityScoreCard(plan)}
-    `;
-    const metaDiv = document.createElement('div');
-    metaDiv.id = 'plan-meta-top';
-    metaDiv.innerHTML = metaHtml;
-    const existing = document.getElementById('plan-meta-top');
-    if (existing) existing.remove();
-    if (firstBlock) scrollBody.insertBefore(metaDiv, firstBlock);
-    else scrollBody.prepend(metaDiv);
+    // Garder uniquement les disclaimers, supprimer le reste
+    Array.from(scrollBody.children).forEach(child => {
+      if (!child.classList.contains('ai-disclaimer') && !child.classList.contains('rel-disclaimer')) {
+        child.remove();
+      }
+    });
+    const planSections = document.createElement('div');
+    planSections.id = 'plan-all-sections';
+    planSections.innerHTML = buildAllSections(plan);
+    scrollBody.appendChild(planSections);
+
+    // Charts (après injection DOM)
+    const crescLabels = ['M1','M3','M6','An 1','1.5 an','An 2','An 3'];
+    const crescVals = ['rev_m1','rev_m3','rev_m6','rev_m12','rev_m18','rev_m24','rev_m36'].map(k => parseAmount(plan[k]));
+    setTimeout(() => {
+      drawCrescendoChart('crescendoChart', crescLabels, crescVals);
+      drawRevenueChart(plan.rev_mensuel || []);
+      if (plan.concurrents?.length) {
+        drawBarChart('concChart', plan.concurrents.map(c => c.nom.split(' ')[0]), plan.concurrents.map(c => c.menace==='haute'?85:c.menace==='moyenne'?55:25), 'Menace');
+      }
+      const nonTotal = (plan.investissements||[]).filter(i=>!i.total);
+      if (nonTotal.length) drawDonutChart('investDonut', nonTotal.map(i=>i.label.replace(/^\d+\.\s*/,'').substring(0,20)), nonTotal.map(i=>parseAmount(i.montant)||1), ['#6b8fef','#a78bfa','#34d399','#fbbf24','#ef4444','#9db8f8']);
+      if (plan.tresorerie_soldes?.length) drawCrescendoChart('tresoChart', ['M1','M2','M3','M4','M5','M6','M7','M8','M9','M10','M11','M12'].slice(0,plan.tresorerie_soldes.length), plan.tresorerie_soldes);
+    }, 250);
+
+    renderTimeline90j(plan.actions || [], 'dActions90j');
+    fillDocumentsAnnexes(plan);
+    fillBancabilite(plan);
+    applyReliabilityIndicators(scrollBody);
   }
+}
 
-  // ── 01. Résumé exécutif ──────────────────────────────────────────
-  const dResume = document.getElementById('dResume');
-  if (dResume) dResume.innerHTML = relText(plan.resume_executif || '');
-
-  // ── Sections nouvelles (02-03 + extras) injectées dynamiquement ─
-  injectExtraSections(plan);
-
-  // ── 02/04. Marché ────────────────────────────────────────────────
-  const setInner = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
-  const setText = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+  // ── [DEAD CODE — kept as stub for safety] ────────────────────────
+  if (false) { const setInner = () => {}; const setText = () => {};
 
   setText('dMktSize',    stripReliability(plan.marche_taille || '—'));
   setText('dMktGrowth',  stripReliability(plan.marche_croissance || '—'));
@@ -848,15 +1194,15 @@ function fillPlan(plan) {
   // ── 17. Checklist bancabilité ────────────────────────────────────
   fillBancabilite(plan);
 
-  // ── Indicateurs fiabilité (anciens marqueurs) sur tout le scrollBody ─
-  if (scrollBody) applyReliabilityIndicators(scrollBody);
+  } // end if(false)
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// INJECTION SECTIONS SUPPLÉMENTAIRES (02, 03, 06, 08, 10, 11, 13, 15, 16, 19, 20)
+// ANCIENNES FONCTIONS (conservées vides pour compat)
 // ═══════════════════════════════════════════════════════════════════
 
-function injectExtraSections(plan) {
+function injectExtraSections(plan) { /* remplacée par buildAllSections */ }
+function _oldInjectExtraSections_DEAD(plan) {
   const scrollBody = document.getElementById('planScrollBody');
   if (!scrollBody) return;
 
@@ -1076,8 +1422,8 @@ function injectCrescendoSection(plan) {
 // TIMELINE 90 JOURS
 // ═══════════════════════════════════════════════════════════════════
 
-function renderTimeline90j(actions) {
-  const el = document.getElementById('dActions');
+function renderTimeline90j(actions, elId) {
+  const el = document.getElementById(elId || 'dActions');
   if (!el) return;
 
   // Grouper par période (J1-30, J31-60, J61-90)

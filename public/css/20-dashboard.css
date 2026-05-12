@@ -116,6 +116,17 @@
   align-items:start;
 }
 
+/* Quand le plan est affiché : le formulaire se cache, le plan prend toute la largeur */
+.gen-layout.plan-visible {
+  grid-template-columns: 1fr;
+}
+.gen-layout.plan-visible .gen-panel {
+  display: none;
+}
+.gen-layout.plan-visible .result-panel {
+  border-radius: 12px;
+}
+
 .gen-panel {
   background:#1a1d26;
   border:1px solid rgba(255,255,255,0.07);

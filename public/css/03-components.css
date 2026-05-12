@@ -1,16 +1,27 @@
 /* PLAN DOCUMENT BLOCKS */
-.plan-block { padding:28px 0; border-bottom:1px solid rgba(255,255,255,0.06); }
+.plan-block { padding:36px 0; border-bottom:1px solid rgba(255,255,255,0.06); }
 .plan-block:last-child { border-bottom:none; }
 .plan-block-title {
-  font-family:'Geist',sans-serif; font-size:13px; font-weight:600; letter-spacing:0.01em;
-  color:#ecedf2; margin-bottom:20px;
+  font-family:'Geist',sans-serif; font-size:14px; font-weight:700; letter-spacing:0.01em;
+  color:#ecedf2; margin-bottom:24px;
   display:flex; align-items:center; gap:12px;
 }
 .plan-block-title::before {
-  content:''; display:block; width:3px; height:16px; flex-shrink:0;
+  content:''; display:block; width:3px; height:18px; flex-shrink:0;
   background:linear-gradient(180deg,#6b8fef,#a78bfa); border-radius:2px;
 }
-.plan-block-content { font-family:'Geist',sans-serif; font-size:14px; line-height:1.85; color:rgba(255,255,255,0.72); }
+.plan-block-content { font-family:'Geist',sans-serif; font-size:15px; line-height:1.9; color:rgba(255,255,255,0.75); }
+.plan-usp {
+  background: linear-gradient(135deg, rgba(107,143,239,0.08), rgba(167,139,250,0.06));
+  border: 1px solid rgba(107,143,239,0.25);
+  border-left: 3px solid #6b8fef;
+  border-radius: 0 10px 10px 0;
+  padding: 18px 20px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #ecedf2 !important;
+  line-height: 1.8;
+}
 .stat-mini { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:16px; transition:border-color .2s; }
 .stat-mini:hover { border-color:rgba(107,143,239,0.35); }
 .stat-mini-label { font-family:'DM Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:0.12em; color:rgba(255,255,255,0.3); margin-bottom:8px; }
