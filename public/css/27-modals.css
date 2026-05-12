@@ -124,13 +124,28 @@
 .tip-check { font-size:14px; flex-shrink:0; transition:all .2s; }
 .tip-item.done .tip-check { color:#34d399; }
 .gen-section-row {
-  display:flex; align-items:center; gap:10px; padding:7px 0;
+  display:flex; align-items:center; gap:6px; padding:5px 0;
   border-bottom:1px solid rgba(255,255,255,0.04);
-  font-size:12px; color:#7a7f9a; font-family:'DM Mono',monospace;
+  font-size:11px; color:#7a7f9a; font-family:'DM Mono',monospace;
   transition:color .3s;
 }
+.gsrow-icon {
+  font-size:11px; flex-shrink:0; width:14px; text-align:center;
+  transition:all .25s;
+}
+.gsrow-num {
+  font-size:9px; color:rgba(255,255,255,0.2); flex-shrink:0; width:20px;
+}
+.gsrow-label { flex:1; }
 .gen-section-row.active { color:#9db8f8; }
-.gen-section-row.done { color:#34d399; }
+.gen-section-row.done   { color:#34d399; }
+.gen-section-row.done .gsrow-num { color:rgba(52,211,153,0.4); }
+/* Category color-coding (active state) */
+.gen-section-row[data-cat="strategie"].active { color:#6b8fef; }
+.gen-section-row[data-cat="marche"].active    { color:#a78bfa; }
+.gen-section-row[data-cat="finance"].active   { color:#fbbf24; }
+.gen-section-row[data-cat="juridique"].active { color:#34d399; }
+.gen-section-row[data-cat="action"].active    { color:#f472b6; }
 .tooltip-wrap { position:relative; display:inline-flex; }
 .tooltip-box {
   position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%);
