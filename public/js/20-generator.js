@@ -1,4 +1,199 @@
 // ========== GENERATE PLAN — V3 — 20 sections, crescendo 7 jalons, fiabilité ==========
+
+// ─── Prompt 20 sections complet ────────────────────────────────────────────
+function buildPlanPrompt20(idea, budget, profile, sector, time) {
+  return `Tu es EADEE, expert business plan senior français. Génère un plan COMPLET, ultra-concret et 100% actionnable.
+
+PROJET :
+- Idée : ${idea}
+- Budget : ${budget}
+- Profil : ${profile}
+- Secteur : ${sector}
+- Disponibilité : ${time}
+- Marché : France, ${new Date().toLocaleDateString('fr-FR',{month:'long',year:'numeric'})}
+
+MARQUEURS DE FIABILITÉ — OBLIGATOIRES sur chaque chiffre important :
+{{V:VALEUR|source officielle}} → vérifié (INSEE, BPI, Xerfi, étude sectorielle)
+{{E:VALEUR|méthode de calcul}} → estimation (calcul sur hypothèses)
+{{H:VALEUR|hypothèse}} → hypothèse IA (à valider)
+
+RÈGLE ANTI-COUPURE : Les 20 clés JSON DOIVENT toutes être présentes. Si tu risques de manquer de place, raccourcis chaque valeur mais n'omets JAMAIS une clé.
+
+Réponds UNIQUEMENT avec un JSON valide (sans markdown ni backtick) contenant EXACTEMENT ces 20 clés + les métadonnées :
+
+{
+  "nom_business": "Nom court et percutant",
+  "tagline": "Slogan en 6-8 mots",
+  "score_viabilite": 82,
+  "pitch_30s": "Pitch 30s : problème → solution → marché → modèle → appel à action. 4-5 phrases.",
+
+  "resume_executif": "5-6 phrases avec {{V:}}/{{E:}}/{{H:}} sur les chiffres clés.",
+
+  "porteur_projet": "Présentation porteur : parcours, compétences clés pour ce projet, motivations. 3-4 phrases (à personnaliser).",
+
+  "presentation_projet": "Origine de l'idée, problème résolu, solution, vision 3 ans, mission. 3-4 phrases.",
+
+  "persona": {
+    "nom": "Prénom fictif",
+    "age": "30-45 ans",
+    "situation": "Profession, revenus, contexte",
+    "douleurs": "3 problèmes principaux",
+    "motivations": "Ce qui le pousse à chercher",
+    "ou_le_trouver": "Canaux de présence"
+  },
+
+  "marche_taille": "{{V:X Mds€|source}} ou {{E:X M€|calcul}}",
+  "marche_croissance": "{{V:+X%/an|source}} ou {{E:+X%/an|calcul}}",
+  "marche_part_cible": "{{H:0,0X%|hypothèse an 1}}",
+  "marche_clients_potentiels": "{{E:XX 000|population × taux pénétration}}",
+  "marche_analyse": "4-5 phrases avec sources et marqueurs fiabilité.",
+
+  "proposition_valeur": "USP différenciante : pourquoi choisir ce projet. 2 phrases percutantes.",
+
+  "concurrence_intro": "2-3 phrases : état concurrentiel, opportunité, positionnement.",
+  "concurrents": [
+    {"nom": "Concurrent réel 1", "description": "Ce qu'ils font + prix réels + failles", "menace": "haute", "prix_moyen": "{{E:X€|tarif observé}}", "part_marche": "{{H:X%|estimation}}"},
+    {"nom": "Concurrent réel 2", "description": "Détails + prix + différences", "menace": "moyenne", "prix_moyen": "{{E:X€|tarif observé}}", "part_marche": "{{H:X%|estimation}}"},
+    {"nom": "Concurrent réel 3", "description": "Détails + opportunité", "menace": "faible", "prix_moyen": "{{E:X€|tarif observé}}", "part_marche": "{{H:X%|estimation}}"},
+    {"nom": "Concurrent réel 4", "description": "Détails + positionnement", "menace": "moyenne", "prix_moyen": "{{E:X€|tarif observé}}", "part_marche": "{{H:X%|estimation}}"}
+  ],
+
+  "modele_economique": "3-4 phrases : flux revenus, pricing justifié, récurrence, LTV. Marqueurs obligatoires.",
+  "offres": [
+    {"nom": "Offre 1", "description": "Contenu précis", "prix": "{{H:X€|positionnement}}"},
+    {"nom": "Offre 2", "description": "Contenu avec inclus/exclus", "prix": "{{H:X€/mois|benchmark}}"},
+    {"nom": "Offre 3", "description": "Offre premium", "prix": "{{H:X€|premium}}"}
+  ],
+
+  "strategie_commerciale": "Positionnement, canaux distribution, message clé, tunnel de vente. 3-4 phrases.",
+
+  "aspects_juridiques": "Statut recommandé (SASU/EURL/micro) avec justification CA/fiscalité. Obligations sectorielles. 3-4 phrases.",
+
+  "aspects_organisationnels": "Équipe, locaux (achat/location/domiciliation), sous-traitance, organisation. 2-3 phrases.",
+
+  "acquisition": [
+    {"canal": "Canal principal", "description": "Stratégie : volume, message, taux conversion, budget, outils", "cac": "{{E:XX€|CAC estimé}}"},
+    {"canal": "Canal secondaire", "description": "Actions, fréquence, KPI, coût", "cac": "{{E:XX€|CAC estimé}}"},
+    {"canal": "Canal tertiaire", "description": "Partenariats ou SEO : qui, comment, modèle", "cac": "{{E:XX€|CAC estimé}}"}
+  ],
+
+  "rev_m1":  "{{H:X €|hypothèse démarrage}}",
+  "rev_m3":  "{{E:X €|projection mois 3}}",
+  "rev_m6":  "{{E:X €|projection mois 6}}",
+  "rev_m12": "{{E:X €|fin an 1}}",
+  "rev_m18": "{{E:X €|18 mois}}",
+  "rev_m24": "{{E:X €|fin an 2}}",
+  "rev_m36": "{{E:X €|fin an 3}}",
+  "rev_mensuel": [200, 600, 1200, 1800, 2500, 3200, 3800, 4400, 5000, 5700, 6500, 7500],
+  "finances_detail": [
+    {"label": "CA annuel estimé (an 1)", "valeur": "{{E:XX XXX€|somme mensuelle}}"},
+    {"label": "Charges fixes mensuelles", "valeur": "{{E:X XXX€|loyer+charges}}"},
+    {"label": "Charges variables (% CA)", "valeur": "{{H:XX%|benchmark secteur}}"},
+    {"label": "Marge brute", "valeur": "{{E:XX%|prix - coût variable}}"},
+    {"label": "Point mort mensuel", "valeur": "{{E:X XXX€/mois|charges÷marge}}"},
+    {"label": "Break-even atteint", "valeur": "{{H:Mois X|projection}}"},
+    {"label": "ROI investissement initial", "valeur": "{{E:XXX% sur 12 mois|bénéfice÷invest}}"}
+  ],
+
+  "tresorerie_detail": "Analyse trésorerie sur 12 mois : entrées, sorties, points de vigilance. 2-3 phrases.",
+  "tresorerie_soldes": [500, 1200, 1800, 2400, 3100, 3900, 4800, 5500, 6300, 7200, 8100, 9000],
+
+  "investissements": [
+    {"label": "Poste 1 précis", "montant": "{{H:XXX€|devis estimatif}}", "categorie": "materiel"},
+    {"label": "Poste 2 précis", "montant": "{{H:XXX€|devis estimatif}}", "categorie": "communication"},
+    {"label": "Poste 3 précis", "montant": "{{H:XXX€|devis estimatif}}", "categorie": "bfr"},
+    {"label": "Poste 4 précis", "montant": "{{H:XXX€|devis estimatif}}", "categorie": "autres"},
+    {"label": "TOTAL investissement", "montant": "{{E:X XXX€|somme postes}}", "total": true}
+  ],
+
+  "bilan_previsionnel": "Actif/passif simplifié fin an 1, 2, 3. Capitaux propres, dettes, trésorerie. 2-3 phrases.",
+
+  "seuil_rentabilite": {
+    "charges_fixes_mensuelles": "{{E:X XXX€|loyer+salaires+abonnements}}",
+    "taux_marge_sur_cv": "{{E:XX%|1 - coûts variables/CA}}",
+    "point_mort_ca": "{{E:X XXX€/mois|charges fixes÷taux marge}}",
+    "break_even_mois": "{{H:Mois X|estimation conservatrice}}",
+    "detail": "Calcul du point mort : hypothèses, marge de sécurité, distance fin an 1."
+  },
+
+  "risques": [
+    {"titre": "Risque business précis", "niveau": "élevé", "solution": "Actions correctives + indicateurs d'alerte"},
+    {"titre": "Risque marché précis", "niveau": "moyen", "solution": "Détection précoce + réponse"},
+    {"titre": "Risque opérationnel", "niveau": "faible", "solution": "Mesures préventives"},
+    {"titre": "Risque financier", "niveau": "moyen", "solution": "Seuils d'alerte + plan B chiffré"},
+    {"titre": "Risque réglementaire", "niveau": "faible", "solution": "Veille + conformité"}
+  ],
+
+  "actions": [
+    {"phase": "J1-7",   "titre": "Action concrète", "detail": "Détail précis avec outils + objectif mesurable"},
+    {"phase": "J8-14",  "titre": "Action concrète", "detail": "Détail précis"},
+    {"phase": "J15-30", "titre": "Action concrète", "detail": "Détail précis avec KPI"},
+    {"phase": "J31-45", "titre": "Action concrète", "detail": "Détail précis"},
+    {"phase": "J46-60", "titre": "Action concrète", "detail": "Détail précis + objectif CA"},
+    {"phase": "J61-75", "titre": "Action concrète", "detail": "Détail précis"},
+    {"phase": "J76-90", "titre": "Action concrète", "detail": "Objectif chiffré clair"}
+  ],
+
+  "aides_subventions": [
+    {"nom": "ACRE", "montant": "{{V:Exonération charges 1 an|URSSAF 2024}}", "conditions": "Demandeur emploi ou < 26 ans", "lien": "urssaf.fr", "applicable": true},
+    {"nom": "ARCE Pôle emploi", "montant": "{{V:45% ARE restantes|Pôle Emploi 2024}}", "conditions": "Inscrit Pôle emploi avec ARE", "lien": "pole-emploi.fr", "applicable": true},
+    {"nom": "Prêt d'honneur Initiative", "montant": "{{V:5 000€ à 50 000€|Initiative France 2024}}", "conditions": "Projet viable, porteur engagé", "lien": "initiative-france.fr", "applicable": true},
+    {"nom": "BPI — Prêt création", "montant": "{{V:10 000€ à 7 Mds€|BPI France 2024}}", "conditions": "Entreprise < 3 ans", "lien": "bpifrance.fr", "applicable": false}
+  ],
+
+  "annexes_checklist": [
+    "CV du porteur (1-2 pages, axé légitimité pour ce projet)",
+    "Pièce d'identité + justificatif de domicile",
+    "Devis des investissements principaux",
+    "Preuves de marché : emails intention client, lettres d'intérêt",
+    "Relevés bancaires 3 derniers mois",
+    "Justificatifs d'apport personnel",
+    "Statuts de la société (après immatriculation)",
+    "Extrait Kbis (après immatriculation)",
+    "Contrat de bail ou promesse si local commercial",
+    "Attestation ACRE si applicable"
+  ],
+
+  "kpis": [
+    {"nom": "CA mensuel", "cible": "{{H:X XXX€ dès mois 3|objectif minimum}}", "frequence": "Mensuel"},
+    {"nom": "Taux conversion prospects", "cible": "{{H:X%|benchmark sectoriel}}", "frequence": "Hebdomadaire"},
+    {"nom": "Coût acquisition client (CAC)", "cible": "{{E:XX€|budget÷nb clients}}", "frequence": "Mensuel"},
+    {"nom": "Satisfaction client (NPS)", "cible": "{{H:> 50|objectif top quartile}}", "frequence": "Trimestriel"}
+  ],
+
+  "outils": [
+    {"nom": "Outil réel 1", "usage": "Usage précis", "prix": "{{V:X€/mois|site officiel 2024}}"},
+    {"nom": "Outil réel 2", "usage": "Usage précis", "prix": "{{V:Gratuit|plan freemium}}"},
+    {"nom": "Outil réel 3", "usage": "Usage précis", "prix": "{{V:X€/mois|site officiel}}"},
+    {"nom": "Outil réel 4", "usage": "Usage précis", "prix": "{{V:Gratuit|open source}}"},
+    {"nom": "Outil réel 5", "usage": "Usage précis", "prix": "{{V:X€/mois|site officiel}}"},
+    {"nom": "Outil réel 6", "usage": "Usage précis", "prix": "{{V:X€/mois|site officiel}}"}
+  ],
+
+  "demarches_admin": [
+    {"etape": "1. Choisir le statut juridique", "detail": "Statut optimal pour ce projet avec justification", "delai": "Jour 1-3", "cout": "0-500€", "lien": "infogreffe.fr"},
+    {"etape": "2. Immatriculation", "detail": "Démarche guichet-entreprises.fr, SIRET sous 3-5 jours", "delai": "Semaine 1", "cout": "0€ à 250€", "lien": "guichet-entreprises.fr"},
+    {"etape": "3. Ouverture compte pro", "detail": "Banques recommandées pour ce secteur", "delai": "Semaine 1-2", "cout": "0-30€/mois", "lien": "shine.fr"},
+    {"etape": "4. URSSAF", "detail": "Cotisations estimées, DSN si société", "delai": "Automatique", "cout": "22-45% du CA", "lien": "urssaf.fr"},
+    {"etape": "5. Assurance RC Pro", "detail": "Obligatoire ou recommandée pour ce secteur", "delai": "Avant premier client", "cout": "200-800€/an", "lien": "hiscox.fr"},
+    {"etape": "6. Obligations sectorielles", "detail": "Licences, certifications, autorisations spécifiques", "delai": "Variable", "cout": "Variable", "lien": "service-public.fr"}
+  ],
+
+  "email_fournisseur": {
+    "sujet": "Objet adapté au secteur",
+    "corps": "Email complet prêt à envoyer : présentation, projet, volume, demande tarifs. 150-200 mots."
+  },
+  "email_prospection": {
+    "sujet": "Objet accrocheur pour la cible",
+    "corps": "Email prospection : accroche sur problème, solution 2 lignes, preuve sociale, appel à action. 120-150 mots."
+  },
+  "email_relance": {
+    "sujet": "Objet relance J+7",
+    "corps": "Relance courte avec valeur supplémentaire. 60-80 mots."
+  }
+}`;
+}
+
 const genStatuses = [
   'Analyse de ton idée en profondeur...',
   'Recherche du marché et des chiffres réels...',
@@ -40,12 +235,18 @@ async function generateDashPlan() {
     if (si < genStatuses.length - 1) document.getElementById('genStatusText').textContent = genStatuses[++si];
   }, 1800);
 
+  const prompt = buildPlanPrompt20(idea, budget, profile, sector, time);
+
   try {
-    // ── Appel au pipeline 3 étapes (INSEE + web + génération) ──────
-    const res = await fetch('/api/generate-plan', {
+    // ── Appel direct via proxy (rapide, 1 seul appel Claude) ──────
+    const res = await fetch('/api/proxy', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ idea, sector, budget, profile, time, credits: userCredits })
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 12000,
+        messages: [{ role: 'user', content: prompt }]
+      })
     });
 
     if (!res.ok) {
