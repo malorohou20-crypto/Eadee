@@ -187,6 +187,8 @@
 .guide-tip-body { flex:1; min-width:0; }
 .guide-tip-label { font-family:'Geist',sans-serif; font-size:12px; font-weight:600; color:#ecedf2; margin-bottom:3px; }
 .guide-tip-example { font-size:11px; color:#7a7f9a; font-style:italic; line-height:1.5; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.guide-tip-note { font-size:10.5px; color:#a0845c; background:rgba(251,191,36,0.07); border-left:2px solid rgba(251,191,36,0.35); border-radius:0 4px 4px 0; padding:5px 8px; margin-top:5px; line-height:1.5; }
+.guide-tip-note strong { color:#fbbf24; font-weight:600; }
 
 /* ========== ROADMAP + LIVE FEED (preview-state-A) ========== */
 .rd-panel { display:flex; flex-direction:column; height:100%; overflow:hidden; }
