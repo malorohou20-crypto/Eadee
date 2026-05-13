@@ -1,67 +1,147 @@
-// ── Template compte de résultat prévisionnel 3 ans (Excel) ───────────
+/**
+ * compte-resultat.js
+ * Génère le compte de résultat prévisionnel 3 ans au format HTML-for-Excel (.xls).
+ */
 
-export function buildCompteResultatData(plan) {
-  const name = plan.nom_business || plan.name || 'Mon projet';
-  const cr = plan.compte_resultat_3ans || {};
+import { fmtEur } from '../enrich-plan.js';
 
-  // Extraction des données du plan avec fallbacks
-  const an1_ca = extractNum(cr, ['ca_an1', 'chiffre_affaires_an1', 'revenus_an1']) || 0;
-  const an2_ca = extractNum(cr, ['ca_an2', 'chiffre_affaires_an2']) || Math.round(an1_ca * 1.3);
-  const an3_ca = extractNum(cr, ['ca_an3', 'chiffre_affaires_an3']) || Math.round(an1_ca * 1.7);
+const CSS = `
+  body { font-family: Calibri, Arial, sans-serif; font-size: 11px; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { border: 1px solid #c8d0e0; padding: 5px 10px; }
+  .title { font-size: 16px; font-weight: bold; color: #2B5797; padding: 12px 0 4px; }
+  .subtitle { font-size: 11px; color: #7a7f9a; margin-bottom: 12px; }
+  .label { text-align: left; }
+  .num { text-align: right; mso-number-format:"# ##0\\ €"; }
+  .pct { text-align: right; font-style: italic; color: #7a7f9a; font-size: 10px; mso-number-format:"0%"; }
+  .section > td { background: #2B5797; color: #fff; font-weight: bold; }
+  .total > td { background: #dce4f5; font-weight: bold; border-top: 2px solid #2B5797; border-bottom: 2px solid #2B5797; }
+  .highlight > td { background: #e8f4e8; color: #1E7E34; font-weight: bold; }
+  .negative { color: #C82333; }
+  .alt > td { background: #f2f5fb; }
+  .header-row th { background: #2B5797; color: #fff; font-size: 12px; font-weight: bold; text-align: center; }
+  .header-row th:first-child { text-align: left; min-width: 220px; }
+`;
 
-  const charges_ratio = 0.65; // hypothèse par défaut
-
-  return {
-    name,
-    hypotheses: [
-      'Taux de charges : estimé à 65% du CA (à ajuster selon ton modèle)',
-      'Croissance : +30% an 2, +30% an 3 (hypothèse conservatrice)',
-      'TVA non applicable en micro-entreprise / franchise de base',
-      'Rémunération porteur incluse dans charges an 1',
-    ],
-    sections: [
-      {
-        label: 'PRODUITS (REVENUS)',
-        rows: [
-          { label: 'Chiffre d\'affaires HT', an1: an1_ca, an2: an2_ca, an3: an3_ca, isMain: true },
-          { label: 'Autres produits', an1: 0, an2: 0, an3: 0 },
-          { label: 'TOTAL PRODUITS', an1: an1_ca, an2: an2_ca, an3: an3_ca, isTotal: true },
-        ],
-      },
-      {
-        label: 'CHARGES D\'EXPLOITATION',
-        rows: [
-          { label: 'Achats marchandises / matières', an1: cr.achats_an1 || 0, an2: 0, an3: 0 },
-          { label: 'Loyer et charges locatives', an1: cr.loyer_an1 || 0, an2: 0, an3: 0 },
-          { label: 'Salaires et traitements', an1: cr.salaires_an1 || 0, an2: 0, an3: 0 },
-          { label: 'Charges sociales patronales', an1: cr.charges_sociales_an1 || 0, an2: 0, an3: 0 },
-          { label: 'Marketing / Communication', an1: cr.marketing_an1 || 0, an2: 0, an3: 0 },
-          { label: 'Honoraires (comptable, avocat)', an1: cr.honoraires_an1 || 0, an2: 0, an3: 0 },
-          { label: 'Assurances', an1: cr.assurances_an1 || 0, an2: 0, an3: 0 },
-          { label: 'Amortissements', an1: cr.amortissements_an1 || 0, an2: 0, an3: 0 },
-          { label: 'Divers charges', an1: 0, an2: 0, an3: 0 },
-          { label: 'TOTAL CHARGES', an1: Math.round(an1_ca * charges_ratio), an2: Math.round(an2_ca * charges_ratio), an3: Math.round(an3_ca * charges_ratio), isTotal: true },
-        ],
-      },
-      {
-        label: 'RÉSULTAT',
-        rows: [
-          { label: 'Résultat d\'exploitation (REX)', an1: Math.round(an1_ca * (1 - charges_ratio)), an2: Math.round(an2_ca * (1 - charges_ratio)), an3: Math.round(an3_ca * (1 - charges_ratio)), isResult: true },
-          { label: 'Impôt sur les bénéfices (estimé)', an1: 0, an2: Math.round(an2_ca * (1 - charges_ratio) * 0.15), an3: Math.round(an3_ca * (1 - charges_ratio) * 0.25) },
-          { label: 'RÉSULTAT NET', an1: Math.round(an1_ca * (1 - charges_ratio)), an2: Math.round(an2_ca * (1 - charges_ratio) * 0.85), an3: Math.round(an3_ca * (1 - charges_ratio) * 0.75), isTotal: true },
-        ],
-      },
-    ],
-  };
+function numCell(val, ca = 0, showPct = false) {
+  const n = Number(val) || 0;
+  const color = n < 0 ? ' negative' : '';
+  const cell = `<td class="num${color}">${fmtEur(n)}</td>`;
+  const pctCell = showPct && ca > 0
+    ? `<td class="pct">${Math.round((n / ca) * 100)} %</td>`
+    : (showPct ? '<td class="pct">—</td>' : '');
+  return cell + pctCell;
 }
 
-function extractNum(obj, keys) {
-  if (!obj) return null;
-  for (const k of keys) {
-    if (obj[k] !== undefined) {
-      const n = parseFloat(String(obj[k]).replace(/[^\d.-]/g, ''));
-      if (!isNaN(n) && n > 0) return n;
-    }
-  }
-  return null;
+function dataRow(label, vals, cas, showPct = false, cls = '') {
+  const altCls = cls || '';
+  return `<tr class="${altCls}"><td class="label">${label}</td>${vals.map((v, i) => numCell(v, cas[i], showPct)).join('')}</tr>`;
 }
+
+function totalRow(label, vals, cas, showPct = false, cls = 'total') {
+  return `<tr class="${cls}"><td class="label">${label}</td>${vals.map((v, i) => numCell(v, cas[i], showPct)).join('')}</tr>`;
+}
+
+export function buildCompteResultat(plan) {
+  const ca   = [plan.ca1, plan.ca2, plan.ca3];
+  const taux = plan.tauxMargeCV || 0.45;
+  const cf   = (plan.chargesFixesMois || 0) * 12;
+
+  // Charges variables (coûts directs)
+  const cv = ca.map(c => Math.round(c * (1 - taux)));
+
+  // Marge brute
+  const mb = ca.map((c, i) => c - cv[i]);
+
+  // Charges fixes réparties
+  const loyer     = Array(3).fill(Math.round(cf * 0.25));
+  const salaires  = Array(3).fill(Math.round(cf * 0.45));
+  const marketing = Array(3).fill(Math.round(cf * 0.15));
+  const autresCF  = Array(3).fill(Math.round(cf * 0.15));
+  const amort     = [Math.round(plan.totalInvest / 5), Math.round(plan.totalInvest / 5), Math.round(plan.totalInvest / 5)];
+
+  const totalCharges = ca.map((_, i) =>
+    cv[i] + loyer[i] + salaires[i] + marketing[i] + autresCF[i] + amort[i]
+  );
+
+  // EBITDA
+  const ebitda = ca.map((c, i) => c - cv[i] - loyer[i] - salaires[i] - marketing[i] - autresCF[i]);
+
+  // EBIT (après amortissement)
+  const ebit = ebitda.map((e, i) => e - amort[i]);
+
+  // Intérêts (estimés)
+  const interets = [Math.round(plan.pret * 0.04), Math.round(plan.pret * 0.03), Math.round(plan.pret * 0.02)];
+
+  // Résultat avant impôt
+  const rai = ebit.map((e, i) => e - interets[i]);
+
+  // IS (0% an1 si déficit, 15% an2, 25% an3)
+  const is = rai.map((r, i) => r <= 0 ? 0 : Math.round(r * (i === 0 ? 0.15 : i === 1 ? 0.15 : 0.25)));
+
+  // Résultat net
+  const rn = rai.map((r, i) => r - is[i]);
+
+  const colHeader = (showPct) =>
+    `<th>An 1</th>${showPct ? '<th>% CA</th>' : ''}<th>An 2</th>${showPct ? '<th>% CA</th>' : ''}<th>An 3</th>${showPct ? '<th>% CA</th>' : ''}`;
+
+  const html = `<!DOCTYPE html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+      xmlns:x="urn:schemas-microsoft-com:office:excel"
+      xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta charset="UTF-8">
+<meta name="ProgId" content="Excel.Sheet">
+<meta name="Generator" content="Microsoft Excel 15">
+<!--[if gte mso 9]><xml>
+<x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>
+<x:Name>Compte de résultat</x:Name>
+<x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>
+</x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook>
+</xml><![endif]-->
+<style>${CSS}</style>
+</head>
+<body>
+<div class="title">Compte de résultat prévisionnel — ${plan.nom_business}</div>
+<div class="subtitle">Généré le ${new Date().toLocaleDateString('fr-FR')} — Eadee · À valider par un expert-comptable</div>
+<table>
+  <tr class="header-row">
+    <th>Postes</th>
+    ${colHeader(true)}
+  </tr>
+
+  <tr class="section"><td colspan="7" class="label">▶ CHIFFRE D'AFFAIRES</td></tr>
+  ${totalRow('Chiffre d\'affaires HT', ca, ca, true, 'total')}
+
+  <tr class="section"><td colspan="7" class="label">▶ MARGE BRUTE</td></tr>
+  ${dataRow('Coûts variables / Achats', cv, ca, true, 'alt')}
+  ${totalRow('MARGE BRUTE', mb, ca, true, 'highlight')}
+
+  <tr class="section"><td colspan="7" class="label">▶ CHARGES D'EXPLOITATION</td></tr>
+  ${dataRow('Loyer & charges locatives', loyer, ca, true)}
+  ${dataRow('Salaires & charges sociales', salaires, ca, true, 'alt')}
+  ${dataRow('Marketing & communication', marketing, ca, true)}
+  ${dataRow('Autres charges fixes', autresCF, ca, true, 'alt')}
+  ${dataRow('Dotations aux amortissements', amort, ca, true)}
+  ${totalRow('TOTAL CHARGES FIXES', loyer.map((_, i) => loyer[i] + salaires[i] + marketing[i] + autresCF[i] + amort[i]), ca, true)}
+
+  <tr class="section"><td colspan="7" class="label">▶ RÉSULTATS</td></tr>
+  ${totalRow('EBITDA', ebitda, ca, true, 'highlight')}
+  ${totalRow('EBIT (résultat d\'exploitation)', ebit, ca, true)}
+  ${dataRow('Charges financières (intérêts)', interets, ca, true, 'alt')}
+  ${totalRow('Résultat avant impôt', rai, ca, true)}
+  ${dataRow('Impôt sur les sociétés', is, ca, true, 'alt')}
+  ${totalRow('RÉSULTAT NET', rn, ca, true, 'highlight')}
+</table>
+
+<p style="font-size:9px;color:#7a7f9a;margin-top:12px">
+  ⚠ Projections indicatives basées sur vos données Eadee. Taux IS : 15 % an1-2 / 25 % an3 (taux normal).
+  Toutes les valeurs sont à affiner avec votre expert-comptable.
+</p>
+</body>
+</html>`;
+
+  return html;
+}
+
+export function buildCompteResultatData(plan) { return buildCompteResultat(plan); }

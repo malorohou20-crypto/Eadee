@@ -1,68 +1,87 @@
-// ── Template lettre d'intention de client ────────────────────────────
+/**
+ * lettre-intention.js
+ * Génère une lettre d'intention client au format RTF professionnel.
+ */
 
-export function buildLettreIntentionContent(plan) {
-  const name = plan.nom_business || plan.name || '[Nom du projet]';
-  const offre = plan.modele_economique?.offres?.[0] || plan.proposition_valeur || {};
-  const prixRef = offre.prix || offre.tarif || '[MONTANT]';
-  const prestation = offre.nom || offre.description || plan.presentation_projet?.description || '[description de la prestation]';
+import { u, par, hrule, sectionHeader, kvRow, wrapRtf } from './rtf-core.js';
+import { fmtEur } from '../enrich-plan.js';
 
-  return {
-    title: `Lettre d\'intention d\'achat — ${name}`,
-    note: 'Ce document est un template. Le futur client doit le compléter et le signer sur papier à en-tête.',
-    sections: [
-      {
-        type: 'client_header',
-        content: {
-          nom_client: '[Nom / Raison sociale du client]',
-          adresse: '[Adresse du client]',
-          representant: '[Prénom Nom du signataire]',
-          qualite: '[Directeur, Gérant, etc.]',
-          date: new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }),
-          destinataire: name,
-        },
-      },
-      {
-        type: 'objet',
-        content: `Objet : Lettre d'intention d'achat de [PRESTATION/PRODUIT]`,
-      },
-      {
-        type: 'corps',
-        content: `Madame, Monsieur,
+export function buildLettreIntention(plan) {
+  const today = new Date().toLocaleDateString('fr-FR', {
+    day: 'numeric', month: 'long', year: 'numeric',
+  });
+  const biz    = plan.nom_business;
+  const nom    = plan.porteur_nom || '[Nom du fournisseur / prestataire]';
+  const offre1 = plan.offres?.[0];
 
-Par la présente, nous vous confirmons notre intérêt pour vos services et notre intention d'engager votre entreprise ${name} pour la prestation suivante :
+  const body = [
+    // En-tête client
+    par('[Nom du client — à compléter]', { bold: true, size: 13 }),
+    par('[Entreprise du client]'),
+    par('[Adresse]'),
+    par('[Code postal — Ville]'),
+    par(''),
+    par(today, { right: true }),
+    par(''),
+    par(u(biz), { bold: true }),
+    par(u(nom)),
+    par(''),
+    hrule(),
+    par(`Objet : Lettre d'intention d'achat — ${u(biz)}`, { bold: true, cf: 2, size: 12 }),
+    hrule(),
+    par(''),
+    par('Madame, Monsieur,'),
+    par(''),
+    par(
+      `Par la présente, nous, soussignés [Nom du client], représentant [Entreprise], ` +
+      `exprimons notre intérêt pour les services / produits proposés par ${u(biz)}.`,
+      { spaceAfter: 120 }
+    ),
 
-PRESTATION : ${prestation}
-VOLUME / FRÉQUENCE : [Ex. : 10 heures/mois / livraison mensuelle / forfait annuel]
-MONTANT ESTIMÉ : ${prixRef}€ [HT/TTC] par [heure / mois / prestation]
-DURÉE ENVISAGÉE : [Ex. : 12 mois à partir du lancement]
-DATE DE DÉBUT SOUHAITÉE : [Date envisagée]
+    sectionHeader('1. Contexte et besoin'),
+    par(u(plan.marche_analyse?.slice?.(0, 300) || '[Décrivez le besoin identifié par le client]'), { spaceAfter: 80 }),
 
-Cette lettre d'intention ne constitue pas un contrat ferme mais témoigne de notre sérieux dans notre démarche et de notre volonté de collaborer avec vous sous réserve des conditions définitives à négocier.
+    sectionHeader('2. Solution retenue'),
+    par(u(plan.proposition_valeur?.slice?.(0, 400) || ''), { spaceAfter: 60 }),
+    ...(offre1 ? [
+      kvRow('Offre / Prestation', u(offre1.nom || '')),
+      kvRow('Description', u(offre1.description || '')),
+      kvRow('Prix indicatif', u(offre1.prix || '—')),
+      par(''),
+    ] : []),
 
-Nous restons disponibles pour un échange complémentaire si nécessaire.
+    sectionHeader('3. Engagement'),
+    par(
+      `Sous réserve de la finalisation des conditions contractuelles, nous nous engageons à ` +
+      `étudier sérieusement une collaboration commerciale avec ${u(biz)} sur la période à venir.`,
+      { spaceAfter: 60 }
+    ),
+    kvRow('Montant estimé', fmtEur(plan.ca1 ? plan.ca1 * 0.1 : 0) + ' (indicatif)'),
+    kvRow('Durée de validité', '3 mois à compter de la date'),
+    par(''),
 
-Veuillez agréer, Madame, Monsieur, l'expression de nos salutations distinguées.`,
-      },
-      {
-        type: 'signature_client',
-        content: `[Ville], le [Date]
+    sectionHeader('4. Prochaines étapes'),
+    par('1. Réunion de présentation détaillée du projet'),
+    par('2. Remise d'une proposition commerciale formelle'),
+    par('3. Négociation et signature du contrat définitif'),
+    par(''),
+    hrule(),
+    par(
+      `Cette lettre n'est pas contractuelle et ne vaut pas commande ferme. ` +
+      `Elle témoigne de notre intérêt sincère pour le projet ${u(biz)}.`,
+      { cf: 3, italic: true, spaceAfter: 180 }
+    ),
+    par('Pour le client :', { bold: true }),
+    par(''),
+    par('Nom : ________________________________'),
+    par('Fonction : ________________________________'),
+    par('Signature : ________________________________'),
+    par('Date : ' + today),
+    par(''),
+    par('Document généré par Eadee — à personnaliser avant signature', { cf: 3, size: 9, italic: true }),
+  ].join('\n');
 
-Signature et tampon :
-
-_______________________________
-[Prénom Nom]
-[Qualité]
-[Entreprise / Particulier]`,
-      },
-      {
-        type: 'note_utilisation',
-        content: `INSTRUCTIONS D'UTILISATION DE CE TEMPLATE :
-1. Remplir tous les champs entre crochets [ ]
-2. Faire signer par le futur client
-3. Joindre ce document à votre dossier bancaire ou BPI
-4. Plus vous avez de lettres d'intention, plus votre dossier est solide
-5. Idéalement obtenir 2-3 lettres avant de soumettre votre dossier`,
-      },
-    ],
-  };
+  return wrapRtf(body);
 }
+
+export function buildLettreIntentionContent(plan) { return buildLettreIntention(plan); }

@@ -1,78 +1,108 @@
-// ── Template courrier de présentation à la banque ─────────────────────
+/**
+ * courrier-banque.js
+ * Génère un courrier de demande de financement bancaire au format RTF professionnel.
+ * Reçoit un plan enrichi (depuis enrich-plan.js) et retourne un string RTF complet.
+ */
 
-export function buildCourrierBanqueContent(plan) {
-  const name = plan.nom_business || plan.name || '[Nom du projet]';
-  const porteur = plan.porteur_projet || {};
-  const resume = plan.resume_executif || {};
-  const financier = plan.plan_investissement || plan.compte_resultat_3ans || {};
+import { u, par, hrule, sectionHeader, kvRow, wrapRtf } from './rtf-core.js';
+import { fmtEur } from '../enrich-plan.js';
 
-  const investissement = financier.investissement_total || financier.besoins_total || '[MONTANT]';
-  const apport = financier.apport_personnel || '[APPORT]';
-  const pret = financier.pret_demande || financier.besoin_financement_externe || '[MONTANT PRÊT]';
+export function buildCourrierBanque(plan) {
+  const today = new Date().toLocaleDateString('fr-FR', {
+    day: 'numeric', month: 'long', year: 'numeric',
+  });
 
-  return {
-    title: `Demande de financement — ${name}`,
-    sections: [
-      {
-        type: 'header',
-        content: {
-          expediteur: porteur.nom || '[Votre Nom Prénom]',
-          adresse: porteur.adresse || '[Votre adresse]',
-          ville: porteur.ville || '[Ville]',
-          date: new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }),
-          destinataire: 'Madame, Monsieur le Directeur d\'agence',
-          banque: '[Nom de votre banque]',
-        },
-      },
-      {
-        type: 'objet',
-        content: `Objet : Demande de financement pour la création de ${name}`,
-      },
-      {
-        type: 'paragraphe',
-        titre: 'Présentation du projet',
-        content: `J'ai l'honneur de vous soumettre ma demande de financement pour la création de ${name}.
+  const nom         = plan.porteur_nom || '[Votre Nom Pr\u233nom]';
+  const bizName     = plan.nom_business;
+  const investTotal = fmtEur(plan.totalInvest);
+  const apport      = fmtEur(plan.apport);
+  const pret        = fmtEur(plan.pret);
+  const ca1         = fmtEur(plan.ca1);
+  const breakEven   = plan.breakEvenMois ? `mois ${plan.breakEvenMois}` : 'an 1';
+  const pct         = plan.totalInvest > 0
+    ? Math.round((plan.apport / plan.totalInvest) * 100) + ' %'
+    : '[X] %';
 
-${resume.texte || resume.synthese || `Mon projet consiste à ${plan.presentation_projet?.description || '[description du projet]'}. Après une étude de marché approfondie, j'ai identifié une opportunité réelle sur le marché ${plan.etude_marche?.secteur || '[secteur]'} dans la région ${plan.aspects_organisationnels?.localisation || '[zone géographique]'}.`}`,
-      },
-      {
-        type: 'paragraphe',
-        titre: 'Structure du financement',
-        content: `Le plan de financement de mon projet s'établit comme suit :
+  const body = [
+    // ── En-tête expéditeur ───────────────────────────────────────────
+    par(nom, { bold: true, size: 13 }),
+    par('[Votre adresse — à compléter]'),
+    par('[Code postal — Ville]'),
+    par('[Téléphone] · [email@exemple.fr]'),
+    par(''),
+    par(today, { right: true }),
+    par(''),
+    par('Madame, Monsieur le Directeur d’agence', { bold: true }),
+    par('[Nom de votre banque]'),
+    par('[Adresse de l’agence]'),
+    par(''),
+    hrule(),
+    par(`Objet : Demande de financement — Création de ${u(bizName)}`, { bold: true, cf: 2, size: 12 }),
+    hrule(),
+    par(''),
 
-- Investissement total nécessaire : ${investissement}€
-- Apport personnel : ${apport}€
-- Financement bancaire sollicité : ${pret}€
+    // ── Corps ────────────────────────────────────────────────────────
+    par(`Madame, Monsieur,`),
+    par(''),
+    par(
+      `J’ai l’honneur de vous soumettre ma demande de financement dans le cadre de ` +
+      `la création de ${u(bizName)}. ` +
+      `${u(plan.pitch || plan.presentation_projet?.slice?.(0, 200) || '')}`,
+      { spaceAfter: 120 }
+    ),
 
-Mon apport personnel représente ${typeof apport === 'number' && typeof investissement === 'number' ? Math.round(apport / investissement * 100) : '[X]'}% du financement total, témoignant de mon engagement dans ce projet.`,
-      },
-      {
-        type: 'paragraphe',
-        titre: 'Viabilité du projet',
-        content: `Les projections financières montrent :
-- Chiffre d'affaires prévisionnel an 1 : ${plan.compte_resultat_3ans?.ca_an1 || '[CA]'}€
-- Point mort prévu : ${plan.seuil_rentabilite?.mois_break_even || '[X mois]'} après lancement
-- Retour sur investissement : ${plan.compte_resultat_3ans?.annee_rentabilite || 'an 2'}
+    sectionHeader('1. Présentation du projet'),
+    par(u(plan.presentation_projet?.slice?.(0, 600) || plan.resume_executif?.slice?.(0, 600) || ''), { spaceAfter: 80 }),
 
-Ces projections reposent sur des hypothèses conservatrices détaillées dans le business plan joint.`,
-      },
-      {
-        type: 'paragraphe',
-        titre: 'Documents joints',
-        content: `- Business plan complet (${new Date().getFullYear()})
-- Compte de résultat prévisionnel sur 3 ans
-- Plan de trésorerie mensuel sur 12 mois
-- CV du porteur de projet
-- Justificatifs d'apport personnel`,
-      },
-      {
-        type: 'signature',
-        content: `Dans l'attente de votre réponse, je reste à votre disposition pour tout renseignement complémentaire et vous prie d'agréer, Madame, Monsieur, l'expression de mes salutations distinguées.
+    sectionHeader('2. Étude de marché'),
+    par(u(plan.marche_analyse?.slice?.(0, 400) || ''), { spaceAfter: 80 }),
 
-${porteur.nom || '[Votre Nom Prénom]'}
-${porteur.email || '[votre@email.fr]'}
-${porteur.telephone || '[Téléphone]'}`,
-      },
-    ],
-  };
+    sectionHeader('3. Plan de financement'),
+    kvRow('Investissement total', investTotal, true),
+    kvRow('dont apport personnel', apport),
+    kvRow('dont prêt bancaire sollicité', pret, true),
+    kvRow('dont aides & subventions', fmtEur(plan.bpi)),
+    par(''),
+    par(
+      `Mon apport personnel représente ${pct} du financement total, témoignant de mon engagement.`,
+      { spaceAfter: 80 }
+    ),
+
+    sectionHeader('4. Prévisions financières'),
+    kvRow('Chiffre d’affaires an 1', ca1),
+    kvRow('Point mort prévu', breakEven),
+    kvRow('Marge brute estimée', Math.round(plan.tauxMargeCV * 100) + ' %'),
+    par(''),
+    par(
+      `Ces projections reposent sur des hypothèses conservatrices ` +
+      `détaillées dans le business plan joint en annexe.`,
+      { spaceAfter: 80 }
+    ),
+
+    sectionHeader('5. Documents joints'),
+    par('• Business plan complet'),
+    par('• Compte de résultat prévisionnel 3 ans'),
+    par('• Plan de trésorerie 12 mois'),
+    par('• CV du porteur de projet'),
+    par('• Justificatifs d’apport personnel'),
+    par(''),
+    hrule(),
+
+    // ── Formule de politesse ─────────────────────────────────────────
+    par(
+      `Dans l’attente de votre réponse, je reste à votre disposition pour ` +
+      `tout renseignement complémentaire et vous prie d’agréer, Madame, Monsieur, ` +
+      `l’expression de mes salutations distinguées.`,
+      { spaceAfter: 240 }
+    ),
+    par(u(nom), { bold: true }),
+    par('[Signature manuscrite]', { cf: 3, italic: true }),
+    par(''),
+    par('Document généré par Eadee — à personnaliser avant envoi', { cf: 3, size: 9, italic: true }),
+  ].join('\n');
+
+  return wrapRtf(body);
 }
+
+// Compat ancienne API
+export function buildCourrierBanqueContent(plan) { return buildCourrierBanque(plan); }
