@@ -1,6 +1,6 @@
 /**
  * lettre-intention.js
- * Génère une lettre d'intention client au format RTF professionnel.
+ * Lettre d'intention client — format RTF professionnel.
  */
 
 import { u, par, hrule, sectionHeader, kvRow, wrapRtf } from './rtf-core.js';
@@ -11,15 +11,14 @@ export function buildLettreIntention(plan) {
     day: 'numeric', month: 'long', year: 'numeric',
   });
   const biz    = plan.nom_business;
-  const nom    = plan.porteur_nom || '[Nom du fournisseur / prestataire]';
-  const offre1 = plan.offres?.[0];
+  const nom    = plan.porteur_nom || '[Nom du prestataire]';
+  const offre1 = (plan.offres || [])[0];
 
   const body = [
-    // En-tête client
-    par('[Nom du client — à compléter]', { bold: true, size: 13 }),
+    par('[Nom du client - a completer]', { bold: true, size: 13 }),
     par('[Entreprise du client]'),
     par('[Adresse]'),
-    par('[Code postal — Ville]'),
+    par('[Code postal - Ville]'),
     par(''),
     par(today, { right: true }),
     par(''),
@@ -27,48 +26,48 @@ export function buildLettreIntention(plan) {
     par(u(nom)),
     par(''),
     hrule(),
-    par(`Objet : Lettre d'intention d'achat — ${u(biz)}`, { bold: true, cf: 2, size: 12 }),
+    par(u(`Objet : Lettre d'intention d'achat - ${biz}`), { bold: true, cf: 2, size: 12 }),
     hrule(),
     par(''),
     par('Madame, Monsieur,'),
     par(''),
     par(
-      `Par la présente, nous, soussignés [Nom du client], représentant [Entreprise], ` +
-      `exprimons notre intérêt pour les services / produits proposés par ${u(biz)}.`,
+      u(`Par la presente, nous, soussignes [Nom du client], representant [Entreprise], ` +
+        `exprimons notre interet pour les services / produits proposes par ${biz}.`),
       { spaceAfter: 120 }
     ),
 
     sectionHeader('1. Contexte et besoin'),
-    par(u(plan.marche_analyse?.slice?.(0, 300) || '[Décrivez le besoin identifié par le client]'), { spaceAfter: 80 }),
+    par(u((plan.marche_analyse || '[Decrivez le besoin identifie]').slice(0, 300)), { spaceAfter: 80 }),
 
     sectionHeader('2. Solution retenue'),
-    par(u(plan.proposition_valeur?.slice?.(0, 400) || ''), { spaceAfter: 60 }),
+    par(u((plan.proposition_valeur || '').slice(0, 400)), { spaceAfter: 60 }),
     ...(offre1 ? [
       kvRow('Offre / Prestation', u(offre1.nom || '')),
       kvRow('Description', u(offre1.description || '')),
-      kvRow('Prix indicatif', u(offre1.prix || '—')),
+      kvRow('Prix indicatif', u(String(offre1.prix || '---'))),
       par(''),
     ] : []),
 
     sectionHeader('3. Engagement'),
     par(
-      `Sous réserve de la finalisation des conditions contractuelles, nous nous engageons à ` +
-      `étudier sérieusement une collaboration commerciale avec ${u(biz)} sur la période à venir.`,
+      u(`Sous reserve de la finalisation des conditions contractuelles, nous nous engageons a ` +
+        `etudier serieusement une collaboration commerciale avec ${biz} sur la periode a venir.`),
       { spaceAfter: 60 }
     ),
-    kvRow('Montant estimé', fmtEur(plan.ca1 ? plan.ca1 * 0.1 : 0) + ' (indicatif)'),
-    kvRow('Durée de validité', '3 mois à compter de la date'),
+    kvRow('Montant estime', fmtEur(plan.ca1 ? Math.round(plan.ca1 * 0.1) : 0) + ' (indicatif)'),
+    kvRow('Duree de validite', '3 mois a compter de la date'),
     par(''),
 
-    sectionHeader('4. Prochaines étapes'),
-    par('1. Réunion de présentation détaillée du projet'),
-    par('2. Remise d'une proposition commerciale formelle'),
-    par('3. Négociation et signature du contrat définitif'),
+    sectionHeader('4. Prochaines etapes'),
+    par('1. Reunion de presentation detaillee du projet'),
+    par('2. Remise d\\u8217?une proposition commerciale formelle'),
+    par('3. Negociation et signature du contrat definitif'),
     par(''),
     hrule(),
     par(
-      `Cette lettre n'est pas contractuelle et ne vaut pas commande ferme. ` +
-      `Elle témoigne de notre intérêt sincère pour le projet ${u(biz)}.`,
+      u(`Cette lettre n'est pas contractuelle et ne vaut pas commande ferme. ` +
+        `Elle temoigne de notre interet sincere pour le projet ${biz}.`),
       { cf: 3, italic: true, spaceAfter: 180 }
     ),
     par('Pour le client :', { bold: true }),
@@ -76,9 +75,9 @@ export function buildLettreIntention(plan) {
     par('Nom : ________________________________'),
     par('Fonction : ________________________________'),
     par('Signature : ________________________________'),
-    par('Date : ' + today),
+    par(u(`Date : ${today}`)),
     par(''),
-    par('Document généré par Eadee — à personnaliser avant signature', { cf: 3, size: 9, italic: true }),
+    par(u('Document genere par Eadee - a personnaliser avant signature'), { cf: 3, size: 9, italic: true }),
   ].join('\n');
 
   return wrapRtf(body);
