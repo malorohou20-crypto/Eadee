@@ -969,7 +969,6 @@ function fillPlan(plan) {
   }
 }
 
-  // ── [DEAD CODE — kept as stub for safety] ────────────────────────
   if (false) { const setInner = () => {}; const setText = () => {};
 
   setText('dMktSize',    stripReliability(plan.marche_taille || '—'));
@@ -1195,7 +1194,6 @@ function fillPlan(plan) {
   fillBancabilite(plan);
 
   } // end if(false)
-}
 
 // ═══════════════════════════════════════════════════════════════════
 // ANCIENNES FONCTIONS (conservées vides pour compat)

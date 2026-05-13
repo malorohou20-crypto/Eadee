@@ -19,8 +19,9 @@ function renderHistory() {
   }
   grid.innerHTML = plansHistory.map((p, i) => {
     const score = p.score_viabilite || p.score || null;
-    const rev = p.revenu_an1 || p.rev_m12 || p.revenu_a1 || null;
-    const sector = p.secteur || p.idea?.slice(0, 40) || '';
+    const revRaw = p.revenu_an1 || p.rev_m12 || p.revenu_a1 || null;
+    const rev = revRaw ? revRaw.replace(/\{\{[VEH]:(.*?)\|.*?\}\}/g, '$1').trim() : null;
+    const sector = (p.secteur || p.idea?.slice(0, 40) || '').replace(/\{\{[VEH]:(.*?)\|.*?\}\}/g, '$1').trim();
     const dateStr = (p.date instanceof Date ? p.date : new Date(p.date)).toLocaleDateString('fr-FR', { day:'2-digit', month:'short', year:'numeric' });
     return `
     <div class="history-card" onclick="openFromHistory(${i})" style="cursor:pointer;display:flex;align-items:center;gap:16px;padding:18px 22px;background:#1a1d26;border:1px solid rgba(255,255,255,0.07);border-radius:12px;transition:border-color .2s,background .2s;" onmouseover="this.style.borderColor='rgba(107,143,239,0.35)';this.style.background='#1e2235'" onmouseout="this.style.borderColor='rgba(255,255,255,0.07)';this.style.background='#1a1d26'">
