@@ -7,20 +7,24 @@ export const config = { runtime: 'nodejs' };
  */
 
 import { enrichPlan } from './lib/enrich-plan.js';
-import { buildCourrierBanque }   from './lib/document-templates/courrier-banque.js';
-import { buildCourrierBpi }      from './lib/document-templates/courrier-bpi.js';
-import { buildLettreIntention }  from './lib/document-templates/lettre-intention.js';
-import { buildTresorerie }       from './lib/document-templates/plan-tresorerie.js';
-import { buildCompteResultat }   from './lib/document-templates/compte-resultat.js';
-import { buildFicheSynthese }    from './lib/document-templates/fiche-synthese.js';
+import { buildCourrierBanque }      from './lib/document-templates/courrier-banque.js';
+import { buildCourrierBpi }         from './lib/document-templates/courrier-bpi.js';
+import { buildLettreIntention }     from './lib/document-templates/lettre-intention.js';
+import { buildTresorerie }          from './lib/document-templates/plan-tresorerie.js';
+import { buildCompteResultat }      from './lib/document-templates/compte-resultat.js';
+import { buildFicheSynthese }       from './lib/document-templates/fiche-synthese.js';
+import { buildTresoreriePdf }       from './lib/document-templates/tresorerie-pdf.js';
+import { buildCompteResultatPdf }   from './lib/document-templates/compte-resultat-pdf.js';
 
 const DOCUMENTS = {
-  courrier_banque:     { builder: buildCourrierBanque,  ext: 'doc',  mime: 'application/msword',       title: 'Courrier banque' },
-  courrier_bpi:        { builder: buildCourrierBpi,     ext: 'doc',  mime: 'application/msword',       title: 'Demande BPI France' },
-  lettre_intention:    { builder: buildLettreIntention, ext: 'doc',  mime: 'application/msword',       title: "Lettre d'intention" },
-  plan_tresorerie:     { builder: buildTresorerie,      ext: 'xls',  mime: 'application/vnd.ms-excel', title: 'Plan tresorerie 12 mois' },
-  compte_resultat_3ans:{ builder: buildCompteResultat,  ext: 'xls',  mime: 'application/vnd.ms-excel', title: 'Compte de resultat 3 ans' },
-  fiche_synthese:      { builder: buildFicheSynthese,   ext: 'html', mime: 'text/html',                title: 'Fiche synthese' },
+  courrier_banque:        { builder: buildCourrierBanque,    ext: 'doc',  mime: 'application/msword',       title: 'Courrier banque' },
+  courrier_bpi:           { builder: buildCourrierBpi,       ext: 'doc',  mime: 'application/msword',       title: 'Demande BPI France' },
+  lettre_intention:       { builder: buildLettreIntention,   ext: 'doc',  mime: 'application/msword',       title: "Lettre d'intention" },
+  plan_tresorerie:        { builder: buildTresorerie,        ext: 'xls',  mime: 'application/vnd.ms-excel', title: 'Plan tresorerie 12 mois' },
+  compte_resultat_3ans:   { builder: buildCompteResultat,    ext: 'xls',  mime: 'application/vnd.ms-excel', title: 'Compte de resultat 3 ans' },
+  fiche_synthese:         { builder: buildFicheSynthese,     ext: 'html', mime: 'text/html',                title: 'Fiche synthese' },
+  tresorerie_pdf:         { builder: buildTresoreriePdf,     ext: 'html', mime: 'text/html',                title: 'Tresorerie PDF' },
+  compte_resultat_pdf:    { builder: buildCompteResultatPdf, ext: 'html', mime: 'text/html',                title: 'Compte de resultat PDF' },
 };
 
 export default async function handler(req, res) {
