@@ -15,12 +15,12 @@ import { buildCompteResultat }   from './lib/document-templates/compte-resultat.
 import { buildFicheSynthese }    from './lib/document-templates/fiche-synthese.js';
 
 const DOCUMENTS = {
-  courrier_banque:     { builder: buildCourrierBanque,  ext: 'rtf',  mime: 'application/rtf',          title: 'Courrier banque' },
-  courrier_bpi:        { builder: buildCourrierBpi,     ext: 'rtf',  mime: 'application/rtf',          title: 'Demande BPI France' },
-  lettre_intention:    { builder: buildLettreIntention, ext: 'rtf',  mime: 'application/rtf',          title: "Lettre d'intention" },
-  plan_tresorerie:     { builder: buildTresorerie,      ext: 'xls',  mime: 'application/vnd.ms-excel', title: 'Plan trésorerie 12 mois' },
-  compte_resultat_3ans:{ builder: buildCompteResultat,  ext: 'xls',  mime: 'application/vnd.ms-excel', title: 'Compte de résultat 3 ans' },
-  fiche_synthese:      { builder: buildFicheSynthese,   ext: 'html', mime: 'text/html',                title: 'Fiche synthèse' },
+  courrier_banque:     { builder: buildCourrierBanque,  ext: 'doc',  mime: 'application/msword',       title: 'Courrier banque' },
+  courrier_bpi:        { builder: buildCourrierBpi,     ext: 'doc',  mime: 'application/msword',       title: 'Demande BPI France' },
+  lettre_intention:    { builder: buildLettreIntention, ext: 'doc',  mime: 'application/msword',       title: "Lettre d'intention" },
+  plan_tresorerie:     { builder: buildTresorerie,      ext: 'xls',  mime: 'application/vnd.ms-excel', title: 'Plan tresorerie 12 mois' },
+  compte_resultat_3ans:{ builder: buildCompteResultat,  ext: 'xls',  mime: 'application/vnd.ms-excel', title: 'Compte de resultat 3 ans' },
+  fiche_synthese:      { builder: buildFicheSynthese,   ext: 'html', mime: 'text/html',                title: 'Fiche synthese' },
 };
 
 export default async function handler(req, res) {

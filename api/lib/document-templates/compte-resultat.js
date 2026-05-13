@@ -1,147 +1,233 @@
 /**
  * compte-resultat.js
- * Génère le compte de résultat prévisionnel 3 ans au format HTML-for-Excel (.xls).
+ * Compte de résultat prévisionnel 3 ans — format SpreadsheetML XML (.xls).
+ * S'ouvre nativement dans Excel ET LibreOffice Calc sans avertissement.
  */
 
 import { fmtEur } from '../enrich-plan.js';
 
-const CSS = `
-  body { font-family: Calibri, Arial, sans-serif; font-size: 11px; }
-  table { border-collapse: collapse; width: 100%; }
-  th, td { border: 1px solid #c8d0e0; padding: 5px 10px; }
-  .title { font-size: 16px; font-weight: bold; color: #2B5797; padding: 12px 0 4px; }
-  .subtitle { font-size: 11px; color: #7a7f9a; margin-bottom: 12px; }
-  .label { text-align: left; }
-  .num { text-align: right; mso-number-format:"# ##0\\ €"; }
-  .pct { text-align: right; font-style: italic; color: #7a7f9a; font-size: 10px; mso-number-format:"0%"; }
-  .section > td { background: #2B5797; color: #fff; font-weight: bold; }
-  .total > td { background: #dce4f5; font-weight: bold; border-top: 2px solid #2B5797; border-bottom: 2px solid #2B5797; }
-  .highlight > td { background: #e8f4e8; color: #1E7E34; font-weight: bold; }
-  .negative { color: #C82333; }
-  .alt > td { background: #f2f5fb; }
-  .header-row th { background: #2B5797; color: #fff; font-size: 12px; font-weight: bold; text-align: center; }
-  .header-row th:first-child { text-align: left; min-width: 220px; }
-`;
-
-function numCell(val, ca = 0, showPct = false) {
-  const n = Number(val) || 0;
-  const color = n < 0 ? ' negative' : '';
-  const cell = `<td class="num${color}">${fmtEur(n)}</td>`;
-  const pctCell = showPct && ca > 0
-    ? `<td class="pct">${Math.round((n / ca) * 100)} %</td>`
-    : (showPct ? '<td class="pct">—</td>' : '');
-  return cell + pctCell;
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function dataRow(label, vals, cas, showPct = false, cls = '') {
-  const altCls = cls || '';
-  return `<tr class="${altCls}"><td class="label">${label}</td>${vals.map((v, i) => numCell(v, cas[i], showPct)).join('')}</tr>`;
+function cell(value, styleId = 'sData') {
+  const n = Number(value) || 0;
+  return `<Cell ss:StyleID="${styleId}"><Data ss:Type="Number">${n}</Data></Cell>`;
 }
 
-function totalRow(label, vals, cas, showPct = false, cls = 'total') {
-  return `<tr class="${cls}"><td class="label">${label}</td>${vals.map((v, i) => numCell(v, cas[i], showPct)).join('')}</tr>`;
+function labelCell(text, styleId = 'sLabel') {
+  return `<Cell ss:StyleID="${styleId}"><Data ss:Type="String">${esc(text)}</Data></Cell>`;
 }
+
+function pctCell(num, denom, styleId = 'sPct') {
+  const pct = denom > 0 ? (num / denom) : 0;
+  return `<Cell ss:StyleID="${styleId}"><Data ss:Type="Number">${pct.toFixed(4)}</Data></Cell>`;
+}
+
+function sectionRow(label) {
+  return `<Row ss:Height="18">
+    <Cell ss:StyleID="sSection" ss:MergeAcross="6"><Data ss:Type="String">${esc(label)}</Data></Cell>
+  </Row>`;
+}
+
+function dataRow(label, v1, v2, v3, ca, styleId = 'sData', lblStyle = 'sLabel', showPct = true) {
+  return `<Row>
+    ${labelCell(label, lblStyle)}
+    ${cell(v1, styleId)} ${showPct ? pctCell(v1, ca[0]) : '<Cell/>'}
+    ${cell(v2, styleId)} ${showPct ? pctCell(v2, ca[1]) : '<Cell/>'}
+    ${cell(v3, styleId)} ${showPct ? pctCell(v3, ca[2]) : '<Cell/>'}
+  </Row>`;
+}
+
+function totalRow(label, v1, v2, v3, ca, styleId = 'sTotal', showPct = true) {
+  return `<Row>
+    ${labelCell(label, styleId)}
+    ${cell(v1, styleId)} ${showPct ? pctCell(v1, ca[0], 'sPctTotal') : '<Cell/>'}
+    ${cell(v2, styleId)} ${showPct ? pctCell(v2, ca[1], 'sPctTotal') : '<Cell/>'}
+    ${cell(v3, styleId)} ${showPct ? pctCell(v3, ca[2], 'sPctTotal') : '<Cell/>'}
+  </Row>`;
+}
+
+function emptyRow() { return `<Row ss:Height="6"></Row>`; }
 
 export function buildCompteResultat(plan) {
-  const ca   = [plan.ca1, plan.ca2, plan.ca3];
+  const ca   = [plan.ca1 || 0, plan.ca2 || 0, plan.ca3 || 0];
   const taux = plan.tauxMargeCV || 0.45;
   const cf   = (plan.chargesFixesMois || 0) * 12;
 
-  // Charges variables (coûts directs)
-  const cv = ca.map(c => Math.round(c * (1 - taux)));
+  const cv      = ca.map(c => Math.round(c * (1 - taux)));
+  const mb      = ca.map((c, i) => c - cv[i]);
+  const loyer   = Array(3).fill(Math.round(cf * 0.25));
+  const sal     = Array(3).fill(Math.round(cf * 0.45));
+  const mkt     = Array(3).fill(Math.round(cf * 0.15));
+  const autres  = Array(3).fill(Math.round(cf * 0.15));
+  const amort   = [1,2,3].map(() => Math.round((plan.totalInvest || 0) / 5));
+  const ebitda  = ca.map((c, i) => c - cv[i] - loyer[i] - sal[i] - mkt[i] - autres[i]);
+  const ebit    = ebitda.map((e, i) => e - amort[i]);
+  const inter   = [1,2,3].map((_, i) => Math.round((plan.pret || 0) * [0.04, 0.03, 0.02][i]));
+  const rai     = ebit.map((e, i) => e - inter[i]);
+  const is      = rai.map((r, i) => r <= 0 ? 0 : Math.round(r * [0.15, 0.15, 0.25][i]));
+  const rn      = rai.map((r, i) => r - is[i]);
+  const totalCF = [0,1,2].map(i => loyer[i] + sal[i] + mkt[i] + autres[i] + amort[i]);
 
-  // Marge brute
-  const mb = ca.map((c, i) => c - cv[i]);
+  const today = new Date().toLocaleDateString('fr-FR');
 
-  // Charges fixes réparties
-  const loyer     = Array(3).fill(Math.round(cf * 0.25));
-  const salaires  = Array(3).fill(Math.round(cf * 0.45));
-  const marketing = Array(3).fill(Math.round(cf * 0.15));
-  const autresCF  = Array(3).fill(Math.round(cf * 0.15));
-  const amort     = [Math.round(plan.totalInvest / 5), Math.round(plan.totalInvest / 5), Math.round(plan.totalInvest / 5)];
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+  xmlns:o="urn:schemas-microsoft-com:office:office"
+  xmlns:x="urn:schemas-microsoft-com:office:excel"
+  xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+<DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+  <Title>Compte de resultat - ${esc(plan.nom_business)}</Title>
+  <Author>Eadee</Author>
+</DocumentProperties>
+<Styles>
+  <Style ss:ID="sTitle">
+    <Font ss:Bold="1" ss:Size="14" ss:Color="#2B5797"/>
+  </Style>
+  <Style ss:ID="sColHeader">
+    <Font ss:Bold="1" ss:Size="11" ss:Color="#FFFFFF"/>
+    <Interior ss:Color="#2B5797" ss:Pattern="Solid"/>
+    <Alignment ss:Horizontal="Center"/>
+  </Style>
+  <Style ss:ID="sPctHeader">
+    <Font ss:Bold="1" ss:Size="10" ss:Color="#FFFFFF" ss:Italic="1"/>
+    <Interior ss:Color="#2B5797" ss:Pattern="Solid"/>
+    <Alignment ss:Horizontal="Center"/>
+  </Style>
+  <Style ss:ID="sSection">
+    <Font ss:Bold="1" ss:Size="10" ss:Color="#FFFFFF"/>
+    <Interior ss:Color="#4a7acf" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="sLabel">
+    <Font ss:Size="10"/>
+    <Alignment ss:Horizontal="Left"/>
+  </Style>
+  <Style ss:ID="sLabelAlt">
+    <Font ss:Size="10"/>
+    <Interior ss:Color="#F2F5FB" ss:Pattern="Solid"/>
+    <Alignment ss:Horizontal="Left"/>
+  </Style>
+  <Style ss:ID="sData">
+    <NumberFormat ss:Format="#,##0\ &quot;€&quot;"/>
+    <Alignment ss:Horizontal="Right"/>
+    <Font ss:Size="10"/>
+  </Style>
+  <Style ss:ID="sDataAlt">
+    <NumberFormat ss:Format="#,##0\ &quot;€&quot;"/>
+    <Interior ss:Color="#F2F5FB" ss:Pattern="Solid"/>
+    <Alignment ss:Horizontal="Right"/>
+    <Font ss:Size="10"/>
+  </Style>
+  <Style ss:ID="sPct">
+    <NumberFormat ss:Format="0%"/>
+    <Alignment ss:Horizontal="Right"/>
+    <Font ss:Size="9" ss:Italic="1" ss:Color="#7a7f9a"/>
+  </Style>
+  <Style ss:ID="sPctTotal">
+    <NumberFormat ss:Format="0%"/>
+    <Alignment ss:Horizontal="Right"/>
+    <Font ss:Size="9" ss:Bold="1" ss:Color="#2B5797"/>
+  </Style>
+  <Style ss:ID="sTotal">
+    <NumberFormat ss:Format="#,##0\ &quot;€&quot;"/>
+    <Font ss:Bold="1" ss:Size="10" ss:Color="#2B5797"/>
+    <Interior ss:Color="#DCE4F5" ss:Pattern="Solid"/>
+    <Alignment ss:Horizontal="Right"/>
+    <Borders>
+      <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="2" ss:Color="#2B5797"/>
+      <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="2" ss:Color="#2B5797"/>
+    </Borders>
+  </Style>
+  <Style ss:ID="sHighlight">
+    <NumberFormat ss:Format="#,##0\ &quot;€&quot;"/>
+    <Font ss:Bold="1" ss:Size="10" ss:Color="#1E7E34"/>
+    <Interior ss:Color="#E8F4E8" ss:Pattern="Solid"/>
+    <Alignment ss:Horizontal="Right"/>
+    <Borders>
+      <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="2" ss:Color="#1E7E34"/>
+      <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="2" ss:Color="#1E7E34"/>
+    </Borders>
+  </Style>
+  <Style ss:ID="sNegative">
+    <NumberFormat ss:Format="#,##0\ &quot;€&quot;;[Red]-#,##0\ &quot;€&quot;"/>
+    <Font ss:Bold="1" ss:Size="10"/>
+    <Interior ss:Color="#FDE8E8" ss:Pattern="Solid"/>
+    <Alignment ss:Horizontal="Right"/>
+  </Style>
+  <Style ss:ID="sFooter">
+    <Font ss:Italic="1" ss:Size="8" ss:Color="#7a7f9a"/>
+  </Style>
+</Styles>
+<Worksheet ss:Name="Compte de resultat">
+<Table ss:DefaultColumnWidth="75">
+  <Column ss:Width="200"/>
+  <Column ss:Width="85"/> <Column ss:Width="52"/>
+  <Column ss:Width="85"/> <Column ss:Width="52"/>
+  <Column ss:Width="85"/> <Column ss:Width="52"/>
 
-  const totalCharges = ca.map((_, i) =>
-    cv[i] + loyer[i] + salaires[i] + marketing[i] + autresCF[i] + amort[i]
-  );
+  <!-- Titre -->
+  <Row ss:Height="26">
+    <Cell ss:StyleID="sTitle" ss:MergeAcross="6">
+      <Data ss:Type="String">Compte de resultat previsionnel — ${esc(plan.nom_business)}</Data>
+    </Cell>
+  </Row>
+  <Row ss:Height="14">
+    <Cell ss:StyleID="sFooter" ss:MergeAcross="6">
+      <Data ss:Type="String">Genere le ${today} par Eadee · A valider par un expert-comptable</Data>
+    </Cell>
+  </Row>
+  ${emptyRow()}
 
-  // EBITDA
-  const ebitda = ca.map((c, i) => c - cv[i] - loyer[i] - salaires[i] - marketing[i] - autresCF[i]);
+  <!-- En-tetes -->
+  <Row ss:Height="22">
+    <Cell ss:StyleID="sColHeader"><Data ss:Type="String">Postes</Data></Cell>
+    <Cell ss:StyleID="sColHeader"><Data ss:Type="String">An 1</Data></Cell>
+    <Cell ss:StyleID="sPctHeader"><Data ss:Type="String">% CA</Data></Cell>
+    <Cell ss:StyleID="sColHeader"><Data ss:Type="String">An 2</Data></Cell>
+    <Cell ss:StyleID="sPctHeader"><Data ss:Type="String">% CA</Data></Cell>
+    <Cell ss:StyleID="sColHeader"><Data ss:Type="String">An 3</Data></Cell>
+    <Cell ss:StyleID="sPctHeader"><Data ss:Type="String">% CA</Data></Cell>
+  </Row>
 
-  // EBIT (après amortissement)
-  const ebit = ebitda.map((e, i) => e - amort[i]);
+  ${sectionRow("CHIFFRE D'AFFAIRES")}
+  ${totalRow("Chiffre d'affaires HT", ca[0], ca[1], ca[2], ca, 'sTotal')}
+  ${emptyRow()}
 
-  // Intérêts (estimés)
-  const interets = [Math.round(plan.pret * 0.04), Math.round(plan.pret * 0.03), Math.round(plan.pret * 0.02)];
+  ${sectionRow('MARGE BRUTE')}
+  ${dataRow('Couts variables / Achats', cv[0], cv[1], cv[2], ca, 'sDataAlt', 'sLabelAlt')}
+  ${totalRow('MARGE BRUTE', mb[0], mb[1], mb[2], ca, 'sHighlight')}
+  ${emptyRow()}
 
-  // Résultat avant impôt
-  const rai = ebit.map((e, i) => e - interets[i]);
+  ${sectionRow("CHARGES D'EXPLOITATION")}
+  ${dataRow('Loyer & charges locatives', loyer[0], loyer[1], loyer[2], ca)}
+  ${dataRow('Salaires & charges sociales', sal[0], sal[1], sal[2], ca, 'sDataAlt', 'sLabelAlt')}
+  ${dataRow('Marketing & communication', mkt[0], mkt[1], mkt[2], ca)}
+  ${dataRow('Autres charges fixes', autres[0], autres[1], autres[2], ca, 'sDataAlt', 'sLabelAlt')}
+  ${dataRow('Amortissements', amort[0], amort[1], amort[2], ca)}
+  ${totalRow('TOTAL CHARGES FIXES', totalCF[0], totalCF[1], totalCF[2], ca)}
+  ${emptyRow()}
 
-  // IS (0% an1 si déficit, 15% an2, 25% an3)
-  const is = rai.map((r, i) => r <= 0 ? 0 : Math.round(r * (i === 0 ? 0.15 : i === 1 ? 0.15 : 0.25)));
+  ${sectionRow('RESULTATS')}
+  ${totalRow('EBITDA', ebitda[0], ebitda[1], ebitda[2], ca, 'sHighlight')}
+  ${totalRow("EBIT (resultat d'exploitation)", ebit[0], ebit[1], ebit[2], ca, 'sTotal')}
+  ${dataRow('Charges financieres (interets)', inter[0], inter[1], inter[2], ca, 'sDataAlt', 'sLabelAlt')}
+  ${totalRow('Resultat avant impot', rai[0], rai[1], rai[2], ca)}
+  ${dataRow('Impot sur les societes (IS)', is[0], is[1], is[2], ca, 'sDataAlt', 'sLabelAlt')}
+  ${totalRow('RESULTAT NET', rn[0], rn[1], rn[2], ca, rn[0] >= 0 ? 'sHighlight' : 'sNegative')}
+  ${emptyRow()}
 
-  // Résultat net
-  const rn = rai.map((r, i) => r - is[i]);
+  <Row>
+    <Cell ss:StyleID="sFooter" ss:MergeAcross="6">
+      <Data ss:Type="String">IS : 15% an1-2 / 25% an3 (taux normal). Projections indicatives a affiner avec votre expert-comptable.</Data>
+    </Cell>
+  </Row>
+</Table>
+</Worksheet>
+</Workbook>`;
 
-  const colHeader = (showPct) =>
-    `<th>An 1</th>${showPct ? '<th>% CA</th>' : ''}<th>An 2</th>${showPct ? '<th>% CA</th>' : ''}<th>An 3</th>${showPct ? '<th>% CA</th>' : ''}`;
-
-  const html = `<!DOCTYPE html>
-<html xmlns:o="urn:schemas-microsoft-com:office:office"
-      xmlns:x="urn:schemas-microsoft-com:office:excel"
-      xmlns="http://www.w3.org/TR/REC-html40">
-<head>
-<meta charset="UTF-8">
-<meta name="ProgId" content="Excel.Sheet">
-<meta name="Generator" content="Microsoft Excel 15">
-<!--[if gte mso 9]><xml>
-<x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>
-<x:Name>Compte de résultat</x:Name>
-<x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>
-</x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook>
-</xml><![endif]-->
-<style>${CSS}</style>
-</head>
-<body>
-<div class="title">Compte de résultat prévisionnel — ${plan.nom_business}</div>
-<div class="subtitle">Généré le ${new Date().toLocaleDateString('fr-FR')} — Eadee · À valider par un expert-comptable</div>
-<table>
-  <tr class="header-row">
-    <th>Postes</th>
-    ${colHeader(true)}
-  </tr>
-
-  <tr class="section"><td colspan="7" class="label">▶ CHIFFRE D'AFFAIRES</td></tr>
-  ${totalRow('Chiffre d\'affaires HT', ca, ca, true, 'total')}
-
-  <tr class="section"><td colspan="7" class="label">▶ MARGE BRUTE</td></tr>
-  ${dataRow('Coûts variables / Achats', cv, ca, true, 'alt')}
-  ${totalRow('MARGE BRUTE', mb, ca, true, 'highlight')}
-
-  <tr class="section"><td colspan="7" class="label">▶ CHARGES D'EXPLOITATION</td></tr>
-  ${dataRow('Loyer & charges locatives', loyer, ca, true)}
-  ${dataRow('Salaires & charges sociales', salaires, ca, true, 'alt')}
-  ${dataRow('Marketing & communication', marketing, ca, true)}
-  ${dataRow('Autres charges fixes', autresCF, ca, true, 'alt')}
-  ${dataRow('Dotations aux amortissements', amort, ca, true)}
-  ${totalRow('TOTAL CHARGES FIXES', loyer.map((_, i) => loyer[i] + salaires[i] + marketing[i] + autresCF[i] + amort[i]), ca, true)}
-
-  <tr class="section"><td colspan="7" class="label">▶ RÉSULTATS</td></tr>
-  ${totalRow('EBITDA', ebitda, ca, true, 'highlight')}
-  ${totalRow('EBIT (résultat d\'exploitation)', ebit, ca, true)}
-  ${dataRow('Charges financières (intérêts)', interets, ca, true, 'alt')}
-  ${totalRow('Résultat avant impôt', rai, ca, true)}
-  ${dataRow('Impôt sur les sociétés', is, ca, true, 'alt')}
-  ${totalRow('RÉSULTAT NET', rn, ca, true, 'highlight')}
-</table>
-
-<p style="font-size:9px;color:#7a7f9a;margin-top:12px">
-  ⚠ Projections indicatives basées sur vos données Eadee. Taux IS : 15 % an1-2 / 25 % an3 (taux normal).
-  Toutes les valeurs sont à affiner avec votre expert-comptable.
-</p>
-</body>
-</html>`;
-
-  return html;
+  return xml;
 }
 
 export function buildCompteResultatData(plan) { return buildCompteResultat(plan); }
