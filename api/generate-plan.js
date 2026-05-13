@@ -39,6 +39,77 @@ RÈGLES STRICTES SUR LES CHIFFRES :
 2. Ne JAMAIS inventer un chiffre exact sans source. Préfère une fourchette.
 3. Les projections financières listent les hypothèses en début de section.
 
+═══════════════════════════════════════════════════════════════
+RÈGLE DES 3 NIVEAUX — POSTES D'INVESTISSEMENT ET CHARGES
+Tu DOIS appliquer cette logique à chaque plan pour les sections
+"investissements", "seuil_rentabilite" et "finances_detail".
+═══════════════════════════════════════════════════════════════
+
+NIVEAU 1 — POSTES UNIVERSELS (toujours inclus, peu importe le projet) :
+Ces postes apparaissent dans TOUS les plans, adaptés au contexte :
+  • Matériel de travail (ordinateur, périphériques…)
+  • Outils et logiciels métier (abonnements SaaS, licences…)
+  • Marketing & communication (site web, réseaux sociaux, visuels…)
+  • Assurance professionnelle (RC Pro…)
+  • Comptabilité / Juridique (expert-comptable, création société…)
+  • Téléphone & internet professionnel
+  • Frais divers & imprévus (buffer 5-10 %)
+
+NIVEAU 2 — POSTES DÉDUITS AUTOMATIQUEMENT DU SECTEUR :
+Identifie le type de projet et ajoute LES postes typiques de ce secteur
+SANS que l'utilisateur ait besoin de les mentionner explicitement.
+Mapping secteur → postes à ajouter automatiquement :
+  • Application mobile / SaaS / Tech
+      → hébergement serveur & cloud, nom de domaine + SSL,
+        frais de développement (si pas fait en interne), frais App Store / Google Play
+  • Restaurant / Food / Traiteur
+      → matières premières / approvisionnement, équipement cuisine,
+        licences alimentaires & HACCP, emballages/ustensiles
+  • Boutique physique ou e-commerce
+      → stock initial, emballages & conditionnement, logistique & livraison,
+        plateforme e-commerce (Shopify, WooCommerce…)
+  • Artisanat / Fabrication
+      → matières premières, outils et équipements spécifiques au métier,
+        atelier ou espace de production (si mentionné)
+  • Conseil / Coaching / Freelance
+      → formation & certifications professionnelles,
+        outil CRM / gestion client, plateforme de facturation
+  • Santé / Bien-être / Beauté
+      → certifications et diplômes requis, matériel spécifique,
+        conformité RGPD & données santé
+  • Immobilier / Agence
+      → carte professionnelle T, logiciel de gestion, caution garantie
+
+NIVEAU 3 — POSTES INCLUS UNIQUEMENT SI L'UTILISATEUR LES MENTIONNE :
+N'AJOUTE CES POSTES QUE si l'utilisateur en parle EXPLICITEMENT
+dans sa description de projet. Ne jamais les inventer ou supposer.
+  • Local commercial ou bureau
+      → loyer mensuel, charges locatives, dépôt de garantie, travaux d'aménagement
+  • Véhicule professionnel
+      → achat ou leasing, carburant, assurance auto professionnelle
+  • Employés ou associés salariés
+      → salaires bruts, charges sociales patronales (~42-45 % du brut)
+  • Livraison / flotte
+      → véhicules de livraison, partenaires logistiques (Chronopost, Stuart…)
+  • Tout équipement très spécifique non standard mentionné par l'utilisateur
+
+RÈGLE D'OR :
+  ✅ Standard pour le secteur → inclus automatiquement (Niveau 1 + 2)
+  ✅ Mentionné explicitement par l'utilisateur → toujours inclus (Niveau 3)
+  ❌ Engagement physique ou humain majeur NON mentionné → JAMAIS inventé
+  ❌ Poste spéculatif hors secteur → JAMAIS inventé
+
+EXEMPLES D'APPLICATION :
+  • "Je crée une appli mobile" (sans mention de bureau ni d'employés)
+      → Niveau 1 + hébergement/domaine/App Store (Niveau 2)
+      → PAS de loyer, PAS de salariés
+  • "Je veux ouvrir une boulangerie artisanale"
+      → Niveau 1 + matières premières/équipement cuisine/licences (Niveau 2)
+      → PAS de véhicule (sauf si mentionné), PAS d'employés (sauf si mentionné)
+  • "Je crée une appli, j'ai un bureau et deux développeurs"
+      → Niveau 1 + Niveau 2 tech + loyer bureau + salaires 2 devs (Niveau 3 mentionné)
+═══════════════════════════════════════════════════════════════
+
 DONNÉES RÉELLES DISPONIBLES (issues INSEE + recherche web) :
 ${JSON.stringify(verifiedData, null, 2)}
 
@@ -261,7 +332,10 @@ Génère ce JSON complet (sans markdown, sans backtick) :
   "rev_mensuel": [200, 600, 1200, 1800, 2500, 3200, 3800, 4400, 5000, 5700, 6500, 7500],
   "finances_detail": [
     {"label": "CA annuel estimé (an 1)", "valeur": "{{E:XX XXX€|somme projections mensuelles}}"},
-    {"label": "Charges fixes mensuelles", "valeur": "{{E:X XXX€|loyer+salaires+abonnements}}"},
+    {"label": "Charges fixes mensuelles", "valeur": "{{E:X XXX€|postes Niv1+Niv2 + Niv3 si mentionnés}}"},
+    // RÈGLE : intègre UNIQUEMENT dans les charges les postes validés par les 3 niveaux.
+    // Ex : si pas de local mentionné → PAS de loyer dans les charges fixes.
+    // Ex : si pas d'employé mentionné → PAS de salaires dans les charges fixes.
     {"label": "Charges variables (% CA)", "valeur": "{{H:XX%|estimation sectorielle}}"},
     {"label": "Marge brute", "valeur": "{{E:XX%|prix vente - coût variable}}"},
     {"label": "Point mort mensuel", "valeur": "{{E:X XXX€/mois|charges fixes ÷ taux marge}}"},
@@ -273,11 +347,16 @@ Génère ce JSON complet (sans markdown, sans backtick) :
   "tresorerie_soldes": [500, 1200, 1800, 2400, 3100, 3900, 4800, 5500, 6300, 7200, 8100, 9000],
 
   "investissements": [
-    {"label": "Poste précis 1", "montant": "{{H:XXX€|devis estimatif}}", "categorie": "materiel"},
-    {"label": "Poste précis 2", "montant": "{{H:XXX€|devis estimatif}}", "categorie": "communication"},
-    {"label": "Poste précis 3", "montant": "{{H:XXX€|devis estimatif}}", "categorie": "bfr"},
-    {"label": "Poste précis 4", "montant": "{{H:XXX€|devis estimatif}}", "categorie": "autres"},
-    {"label": "Poste précis 5", "montant": "{{H:XXX€|devis estimatif}}", "categorie": "autres"},
+    // APPLIQUE ICI LA RÈGLE DES 3 NIVEAUX :
+    // → Niveau 1 (universels) : toujours présents (matériel, outils, marketing, assurance, compta, téléphone, divers)
+    // → Niveau 2 (déduits du secteur) : ajoute les postes typiques de CE secteur sans que l'utilisateur ait à les demander
+    // → Niveau 3 (engagement physique/humain) : UNIQUEMENT si l'utilisateur l'a mentionné explicitement
+    // → Ne JAMAIS inventer un loyer, des salariés ou un véhicule si non mentionné
+    {"label": "Poste Niveau 1 ou 2 précis", "montant": "{{H:XXX€|devis estimatif}}", "categorie": "materiel"},
+    {"label": "Poste Niveau 1 ou 2 précis", "montant": "{{H:XXX€|devis estimatif}}", "categorie": "communication"},
+    {"label": "Poste Niveau 1 ou 2 précis", "montant": "{{H:XXX€|devis estimatif}}", "categorie": "bfr"},
+    {"label": "Poste Niveau 2 secteur-spécifique", "montant": "{{H:XXX€|devis estimatif}}", "categorie": "autres"},
+    {"label": "Poste Niveau 3 si mentionné par l'utilisateur", "montant": "{{H:XXX€|devis estimatif}}", "categorie": "autres"},
     {"label": "TOTAL investissement", "montant": "{{E:X XXX€|somme des postes}}", "total": true}
   ],
 
