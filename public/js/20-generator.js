@@ -235,17 +235,19 @@ async function generateDashPlan() {
     if (si < genStatuses.length - 1) document.getElementById('genStatusText').textContent = genStatuses[++si];
   }, 1800);
 
-  const prompt = buildPlanPrompt20(idea, budget, profile, sector, time);
-
   try {
-    // ── Appel direct via proxy (rapide, 1 seul appel Claude) ──────
-    const res = await fetch('/api/proxy', {
+    // ── Pipeline complet v2.0 avec system prompt bancaire + INSEE + web search ──
+    const res = await fetch('/api/generate-plan', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 12000,
-        messages: [{ role: 'user', content: prompt }]
+        idea,
+        sector,
+        city: '',
+        budget,
+        profile,
+        time,
+        credits: userCredits,
       })
     });
 
@@ -600,6 +602,7 @@ function renderConcurrentCard(c) {
     </div>
     <div class="cc-desc">${esc(c.description)}</div>
     ${c.prix_moyen ? `<div class="cc-prix">Prix moyen : ${relText(c.prix_moyen)}</div>` : ''}
+    ${c.avantage_differentiel ? `<div style="margin-top:8px;padding:8px 12px;background:rgba(52,211,153,0.07);border-left:2px solid rgba(52,211,153,0.35);border-radius:0 6px 6px 0;font-size:12px;color:#34d399;line-height:1.5"><strong>Notre avantage :</strong> ${esc(c.avantage_differentiel)}</div>` : ''}
   </div>`;
 }
 
@@ -611,15 +614,18 @@ function renderRiskCard(r) {
       <div class="risk-title">${esc(r.titre)}</div>
       <div class="risk-level" style="color:${lc};background:${lc}18;border:1px solid ${lc}40">${esc(r.niveau||'')}</div>
     </div>
+    ${r.signal_alarme ? `<div style="font-size:12px;color:rgba(255,255,255,0.45);margin-bottom:6px;line-height:1.5"><span style="color:#fbbf24;font-weight:600">⚠ Signal :</span> ${esc(r.signal_alarme)}</div>` : ''}
+    ${r.solution_preventive ? `<div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:6px;line-height:1.5"><span style="color:#34d399;font-weight:600">✓ Prévention :</span> ${esc(r.solution_preventive)}</div>` : ''}
     <div class="risk-solution"><strong>Mitigation :</strong> ${esc(r.solution)}</div>
   </div>`;
 }
 
 // Helper: aide card
 function renderAideCard(a) {
+  const prioColor = a.priorite==='haute' ? '#34d399' : a.priorite==='moyenne' ? '#fbbf24' : 'rgba(255,255,255,0.3)';
   return `<div class="aide-card${a.applicable===false?' aide-disabled':''}">
     <div class="aide-header">
-      <div class="aide-nom">${esc(a.nom)}</div>
+      <div class="aide-nom">${esc(a.nom)}${a.priorite ? `<span style="display:inline-block;margin-left:8px;font-size:9px;font-family:'DM Mono',monospace;font-weight:600;padding:2px 7px;border-radius:10px;background:${prioColor}18;color:${prioColor};border:1px solid ${prioColor}40">${esc(a.priorite)}</span>` : ''}</div>
       <div class="aide-montant">${relText(a.montant||'')}</div>
     </div>
     <div class="aide-conditions">${esc(a.conditions||'')}</div>
@@ -681,6 +687,172 @@ function renderDemarchesHtml(demarches) {
   </div>`;
 }
 
+// ─────────────────────────────────────────────────────────
+// HELPERS v2.0 — Score bancabilité, Plan financement, Scénarios, Trésorerie mensuelle
+// ─────────────────────────────────────────────────────────
+
+function renderScoreBancabilite(sb) {
+  if (!sb) return '';
+  const color = sb.note >= 75 ? '#34d399' : sb.note >= 55 ? '#fbbf24' : '#ef4444';
+  const label = sb.note >= 75 ? 'Dossier bancable' : sb.note >= 55 ? 'Dossier à renforcer' : 'Dossier insuffisant';
+  const detail = sb.detail || {};
+  const rows = [
+    { k: 'apport_suffisant',       l: 'Apport personnel',     max: 25 },
+    { k: 'point_mort_rapide',      l: 'Point mort rapide',    max: 20 },
+    { k: 'tresorerie_positive_m6', l: 'Trésorerie positive',  max: 20 },
+    { k: 'garanties_disponibles',  l: 'Garanties disponibles',max: 15 },
+    { k: 'secteur_risque_faible',  l: 'Secteur peu risqué',   max: 10 },
+    { k: 'experience_porteur',     l: 'Expérience porteur',   max: 10 },
+  ].map(r => {
+    const d = detail[r.k] || {};
+    const pts = d.points ?? 0;
+    const pct = Math.round((pts / r.max) * 100);
+    const c2 = pct >= 70 ? '#34d399' : pct >= 40 ? '#fbbf24' : '#ef4444';
+    return `<div style="display:flex;flex-direction:column;gap:4px;padding:10px 14px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.07)">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:12px;color:rgba(255,255,255,0.6)">${r.l}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:11px;font-weight:700;color:${c2}">${pts}/${r.max}</div>
+      </div>
+      <div style="height:4px;background:rgba(255,255,255,0.07);border-radius:2px">
+        <div style="height:4px;width:${pct}%;background:${c2};border-radius:2px;transition:width 0.6s"></div>
+      </div>
+      ${d.commentaire ? `<div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:2px;line-height:1.4">${esc(d.commentaire)}</div>` : ''}
+    </div>`;
+  }).join('');
+
+  return `<div class="plan-block" style="border-color:${color}30;background:linear-gradient(135deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01))">
+    <div class="plan-block-title" style="color:${color}">🏦 Score Bancabilité</div>
+    <div style="display:flex;align-items:center;gap:20px;margin-bottom:20px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:64px;height:64px;border-radius:50%;border:3px solid ${color};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <div style="text-align:center">
+            <div style="font-size:22px;font-weight:800;color:${color};line-height:1">${sb.note}</div>
+            <div style="font-family:'DM Mono',monospace;font-size:8px;color:rgba(255,255,255,0.35);letter-spacing:0.1em">/100</div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:${color}">${label}</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:3px;max-width:280px;line-height:1.5">${esc(sb.interpretation||'')}</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">${detail ? rows : ''}</div>
+    ${sb.message_banquier ? `<div style="padding:14px 16px;background:rgba(107,143,239,0.07);border:1px solid rgba(107,143,239,0.2);border-radius:10px">
+      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:8px">Ce que dira le banquier</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.7;font-style:italic">"${esc(sb.message_banquier)}"</div>
+    </div>` : ''}
+  </div>`;
+}
+
+function renderPlanFinancement(pf) {
+  if (!pf) return '';
+  const besoins = pf.besoins || {};
+  const ressources = pf.ressources || {};
+
+  const row = (label, val) => val ? `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+    <div style="font-size:13px;color:rgba(255,255,255,0.6)">${esc(label)}</div>
+    <div style="font-size:13px;font-weight:600;color:#fff">${relText(String(val))}</div>
+  </div>` : '';
+
+  return `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:10px">Besoins</div>
+        ${row('Investissements matériels', besoins.investissements_materiels)}
+        ${row('Investissements immatériels', besoins.investissements_immateriels)}
+        ${row('BFR démarrage', besoins.bfr_demarrage)}
+        ${row('Trésorerie de sécurité', besoins.tresorerie_securite)}
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;margin-top:4px;border-top:1px solid rgba(255,255,255,0.12)">
+          <div style="font-size:13px;font-weight:700;color:#fff">TOTAL BESOINS</div>
+          <div style="font-size:15px;font-weight:800;color:var(--acid)">${relText(String(besoins.total_besoins||'—'))}</div>
+        </div>
+      </div>
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:10px">Ressources</div>
+        ${row('Apport personnel', ressources.apport_personnel)}
+        ${row('Prêt bancaire', ressources.pret_bancaire)}
+        ${ressources.pret_bpi && ressources.pret_bpi !== 'null' ? row('Prêt BPI', ressources.pret_bpi) : ''}
+        ${ressources.pret_honneur && ressources.pret_honneur !== 'null' ? row('Prêt d\'honneur', ressources.pret_honneur) : ''}
+        ${ressources.subventions && ressources.subventions !== 'null' ? row('Subventions', ressources.subventions) : ''}
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;margin-top:4px;border-top:1px solid rgba(255,255,255,0.12)">
+          <div style="font-size:13px;font-weight:700;color:#fff">TOTAL RESSOURCES</div>
+          <div style="font-size:15px;font-weight:800;color:#34d399">${relText(String(ressources.total_ressources||'—'))}</div>
+        </div>
+      </div>
+    </div>
+    ${pf.message_banquier ? `<div style="padding:12px 16px;background:rgba(107,143,239,0.07);border:1px solid rgba(107,143,239,0.2);border-radius:10px;font-size:13px;color:rgba(255,255,255,0.65);line-height:1.7">
+      <span style="color:#9db8f8;font-weight:600">💬 Vision banquier : </span>${esc(pf.message_banquier)}
+    </div>` : ''}`;
+}
+
+function renderScenariosBlock(sc) {
+  if (!sc) return '';
+  const configs = [
+    { key: 'pessimiste', label: 'Pessimiste', color: '#ef4444', icon: '↓' },
+    { key: 'realiste',   label: 'Réaliste',   color: '#fbbf24', icon: '→' },
+    { key: 'optimiste',  label: 'Optimiste',  color: '#34d399', icon: '↑' },
+  ];
+  const cards = configs.map(({ key, label, color, icon }) => {
+    const s = sc[key];
+    if (!s) return '';
+    return `<div style="padding:14px;background:rgba(255,255,255,0.03);border:1px solid ${color}30;border-radius:10px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <div style="width:24px;height:24px;border-radius:50%;background:${color}20;color:${color};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;flex-shrink:0">${icon}</div>
+        <div style="font-weight:700;font-size:13px;color:${color}">${label}</div>
+      </div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:10px;line-height:1.5;font-style:italic">${esc(s.hypothese||'')}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <div style="text-align:center;padding:6px;background:rgba(255,255,255,0.04);border-radius:6px">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,0.3);margin-bottom:2px">CA An 1</div>
+          <div style="font-size:13px;font-weight:700;color:${color}">${relText(String(s.ca_an1||'—'))}</div>
+        </div>
+        <div style="text-align:center;padding:6px;background:rgba(255,255,255,0.04);border-radius:6px">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,0.3);margin-bottom:2px">CA An 3</div>
+          <div style="font-size:13px;font-weight:700;color:${color}">${relText(String(s.ca_an3||'—'))}</div>
+        </div>
+      </div>
+      ${s.point_mort_mois ? `<div style="margin-top:8px;font-size:11px;color:rgba(255,255,255,0.45);text-align:center">Break-even : ${relText(String(s.point_mort_mois))}</div>` : ''}
+    </div>`;
+  }).join('');
+
+  return `<div style="margin-top:20px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.06)">
+    <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:12px">Scénarios financiers</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">${cards}</div>
+  </div>`;
+}
+
+function renderTresorerieMensuelle(tm) {
+  if (!tm?.length) return '';
+  const rows = tm.map(m => {
+    const hasAlert = m.alerte && m.alerte !== 'null';
+    return `<tr style="${hasAlert ? 'background:rgba(239,68,68,0.08)' : ''}">
+      <td style="padding:7px 10px;font-size:12px;color:rgba(255,255,255,0.7);border-bottom:1px solid rgba(255,255,255,0.04);white-space:nowrap">${esc(m.mois||'')}</td>
+      <td style="padding:7px 10px;font-size:12px;color:#34d399;font-family:'DM Mono',monospace;border-bottom:1px solid rgba(255,255,255,0.04);text-align:right">${relText(String(m.encaissements||'—'))}</td>
+      <td style="padding:7px 10px;font-size:12px;color:#ef4444;font-family:'DM Mono',monospace;border-bottom:1px solid rgba(255,255,255,0.04);text-align:right">${relText(String(m.decaissements||'—'))}</td>
+      <td style="padding:7px 10px;font-size:12px;font-weight:600;font-family:'DM Mono',monospace;border-bottom:1px solid rgba(255,255,255,0.04);text-align:right">${relText(String(m.solde_mois||'—'))}</td>
+      <td style="padding:7px 10px;font-size:12px;font-weight:700;color:var(--acid);font-family:'DM Mono',monospace;border-bottom:1px solid rgba(255,255,255,0.04);text-align:right">${relText(String(m.solde_cumule||'—'))}</td>
+      ${hasAlert ? `<td style="padding:7px 10px;font-size:11px;color:#fbbf24;border-bottom:1px solid rgba(255,255,255,0.04)">⚠ ${esc(m.alerte)}</td>` : '<td></td>'}
+    </tr>`;
+  }).join('');
+
+  return `<div style="margin-top:20px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.06);overflow-x:auto">
+    <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:10px">Trésorerie mensuelle détaillée</div>
+    <table style="width:100%;border-collapse:collapse;min-width:520px">
+      <thead>
+        <tr style="background:rgba(255,255,255,0.04)">
+          <th style="padding:8px 10px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.3);text-align:left">Mois</th>
+          <th style="padding:8px 10px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.3);text-align:right">Encaissements</th>
+          <th style="padding:8px 10px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.3);text-align:right">Décaissements</th>
+          <th style="padding:8px 10px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.3);text-align:right">Solde mois</th>
+          <th style="padding:8px 10px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--acid);text-align:right">Cumulé</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`;
+}
+
 // ── Construit tout le HTML des 20 sections dans l'ordre ──────────────
 function buildAllSections(plan) {
   const crescendo7 = `
@@ -699,6 +871,12 @@ function buildAllSections(plan) {
 
   // ── Meta top ──
   h += `<div style="padding-top:28px">${renderCompletenessCounter(plan)}${renderReliabilityScoreCard(plan)}</div>`;
+
+  // ── Score Bancabilité v2.0 ──
+  if (plan.scores?.score_bancabilite) h += renderScoreBancabilite(plan.scores.score_bancabilite);
+
+  // ── Plan de Financement v2.0 ──
+  if (plan.plan_financement) h += planBlock('✦ Plan de Financement', renderPlanFinancement(plan.plan_financement));
 
   // ── 01 Résumé Exécutif ──
   h += planBlock('01 — Résumé Exécutif',
@@ -792,13 +970,15 @@ function buildAllSections(plan) {
           <div class="stat-mini-label">${esc(f.label)}</div>
           <div class="stat-mini-val" style="font-size:18px">${relText(f.valeur||'')}</div>
         </div>`).join('')}
-    </div>`,
+    </div>
+    ${plan.scenarios ? renderScenariosBlock(plan.scenarios) : ''}`,
     'Mes projections financières sont-elles réalistes ?');
 
   // ── 13 Plan de Trésorerie ──
   if (plan.tresorerie_detail) h += planBlock('13 — Plan de Trésorerie', `
     <div class="plan-block-content">${relText(plan.tresorerie_detail)}</div>
-    ${plan.tresorerie_soldes?.length ? `<div style="height:120px;margin-top:20px"><canvas id="tresoChart"></canvas></div>` : ''}`,
+    ${plan.tresorerie_soldes?.length ? `<div style="height:120px;margin-top:20px"><canvas id="tresoChart"></canvas></div>` : ''}
+    ${plan.tresorerie_mensuelle?.length ? renderTresorerieMensuelle(plan.tresorerie_mensuelle) : ''}`,
     'Comment optimiser ma trésorerie les 6 premiers mois ?');
 
   // ── 14 Plan d'Investissement ──
@@ -923,7 +1103,7 @@ function fillPlan(plan) {
     else { badge.style.background='rgba(255,255,255,0.05)'; badge.style.borderColor='rgba(255,255,255,0.1)'; badge.style.color='#7a7f9a'; }
   }
 
-  const score = plan.score_viabilite || 72;
+  const score = plan.score_viabilite || plan.scores?.score_viabilite?.note || 72;
   document.getElementById('dScore').textContent = score + '/100';
   setTimeout(() => {
     const bar = document.getElementById('dScoreBar');

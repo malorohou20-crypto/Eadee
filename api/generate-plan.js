@@ -1,12 +1,11 @@
 export const config = { runtime: 'nodejs' };
 
 // =====================================================================
-// EADEE — Pipeline génération business plan (3 étapes)
+// EADEE — Pipeline génération business plan v2.0
 // Étape 1 : Données INSEE (APIs gratuites)
 // Étape 2 : Recherche web via Claude web_search (données marché vérifiées)
-// Étape 3 : Génération plan complet avec données consolidées
+// Étape 3 : Génération plan complet — Prompt Maître v2.0 (orientation bancaire)
 // Runtime : Node.js (pas Edge — nécessite SDK + jsonrepair)
-// v2 — 14000 tokens, 7 jalons crescendo, marqueurs fiabilité, 20 sections forcées
 // =====================================================================
 
 import { jsonrepair } from 'jsonrepair';
@@ -16,132 +15,91 @@ import { getKnowledgeContext } from './lib/knowledge.js';
 const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
 const MODEL = 'claude-sonnet-4-6';
 
-// ── SYSTEM PROMPT ─────────────────────────────────────────────────────
+// ── SYSTEM PROMPT v2.0 ────────────────────────────────────────────────
 
 function buildSystemPrompt(verifiedData, knowledgeBase) {
-  return `Tu es un expert business plan senior français qui produit des dossiers conformes aux attentes des banques, BPI, et CCI.
+  return `Tu es EADEE, un expert en création d'entreprise et en financement bancaire français.
+Tu génères des business plans professionnels, complets et adaptés à chaque projet,
+optimisés pour convaincre les banques françaises et BPI France.
 
-MARQUEURS DE FIABILITÉ — OBLIGATOIRES POUR CHAQUE CHIFFRE :
-Pour tout chiffre numérique important, utilise ce format inline dans le texte :
-- {{V:VALEUR|source exacte}} → donnée VÉRIFIÉE (INSEE, BPI, Xerfi, étude sectorielle citée)
-- {{E:VALEUR|méthode de calcul}} → ESTIMATION (calcul sur hypothèses raisonnables)
-- {{H:VALEUR|hypothèse utilisée}} → HYPOTHÈSE IA (à valider avant dossier banque)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+RÈGLES FONDAMENTALES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Exemples corrects :
-  "Le marché pèse {{V:2,4 Mds€|INSEE Enquête annuelle 2023}} en France"
-  "Marge brute estimée à {{E:68%|prix moyen 45€ − coût variable 14,4€}}"
-  "Score de viabilité : {{H:84/100|analyse IA multi-critères}}"
+1. ADAPTABILITÉ INTELLIGENTE
+   Ne génère une section que si elle est pertinente pour CE projet spécifique.
+   Un freelance solo n'a pas besoin d'un plan RH détaillé. Une app SaaS n'a pas de bail commercial.
 
-OBJECTIF qualité : ≥ 40 % de chiffres en {{V:...}}, ≤ 30 % en {{H:...}}.
+2. MARQUEURS DE FIABILITÉ OBLIGATOIRES SUR TOUS LES CHIFFRES
+   {{V:valeur|source}}    → chiffre vérifié avec source réelle (INSEE, Statista, rapport sectoriel...)
+   {{E:valeur|calcul}}    → estimation calculée (ex: E:2400€|200€ x 12 mois)
+   {{H:valeur|hypothèse}} → hypothèse à valider par l'entrepreneur (ex: H:15%|taux conversion estimé)
+   JAMAIS de chiffre sans marqueur. OBJECTIF : ≥ 40% en {{V:}}, ≤ 30% en {{H:}}.
 
-RÈGLES STRICTES SUR LES CHIFFRES :
-1. Chaque chiffre marché DOIT être sourcé.
-2. Ne JAMAIS inventer un chiffre exact sans source. Préfère une fourchette.
-3. Les projections financières listent les hypothèses en début de section.
+3. ORIENTATION BANCAIRE
+   Chaque section répond implicitement à la question : "Est-ce que cet entrepreneur va rembourser son prêt ?"
+   Structure tes arguments autour du risque, de la crédibilité et de la capacité de remboursement.
 
-═══════════════════════════════════════════════════════════════
+4. FORMAT DE SORTIE
+   Réponds UNIQUEMENT en JSON valide, sans markdown, sans preamble, sans commentaires.
+   Si une section conditionnelle ne s'applique pas, retourne null pour ce champ.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 RÈGLE DES 3 NIVEAUX — POSTES D'INVESTISSEMENT ET CHARGES
-Tu DOIS appliquer cette logique à chaque plan pour les sections
-"investissements", "seuil_rentabilite" et "finances_detail".
-═══════════════════════════════════════════════════════════════
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-NIVEAU 1 — POSTES UNIVERSELS (toujours inclus, peu importe le projet) :
-Ces postes apparaissent dans TOUS les plans, adaptés au contexte :
-  • Matériel de travail (ordinateur, périphériques…)
-  • Outils et logiciels métier (abonnements SaaS, licences…)
-  • Marketing & communication (site web, réseaux sociaux, visuels…)
-  • Assurance professionnelle (RC Pro…)
-  • Comptabilité / Juridique (expert-comptable, création société…)
-  • Téléphone & internet professionnel
-  • Frais divers & imprévus (buffer 5-10 %)
+NIVEAU 1 — POSTES UNIVERSELS (toujours inclus) :
+  • Matériel de travail, outils/logiciels, marketing & communication,
+    assurance professionnelle, comptabilité/juridique, téléphone & internet, frais divers
 
 NIVEAU 2 — POSTES DÉDUITS AUTOMATIQUEMENT DU SECTEUR :
-Identifie le type de projet et ajoute LES postes typiques de ce secteur
-SANS que l'utilisateur ait besoin de les mentionner explicitement.
-Mapping secteur → postes à ajouter automatiquement :
-  • Application mobile / SaaS / Tech
-      → hébergement serveur & cloud, nom de domaine + SSL,
-        frais de développement (si pas fait en interne), frais App Store / Google Play
-  • Restaurant / Food / Traiteur
-      → matières premières / approvisionnement, équipement cuisine,
-        licences alimentaires & HACCP, emballages/ustensiles
-  • Boutique physique ou e-commerce
-      → stock initial, emballages & conditionnement, logistique & livraison,
-        plateforme e-commerce (Shopify, WooCommerce…)
-  • Artisanat / Fabrication
-      → matières premières, outils et équipements spécifiques au métier,
-        atelier ou espace de production (si mentionné)
-  • Conseil / Coaching / Freelance
-      → formation & certifications professionnelles,
-        outil CRM / gestion client, plateforme de facturation
-  • Santé / Bien-être / Beauté
-      → certifications et diplômes requis, matériel spécifique,
-        conformité RGPD & données santé
-  • Immobilier / Agence
-      → carte professionnelle T, logiciel de gestion, caution garantie
+  • Application mobile / SaaS → hébergement serveur, nom de domaine, App Store fees
+  • Restaurant / Food → matières premières, équipement cuisine, licences HACCP
+  • Boutique / e-commerce → stock initial, emballages, logistique, plateforme e-commerce
+  • Artisanat → matières premières, outils spécifiques
+  • Conseil / Freelance → formation, CRM, facturation
+  • Santé / Bien-être → certifications, matériel spécifique, conformité RGPD
+  • Immobilier / Agence → carte professionnelle T, logiciel gestion
 
-NIVEAU 3 — POSTES INCLUS UNIQUEMENT SI L'UTILISATEUR LES MENTIONNE :
-N'AJOUTE CES POSTES QUE si l'utilisateur en parle EXPLICITEMENT
-dans sa description de projet. Ne jamais les inventer ou supposer.
-  • Local commercial ou bureau
-      → loyer mensuel, charges locatives, dépôt de garantie, travaux d'aménagement
-  • Véhicule professionnel
-      → achat ou leasing, carburant, assurance auto professionnelle
-  • Employés ou associés salariés
-      → salaires bruts, charges sociales patronales (~42-45 % du brut)
-  • Livraison / flotte
-      → véhicules de livraison, partenaires logistiques (Chronopost, Stuart…)
-  • Tout équipement très spécifique non standard mentionné par l'utilisateur
+NIVEAU 3 — UNIQUEMENT SI L'UTILISATEUR LES MENTIONNE EXPLICITEMENT :
+  • Local commercial / bureau → loyer, charges, dépôt de garantie
+  • Véhicule → achat/leasing, carburant, assurance auto
+  • Employés → salaires bruts, charges sociales (~42-45%)
+  ✅ Standard secteur → inclus automatiquement (N1+N2)
+  ❌ Engagement physique/humain non mentionné → JAMAIS inventé
 
-RÈGLE D'OR :
-  ✅ Standard pour le secteur → inclus automatiquement (Niveau 1 + 2)
-  ✅ Mentionné explicitement par l'utilisateur → toujours inclus (Niveau 3)
-  ❌ Engagement physique ou humain majeur NON mentionné → JAMAIS inventé
-  ❌ Poste spéculatif hors secteur → JAMAIS inventé
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+RÈGLES DE GÉNÉRATION INTELLIGENTE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-EXEMPLES D'APPLICATION :
-  • "Je crée une appli mobile" (sans mention de bureau ni d'employés)
-      → Niveau 1 + hébergement/domaine/App Store (Niveau 2)
-      → PAS de loyer, PAS de salariés
-  • "Je veux ouvrir une boulangerie artisanale"
-      → Niveau 1 + matières premières/équipement cuisine/licences (Niveau 2)
-      → PAS de véhicule (sauf si mentionné), PAS d'employés (sauf si mentionné)
-  • "Je crée une appli, j'ai un bureau et deux développeurs"
-      → Niveau 1 + Niveau 2 tech + loyer bureau + salaires 2 devs (Niveau 3 mentionné)
-═══════════════════════════════════════════════════════════════
+RÈGLE 1 : Secteur réglementé [restauration, santé, BTP, finance, sécurité, transport] →
+  alerte dans score_bancabilite, détail autorisations requises dans aspects_juridiques
 
-DONNÉES RÉELLES DISPONIBLES (issues INSEE + recherche web) :
+RÈGLE 2 : Porteur demandeur d'emploi →
+  prioriser ACRE + ARCE, mentionner maintien ARE
+
+RÈGLE 3 : Apport < 20% de l'investissement →
+  alerte dans score_bancabilite, conseiller co-financement
+
+RÈGLE 4 : Projet solo sans employés →
+  simplifier aspects_organisationnels, noter risque solo (maladie, absence)
+
+RÈGLE 5 : Projet sans local →
+  adapter domiciliation (domicile/coworking), pas de bail dans checklist
+
+RÈGLE 6 : E-commerce / Digital →
+  KPIs adaptés (CAC, LTV, churn, MRR), acquisition digitale (SEA, SEO, social)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DONNÉES RÉELLES DISPONIBLES (INSEE + recherche web)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ${JSON.stringify(verifiedData, null, 2)}
 
-KNOWLEDGE BASE INTERNE (statuts, banques, aides françaises) :
+KNOWLEDGE BASE (statuts, banques, aides françaises) :
 ${knowledgeBase}
 
-STRUCTURE OBLIGATOIRE — 20 SECTIONS, AUCUNE NE PEUT ÊTRE OMISE :
-01. resume_executif
-02. porteur_projet
-03. presentation_projet
-04. etude_marche (marche_taille, marche_croissance, marche_analyse…)
-05. analyse_concurrentielle (concurrents)
-06. proposition_valeur
-07. modele_economique (offres)
-08. strategie_commerciale
-09. plan_acquisition (acquisition)
-10. aspects_juridiques
-11. aspects_organisationnels
-12. compte_resultat_3ans (rev_m1 → rev_m36, 7 jalons, rev_mensuel[12])
-13. tresorerie_detail
-14. plan_investissement (investissements)
-15. bilan_previsionnel
-16. seuil_rentabilite
-17. risques
-18. plan_action_90jours (actions)
-19. aides_subventions
-20. annexes_checklist
-
-RÈGLE ANTI-COUPURE : Avant de terminer, vérifie mentalement que les 20 sections JSON sont présentes. Si une manque, ajoute-la immédiatement même sous forme minimale.
-
 LANGUE : Français, tutoiement, ton professionnel mais accessible.
-SORTIE : JSON strictement valide, une clé par section. Pas de markdown dans les clés.`;
+SORTIE : JSON strictement valide, une clé par section.`;
 }
 
 // ── ÉTAPE 2 : WEB SEARCH ─────────────────────────────────────────────
@@ -245,81 +203,148 @@ Si une donnée n'est pas trouvable, mets value: null et fiabilite: "HYPOTHESE".`
   }
 }
 
-// ── ÉTAPE 3 : GÉNÉRATION DU PLAN ─────────────────────────────────────
+// ── ÉTAPE 3 : GÉNÉRATION DU PLAN v2.0 ────────────────────────────────
 
 function buildPlanPrompt(params, verifiedData) {
   const { idea, sector, city, budget, profile, time } = params;
-  return `Génère un business plan EXCEPTIONNEL, ultra-complet et 100% actionnable pour cet entrepreneur français.
 
-PROJET :
-- Idée : ${idea}
-- Secteur : ${sector}
-- Ville / zone : ${city || 'France'}
-- Budget disponible : ${budget}
-- Profil porteur : ${profile}
-- Disponibilité : ${time}
-- Date : France, ${new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
+  // Déduire la situation du porteur depuis le champ "profile"
+  const situationLabel = {
+    'salarie':          'salarié en activité',
+    'chomeur':          'demandeur d\'emploi',
+    'etudiant':         'étudiant',
+    'entrepreneur':     'entrepreneur / indépendant',
+    'reconversion':     'en reconversion professionnelle',
+  }[profile] || (profile || 'non renseigné');
 
-DONNÉES MARCHÉ VÉRIFIÉES :
+  // Déduire la disponibilité
+  const stadeLabel = {
+    'temps-plein':      'lancement — disponible à temps plein',
+    'temps-partiel':    'idée / validation — mi-temps',
+    'weekend':          'idée — weekends uniquement',
+  }[time] || (time || 'à préciser');
+
+  return `Génère un business plan EXCEPTIONNEL, ultra-complet et 100% orienté financement bancaire.
+
+━━ PROJET ━━
+Description        : ${idea}
+Secteur            : ${sector}
+Zone géographique  : ${city || 'France'}
+Budget disponible  : ${budget}
+Profil porteur     : ${situationLabel}
+Disponibilité      : ${stadeLabel}
+Date               : France, ${new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
+
+━━ DONNÉES MARCHÉ VÉRIFIÉES ━━
 ${JSON.stringify(verifiedData, null, 2)}
 
-INSTRUCTION CRITIQUE — TOUTES LES 20 SECTIONS SONT OBLIGATOIRES.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STRUCTURE JSON COMPLÈTE — TOUTES LES CLÉS SONT OBLIGATOIRES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 Génère ce JSON complet (sans markdown, sans backtick) :
 
 {
   "nom_business": "Nom court, percutant, mémorable",
   "tagline": "Slogan accrocheur en 6-8 mots",
-  "score_viabilite": 82,
   "pitch_30s": "Pitch de 30 secondes : problème → solution → marché → modèle → appel à action. 4-5 phrases.",
+
+  "scores": {
+    "score_viabilite": {
+      "note": 82,
+      "interpretation": "string — ce que ce score signifie concrètement",
+      "points_forts": ["string x3 — atouts majeurs du projet"],
+      "points_vigilance": ["string x3 — points à renforcer avant dossier banque"]
+    },
+    "score_bancabilite": {
+      "note": 74,
+      "interpretation": "string — ce qu'un banquier penserait de ce dossier",
+      "detail": {
+        "apport_suffisant":       { "points": 18, "commentaire": "string — /25" },
+        "point_mort_rapide":      { "points": 15, "commentaire": "string — /20" },
+        "tresorerie_positive_m6": { "points": 15, "commentaire": "string — /20" },
+        "garanties_disponibles":  { "points": 10, "commentaire": "string — /15" },
+        "secteur_risque_faible":  { "points":  8, "commentaire": "string — /10" },
+        "experience_porteur":     { "points":  8, "commentaire": "string — /10" }
+      },
+      "message_banquier": "string — ce que le banquier dira + ce qu'il faudra défendre en RDV"
+    }
+  },
+
+  "score_viabilite": 82,
 
   "resume_executif": "5-6 phrases avec marqueurs {{V:}}/{{E:}}/{{H:}} sur les chiffres clés.",
 
-  "porteur_projet": "Template de présentation : Nom/prénom (à compléter), formation, expérience pertinente, compétences clés pour ce projet, motivations personnelles. 150 mots minimum.",
+  "resume_vision_banquier": {
+    "montant_demande": "{{E:montant€|à estimer selon investissement}}",
+    "duree_souhaitee": "string — X ans recommandé",
+    "mensualite_estimee": "{{E:montant€/mois|amortissement linéaire}}",
+    "capacite_remboursement": "string — analyse capacité à rembourser",
+    "garanties_proposees": ["string — liste des garanties disponibles"],
+    "argument_principal": "string — l'argument #1 pour convaincre la banque"
+  },
 
-  "presentation_projet": "Origine de l'idée, problème identifié, solution apportée, vision à 3 ans, mission de l'entreprise. 150 mots minimum.",
+  "porteur_projet": "Présentation narrative : parcours, compétences clés pour ce projet, motivations. 3-4 phrases (à personnaliser avec le prénom réel).",
+
+  "porteur_profil_financier": {
+    "apport_personnel": "{{V:montant€|déclaré par porteur}}",
+    "ratio_apport_projet": "{{E:XX%|apport/investissement total}}",
+    "appreciation_ratio": "string — Excellent (>30%) | Correct (20-30%) | Insuffisant (<20%) + conseil",
+    "documents_a_fournir": [
+      "Pièce d'identité valide",
+      "CV détaillé",
+      "Avis d'imposition N-1 et N-2",
+      "Relevés de compte personnel 3 derniers mois",
+      "Justificatifs d'apport personnel"
+    ]
+  },
+
+  "presentation_projet": "Origine de l'idée, problème identifié, solution apportée, vision à 3 ans. 3-4 phrases.",
 
   "persona": {
     "nom": "Prénom fictif représentatif",
     "age": "30-45 ans",
-    "situation": "Description précise",
+    "situation": "Profession, revenus, contexte précis",
     "douleurs": "3 problèmes principaux",
-    "motivations": "Ce qui le pousse à chercher",
-    "ou_le_trouver": "Canaux de présence"
+    "motivations": "Ce qui le pousse à chercher cette solution",
+    "ou_le_trouver": "Canaux de présence (réseau, plateformes, lieux)"
   },
 
-  "marche_taille": "{{V:X Mds€|source INSEE ou étude}} ou {{E:X Mds€|calcul}}",
+  "marche_taille": "{{V:X Mds€|source INSEE ou étude}} ou {{E:X M€|calcul}}",
   "marche_croissance": "{{V:+X%/an|source}} ou {{E:+X%/an|calcul}}",
   "marche_part_cible": "{{H:0,0X%|hypothèse conservatrice an 1}}",
   "marche_clients_potentiels": "{{E:XX 000|population cible × taux pénétration}}",
   "marche_analyse": "5-6 phrases avec sources et marqueurs fiabilité sur tous les chiffres.",
+  "marche_tendances": ["string x3 — tendances 2025-2026 qui FAVORISENT ce projet"],
 
-  "proposition_valeur": "USP claire et différenciante : pourquoi un client te choisit toi. 2-3 phrases percutantes.",
+  "proposition_valeur": "USP claire et différenciante : pourquoi un client te choisit toi plutôt qu'un concurrent. 2-3 phrases percutantes.",
+  "proposition_valeur_benefices": ["string x3 — bénéfices concrets et mesurables pour le client"],
 
   "concurrence_intro": "3 phrases : état du marché concurrentiel, opportunité identifiée, positionnement.",
   "concurrents": [
-    {"nom": "Concurrent réel 1", "description": "Ce qu'ils font + prix réels + points faibles exploitables", "menace": "haute", "prix_moyen": "{{E:X€|tarification observée}}", "part_marche": "{{H:X%|estimation}}"},
-    {"nom": "Concurrent réel 2", "description": "Détails + prix + failles", "menace": "moyenne", "prix_moyen": "{{E:X€|tarification observée}}", "part_marche": "{{H:X%|estimation}}"},
-    {"nom": "Concurrent réel 3", "description": "Détails + différences", "menace": "faible", "prix_moyen": "{{E:X€|tarification observée}}", "part_marche": "{{H:X%|estimation}}"},
-    {"nom": "Concurrent réel 4", "description": "Détails + opportunité", "menace": "moyenne", "prix_moyen": "{{E:X€|tarification observée}}", "part_marche": "{{H:X%|estimation}}"}
+    {"nom": "Concurrent réel 1", "description": "Ce qu'ils font + prix réels + points faibles exploitables", "menace": "haute",   "prix_moyen": "{{E:X€|tarification observée}}", "part_marche": "{{H:X%|estimation}}", "avantage_differentiel": "En quoi on est meilleur sur ce point précis"},
+    {"nom": "Concurrent réel 2", "description": "Détails + prix + failles",                                  "menace": "moyenne", "prix_moyen": "{{E:X€|tarification observée}}", "part_marche": "{{H:X%|estimation}}", "avantage_differentiel": "string"},
+    {"nom": "Concurrent réel 3", "description": "Détails + différences",                                     "menace": "faible",  "prix_moyen": "{{E:X€|tarification observée}}", "part_marche": "{{H:X%|estimation}}", "avantage_differentiel": "string"},
+    {"nom": "Concurrent réel 4", "description": "Détails + opportunité",                                      "menace": "moyenne", "prix_moyen": "{{E:X€|tarification observée}}", "part_marche": "{{H:X%|estimation}}", "avantage_differentiel": "string"}
   ],
 
   "modele_economique": "4-5 phrases : flux de revenus, pricing justifié, récurrence, upsell, LTV estimée. Marqueurs fiabilité obligatoires.",
   "offres": [
     {"nom": "Offre 1", "description": "Contenu précis, à qui, ce qu'elle résout", "prix": "{{H:X€|positionnement marché}}"},
-    {"nom": "Offre 2", "description": "Contenu avec inclus/exclus", "prix": "{{H:X€/mois|benchmark secteur}}"},
-    {"nom": "Offre 3", "description": "Offre premium tout inclus", "prix": "{{H:X€|premium justifié}}"}
+    {"nom": "Offre 2", "description": "Contenu avec inclus/exclus",               "prix": "{{H:X€/mois|benchmark secteur}}"},
+    {"nom": "Offre 3", "description": "Offre premium tout inclus",                "prix": "{{H:X€|premium justifié}}"}
   ],
 
-  "strategie_commerciale": "Positionnement marketing, canaux de distribution, messages clés, tunnel de vente, promesse de marque. 150 mots minimum.",
+  "strategie_commerciale": "Positionnement marketing, canaux de distribution, messages clés, tunnel de vente, promesse de marque. 3-4 phrases.",
 
-  "aspects_juridiques": "Statut recommandé pour ce projet (SASU/EURL/micro…) avec justification chiffrée : CA projeté, fiscalité, cotisations. Includes obligations sectorielles spécifiques.",
+  "aspects_juridiques": "Statut recommandé (SASU/EURL/micro) avec justification chiffrée : CA projeté, fiscalité, cotisations. Obligations sectorielles. 3-4 phrases.",
 
-  "aspects_organisationnels": "Équipe initiale, locaux nécessaires (achat/location/domiciliation), sous-traitance, outils de gestion, organisation quotidienne. 100 mots minimum.",
+  "aspects_organisationnels": "Équipe initiale, locaux (achat/location/domiciliation/coworking), sous-traitance, outils de gestion, organisation quotidienne. 2-3 phrases.",
 
   "acquisition": [
-    {"canal": "Canal principal", "description": "Stratégie détaillée : volume, message, taux conversion, budget, outils", "cac": "{{E:XX€|estimation CAC par canal}}"},
-    {"canal": "Canal secondaire", "description": "Actions précises, fréquence, KPI, coût", "cac": "{{E:XX€|estimation CAC}}"},
-    {"canal": "Canal tertiaire", "description": "Partenariats ou SEO : qui contacter, comment, modèle", "cac": "{{E:XX€|estimation CAC}}"}
+    {"canal": "Canal principal",   "description": "Stratégie détaillée : volume, message, taux conversion, budget, outils", "cac": "{{E:XX€|estimation CAC}}"},
+    {"canal": "Canal secondaire",  "description": "Actions précises, fréquence, KPI, coût",                                 "cac": "{{E:XX€|estimation CAC}}"},
+    {"canal": "Canal tertiaire",   "description": "Partenariats ou SEO : qui contacter, comment, modèle",                   "cac": "{{E:XX€|estimation CAC}}"}
   ],
 
   "rev_m1":  "{{H:X €|hypothèse démarrage prudente}}",
@@ -330,57 +355,107 @@ Génère ce JSON complet (sans markdown, sans backtick) :
   "rev_m24": "{{E:X €|projection fin an 2}}",
   "rev_m36": "{{E:X €|projection fin an 3}}",
   "rev_mensuel": [200, 600, 1200, 1800, 2500, 3200, 3800, 4400, 5000, 5700, 6500, 7500],
+
+  "scenarios": {
+    "pessimiste": {
+      "hypothese": "string — ex: -30% sur le CA prévu, acquisition plus lente",
+      "ca_an1": "{{H:montant€|...}}",
+      "ca_an3": "{{H:montant€|...}}",
+      "point_mort_mois": "{{E:X mois|...}}",
+      "viabilite": "string — viable | fragile | risqué"
+    },
+    "realiste": {
+      "hypothese": "string — projections de base retenues",
+      "ca_an1": "{{H:montant€|...}}",
+      "ca_an3": "{{H:montant€|...}}",
+      "point_mort_mois": "{{E:X mois|...}}",
+      "viabilite": "string"
+    },
+    "optimiste": {
+      "hypothese": "string — ex: +30%, bouche-à-oreille fort, contrat clé signé",
+      "ca_an1": "{{H:montant€|...}}",
+      "ca_an3": "{{H:montant€|...}}",
+      "point_mort_mois": "{{E:X mois|...}}",
+      "viabilite": "string"
+    }
+  },
+
   "finances_detail": [
-    {"label": "CA annuel estimé (an 1)", "valeur": "{{E:XX XXX€|somme projections mensuelles}}"},
-    {"label": "Charges fixes mensuelles", "valeur": "{{E:X XXX€|postes Niv1+Niv2 + Niv3 si mentionnés}}"},
-    // RÈGLE : intègre UNIQUEMENT dans les charges les postes validés par les 3 niveaux.
-    // Ex : si pas de local mentionné → PAS de loyer dans les charges fixes.
-    // Ex : si pas d'employé mentionné → PAS de salaires dans les charges fixes.
-    {"label": "Charges variables (% CA)", "valeur": "{{H:XX%|estimation sectorielle}}"},
-    {"label": "Marge brute", "valeur": "{{E:XX%|prix vente - coût variable}}"},
-    {"label": "Point mort mensuel", "valeur": "{{E:X XXX€/mois|charges fixes ÷ taux marge}}"},
-    {"label": "Break-even atteint", "valeur": "{{H:Mois X|projection conservatrice}}"},
+    {"label": "CA annuel estimé (an 1)",    "valeur": "{{E:XX XXX€|somme projections mensuelles}}"},
+    {"label": "Charges fixes mensuelles",   "valeur": "{{E:X XXX€|postes N1+N2 + N3 si mentionnés}}"},
+    {"label": "Charges variables (% CA)",   "valeur": "{{H:XX%|estimation sectorielle}}"},
+    {"label": "Marge brute",                "valeur": "{{E:XX%|prix vente - coût variable}}"},
+    {"label": "Point mort mensuel",         "valeur": "{{E:X XXX€/mois|charges fixes ÷ taux marge}}"},
+    {"label": "Break-even atteint",         "valeur": "{{H:Mois X|projection conservatrice}}"},
     {"label": "ROI investissement initial", "valeur": "{{E:XXX% sur 12 mois|bénéfice net ÷ investissement}}"}
   ],
 
-  "tresorerie_detail": "Analyse de la trésorerie mois par mois sur 12 mois : entrées, sorties, soldes cumulés. Points de vigilance et conseils de gestion.",
+  "plan_financement": {
+    "besoins": {
+      "investissements_materiels":  "{{E:montant€|matériel + équipements}}",
+      "investissements_immateriels":"{{E:montant€|logiciels + formation + juridique}}",
+      "bfr_demarrage":              "{{E:montant€|2-3 mois de charges fixes}}",
+      "tresorerie_securite":        "{{E:montant€|2 mois de charges recommandés}}",
+      "total_besoins":              "{{E:montant€|somme}}"
+    },
+    "ressources": {
+      "apport_personnel":  "{{V:montant€|déclaré}}",
+      "pret_bancaire":     "{{E:montant€|à négocier}}",
+      "pret_bpi":          "{{E:montant€|si applicable}} | null",
+      "pret_honneur":      "{{E:montant€|si applicable}} | null",
+      "subventions":       "{{E:montant€|si applicable}} | null",
+      "total_ressources":  "{{E:montant€|somme}}"
+    },
+    "message_banquier": "string — ce que ce plan de financement inspire à un banquier + conseils"
+  },
+
+  "tresorerie_detail": "Analyse de la trésorerie mois par mois sur 12 mois : entrées, sorties, soldes cumulés. Points de vigilance et conseils.",
   "tresorerie_soldes": [500, 1200, 1800, 2400, 3100, 3900, 4800, 5500, 6300, 7200, 8100, 9000],
 
+  "tresorerie_mensuelle": [
+    {"mois": "Janvier",   "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null},
+    {"mois": "Février",   "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null},
+    {"mois": "Mars",      "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null},
+    {"mois": "Avril",     "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null},
+    {"mois": "Mai",       "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null},
+    {"mois": "Juin",      "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null},
+    {"mois": "Juillet",   "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null},
+    {"mois": "Août",      "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null},
+    {"mois": "Septembre", "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null},
+    {"mois": "Octobre",   "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null},
+    {"mois": "Novembre",  "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null},
+    {"mois": "Décembre",  "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null}
+  ],
+
   "investissements": [
-    // APPLIQUE ICI LA RÈGLE DES 3 NIVEAUX :
-    // → Niveau 1 (universels) : toujours présents (matériel, outils, marketing, assurance, compta, téléphone, divers)
-    // → Niveau 2 (déduits du secteur) : ajoute les postes typiques de CE secteur sans que l'utilisateur ait à les demander
-    // → Niveau 3 (engagement physique/humain) : UNIQUEMENT si l'utilisateur l'a mentionné explicitement
-    // → Ne JAMAIS inventer un loyer, des salariés ou un véhicule si non mentionné
-    {"label": "Poste Niveau 1 ou 2 précis", "montant": "{{H:XXX€|devis estimatif}}", "categorie": "materiel"},
-    {"label": "Poste Niveau 1 ou 2 précis", "montant": "{{H:XXX€|devis estimatif}}", "categorie": "communication"},
-    {"label": "Poste Niveau 1 ou 2 précis", "montant": "{{H:XXX€|devis estimatif}}", "categorie": "bfr"},
-    {"label": "Poste Niveau 2 secteur-spécifique", "montant": "{{H:XXX€|devis estimatif}}", "categorie": "autres"},
-    {"label": "Poste Niveau 3 si mentionné par l'utilisateur", "montant": "{{H:XXX€|devis estimatif}}", "categorie": "autres"},
-    {"label": "TOTAL investissement", "montant": "{{E:X XXX€|somme des postes}}", "total": true}
+    {"label": "Poste N1 universel précis",    "montant": "{{H:XXX€|devis estimatif}}", "categorie": "materiel"},
+    {"label": "Poste N2 secteur-spécifique",  "montant": "{{H:XXX€|devis estimatif}}", "categorie": "communication"},
+    {"label": "Poste N3 si mentionné",        "montant": "{{H:XXX€|devis estimatif}}", "categorie": "bfr"},
+    {"label": "TOTAL investissement",         "montant": "{{E:X XXX€|somme des postes}}", "total": true}
   ],
 
   "bilan_previsionnel": "Actif et passif simplifié à fin an 1, an 2, an 3. Capitaux propres, dettes, trésorerie finale. Vision patrimoniale de l'entreprise à 3 ans.",
 
   "seuil_rentabilite": {
     "charges_fixes_mensuelles": "{{E:X XXX€|loyer+salaires+abonnements+assurances}}",
-    "taux_marge_sur_cv": "{{E:XX%|1 - (coûts variables ÷ CA)}}",
-    "point_mort_ca": "{{E:X XXX€/mois|charges fixes ÷ taux marge}}",
-    "break_even_mois": "{{H:Mois X|estimation basée sur courbe CA}}",
-    "detail": "Explication du calcul : hypothèses retenues, marge de sécurité, distance au point mort à fin an 1."
+    "taux_marge_sur_cv":        "{{E:XX%|1 - (coûts variables ÷ CA)}}",
+    "point_mort_ca":            "{{E:X XXX€/mois|charges fixes ÷ taux marge}}",
+    "break_even_mois":          "{{H:Mois X|estimation basée sur courbe CA}}",
+    "detail":                   "Explication du calcul : hypothèses retenues, marge de sécurité, distance au point mort à fin an 1.",
+    "interpretation_bancaire":  "string — ce résultat rassure ou inquiète le banquier ?"
   },
 
   "risques": [
-    {"titre": "Risque business précis", "niveau": "élevé", "solution": "Plan d'action : indicateurs d'alerte + actions correctives chiffrées"},
-    {"titre": "Risque marché précis", "niveau": "moyen", "solution": "Comment détecter tôt et y répondre"},
-    {"titre": "Risque opérationnel", "niveau": "faible", "solution": "Mesures préventives concrètes"},
-    {"titre": "Risque financier", "niveau": "moyen", "solution": "Seuils d'alerte et plan B chiffré"},
-    {"titre": "Risque réglementaire", "niveau": "faible", "solution": "Veille réglementaire et actions de conformité"}
+    {"titre": "Risque business précis",   "niveau": "élevé",  "solution": "Plan d'action : indicateurs d'alerte + actions correctives chiffrées", "signal_alarme": "Comment détecter ce risque tôt", "solution_preventive": "Ce qu'on fait AVANT que ça arrive"},
+    {"titre": "Risque marché précis",     "niveau": "moyen",  "solution": "Comment détecter tôt et y répondre",                                   "signal_alarme": "string", "solution_preventive": "string"},
+    {"titre": "Risque opérationnel",      "niveau": "faible", "solution": "Mesures préventives concrètes",                                         "signal_alarme": "string", "solution_preventive": "string"},
+    {"titre": "Risque financier",         "niveau": "moyen",  "solution": "Seuils d'alerte et plan B chiffré",                                      "signal_alarme": "string", "solution_preventive": "string"},
+    {"titre": "Risque réglementaire",     "niveau": "faible", "solution": "Veille réglementaire et actions de conformité",                          "signal_alarme": "string", "solution_preventive": "string"}
   ],
 
   "actions": [
-    {"phase": "J1-7", "titre": "Action concrète", "detail": "Détail précis avec chiffres, outils, objectif mesurable"},
-    {"phase": "J8-14", "titre": "Action concrète", "detail": "Détail précis"},
+    {"phase": "J1-7",   "titre": "Action concrète", "detail": "Détail précis avec chiffres, outils, objectif mesurable"},
+    {"phase": "J8-14",  "titre": "Action concrète", "detail": "Détail précis"},
     {"phase": "J15-30", "titre": "Action concrète", "detail": "Détail précis avec KPI"},
     {"phase": "J31-45", "titre": "Action concrète", "detail": "Détail précis"},
     {"phase": "J46-60", "titre": "Action concrète", "detail": "Détail précis avec objectif CA"},
@@ -389,16 +464,16 @@ Génère ce JSON complet (sans markdown, sans backtick) :
   ],
 
   "aides_subventions": [
-    {"nom": "ACRE", "montant": "{{V:Exonération charges 1 an|URSSAF 2024}}", "conditions": "Demandeur d'emploi ou créateur < 26 ans", "lien": "urssaf.fr", "applicable": true},
-    {"nom": "ARCE (Pôle emploi)", "montant": "{{V:45% des ARE restantes|Pôle Emploi 2024}}", "conditions": "Inscrit à Pôle emploi avec ARE", "lien": "pole-emploi.fr", "applicable": true},
-    {"nom": "Prêt d'honneur réseau Initiative", "montant": "{{V:5 000€ à 50 000€|Initiative France 2024}}", "conditions": "Projet viable, porteur engagé", "lien": "initiative-france.fr", "applicable": true},
-    {"nom": "BPI — Prêt création", "montant": "{{V:10 000€ à 7 Mds€|BPI France 2024}}", "conditions": "Entreprise < 3 ans, projet innovant ou export", "lien": "bpifrance.fr", "applicable": false}
+    {"nom": "ACRE",                        "montant": "{{V:Exonération charges 1 an|URSSAF 2024}}",      "conditions": "Demandeur d'emploi ou créateur < 26 ans", "lien": "urssaf.fr",            "applicable": true,  "priorite": "haute"},
+    {"nom": "ARCE (Pôle emploi)",          "montant": "{{V:45% des ARE restantes|Pôle Emploi 2024}}",   "conditions": "Inscrit à Pôle emploi avec ARE",          "lien": "pole-emploi.fr",       "applicable": true,  "priorite": "haute"},
+    {"nom": "Prêt d'honneur Initiative",   "montant": "{{V:5 000€ à 50 000€|Initiative France 2024}}", "conditions": "Projet viable, porteur engagé",            "lien": "initiative-france.fr", "applicable": true,  "priorite": "moyenne"},
+    {"nom": "BPI — Prêt création",         "montant": "{{V:10 000€ à 7 Mds€|BPI France 2024}}",        "conditions": "Entreprise < 3 ans, projet innovant",      "lien": "bpifrance.fr",         "applicable": false, "priorite": "faible"}
   ],
 
   "annexes_checklist": [
     "CV du porteur de projet (1-2 pages, axé sur la légitimité pour ce projet)",
     "Pièce d'identité + justificatif de domicile",
-    "Devis des investissements principaux (matériel, travaux)",
+    "Devis des investissements principaux (2 devis/poste > 1000€)",
     "Preuves de marché : emails d'intention client, lettres d'intérêt",
     "Relevés bancaires des 3 derniers mois",
     "Justificatifs d'apport personnel",
@@ -409,37 +484,37 @@ Génère ce JSON complet (sans markdown, sans backtick) :
   ],
 
   "kpis": [
-    {"nom": "CA mensuel", "cible": "{{H:X XXX€ dès mois 3|objectif minimum viabilité}}", "frequence": "Mensuel"},
-    {"nom": "Taux de conversion prospects", "cible": "{{H:X%|benchmark sectoriel}}", "frequence": "Hebdomadaire"},
-    {"nom": "Coût d'acquisition client (CAC)", "cible": "{{E:XX€|budget marketing ÷ nb clients}}", "frequence": "Mensuel"},
-    {"nom": "Satisfaction client (NPS)", "cible": "{{H:> 50|objectif secteur top quartile}}", "frequence": "Trimestriel"}
+    {"nom": "CA mensuel",                    "cible": "{{H:X XXX€ dès mois 3|objectif minimum viabilité}}", "frequence": "Mensuel"},
+    {"nom": "Taux de conversion prospects",  "cible": "{{H:X%|benchmark sectoriel}}",                       "frequence": "Hebdomadaire"},
+    {"nom": "Coût d'acquisition client",     "cible": "{{E:XX€|budget marketing ÷ nb clients}}",            "frequence": "Mensuel"},
+    {"nom": "Satisfaction client (NPS)",     "cible": "{{H:> 50|objectif secteur top quartile}}",           "frequence": "Trimestriel"}
   ],
 
   "outils": [
     {"nom": "Outil réel 1", "usage": "Usage précis dans ce projet", "prix": "{{V:X€/mois|site officiel 2024}}"},
-    {"nom": "Outil réel 2", "usage": "Usage précis", "prix": "{{V:Gratuit|plan freemium}}"},
-    {"nom": "Outil réel 3", "usage": "Usage précis", "prix": "{{V:X€/mois|site officiel 2024}}"},
-    {"nom": "Outil réel 4", "usage": "Usage précis", "prix": "{{V:Gratuit|open source}}"},
-    {"nom": "Outil réel 5", "usage": "Usage précis", "prix": "{{V:X€/mois|site officiel 2024}}"},
-    {"nom": "Outil réel 6", "usage": "Usage précis", "prix": "{{V:X€/mois|site officiel 2024}}"}
+    {"nom": "Outil réel 2", "usage": "Usage précis",                "prix": "{{V:Gratuit|plan freemium}}"},
+    {"nom": "Outil réel 3", "usage": "Usage précis",                "prix": "{{V:X€/mois|site officiel 2024}}"},
+    {"nom": "Outil réel 4", "usage": "Usage précis",                "prix": "{{V:Gratuit|open source}}"},
+    {"nom": "Outil réel 5", "usage": "Usage précis",                "prix": "{{V:X€/mois|site officiel 2024}}"},
+    {"nom": "Outil réel 6", "usage": "Usage précis",                "prix": "{{V:X€/mois|site officiel 2024}}"}
   ],
 
   "demarches_admin": [
-    {"etape": "1. Choisir le statut juridique", "detail": "Pour ce projet : statut optimal avec justification fiscalité/CA", "delai": "Jour 1-3", "cout": "0-500€", "lien": "infogreffe.fr"},
-    {"etape": "2. Immatriculation", "detail": "Démarche sur guichet-entreprises.fr, documents, SIRET sous 3-5 jours", "delai": "Semaine 1", "cout": "0€ à 250€", "lien": "guichet-entreprises.fr"},
-    {"etape": "3. Ouverture compte pro", "detail": "Banques recommandées pour ce secteur avec comparatif", "delai": "Semaine 1-2", "cout": "0-30€/mois", "lien": "shine.fr"},
-    {"etape": "4. URSSAF", "detail": "Cotisations estimées pour ce projet, DSN si société", "delai": "Automatique", "cout": "22-45% du CA", "lien": "urssaf.fr"},
-    {"etape": "5. Assurance RC Pro", "detail": "Obligatoire ou recommandée pour ce secteur", "delai": "Avant premier client", "cout": "200-800€/an", "lien": "hiscox.fr"},
-    {"etape": "6. Obligations sectorielles", "detail": "Licences, certifications, autorisations spécifiques à ce secteur", "delai": "Variable", "cout": "Variable", "lien": "service-public.fr"}
+    {"etape": "1. Choisir le statut juridique", "detail": "Statut optimal avec justification fiscalité/CA", "delai": "Jour 1-3",      "cout": "0-500€",       "lien": "infogreffe.fr"},
+    {"etape": "2. Immatriculation",             "detail": "Démarche sur guichet-entreprises.fr, SIRET",    "delai": "Semaine 1",     "cout": "0€ à 250€",    "lien": "guichet-entreprises.fr"},
+    {"etape": "3. Ouverture compte pro",        "detail": "Banques recommandées pour ce secteur",          "delai": "Semaine 1-2",   "cout": "0-30€/mois",   "lien": "shine.fr"},
+    {"etape": "4. URSSAF",                      "detail": "Cotisations estimées, DSN si société",          "delai": "Automatique",   "cout": "22-45% du CA", "lien": "urssaf.fr"},
+    {"etape": "5. Assurance RC Pro",            "detail": "Obligatoire ou recommandée pour ce secteur",   "delai": "Avant 1er client","cout": "200-800€/an",  "lien": "hiscox.fr"},
+    {"etape": "6. Obligations sectorielles",    "detail": "Licences, certifications, autorisations",       "delai": "Variable",      "cout": "Variable",     "lien": "service-public.fr"}
   ],
 
   "email_fournisseur": {
     "sujet": "Objet adapté au secteur — demande de tarifs/partenariat",
-    "corps": "Email complet prêt à envoyer : présentation société, projet, volume estimé, demande tarifs/catalogue. 150-200 mots."
+    "corps": "Email complet prêt à envoyer : présentation société, projet, volume estimé, demande tarifs. 150-200 mots."
   },
   "email_prospection": {
     "sujet": "Objet accrocheur et personnalisé pour la cible",
-    "corps": "Email de prospection : accroche sur problème prospect, solution en 2 lignes, preuve sociale, appel à action clair (RDV 15 min). 120-150 mots."
+    "corps": "Email de prospection : accroche sur problème prospect, solution en 2 lignes, preuve sociale, appel à action (RDV 15 min). 120-150 mots."
   },
   "email_relance": {
     "sujet": "Objet de relance J+7",
@@ -447,7 +522,10 @@ Génère ce JSON complet (sans markdown, sans backtick) :
   }
 }
 
-VÉRIFICATION FINALE OBLIGATOIRE avant de terminer : Confirme mentalement que les 20 clés suivantes sont présentes dans ton JSON : resume_executif, porteur_projet, presentation_projet, marche_analyse, proposition_valeur, concurrents, modele_economique, strategie_commerciale, acquisition, aspects_juridiques, aspects_organisationnels, rev_m36, tresorerie_detail, investissements, bilan_previsionnel, seuil_rentabilite, risques, actions, aides_subventions, annexes_checklist. Si l'une manque, ajoute-la avant de terminer.`;
+VÉRIFICATION FINALE OBLIGATOIRE : Avant de terminer, confirme que ces clés sont présentes :
+resume_executif, scores, plan_financement, scenarios, tresorerie_mensuelle, porteur_profil_financier,
+resume_vision_banquier, concurrents, investissements, seuil_rentabilite, risques, actions, aides_subventions.
+Si l'une manque, ajoute-la immédiatement.`;
 }
 
 function extractJSON(text) {
@@ -504,14 +582,14 @@ export default async function handler(req, res) {
     const credits = parseInt(req.body.credits ?? '1', 10);
     const isDiscovery = credits === 0;
 
-    console.log(`[generate-plan] Début pipeline — ${idea.substring(0, 60)}... [mode: ${isDiscovery ? 'DÉCOUVERTE' : 'COMPLET'}]`);
+    console.log(`[generate-plan v2] Début pipeline — ${idea.substring(0, 60)}... [mode: ${isDiscovery ? 'DÉCOUVERTE' : 'COMPLET'}]`);
 
-    // ÉTAPE 1 — Données INSEE (parallèle avec étape 2)
+    // ÉTAPE 1 — Données INSEE + web search (parallèle)
     const inseePromise = fetchINSEEData(sector, city);
     const searchPromise = performWebSearch(idea, sector, city, {});
     const [inseeData, webData] = await Promise.all([inseePromise, searchPromise]);
 
-    console.log(`[generate-plan] Données récupérées — INSEE: ${!!inseeData?.city}, Web: ${!!webData} — ${Date.now() - startTime}ms`);
+    console.log(`[generate-plan v2] Données récupérées — INSEE: ${!!inseeData?.city}, Web: ${!!webData} — ${Date.now() - startTime}ms`);
 
     const verifiedData = {
       insee: inseeData,
@@ -520,12 +598,12 @@ export default async function handler(req, res) {
       generated_at: new Date().toISOString(),
     };
 
-    // ÉTAPE 3 — Génération du plan
+    // ÉTAPE 3 — Génération du plan v2.0
     const knowledgeBase = getKnowledgeContext();
     const systemPrompt = buildSystemPrompt(verifiedData, knowledgeBase);
 
     const discoveryNote = isDiscovery
-      ? '\n\nIMPORTANT MODE DÉCOUVERTE : Génère UNIQUEMENT les sections resume_executif, porteur_projet, presentation_projet, marche_analyse et concurrents. Les autres sections ne doivent pas apparaître.'
+      ? '\n\nIMPORTANT MODE DÉCOUVERTE : Génère UNIQUEMENT les sections resume_executif, scores (score_viabilite uniquement), porteur_projet, presentation_projet, marche_analyse et concurrents. Les autres sections ne doivent pas apparaître.'
       : '';
     const userPrompt = buildPlanPrompt({ idea, sector, city, budget, profile, time }, verifiedData) + discoveryNote;
 
@@ -538,7 +616,8 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: MODEL,
-        max_tokens: isDiscovery ? 3000 : 14000,
+        max_tokens: isDiscovery ? 3000 : 12000,
+        temperature: 0.3,
         system: systemPrompt,
         messages: [{ role: 'user', content: userPrompt }],
       }),
@@ -560,7 +639,12 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: { message: 'JSON invalide: ' + e.message } });
     }
 
-    // Compter les sections présentes pour le score de complétude
+    // Compatibilité : score_viabilite à la racine depuis scores
+    if (!plan.score_viabilite && plan.scores?.score_viabilite?.note) {
+      plan.score_viabilite = plan.scores.score_viabilite.note;
+    }
+
+    // Compter les sections présentes
     const REQUIRED_SECTIONS = [
       'resume_executif', 'porteur_projet', 'presentation_projet', 'marche_analyse',
       'proposition_valeur', 'concurrents', 'modele_economique', 'strategie_commerciale',
@@ -574,15 +658,15 @@ export default async function handler(req, res) {
     plan._meta = {
       verified_data: verifiedData,
       generation_ms: Date.now() - startTime,
-      pipeline_version: '3-step-v2',
+      pipeline_version: 'v2.0-bancaire',
     };
 
     if (isDiscovery) {
       plan._discovery = true;
-      plan._watermark = "Plan incomplet — Passe à Solo pour les 20 sections complètes";
+      plan._watermark = 'Plan incomplet — Passe à Solo pour les 20 sections complètes';
     }
 
-    console.log(`[generate-plan] Plan généré — complétude: ${presentSections.length}/20 — ${Date.now() - startTime}ms`);
+    console.log(`[generate-plan v2] Plan généré — complétude: ${presentSections.length}/20 — ${Date.now() - startTime}ms`);
 
     return res.status(200).json({
       ...planData,
@@ -590,7 +674,7 @@ export default async function handler(req, res) {
     });
 
   } catch (err) {
-    console.error('[generate-plan] Error:', err);
+    console.error('[generate-plan v2] Error:', err);
     return res.status(500).json({ error: { message: 'Erreur serveur: ' + err.message } });
   }
 }
