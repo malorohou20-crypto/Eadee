@@ -9,6 +9,12 @@
   --green: #34d399;
   --text: #ecedf2;
   --gold: #fbbf24;
+  /* Catégories plan */
+  --cat-strategy: #6b8fef;
+  --cat-market:   #a78bfa;
+  --cat-finance:  #34d399;
+  --cat-action:   #fbbf24;
+  --cat-legal:    #f87171;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }

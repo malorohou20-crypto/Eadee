@@ -969,8 +969,19 @@
                   </div>
                 </div>
 
-                <!-- SCROLLABLE BODY -->
-                <div id="planScrollBody" style="flex:1;overflow-y:auto;padding:0 0 60px;">
+                <!-- HERO KPIs -->
+                <div class="hero-kpis" id="planHeroKpis" style="display:none">
+                  <div class="kpi-cell finance"><div class="kpi-label">CA An 3</div><div class="kpi-value" id="kpiCaAn3" style="color:var(--cat-finance)">—</div><div class="kpi-sub" id="kpiCaAn3Sub"></div></div>
+                  <div class="kpi-cell action"><div class="kpi-label">Point mort</div><div class="kpi-value" id="kpiPointMort" style="color:var(--gold)">—</div><div class="kpi-sub" id="kpiPointMortSub"></div></div>
+                  <div class="kpi-cell strategy"><div class="kpi-label">Investissement total</div><div class="kpi-value" id="kpiInvest" style="color:var(--acid)">—</div><div class="kpi-sub" id="kpiInvestSub"></div></div>
+                  <div class="kpi-cell market"><div class="kpi-label">Part marché cible</div><div class="kpi-value" id="kpiMarket" style="color:var(--rust)">—</div><div class="kpi-sub" id="kpiMarketSub"></div></div>
+                </div>
+
+                <!-- PLAN LAYOUT -->
+                <div class="plan-layout" style="flex:1;min-height:0;">
+                  <nav class="plan-sidebar" id="planSidebar"></nav>
+                  <div class="plan-content">
+                    <div id="planScrollBody" style="padding:0 0 60px;">
 
                   <!-- AI ACT DISCLAIMER + LÉGENDE FIABILITÉ -->
                   <div class="ai-disclaimer">
@@ -1126,8 +1137,10 @@
                     <button class="res-btn" onclick="savePlan()">Sauvegarder</button>
                     <button class="res-btn primary" onclick="generateDossier()">Dossier Création</button>
                   </div>
-                </div>
-              </div>
+                    </div><!-- /planScrollBody -->
+                  </div><!-- /plan-content -->
+                </div><!-- /plan-layout -->
+              </div><!-- /dashResult -->
             </div>
           </div>
         </div>

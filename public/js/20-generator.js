@@ -581,12 +581,45 @@ function drawBarChart(canvasId, labels, values, label) {
 // FILL PLAN — Rendu complet 20 sections (fresh rebuild)
 // ═══════════════════════════════════════════════════════════════════
 
-// Helper: bloc section
+// Helper: bloc section avec header coloré par catégorie
 function planBlock(title, content, chatQ) {
+  const catMap = {
+    '01':'strategy','02':'strategy','03':'strategy',
+    '04':'market',  '05':'market',
+    '06':'strategy','07':'finance',
+    '08':'action',  '09':'action',
+    '10':'legal',   '11':'strategy',
+    '12':'finance', '13':'finance','14':'finance','15':'finance','16':'finance',
+    '17':'legal',
+    '18':'action',  '19':'action', '20':'strategy'
+  };
+  const catLabels = { strategy:'Stratégie', market:'Marché', finance:'Finance', action:'Action', legal:'Légal' };
+
+  const numMatch = title.match(/^(\d{2})/);
+  const num = numMatch ? numMatch[1] : null;
+  const cat = num ? (catMap[num] || 'strategy')
+    : /[Ff]inance|[Ff]inancement|[Tt]résor|[Bb]ilan|[Ii]nvest|[Rr]entab/.test(title) ? 'finance'
+    : /[Mm]arch|[Cc]oncu|[Pp]ersona/.test(title) ? 'market'
+    : /[Jj]urid|[Ll]égal|[Rr]isque/.test(title) ? 'legal'
+    : /[Aa]ction|[Aa]cquis|[Ee]mail|KPI|[Oo]util/.test(title) ? 'action'
+    : 'strategy';
+
+  const cleanTitle = title.replace(/^\d{2}\s*[—–-]\s*/, '').replace(/&amp;/g,'&');
+  const sectionId = num ? `section-${num}` : `section-${title.replace(/[^a-z0-9]/gi,'').toLowerCase().slice(0,14)}`;
+
   const btn = chatQ
     ? `<button class="section-coach-btn" onclick="openChatDrawer(chatState.activePlanId,${JSON.stringify(chatQ)})" title="Expert Eadee">💬</button>`
     : '';
-  return `<div class="plan-block"><div class="plan-block-title">${title}${btn}</div>${content}</div>`;
+
+  return `<div class="plan-block ${cat}-block" id="${sectionId}" data-cat="${cat}">
+  <div class="block-header">
+    <div class="block-cat-bar" style="background:var(--cat-${cat})"></div>
+    <span class="block-num">${num || '✦'}</span>
+    <span class="block-title">${cleanTitle}${btn}</span>
+    <span class="block-tag tag-${cat}">${catLabels[cat]}</span>
+  </div>
+  <div class="block-body">${content}</div>
+</div>`;
 }
 
 // Helper: card concurrent
@@ -1089,6 +1122,121 @@ function buildAllSections(plan) {
   return h;
 }
 
+// ── HERO KPIs ─────────────────────────────────────────────────────
+function fillHeroKpis(plan) {
+  // CA An 3 (rev_m36 × 12)
+  const ca3 = parseAmount(plan.rev_m36) || 0;
+  const caAn3 = ca3 * 12;
+  const kpiCa = document.getElementById('kpiCaAn3');
+  if (kpiCa) {
+    kpiCa.textContent = caAn3 >= 1e6 ? (caAn3/1e6).toFixed(1)+'M€'
+      : caAn3 >= 1000 ? Math.round(caAn3/1000)+'k€'
+      : caAn3 ? caAn3+'€' : '—';
+    document.getElementById('kpiCaAn3Sub').textContent = 'revenus mois 36 × 12';
+  }
+
+  // Investissement total
+  const investItems = (plan.investissements || []);
+  const totalItem = investItems.find(i => i.total);
+  let investTotal = totalItem ? parseAmount(totalItem.montant) : investItems.reduce((s,i) => s + (parseAmount(i.montant)||0), 0);
+  const kpiInv = document.getElementById('kpiInvest');
+  if (kpiInv) {
+    kpiInv.textContent = investTotal >= 1000 ? Math.round(investTotal/1000)+'k€' : investTotal ? investTotal+'€' : '—';
+    document.getElementById('kpiInvestSub').textContent = 'budget total requis';
+  }
+
+  // Part de marché cible
+  const kpiMkt = document.getElementById('kpiMarket');
+  if (kpiMkt) {
+    kpiMkt.textContent = stripReliability(plan.marche_part_cible || '—');
+    document.getElementById('kpiMarketSub').textContent = 'part marché an 1';
+  }
+
+  // Point mort / seuil rentabilité
+  let pm = '—';
+  if (plan.seuil_rentabilite) pm = stripReliability(plan.seuil_rentabilite);
+  else {
+    const fd = (plan.finances_detail || []).find(f => /seuil|rentab|point.mort/i.test(f.label||''));
+    if (fd) pm = stripReliability(fd.valeur);
+  }
+  const kpiPm = document.getElementById('kpiPointMort');
+  if (kpiPm) {
+    kpiPm.textContent = pm;
+    document.getElementById('kpiPointMortSub').textContent = 'seuil de rentabilité';
+  }
+
+  // Show
+  const heroEl = document.getElementById('planHeroKpis');
+  if (heroEl) heroEl.style.display = '';
+}
+
+// ── SIDEBAR NAVIGATION ────────────────────────────────────────────
+function buildSidebar() {
+  const sidebar = document.getElementById('planSidebar');
+  if (!sidebar) return;
+
+  const catOrder = ['strategy','market','finance','action','legal'];
+  const catMeta = {
+    strategy: { label:'Stratégie', color:'var(--cat-strategy)' },
+    market:   { label:'Marché',    color:'var(--cat-market)' },
+    finance:  { label:'Finance',   color:'var(--cat-finance)' },
+    action:   { label:'Action',    color:'var(--cat-action)' },
+    legal:    { label:'Légal',     color:'var(--cat-legal)' },
+  };
+
+  const groups = {};
+  catOrder.forEach(c => { groups[c] = []; });
+
+  document.querySelectorAll('.plan-block[id][data-cat]').forEach(block => {
+    const cat = block.dataset.cat;
+    if (!groups[cat]) return;
+    const numEl = block.querySelector('.block-num');
+    const titleEl = block.querySelector('.block-title');
+    const num = numEl ? numEl.textContent : '✦';
+    const titleText = titleEl ? titleEl.childNodes[0]?.textContent?.trim() || titleEl.textContent.replace('💬','').trim() : block.id;
+    groups[cat].push({ id: block.id, num, title: titleText });
+  });
+
+  let html = '';
+  catOrder.forEach(cat => {
+    if (!groups[cat].length) return;
+    const m = catMeta[cat];
+    html += `<div class="sidebar-cat"><span class="cat-dot" style="background:${m.color}"></span>${m.label}</div>`;
+    groups[cat].forEach(s => {
+      html += `<div class="sidebar-link" data-target="${s.id}" onclick="scrollToSection('${s.id}')"><span class="snum">${s.num}</span>${s.title}</div>`;
+    });
+  });
+  sidebar.innerHTML = html;
+}
+
+function scrollToSection(id) {
+  const el = document.getElementById(id);
+  const planContent = document.querySelector('.plan-content');
+  if (el && planContent) {
+    planContent.scrollTo({ top: el.offsetTop - 20, behavior: 'smooth' });
+  }
+}
+
+function initPlanNav() {
+  const planContent = document.querySelector('.plan-content');
+  if (!planContent) return;
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      const link = document.querySelector(`.sidebar-link[data-target="${entry.target.id}"]`);
+      if (!link) return;
+      if (entry.isIntersecting) {
+        document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+        // Auto-scroll sidebar to show active link
+        const sb = document.getElementById('planSidebar');
+        if (sb) { const top = link.offsetTop - sb.clientHeight/2 + link.clientHeight/2; sb.scrollTo({ top, behavior: 'smooth' }); }
+      }
+    });
+  }, { root: planContent, threshold: 0.2 });
+  document.querySelectorAll('.plan-block[id]').forEach(b => observer.observe(b));
+}
+
+// ─────────────────────────────────────────────────────────────────
 function fillPlan(plan) {
   // ── Header (hors scrollBody) ──────────────────────────────────────
   document.getElementById('dBizName').textContent = plan.nom_business || '—';
@@ -1127,6 +1275,11 @@ function fillPlan(plan) {
     planSections.id = 'plan-all-sections';
     planSections.innerHTML = buildAllSections(plan);
     scrollBody.appendChild(planSections);
+
+    // ── Hero KPIs + Sidebar nav ───────────────────────────────────
+    fillHeroKpis(plan);
+    buildSidebar();
+    setTimeout(() => initPlanNav(), 100);
 
     // Charts (après injection DOM)
     const crescLabels = ['M1','M3','M6','An 1','1.5 an','An 2','An 3'];
