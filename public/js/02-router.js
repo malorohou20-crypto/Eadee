@@ -60,7 +60,7 @@ function updateNav() {
 // ========== DASHBOARD VIEWS ==========
 function showView(name) {
   document.querySelectorAll('.dash-view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+  document.querySelectorAll('.sidebar-link[data-view]').forEach(l => l.classList.remove('active'));
   const viewEl = document.getElementById('view-' + name);
   if (viewEl) viewEl.classList.add('active');
   const link = document.querySelector(`[data-view="${name}"]`);
