@@ -1,4 +1,4 @@
-// ========== PAYMENT ==========
+﻿// ========== PAYMENT ==========
 function selectPlan(planId) {
   const plans = { solo: { name: 'Solo', price: 12.99, credits: 1 }, pro: { name: 'Pro', price: 29.99, credits: 3 }, empire: { name: 'Empire', price: 59.99, credits: 8 } };
   if (!user) { showAuth('signup'); return; }
@@ -20,7 +20,7 @@ function selectPayPlan(el) {
   document.getElementById('osTotal').textContent = selectedPayPlan.price.toFixed(2) + '€';
   document.getElementById('osCredits').textContent = credits + ' générations';
 
-  const feats = ['Business plan complet — 20 sections','Généré en 60 secondes','Compatible dossier banque & BPI','Démarches administratives pré-remplies','Emails prêts à envoyer','Sans abonnement · Sans expiration','Conseiller Eadee 24h/24'];
+  const feats = ['Business plan complet — 23 sections','Généré en 60 secondes','Compatible dossier banque & BPI','Démarches administratives pré-remplies','Emails prêts à envoyer','Sans abonnement · Sans expiration','Conseiller Eadee 24h/24'];
 
   document.getElementById('osFeatures').innerHTML = feats.map(f => `<div class="os-feat">${f}</div>`).join('');
 }
@@ -81,4 +81,5 @@ async function processPayment() {
     });
   }
 })();
+
 

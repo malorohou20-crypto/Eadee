@@ -1,4 +1,4 @@
-// ========== MODAUX LÉGAUX ==========
+﻿// ========== MODAUX LÉGAUX ==========
 const legalContent = {
   mentions: {
     title: 'Mentions légales',
@@ -90,7 +90,7 @@ const legalContent = {
       <p>L'accès nécessite la création d'un compte avec une adresse email valide. Tu dois avoir au moins 18 ans. Tu es responsable de la confidentialité de tes identifiants.</p>
       <h3>Article 3 — Description du service</h3>
       <ul>
-        <li>Génération automatisée de business plans complets (20 sections)</li>
+        <li>Génération automatisée de business plans complets (23 sections)</li>
         <li>Analyse de marché, projections financières, templates d'emails</li>
         <li>Dossier de création d'entreprise pré-rempli</li>
         <li>Conseiller Eadee (assistant IA) disponible 24h/24</li>
@@ -197,4 +197,5 @@ function closeLegal() {
 
 // Fermer avec Escape
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLegal(); });
+
 
