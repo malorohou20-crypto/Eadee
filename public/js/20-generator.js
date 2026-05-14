@@ -1108,15 +1108,18 @@ function buildAllSections(plan) {
   }
 
   // Placeholder IDs pour fillDocumentsAnnexes + fillBancabilite
-  h += `<div class="plan-block" id="dDocsBlock">
-    <div class="plan-block-title">✦ Documents Annexes</div>
-    <p style="font-size:12px;color:rgba(255,255,255,0.35);margin-bottom:14px;line-height:1.5">Génère les pièces justificatives prêtes à soumettre à ta banque ou à BPI France.</p>
-    <div class="docs-grid" id="dDocsGrid"></div>
-  </div>`;
-  h += `<div class="plan-block" id="dBancBlock">
-    <div class="plan-block-title">✦ Checklist Bancabilité</div>
-    <div id="dBancabilite"></div>
-  </div>`;
+  h += planBlock('✦ Documents Annexes',
+    `<p style="font-size:12px;color:rgba(255,255,255,0.35);margin-bottom:14px;line-height:1.5">Génère les pièces justificatives prêtes à soumettre à ta banque ou à BPI France.</p>
+    <div class="docs-grid" id="dDocsGrid"></div>`);
+  h += planBlock('✦ Checklist Bancabilité', `
+    <div class="banc-score-bar" style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+      <div style="flex:1">
+        <div class="banc-track"><div class="banc-fill" id="dBancFill" style="width:0%"></div></div>
+        <div class="banc-label" id="dBancLabel">À compléter</div>
+      </div>
+      <div class="banc-pct" id="dBancPct">0%</div>
+    </div>
+    <div class="banc-items" id="dBancItems"></div>`);
 
   h += `</div>`; // close max-width wrapper
   return h;
