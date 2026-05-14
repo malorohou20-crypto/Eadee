@@ -203,19 +203,38 @@
         </div>
       </div>
       <div class="tr-visual">
-        <div class="tr-visual-card">
-          <div class="tr-rev-lbl">Projections CA · VélôBretagne</div>
-          <div class="tr-rev-grid">
-            <div class="tr-rev-cell"><span>1 200€</span><small>Mois 1</small></div>
-            <div class="tr-rev-cell"><span>4 800€</span><small>Mois 3</small></div>
-            <div class="tr-rev-cell"><span>9 500€</span><small>Mois 6</small></div>
-            <div class="tr-rev-cell hl"><span>68 000€</span><small>An 1</small></div>
+        <div class="tr-visual-card" style="padding:20px 20px 16px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+            <div>
+              <div style="font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:#7a7f9a;margin-bottom:4px">Projections CA · VélôBretagne</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:#fff;line-height:1">185 000€</div>
+              <div style="font-family:'DM Mono',monospace;font-size:9px;color:#a78bfa;margin-top:2px">projection an 3</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;padding-top:4px">
+              <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:#7a7f9a;font-family:'DM Mono',monospace">
+                <div style="width:11px;height:11px;background:#a78bfa;border-radius:2px;flex-shrink:0"></div>CA mensuel
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:#7a7f9a;font-family:'DM Mono',monospace">
+                <div style="width:18px;height:1.5px;background:rgba(122,127,154,0.7);flex-shrink:0;margin:0 1px"></div>Break-even
+              </div>
+            </div>
           </div>
-          <div class="tr-rev-cell" style="margin-top:8px;width:100%;text-align:center;border-color:rgba(167,139,250,0.3);background:rgba(167,139,250,0.06)"><span style="color:#a78bfa">185 000€</span><small style="color:#a78bfa">Projection An 3</small></div>
-          <div class="tr-rev-detail">
-            <div class="tr-rev-row"><em>Marge brute</em><span>71%</span></div>
-            <div class="tr-rev-row"><em>Break-even</em><span>Mois 4</span></div>
-            <div class="tr-rev-row"><em>ROI initial</em><span>340%</span></div>
+          <div style="position:relative;width:100%;height:180px;margin-bottom:12px">
+            <canvas id="landingRevChart" style="display:block;width:100%;height:100%"></canvas>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+            <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:11px 13px">
+              <div style="font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:#7a7f9a;margin-bottom:4px">Marge brute</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:#a78bfa;line-height:1">71%</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:11px 13px">
+              <div style="font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:#7a7f9a;margin-bottom:4px">Break-even</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:#a78bfa;line-height:1">Mois 4</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:11px 13px">
+              <div style="font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:#7a7f9a;margin-bottom:4px">ROI initial</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:#a78bfa;line-height:1">340%</div>
+            </div>
           </div>
         </div>
       </div>
