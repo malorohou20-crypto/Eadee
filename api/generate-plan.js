@@ -249,6 +249,41 @@ Génère ce JSON complet (sans markdown, sans backtick) :
   "tagline": "Slogan accrocheur en 6-8 mots",
   "pitch_30s": "Pitch de 30 secondes : problème → solution → marché → modèle → appel à action. 4-5 phrases.",
 
+  "disclaimer": {
+    "message_entrepreneur": {
+      "titre": "Ce plan est un point de départ solide — pas un document certifié.",
+      "corps": "EADEE a structuré votre projet en suivant les standards des banques françaises et de BPI France. Ce business plan vous fait gagner plusieurs semaines de travail et vous prépare sérieusement à votre rendez-vous. Mais avant tout engagement financier, faites-le valider par un expert-comptable ou un conseiller CCI.",
+      "recommandation_concrete": "Prévoyez 2 à 4h avec un expert-comptable (~300 à 600€) ou un rendez-vous gratuit à votre CCI avant votre RDV bancaire. C'est l'investissement le plus rentable de votre parcours."
+    },
+    "fiabilite_des_chiffres": {
+      "legende_marqueurs": {
+        "V_verifie": "Chiffre sourcé — issu d'une source publique identifiée (INSEE, Banque de France, BPI, rapport sectoriel). Vérifiez que la source est toujours d'actualité avant de le citer en RDV.",
+        "E_estime": "Chiffre estimé — calculé à partir de vos données et d'hypothèses standard du secteur. Cohérent mais à affiner avec votre comptable.",
+        "H_hypothese": "Hypothèse — posée par vous ou par EADEE à partir de moyennes sectorielles. À valider impérativement avant de la présenter à une banque."
+      },
+      "avertissement_donnees_marche": "Les données de marché sont des estimations basées sur les informations disponibles au moment de la génération. Vérifiez les chiffres clés sur insee.fr, bpifrance-creation.fr ou auprès de votre CCI avant le rendez-vous."
+    },
+    "ce_que_ce_plan_fait": [
+      "Structure votre projet selon les standards bancaires français",
+      "Calcule vos projections financières de façon cohérente et justifiée",
+      "Identifie les documents manquants à votre dossier complet",
+      "Vous prépare aux questions d'un banquier ou d'un conseiller BPI",
+      "Vous fait gagner 2 à 4 semaines de travail de structuration"
+    ],
+    "ce_que_ce_plan_ne_fait_pas": [
+      "Ne remplace pas les vrais documents physiques (Kbis, devis réels, avis d'imposition...)",
+      "Ne garantit pas l'obtention d'un financement bancaire",
+      "Ne remplace pas le conseil d'un expert-comptable ou d'un conseiller juridique",
+      "Ne certifie pas l'exactitude des données de marché en temps réel"
+    ],
+    "ressources_gratuites_recommandees": [
+      {"organisme": "BPI France Création", "service": "Diagnostic gratuit, guides sectoriels, accompagnement création", "url": "bpifrance-creation.fr", "cout": "Gratuit"},
+      {"organisme": "CCI France", "service": "Conseil pré-création, relecture dossier, mise en relation banques", "url": "cci.fr", "cout": "Gratuit à faible coût"},
+      {"organisme": "BGE (Boutique de Gestion)", "service": "Accompagnement complet création, validation business plan", "url": "bge.asso.fr", "cout": "Gratuit ou subventionné selon région"},
+      {"organisme": "Réseau Entreprendre", "service": "Prêt d'honneur 0% + mentorat entrepreneur expérimenté", "url": "reseau-entreprendre.fr", "cout": "Gratuit (sur dossier)"}
+    ]
+  },
+
   "scores": {
     "score_viabilite": {
       "note": 82,
@@ -445,6 +480,8 @@ Génère ce JSON complet (sans markdown, sans backtick) :
     "interpretation_bancaire":  "string — ce résultat rassure ou inquiète le banquier ?"
   },
 
+  "tableau_amortissement": "[CONDITIONNEL — générer uniquement si plan_financement.ressources.pret_bancaire > 0] Objet avec : parametres (capital_emprunte, taux_annuel_estime {{H:X%|taux moyen TPE France 2024 : 4.5-6.5%}}, duree_annees {{H:X ans|5-7 ans matériel, 7 ans aménagement, 2-3 ans BFR}}, mensualite_estimee {{E:montant€|K×t/(1-(1+t)^-n)}}, total_interets {{E:montant€}}, cout_total_credit {{E:montant€}}), echeancier_annuel (une ligne par année : annee, mensualite, capital_rembourse_annee, interets_payes_annee, capital_restant_du_fin_annee — tous en {{E:}}), analyse_capacite_remboursement (mensualite_vs_marge_nette_an1 {{E:XX%}}, appreciation 'Confortable si <15% | Correct si 15-25% | Tendu si >25%', verdict string, option_differe avec recommande boolean + type + duree_conseillee + explication), conseils_negociation_banque (5 conseils string), note_importante string. Si pas de prêt → null.",
+
   "risques": [
     {"titre": "Risque business précis",   "niveau": "élevé",  "solution": "Plan d'action : indicateurs d'alerte + actions correctives chiffrées", "signal_alarme": "Comment détecter ce risque tôt", "solution_preventive": "Ce qu'on fait AVANT que ça arrive"},
     {"titre": "Risque marché précis",     "niveau": "moyen",  "solution": "Comment détecter tôt et y répondre",                                   "signal_alarme": "string", "solution_preventive": "string"},
@@ -522,9 +559,53 @@ Génère ce JSON complet (sans markdown, sans backtick) :
   }
 }
 
+AVANT DE RETOURNER LE JSON — PASSE CES 15 CONTRÔLES DE COHÉRENCE :
+
+━━ COHÉRENCE FINANCIÈRE ━━
+
+CONTRÔLE 1 — plan_financement.total_besoins === plan_financement.total_ressources ?
+  Si non → ajuster tresorerie_securite ou signaler l'écart dans commentaire_equilibre.
+
+CONTRÔLE 2 — scores.score_bancabilite.detail.apport_suffisant cohérent avec plan_financement.ressources.apport_personnel / total_besoins ?
+
+CONTRÔLE 3 — Si résultat positif à M6, la trésorerie ne peut pas être négative à M6 sans explication BFR.
+  Si incohérence → ajouter explication dans alerte du mois concerné.
+
+CONTRÔLE 4 — seuil_rentabilite.break_even_mois doit correspondre au mois où le CA mensuel dépasse le point mort CA.
+
+CONTRÔLE 5 — Le BFR dans seuil_rentabilite doit être financé dans plan_financement.besoins.bfr_demarrage.
+
+CONTRÔLE 6 — tableau_amortissement.mensualite_estimee doit être < 30% de (taux_marge_brute × CA M6).
+  Si >30% → alerte dans analyse_capacite_remboursement.verdict.
+
+CONTRÔLE 7 — bilan_previsionnel : total actif === total passif. Un bilan doit toujours être équilibré.
+
+CONTRÔLE 8 — scenarios : pessimiste.ca_an1 < realiste.ca_an1 < optimiste.ca_an1. Corriger si non respecté.
+
+━━ COHÉRENCE CONTENU ━━
+
+CONTRÔLE 9 — Chaque valeur numérique a un marqueur {{V: / E: / H:}} avec source. Zéro chiffre nu autorisé.
+
+CONTRÔLE 10 — Les sources citées dans {{V:}} sont des organismes réels (INSEE, Banque de France, BPI, Xerfi...). Si non vérifiable → passer en {{H:}}.
+
+CONTRÔLE 11 — Les 4 concurrents dans le tableau sont des entreprises réellement existantes dans ce secteur en France. Pas de noms génériques.
+
+CONTRÔLE 12 — Les aides dans aides_subventions correspondent au profil du porteur (ACRE → seulement demandeur d'emploi, JEI → seulement R&D...).
+
+━━ COHÉRENCE CONDITIONNELLE ━━
+
+CONTRÔLE 13 — Sections conditionnelles non applicables retournent null (cap_table, franchise_specifique, autorisations_sectorielles si non réglementé).
+
+CONTRÔLE 14 — Si aspects_organisationnels.locaux.necessaire = false → pas de bail dans annexes_checklist.
+
+CONTRÔLE 15 — Le bloc disclaimer est présent et complet. Non négociable.
+
+SI UN CONTRÔLE ÉCHOUE : corriger avant de retourner. Si correction impossible → ajouter "alertes_coherence": ["description"] pour affichage frontend.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 VÉRIFICATION FINALE OBLIGATOIRE : Avant de terminer, confirme que ces clés sont présentes :
-resume_executif, scores, plan_financement, scenarios, tresorerie_mensuelle, porteur_profil_financier,
-resume_vision_banquier, concurrents, investissements, seuil_rentabilite, risques, actions, aides_subventions.
+disclaimer, resume_executif, scores, plan_financement, scenarios, tresorerie_mensuelle, porteur_profil_financier,
+resume_vision_banquier, concurrents, investissements, seuil_rentabilite, tableau_amortissement, risques, actions, aides_subventions.
 Si l'une manque, ajoute-la immédiatement.`;
 }
 

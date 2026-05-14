@@ -887,6 +887,95 @@ function renderTresorerieMensuelle(tm) {
 }
 
 // ── Construit tout le HTML des 20 sections dans l'ordre ──────────────
+// ── RENDER DISCLAIMER ────────────────────────────────────────────────────────
+function renderDisclaimer(d) {
+  if (!d) return '';
+  const msg = d.message_entrepreneur || {};
+  const res = (d.ressources_gratuites_recommandees || []);
+  const fait = (d.ce_que_ce_plan_fait || []);
+  const nfait = (d.ce_que_ce_plan_ne_fait_pas || []);
+  return `<div class="disclaimer-band" style="background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.2);border-radius:12px;padding:20px 24px;margin:20px 0 8px;display:flex;gap:16px;align-items:flex-start">
+    <div style="font-size:22px;line-height:1;flex-shrink:0">⚠️</div>
+    <div style="flex:1">
+      <div style="font-size:13px;font-weight:600;color:var(--gold);margin-bottom:6px">${esc(msg.titre||'')}</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.65);line-height:1.6;margin-bottom:10px">${esc(msg.corps||'')}</div>
+      ${msg.recommandation_concrete ? `<div style="font-size:12px;color:rgba(251,191,36,0.8);background:rgba(251,191,36,0.08);border-radius:6px;padding:8px 12px;margin-bottom:12px">${esc(msg.recommandation_concrete)}</div>` : ''}
+      ${res.length ? `<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">${res.map(r=>`<a href="https://${esc(r.url)}" target="_blank" rel="noopener" style="font-size:11px;padding:4px 10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:20px;color:rgba(255,255,255,0.6);text-decoration:none;white-space:nowrap" title="${esc(r.service)}">${esc(r.organisme)} — ${esc(r.cout)}</a>`).join('')}</div>` : ''}
+      <details style="margin-top:10px">
+        <summary style="font-size:11px;color:rgba(255,255,255,0.35);cursor:pointer;list-style:none">Ce plan fait / ne fait pas ▾</summary>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+          <div><div style="font-size:11px;font-weight:600;color:var(--green);margin-bottom:6px">✓ Ce plan fait</div>${fait.map(f=>`<div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:3px">• ${esc(f)}</div>`).join('')}</div>
+          <div><div style="font-size:11px;font-weight:600;color:rgba(248,113,113,0.9);margin-bottom:6px">✗ Ne remplace pas</div>${nfait.map(f=>`<div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:3px">• ${esc(f)}</div>`).join('')}</div>
+        </div>
+      </details>
+    </div>
+  </div>`;
+}
+
+// ── RENDER TABLEAU AMORTISSEMENT ────────────────────────────────────────────
+function renderTableauAmortissement(ta) {
+  if (!ta || ta === 'null') return '';
+  const p = ta.parametres || {};
+  const ech = ta.echeancier_annuel || [];
+  const acr = ta.analyse_capacite_remboursement || {};
+  const conseilsList = ta.conseils_negociation_banque || [];
+  const diff = acr.option_differe || {};
+
+  const pctVal = parseFloat((acr.mensualite_vs_marge_nette_an1||'').replace('%',''));
+  const pctColor = !isNaN(pctVal) ? (pctVal < 15 ? 'var(--green)' : pctVal < 25 ? 'var(--gold)' : '#f87171') : 'var(--muted)';
+
+  const echeancierHtml = ech.length ? `
+    <div style="overflow-x:auto;margin-bottom:16px">
+      <table style="width:100%;border-collapse:collapse;font-size:12px;font-family:'DM Mono',monospace">
+        <thead>
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.1)">
+            <th style="text-align:left;padding:6px 8px;color:rgba(255,255,255,0.4);font-weight:500">Année</th>
+            <th style="text-align:right;padding:6px 8px;color:rgba(255,255,255,0.4);font-weight:500">Mensualité</th>
+            <th style="text-align:right;padding:6px 8px;color:rgba(255,255,255,0.4);font-weight:500">Capital remboursé</th>
+            <th style="text-align:right;padding:6px 8px;color:rgba(255,255,255,0.4);font-weight:500">Intérêts payés</th>
+            <th style="text-align:right;padding:6px 8px;color:rgba(255,255,255,0.4);font-weight:500">Capital restant</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${ech.map((row,i)=>`
+            <tr style="border-bottom:1px solid rgba(255,255,255,0.05);${i%2===0?'background:rgba(255,255,255,0.02)':''}">
+              <td style="padding:6px 8px;color:rgba(255,255,255,0.6)">An ${row.annee||i+1}</td>
+              <td style="padding:6px 8px;text-align:right;color:var(--text)">${relText(row.mensualite||'—')}</td>
+              <td style="padding:6px 8px;text-align:right;color:var(--green)">${relText(row.capital_rembourse_annee||'—')}</td>
+              <td style="padding:6px 8px;text-align:right;color:rgba(248,113,113,0.8)">${relText(row.interets_payes_annee||'—')}</td>
+              <td style="padding:6px 8px;text-align:right;color:rgba(255,255,255,0.5)">${relText(row.capital_restant_du_fin_annee||'—')}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>` : '';
+
+  return planBlock('16b — Tableau d\'Amortissement du Prêt', `
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
+      <div class="stat-mini"><div class="stat-mini-label">Capital emprunté</div><div class="stat-mini-val">${relText(p.capital_emprunte||'—')}</div></div>
+      <div class="stat-mini"><div class="stat-mini-label">Taux annuel estimé</div><div class="stat-mini-val">${relText(p.taux_annuel_estime||'—')}</div></div>
+      <div class="stat-mini"><div class="stat-mini-label">Durée</div><div class="stat-mini-val">${relText(p.duree_annees||'—')}</div></div>
+      <div class="stat-mini"><div class="stat-mini-label">Mensualité estimée</div><div class="stat-mini-val" style="color:var(--gold)">${relText(p.mensualite_estimee||'—')}</div></div>
+      <div class="stat-mini"><div class="stat-mini-label">Total intérêts</div><div class="stat-mini-val" style="color:#f87171">${relText(p.total_interets||'—')}</div></div>
+      <div class="stat-mini"><div class="stat-mini-label">Coût total crédit</div><div class="stat-mini-val">${relText(p.cout_total_credit||'—')}</div></div>
+    </div>
+    ${echeancierHtml}
+    ${acr.verdict ? `<div style="background:rgba(255,255,255,0.04);border-left:3px solid ${pctColor};border-radius:6px;padding:12px 16px;margin-bottom:14px">
+      <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">Capacité de remboursement</div>
+      <div style="font-size:13px;color:var(--text);line-height:1.5">${esc(acr.verdict)}</div>
+      <div style="font-size:20px;font-weight:700;color:${pctColor};margin-top:6px">${relText(acr.mensualite_vs_marge_nette_an1||'')}</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:2px">${esc(acr.appreciation||'')}</div>
+    </div>` : ''}
+    ${diff.recommande ? `<div style="background:rgba(107,143,239,0.06);border:1px solid rgba(107,143,239,0.2);border-radius:8px;padding:12px 16px;margin-bottom:14px">
+      <div style="font-size:12px;font-weight:600;color:var(--acid);margin-bottom:6px">💡 Différé recommandé — ${esc(diff.type||'')} (${esc(diff.duree_conseillee||'')})</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:1.5">${esc(diff.explication||'')}</div>
+    </div>` : ''}
+    ${conseilsList.length ? `<div style="margin-top:4px"><div style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.4);letter-spacing:0.05em;margin-bottom:8px">CONSEILS NÉGOCIATION BANQUE</div>
+      ${conseilsList.map(c=>`<div style="font-size:12px;color:rgba(255,255,255,0.6);padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05);line-height:1.5">• ${esc(c)}</div>`).join('')}
+    </div>` : ''}
+    ${ta.note_importante ? `<div style="margin-top:14px;font-size:11px;color:rgba(255,255,255,0.3);line-height:1.5;font-style:italic">${esc(ta.note_importante)}</div>` : ''}
+  `);
+}
+
 function buildAllSections(plan) {
   const crescendo7 = `
     <div class="crescendo-grid" style="margin-bottom:20px">
@@ -904,6 +993,9 @@ function buildAllSections(plan) {
 
   // ── Meta top ──
   h += `<div style="padding-top:28px">${renderCompletenessCounter(plan)}${renderReliabilityScoreCard(plan)}</div>`;
+
+  // ── Disclaimer ──
+  if (plan.disclaimer) h += renderDisclaimer(plan.disclaimer);
 
   // ── Score Bancabilité v2.0 ──
   if (plan.scores?.score_bancabilite) h += renderScoreBancabilite(plan.scores.score_bancabilite);
@@ -1041,6 +1133,11 @@ function buildAllSections(plan) {
       </div>
       ${sr.detail ? `<div class="plan-block-content">${relText(sr.detail)}</div>` : ''}`,
       'Comment atteindre plus vite mon seuil de rentabilité ?');
+  }
+
+  // ── 16b Tableau d'Amortissement ──
+  if (plan.tableau_amortissement && plan.tableau_amortissement !== null) {
+    h += renderTableauAmortissement(plan.tableau_amortissement);
   }
 
   // ── 17 Risques & Mitigation ──
