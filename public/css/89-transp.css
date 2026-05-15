@@ -67,32 +67,18 @@
 /* ── Cartes ──────────────────────────────────────────────────── */
 .eadee-transp-card {
   border-radius: 14px;
-  padding: 28px 28px 28px 32px;
+  padding: 24px 24px 24px 24px;
   position: relative;
-}
-
-/* Left-border accent — pas de border complet */
-.eadee-transp-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0;
-  width: 3px;
-  height: 100%;
-  border-radius: 14px 0 0 14px;
 }
 
 .eadee-transp-card--green {
   background: var(--eadee-transp-green-dim);
-}
-.eadee-transp-card--green::before {
-  background: var(--eadee-transp-green-border);
+  border: 1px solid rgba(52, 211, 153, 0.2);
 }
 
 .eadee-transp-card--red {
   background: var(--eadee-transp-red-dim);
-}
-.eadee-transp-card--red::before {
-  background: var(--eadee-transp-red-border);
+  border: 1px solid rgba(248, 113, 113, 0.2);
 }
 
 /* ── En-tête de carte ────────────────────────────────────────── */
