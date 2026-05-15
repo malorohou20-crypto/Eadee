@@ -70,6 +70,7 @@ function showView(name) {
     checkOnboarding();
     updateDashHeader();
     checkDraft();
+    if (typeof initGenAnimations === 'function') initGenAnimations();
     // Start live feed if state A is visible
     const stateA = document.getElementById('preview-state-A');
     if (stateA && stateA.style.display !== 'none') setTimeout(startLiveFeed, 150);
