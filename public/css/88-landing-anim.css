@@ -1,0 +1,525 @@
+/* ================================================================
+   EADEE — Landing Page Animations
+   Toutes les animations dans prefers-reduced-motion: no-preference
+   ================================================================ */
+
+/* ── Killswitch accessibilité ─────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .hero-word, .la-badge-enter, .la-sub-enter, .la-cta-enter,
+  .la-avatars-enter, .animate-on-scroll, .la-how-card,
+  .la-msg, .la-testi-card, .la-price-card, .la-faq-item {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* ================================================================
+   NAVBAR
+   ================================================================ */
+
+@media (prefers-reduced-motion: no-preference) {
+  nav {
+    transition: background 0.3s ease, border-color 0.3s ease,
+                box-shadow 0.3s ease;
+  }
+  nav.nav-scrolled {
+    background: rgba(8, 9, 14, 0.97);
+    border-bottom-color: rgba(107, 143, 239, 0.12);
+    box-shadow: 0 4px 32px rgba(0, 0, 0, 0.45);
+  }
+
+  /* Logo hover — icône carré */
+  .nav-logo > div:first-child {
+    transition: transform 0.2s ease;
+  }
+  .nav-logo:hover > div:first-child {
+    transform: rotate(3deg);
+  }
+
+  /* Liens nav — underline slide-from-left */
+  .nav-link {
+    position: relative;
+    overflow: hidden;
+  }
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 14px;
+    right: 14px;
+    height: 1px;
+    background: #6b8fef;
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .nav-link:hover::after {
+    transform: scaleX(1);
+  }
+  .nav-link:hover {
+    color: #9db8f8;
+  }
+
+  /* Bouton Connexion — border accent hover */
+  .btn-ghost:hover {
+    border-color: rgba(107, 143, 239, 0.45);
+    color: #9db8f8;
+  }
+
+  /* Flèche bouton Commencer */
+  .btn-dark .la-arrow {
+    display: inline-block;
+    transition: transform 0.2s ease;
+  }
+  .btn-dark:hover .la-arrow {
+    transform: translateX(2px);
+  }
+
+  /* :active scale */
+  .nav-btn:active {
+    transform: scale(0.97);
+    transition-duration: 0.08s;
+  }
+}
+
+/* ================================================================
+   HERO — Entrées initiales (état initial, JS déclenche)
+   ================================================================ */
+
+/* Badge pill */
+.la-badge-enter {
+  opacity: 0;
+  transform: scale(0.9) translateY(6px);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .la-badge-enter {
+    transition: opacity 500ms cubic-bezier(0.22, 1, 0.36, 1),
+                transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .la-badge-enter.la-visible {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Mots du H1 */
+.hero-word {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(20px);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hero-word {
+    transition: opacity 600ms cubic-bezier(0.22, 1, 0.36, 1),
+                transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .hero-word.hw-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* Le span gradé doit garder son gradient même en inline-block */
+.hero-grad.hero-word {
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+
+/* Sous-titre */
+.la-sub-enter {
+  opacity: 0;
+  transform: translateY(12px);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .la-sub-enter {
+    transition: opacity 500ms cubic-bezier(0.22, 1, 0.36, 1),
+                transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .la-sub-enter.la-visible { opacity: 1; transform: translateY(0); }
+}
+
+/* CTAs */
+.la-cta-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .la-cta-enter {
+    transition: opacity 500ms cubic-bezier(0.22, 1, 0.36, 1),
+                transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .la-cta-enter.la-visible { opacity: 1; transform: translateY(0); }
+}
+
+/* CTA hero hover */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-cta:active { transform: translateY(0) scale(0.97) !important; }
+  .hero-link .la-arrow {
+    display: inline-block;
+    transition: transform 0.2s ease;
+  }
+  .hero-link:hover .la-arrow {
+    transform: translateX(3px);
+  }
+}
+
+/* Avatars row */
+.la-avatars-enter {
+  opacity: 0;
+  transform: translateY(8px);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .la-avatars-enter {
+    transition: opacity 450ms cubic-bezier(0.22, 1, 0.36, 1),
+                transform 450ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .la-avatars-enter.la-visible { opacity: 1; transform: translateY(0); }
+
+  /* Chaque avatar stagger — scale from 0 */
+  .h-av {
+    transform: scale(0);
+    transition: transform 400ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .h-av.av-visible {
+    transform: scale(1);
+  }
+  /* Hover bloc entier */
+  .la-avatars-enter:hover { transform: translateY(-1px) !important; }
+}
+
+/* Trust items */
+.la-trust-enter {
+  opacity: 0;
+  transform: translateY(8px);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .la-trust-enter {
+    transition: opacity 450ms cubic-bezier(0.22, 1, 0.36, 1),
+                transform 450ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .la-trust-enter.la-visible { opacity: 1; transform: translateY(0); }
+}
+
+/* ================================================================
+   UTILITAIRE — animate-on-scroll
+   ================================================================ */
+
+.animate-on-scroll {
+  opacity: 0;
+  transform: translateY(20px);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .animate-on-scroll {
+    transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .animate-on-scroll.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ================================================================
+   SECTION PROCESS — how
+   ================================================================ */
+
+/* Cartes — état initial pour stagger */
+.la-how-card {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .la-how-card {
+    transition: opacity 500ms cubic-bezier(0.22, 1, 0.36, 1),
+                transform 500ms cubic-bezier(0.22, 1, 0.36, 1),
+                background 0.2s ease, border-color 0.2s ease;
+  }
+  .la-how-card.hc-visible {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  /* Hover */
+  .how-card:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-color: rgba(107, 143, 239, 0.28) !important;
+    border-left: 2px solid rgba(107, 143, 239, 0.7) !important;
+    transform: translateX(4px);
+  }
+}
+
+/* ================================================================
+   SECTIONS TR — Viabilité / Finances / Chat / Banque
+   ================================================================ */
+
+/* Score bar animation — initiale 0, animée par JS */
+@media (prefers-reduced-motion: no-preference) {
+  .tr-score-bar-fill {
+    transition: width 1s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* Carte visuelle hover */
+  .tr-visual-card {
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .tr-visual-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+  }
+
+  /* Stats stagger */
+  .la-score-stat {
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .la-score-stat.ss-visible {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Chat — messages stagger */
+.la-msg {
+  opacity: 0;
+  transform: translateY(8px);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .la-msg {
+    transition: opacity 450ms cubic-bezier(0.22, 1, 0.36, 1),
+                transform 450ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .la-msg.msg-visible { opacity: 1; transform: translateY(0); }
+}
+
+/* ================================================================
+   SECTIONS GRID — hover (reveal géré par 84-sections-grid.js)
+   ================================================================ */
+
+@media (prefers-reduced-motion: no-preference) {
+  .grid-card {
+    transition:
+      opacity 0.5s ease,
+      transform 0.5s ease,
+      background 0.2s ease,
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+  .grid-card:hover {
+    transform: translateY(-3px) !important;
+    border-color: rgba(107, 143, 239, 0.3) !important;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.3);
+  }
+  .grid-card:hover .grid-card-num {
+    color: rgba(107, 143, 239, 0.45);
+  }
+  .grid-card:hover .grid-card-cat-tag {
+    color: rgba(107, 143, 239, 0.7);
+  }
+
+  /* Filtre dim — transition douce */
+  .grid-card.dimmed {
+    opacity: 0.12 !important;
+    transform: scale(0.97) !important;
+    transition: opacity 0.25s ease, transform 0.25s ease !important;
+  }
+  /* Filter button accent hover */
+  .grid-filter:hover {
+    background: rgba(107, 143, 239, 0.1);
+    border-color: rgba(107, 143, 239, 0.3);
+    color: #9db8f8;
+  }
+  /* CTA bas de grille */
+  .grid-footer-cta {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .grid-footer-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(107, 143, 239, 0.3);
+  }
+  .grid-footer-cta:active { transform: translateY(0) scale(0.97); }
+}
+
+/* ================================================================
+   TÉMOIGNAGES
+   ================================================================ */
+
+.la-testi-card {
+  opacity: 0;
+  transform: translateY(20px);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .la-testi-card {
+    transition: opacity 500ms cubic-bezier(0.22, 1, 0.36, 1),
+                transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .la-testi-card.tc-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .testi-card {
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .testi-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  }
+  .testi-avatar {
+    transition: transform 0.2s ease;
+  }
+  .testi-card:hover .testi-avatar {
+    transform: scale(1.08);
+  }
+}
+
+/* ================================================================
+   PRICING
+   ================================================================ */
+
+.la-price-card {
+  opacity: 0;
+  transform: scale(0.95) translateY(20px);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .la-price-card {
+    transition: opacity 500ms cubic-bezier(0.22, 1, 0.36, 1),
+                transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .la-price-card.pc-visible {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+
+  /* Pulse bordure card Pro */
+  @keyframes proPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(107, 143, 239, 0); }
+    50%       { box-shadow: 0 0 0 4px rgba(107, 143, 239, 0.12); }
+  }
+  .price-card.popular {
+    animation: proPulse 3s ease-in-out infinite;
+  }
+
+  /* Hover cards */
+  .price-card {
+    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 0.25s ease !important;
+  }
+  .price-card:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: 0 12px 40px rgba(107, 143, 239, 0.18) !important;
+  }
+
+  /* Boutons plan hover */
+  .plan-cta {
+    transition: background 0.2s, color 0.2s, transform 0.15s ease,
+                box-shadow 0.2s !important;
+  }
+  .plan-cta:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 20px rgba(107, 143, 239, 0.3) !important;
+  }
+  .plan-cta:active { transform: scale(0.97) !important; }
+
+  /* Prix barrés — délai 200ms */
+  .plan-original-price {
+    transition: opacity 400ms ease;
+  }
+}
+
+/* ================================================================
+   FAQ
+   ================================================================ */
+
+.la-faq-item {
+  opacity: 0;
+  transform: translateY(16px);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .la-faq-item {
+    transition: opacity 450ms cubic-bezier(0.22, 1, 0.36, 1),
+                transform 450ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .la-faq-item.fi-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Hover item */
+  .faq-item {
+    transition: background 0.18s ease, border-color 0.18s ease;
+  }
+  .faq-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(107, 143, 239, 0.18);
+  }
+
+  /* Chevron hover translate */
+  .faq-chevron {
+    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .faq-item.open .faq-chevron {
+    transform: rotate(180deg);
+  }
+
+  /* Réponse — amélioration des transitions existantes */
+  .faq-a {
+    transition: max-height 0.35s ease, padding 0.35s ease, opacity 0.25s 0.1s ease !important;
+  }
+  .faq-item.open .faq-a {
+    opacity: 1;
+    max-height: 400px !important;
+  }
+  .faq-item:not(.open) .faq-a {
+    opacity: 0;
+  }
+}
+
+/* ================================================================
+   FOOTER
+   ================================================================ */
+
+@media (prefers-reduced-motion: no-preference) {
+  .footer2-link, .footer2-btn {
+    transition: color 0.15s ease, transform 0.15s ease !important;
+    display: inline-block;
+  }
+  .footer2-link:hover, .footer2-btn:hover {
+    color: #9db8f8 !important;
+    transform: translateX(2px);
+  }
+
+  /* Logo footer */
+  .footer2-brand [style*="Fraunces"] {
+    display: inline-block;
+    transition: transform 0.2s ease;
+  }
+  .footer2-brand:hover [style*="Fraunces"] {
+    transform: rotate(2deg);
+  }
+
+  /* Liens sociaux */
+  .footer2-social {
+    transition: transform 0.15s ease, color 0.15s ease !important;
+    display: inline-flex;
+  }
+  .footer2-social:hover {
+    transform: scale(1.1);
+    color: #9db8f8;
+  }
+  .footer2-social:hover svg path,
+  .footer2-social:hover svg rect,
+  .footer2-social:hover svg circle {
+    stroke: #9db8f8;
+  }
+}
+
+/* ================================================================
+   KEYFRAMES LANDING
+   ================================================================ */
+
+@keyframes laPingOut {
+  0%   { opacity: 0.8; transform: scale(1); }
+  100% { opacity: 0; transform: scale(2.2); }
+}
