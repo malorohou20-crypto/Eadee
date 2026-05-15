@@ -16,5 +16,3 @@
 })();
 
 updateNav(); initChat();
-
-// Test API connection on load

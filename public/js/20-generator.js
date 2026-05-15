@@ -295,7 +295,6 @@ async function generateDashPlan() {
     setPreviewState('A');
     console.error('Erreur génération:', err);
     document.getElementById('dashGenerating').style.display = 'none';
-    document.getElementById('dashEmptyState').style.display = 'none';
     const errStateEl = document.getElementById('dashEmptyState');
     errStateEl.innerHTML = `
       <div style="font-size:11px;font-family:'DM Mono',monospace;letter-spacing:0.15em;color:rgba(255,255,255,0.25);margin-bottom:12px">ERREUR</div>
@@ -304,6 +303,7 @@ async function generateDashPlan() {
       </div>
       <button onclick="resetGenerator()" style="margin-top:16px;padding:8px 20px;background:var(--acid);color:var(--ink);border:none;border-radius:4px;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:0.1em;cursor:pointer;">Réessayer</button>
     `;
+    errStateEl.style.display = 'flex';
     document.getElementById('dashErrMsg').textContent = err.message || 'Problème de connexion. Réessaie.';
     toast('Erreur — voir le détail dans le panneau', 'error');
   }

@@ -6,6 +6,18 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
   try {
+    // Validation minimale : éviter l'abus de max_tokens et forcer le modèle autorisé
+    const body = req.body;
+    if (!body || !body.messages || !Array.isArray(body.messages)) {
+      return res.status(400).json({ error: { message: 'messages requis' } });
+    }
+    // Plafonner max_tokens à 8000 et forcer le modèle
+    const safeBody = {
+      ...body,
+      model: 'claude-sonnet-4-6',
+      max_tokens: Math.min(body.max_tokens || 4000, 8000),
+    };
+
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -13,7 +25,7 @@ export default async function handler(req, res) {
         'x-api-key': process.env.ANTHROPIC_API_KEY,
         'anthropic-version': '2023-06-01'
       },
-      body: JSON.stringify(req.body)
+      body: JSON.stringify(safeBody)
     });
 
     const data = await response.json();

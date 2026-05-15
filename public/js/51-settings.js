@@ -53,7 +53,7 @@ function requestRectification() {
 async function confirmDeleteAccount() {
   if (!user || !supabaseClient) return;
 
-  const confirm1 = confirm('!Es-tu sûr ? Cette action est DÉFINITIVE.\n\nTes plans, conversations et données seront supprimés sous 30 jours.');
+  const confirm1 = confirm('Es-tu sûr ? Cette action est DÉFINITIVE.\n\nTes plans, conversations et données seront supprimés sous 30 jours.');
   if (!confirm1) return;
 
   const typed = prompt(`Pour confirmer, tape exactement :\nSUPPRIMER ${user.email}`);
