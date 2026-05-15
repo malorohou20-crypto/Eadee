@@ -11,8 +11,7 @@ function initGenAnimations() {
   if (!reduced) {
     const targets = [
       document.querySelector('#page-dashboard .sidebar'),
-      document.querySelector('.gen-breadcrumb'),
-      document.querySelector('#view-generator .view-header'),
+document.querySelector('#view-generator .view-header'),
       document.getElementById('draft-resume-banner'),
       document.querySelector('#view-generator .gen-panel'),
       document.getElementById('resultPanel'),
@@ -66,17 +65,6 @@ function initGenAnimations() {
 
 // ── Injection UI : breadcrumb + séparateurs + flèche bouton ──────────────────
 function _genInjectUI() {
-  // Breadcrumb avant .view-header
-  const header = document.querySelector('#view-generator .view-header');
-  if (header && !header.previousElementSibling?.classList.contains('gen-breadcrumb')) {
-    const bc = document.createElement('nav');
-    bc.className = 'gen-breadcrumb';
-    bc.innerHTML = '<span>Tableau de bord</span>'
-      + '<span class="gen-bc-sep">›</span>'
-      + '<span class="gen-bc-cur">Générateur</span>';
-    header.parentNode.insertBefore(bc, header);
-  }
-
   // Séparateur après .gen-panel-title
   const panelTitle = document.querySelector('#view-generator .gen-panel .gen-panel-title');
   if (panelTitle && !panelTitle.nextElementSibling?.classList.contains('gen-sep')) {
