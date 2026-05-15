@@ -40,6 +40,7 @@
 <link rel="stylesheet" href="/public/css/86-gen-redesign.css?v=4">
 <link rel="stylesheet" href="/public/css/87-pages-anim.css?v=1">
 <link rel="stylesheet" href="/public/css/88-landing-anim.css?v=1">
+<link rel="stylesheet" href="/public/css/89-transp.css?v=1">
 <body>
 
 <!-- ========== TOAST ========== -->
@@ -407,33 +408,58 @@
 
 
 
-  <!-- CE QU'EADEE FAIT / NE FAIT PAS -->
-  <section class="fade-up" style="max-width:760px;margin:0 auto 60px;padding:0 20px">
-    <div class="section-tag" style="text-align:center;margin-bottom:16px">Transparence</div>
-    <h2 class="section-h2" style="text-align:center;margin-bottom:32px">Soyons clairs sur ce qu'EADEE fait vraiment.</h2>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
-      <div style="background:rgba(52,211,153,0.06);border:1px solid rgba(52,211,153,0.2);border-radius:14px;padding:24px">
-        <div style="font-size:13px;font-weight:600;color:var(--green);margin-bottom:14px;letter-spacing:0.04em">✅ CE QUE TU OBTIENS</div>
-        <div style="display:flex;flex-direction:column;gap:10px">
-          <div style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.5">→ 23 sections structurées selon les standards bancaires français</div>
-          <div style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.5">→ Projections financières cohérentes avec hypothèses expliquées</div>
-          <div style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.5">→ Checklist des documents manquants à ton dossier complet</div>
-          <div style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.5">→ Score de bancabilité sur les critères réels d'une banque</div>
-          <div style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.5">→ 4 à 6 semaines de travail de structuration en 60 secondes</div>
+  <!-- ========== TRANSPARENCE ========== -->
+  <section class="eadee-transp">
+    <div class="eadee-transp-inner">
+
+      <div class="eadee-transp-label">Transparence</div>
+
+      <h2 class="eadee-transp-h2">Soyons clairs sur ce qu'EADEE fait vraiment.</h2>
+
+      <div class="eadee-transp-grid">
+
+        <!-- Carte OBTIENS -->
+        <div class="eadee-transp-card eadee-transp-card--green animate-on-scroll">
+          <div class="eadee-transp-card-header">
+            <svg class="eadee-transp-card-icon" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+              <circle cx="9" cy="9" r="8" stroke="#34d399" stroke-width="1.4"/>
+              <path d="M5.5 9l2.5 2.5L12.5 6" stroke="#34d399" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="eadee-transp-card-label">Ce que tu obtiens</span>
+          </div>
+          <ul class="eadee-transp-list">
+            <li>Un business plan complet en 23 sections, personnalisé à ton projet</li>
+            <li>Des projections financières 3 ans cohérentes et justifiées</li>
+            <li>Une stratégie commerciale, des emails rédigés, tes démarches admin</li>
+            <li>Un score de viabilité pour savoir si ton idée tient la route</li>
+            <li>4 à 6 semaines de structuration économisées — en 60 secondes</li>
+          </ul>
         </div>
-      </div>
-      <div style="background:rgba(248,113,113,0.06);border:1px solid rgba(248,113,113,0.2);border-radius:14px;padding:24px">
-        <div style="font-size:13px;font-weight:600;color:#f87171;margin-bottom:14px;letter-spacing:0.04em">❌ CE QU'EADEE NE REMPLACE PAS</div>
-        <div style="display:flex;flex-direction:column;gap:10px">
-          <div style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.5">→ Les vrais documents physiques (Kbis, devis réels, avis d'imposition…)</div>
-          <div style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.5">→ La validation d'un expert-comptable avant ton RDV bancaire</div>
-          <div style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.5">→ La garantie d'obtenir un financement</div>
-          <div style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.5">→ Le conseil personnalisé d'un juriste ou d'un conseiller BPI</div>
+
+        <!-- Carte NE REMPLACE PAS -->
+        <div class="eadee-transp-card eadee-transp-card--red animate-on-scroll" style="transition-delay:120ms">
+          <div class="eadee-transp-card-header">
+            <svg class="eadee-transp-card-icon" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+              <circle cx="9" cy="9" r="8" stroke="#f87171" stroke-width="1.4"/>
+              <path d="M6 6l6 6M12 6l-6 6" stroke="#f87171" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+            <span class="eadee-transp-card-label">Ce qu'EADEE ne remplace pas</span>
+          </div>
+          <ul class="eadee-transp-list">
+            <li>Les vrais documents physiques (Kbis, devis réels, avis d'imposition…)</li>
+            <li>La validation d'un expert-comptable si tu vas en banque</li>
+            <li>La garantie d'obtenir un financement</li>
+            <li>Le conseil personnalisé d'un juriste ou d'un conseiller BPI</li>
+          </ul>
         </div>
+
       </div>
-    </div>
-    <div style="margin-top:20px;text-align:center;font-size:14px;color:rgba(255,255,255,0.5);font-style:italic;line-height:1.6">
-      C'est un outil puissant. Pas une baguette magique.<br>Et on préfère te le dire maintenant.
+
+      <p class="eadee-transp-footer animate-on-scroll" style="transition-delay:240ms">
+        C'est un outil puissant. Pas une baguette magique.<br>
+        Et on préfère te le dire maintenant.
+      </p>
+
     </div>
   </section>
 
