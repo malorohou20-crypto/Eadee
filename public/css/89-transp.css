@@ -24,36 +24,33 @@
 .eadee-transp-label {
   display: flex;
   align-items: center;
-  gap: 12px;
-  justify-content: center;
+  gap: 10px;
   font-family: 'DM Mono', monospace;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--eadee-transp-muted);
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
-.eadee-transp-label::before,
-.eadee-transp-label::after {
+.eadee-transp-label::before {
   content: '';
-  width: 28px;
+  width: 24px;
   height: 1px;
   background: var(--eadee-transp-muted);
-  opacity: 0.6;
 }
 
 /* ── Titre ───────────────────────────────────────────────────── */
 .eadee-transp-h2 {
-  font-family: 'Fraunces', serif;
-  font-size: clamp(30px, 3.5vw, 46px);
-  font-weight: 300;
-  font-style: italic;
-  line-height: 1.18;
-  letter-spacing: -0.01em;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(44px, 5vw, 72px);
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: 0.02em;
   color: #ecedf2;
-  text-align: center;
-  margin: 0 0 52px;
+  text-align: left;
+  margin: 0 0 48px;
 }
 
 /* ── Grille 2 colonnes ───────────────────────────────────────── */
