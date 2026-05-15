@@ -78,7 +78,6 @@ function startGenSectionsAnim() {
 
   let idx     = 0;
   let elapsed = 0;
-  let thoughtIdx = 0;
   if (_genSectionTimer)  clearInterval(_genSectionTimer);
   if (_genThoughtTimer)  clearInterval(_genThoughtTimer);
 
@@ -111,12 +110,8 @@ function startGenSectionsAnim() {
     if (idx > GEN_SECTIONS.length) clearInterval(_genSectionTimer);
   }, 2500);
 
-  // Timer pensées IA (toutes les 6s)
+  // Afficher la première pensée IA
   if (statusEl) statusEl.textContent = AI_THOUGHTS[0];
-  _genThoughtTimer = setInterval(() => {
-    thoughtIdx = (thoughtIdx + 1) % AI_THOUGHTS.length;
-    // On met à jour seulement le sous-texte (le timer principal gère le chrono)
-  }, 6000);
 }
 
 function stopGenSectionsAnim() {

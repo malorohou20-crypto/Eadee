@@ -54,8 +54,8 @@ async function generateDossier() {
 PROJET:
 - Nom: ${r.nom_business}
 - Idée: ${r.idea || r.tagline}
-- Secteur: ${document.getElementById('sector')?.value || 'Non défini'}
-- Budget: ${document.getElementById('budget')?.value || 'Non défini'}
+- Secteur: ${document.getElementById('dashSector')?.value || r.secteur || 'Non défini'}
+- Budget: ${document.getElementById('dashBudget')?.value || r.budget || 'Non défini'}
 - Modèle économique: ${r.modele_economique || ''}
 - Offres: ${(r.offres || []).map(o => o.nom + ' — ' + o.prix).join(', ')}
 - Chiffre d'affaires estimé M12: ${r.rev_m12 || ''}

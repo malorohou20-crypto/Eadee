@@ -349,7 +349,6 @@
             if (n.nodeType === 3 && n.textContent.trim()) textNode = n;
           });
           if (textNode) {
-            var origText = textNode.textContent; // "185 000€ "
             setTimeout(function () {
               animateCount(
                 { set textContent(v) { textNode.textContent = v + '€ '; } },

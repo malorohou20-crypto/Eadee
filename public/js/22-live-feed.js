@@ -1,7 +1,6 @@
 // ========== LIVE FEED ==========
 let liveFeedInterval = null;
 let _lfTimestampInterval = null;
-let _lfDisplayed = []; // events currently visible (max 5)
 let _lfPoolIdx = 0;
 
 const liveFeedPool = [

@@ -6,7 +6,6 @@
     if (!wrap || !mock) return;
 
     let rafId = null;
-    let isHovering = false;
 
     wrap.addEventListener('mousemove', (e) => {
       if (rafId) cancelAnimationFrame(rafId);
