@@ -71,31 +71,43 @@ function openFromHistory(index) {
   if (!p) return;
   currentResult = p;
 
-  // Naviguer vers le générateur (compatible v1 et v2)
+  // Naviguer vers l'écran générateur
   if (typeof window.go === 'function') { window.go('gen'); }
   else if (typeof showView === 'function') { showView('generator'); }
 
-  // Masquer les états intermédiaires
-  var genEl = document.getElementById('dashGenerating');
-  if (genEl) genEl.style.display = 'none';
-  var emptyEl = document.getElementById('dashEmptyState');
-  if (emptyEl) emptyEl.style.display = 'none';
+  // Petit délai pour laisser la navigation s'appliquer
+  setTimeout(function() {
+    // Masquer le formulaire et les états intermédiaires
+    var formEl = document.querySelector('.gen-grid');
+    if (formEl) formEl.style.display = 'none';
+    var bannerEl = document.querySelector('.gen-banner');
+    if (bannerEl) bannerEl.style.display = 'none';
+    var pageHead = document.querySelector('.page-head');
+    if (pageHead) pageHead.style.display = 'none';
+    var genEl = document.getElementById('dashGenerating');
+    if (genEl) genEl.style.display = 'none';
+    var emptyEl = document.getElementById('dashEmptyState');
+    if (emptyEl) emptyEl.style.display = 'none';
 
-  // Afficher le résultat
-  var resultEl = document.getElementById('dashResult'); // patché → dashPlanResult en v2
-  if (resultEl) resultEl.style.display = 'block';
+    // Afficher le panneau résultat (ID direct, pas d'alias)
+    var resultEl = document.getElementById('dashPlanResult');
+    if (!resultEl) resultEl = document.getElementById('dashResult');
+    if (resultEl) resultEl.style.display = 'block';
 
-  // Remplir le contenu plan
-  var content = document.getElementById('planResultContent');
-  if (content && typeof window._renderV2PlanResult === 'function') {
-    content.innerHTML = ''; // reset pour que MutationObserver ne réagisse pas
-    window._renderV2PlanResult(p, content);
-  } else if (typeof fillPlan === 'function') {
-    try { fillPlan(p); } catch(e) { console.warn('fillPlan:', e); }
-  }
+    // Remplir le contenu
+    var content = document.getElementById('planResultContent');
+    if (content) {
+      content.innerHTML = '';
+      if (typeof window._renderV2PlanResult === 'function') {
+        window._renderV2PlanResult(p, content);
+      } else if (typeof fillPlan === 'function') {
+        try { fillPlan(p); } catch(e) { console.warn('fillPlan:', e); }
+      }
+    }
 
-  if (typeof toast === 'function') {
-    toast('Plan "' + (p.nom_business || 'Plan') + '" rechargé ✓', 'success');
-  }
+    if (typeof toast === 'function') {
+      toast('Plan "' + (p.nom_business || p.nom_entreprise || 'Plan') + '" chargé ✓', 'success');
+    }
+  }, 80);
 }
 

@@ -1882,7 +1882,17 @@
           </div>` : ''}
 
           <!-- Actions -->
-          <div style="display:flex;gap:12px;margin-top:8px">
+          <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap">
+            <button onclick="(function(){
+              var r=document.getElementById('dashPlanResult');
+              if(r)r.style.display='none';
+              var f=document.querySelector('.gen-grid');
+              if(f)f.style.display='';
+              var b=document.querySelector('.gen-banner');
+              if(b)b.style.display='';
+              var h=document.querySelector('.page-head');
+              if(h)h.style.display='';
+            })()" class="btn btn-ghost">← Nouveau plan</button>
             <button onclick="window.copyPlan&&window.copyPlan()" class="btn btn-ghost">Copier le texte</button>
             <button onclick="window.go&&window.go('expert')" class="btn btn-accent">Affiner avec l'Expert →</button>
           </div>
