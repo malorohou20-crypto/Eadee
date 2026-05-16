@@ -88,6 +88,9 @@
       html += '</div>';
     }
 
+    // ── PRÉSENTATION PROJET ──────────────────────────────────
+    if (plan.presentation_projet) html += card('Présentation du projet', para(plan.presentation_projet));
+
     // ── RÉSUMÉ EXÉCUTIF ──────────────────────────────────────
     html += card('Résumé exécutif', para(plan.resume_executif));
 
@@ -116,6 +119,26 @@
 
     // ── PORTEUR ──────────────────────────────────────────────
     if (plan.porteur_projet) html += card('Porteur du projet', para(plan.porteur_projet));
+
+    // ── PERSONA ───────────────────────────────────────────────
+    var persona = plan.persona;
+    if (persona && persona.nom) {
+      html += card('Persona client cible',
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">' +
+        [['Profil', persona.nom + (persona.age ? ' · ' + persona.age : '')],
+         ['Situation', persona.situation],
+         ['Douleurs', persona.douleurs],
+         ['Motivations', persona.motivations],
+         ['Où le trouver', persona.ou_le_trouver]
+        ].filter(function(r){ return r[1]; }).map(function(r){
+          return '<div style="padding:12px;background:var(--bg);border-radius:8px;border:1px solid var(--rule)">' +
+            '<div style="font-family:var(--mono);font-size:10px;color:var(--ink-3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px">' + esc(r[0]) + '</div>' +
+            '<div style="font-size:13px;color:var(--ink-2);line-height:1.4">' + esc(r[1]) + '</div>' +
+            '</div>';
+        }).join('') +
+        '</div>'
+      );
+    }
 
     // ── MARCHÉ ───────────────────────────────────────────────
     var marcheBody = '';
@@ -151,6 +174,9 @@
     }
     if (pvBody.trim()) html += card('Proposition de valeur', pvBody);
 
+    // ── CONCURRENCE INTRO ─────────────────────────────────────
+    if (plan.concurrence_intro) html += card('Environnement concurrentiel', para(plan.concurrence_intro));
+
     // ── CONCURRENTS ──────────────────────────────────────────
     if (plan.concurrents && plan.concurrents.length) {
       html += card('Analyse concurrentielle',
@@ -184,6 +210,9 @@
     }
     if (mecoBody.trim()) html += card('Modèle économique & offres', mecoBody);
 
+    // ── STRATÉGIE COMMERCIALE ─────────────────────────────────
+    if (plan.strategie_commerciale) html += card('Stratégie commerciale', para(plan.strategie_commerciale));
+
     // ── ACQUISITION ───────────────────────────────────────────
     if (plan.acquisition && plan.acquisition.length) {
       html += card('Stratégie d\'acquisition',
@@ -202,7 +231,7 @@
     // ── PROJECTIONS REVENUS ──────────────────────────────────
     var revEntries = [
       ['M+1', plan.rev_m1], ['M+3', plan.rev_m3], ['M+6', plan.rev_m6],
-      ['An 1', plan.rev_m12], ['An 2', plan.rev_m24], ['An 3', plan.rev_m36]
+      ['An 1', plan.rev_m12], ['18 mois', plan.rev_m18], ['An 2', plan.rev_m24], ['An 3', plan.rev_m36]
     ].filter(function(r){ return r[1]; });
     if (revEntries.length) {
       html += card('Projections de revenus',
@@ -230,6 +259,12 @@
         '</div>'
       );
     }
+
+    // ── TRÉSORERIE ────────────────────────────────────────────
+    if (plan.tresorerie_detail) html += card('Trésorerie', para(plan.tresorerie_detail));
+
+    // ── BILAN PRÉVISIONNEL ────────────────────────────────────
+    if (plan.bilan_previsionnel) html += card('Bilan prévisionnel', para(plan.bilan_previsionnel));
 
     // ── PLAN FINANCEMENT ─────────────────────────────────────
     var pf = plan.plan_financement;
