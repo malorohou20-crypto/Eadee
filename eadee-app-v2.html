@@ -17,662 +17,757 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="/public/css/00-base.css?v=4">
-<link rel="stylesheet" href="/public/css/01-nav.css?v=3">
-<link rel="stylesheet" href="/public/css/02-auth.css?v=3">
-<link rel="stylesheet" href="/public/css/03-components.css?v=3">
-<link rel="stylesheet" href="/public/css/10-landing-hero.css?v=3">
-<link rel="stylesheet" href="/public/css/11-landing-sections.css?v=3">
-
-<link rel="stylesheet" href="/public/css/13-landing-footer.css?v=3">
-<link rel="stylesheet" href="/public/css/16-sections-grid.css?v=3">
-<link rel="stylesheet" href="/public/css/20-dashboard.css?v=3">
-<link rel="stylesheet" href="/public/css/21-generator.css?v=4">
-<link rel="stylesheet" href="/public/css/22-plan.css?v=3">
-<link rel="stylesheet" href="/public/css/23-history.css?v=3">
-<link rel="stylesheet" href="/public/css/24-billing.css?v=3">
-<link rel="stylesheet" href="/public/css/25-chat.css?v=3">
-<link rel="stylesheet" href="/public/css/26-dossier.css?v=3">
-<link rel="stylesheet" href="/public/css/27-modals.css?v=3">
-<link rel="stylesheet" href="/public/css/28-plan-extras.css?v=3">
-<link rel="stylesheet" href="/public/css/29-plan-visual.css?v=3">
-<link rel="stylesheet" href="/public/css/90-overrides.css?v=3">
-<link rel="stylesheet" href="/public/css/99-responsive.css?v=3">
-<link rel="stylesheet" href="/public/css/86-gen-redesign.css?v=4">
-<link rel="stylesheet" href="/public/css/87-pages-anim.css?v=1">
-<link rel="stylesheet" href="/public/css/88-landing-anim.css?v=1">
-<link rel="stylesheet" href="/public/css/89-transp.css?v=1">
 <link rel="stylesheet" href="/public/css/91-new-landing.css?v=1">
 <link rel="stylesheet" href="/public/css/92-new-app.css?v=1">
 <link rel="stylesheet" href="/public/css/93-new-plan.css?v=1">
-<link rel="stylesheet" href="/public/css/94-new-theme.css?v=1">
 <body>
 
 <!-- ========== TOAST ========== -->
 <div class="toast" id="toast"></div>
 
-<!-- ========== NAV ========== -->
-<nav id="mainNav">
-  <div class="nav-logo" onclick="showPage('landing')" style="display:flex;align-items:center;gap:10px">
-    <div style="width:30px;height:30px;border-radius:6px;background:var(--ink);display:grid;place-items:center;font-family:var(--serif);font-style:italic;font-size:20px;color:var(--paper);line-height:1">E</div>
-    <span style="font-family:var(--serif);font-size:22px;letter-spacing:0.04em">EADEE</span>
-    <span class="logo-pulse" style="margin-left:4px;width:7px;height:7px"></span>
-  </div>
-  <div class="nav-links" id="navLinks">
-    <a class="nav-link" onclick="scrollToSection('howSection')">Comment ça marche</a>
-    <a class="nav-link" onclick="scrollToSection('featuresSection')">Fonctionnalités</a>
-    <a class="nav-link" onclick="scrollToSection('pricingSection')">Tarifs</a>
-    <a class="nav-link" onclick="scrollToSection('faqSection')">FAQ</a>
-  </div>
-  <div class="nav-right" id="navRight">
-    <button class="nav-btn btn-ghost" onclick="showAuth('login')">Connexion</button>
-    <button class="nav-btn btn-dark" onclick="showAuth('signup')">Commencer →</button>
-  </div>
-</nav>
-
 <!-- ========== LANDING ========== -->
 <div class="page active" id="page-landing">
 
-  <!-- HERO -->
-  <section class="hero">
-    <div class="hero-photo-bg"></div>
-    <div class="hero-overlay-left"></div>
-    <div class="hero-overlay-bottom"></div>
-    <div class="hero-photo-content">
-      <div class="hero-pill-badge">
-        <span class="hero-pill-new">NOUVEAU</span>
-        <span class="hero-pill-text">L'IA au service de vos projets ✦</span>
+<!-- ========================= TOP BAR ========================= -->
+<header class="nl-topbar" id="mainNav">
+  <div class="nl-topbar-inner">
+    <a class="nl-brand" href="#" onclick="showPage('landing');return false;" aria-label="EADEE">
+      <span class="nl-brand-mark">E</span>
+      <span class="nl-brand-word">EADEE</span>
+    </a>
+    <nav class="nl-nav" id="navLinks">
+      <a href="#nl-process" onclick="scrollToSection('nl-process');return false;">Comment ça marche</a>
+      <a href="#nl-features" onclick="scrollToSection('nl-features');return false;">Fonctionnalités</a>
+      <a href="#nl-pricing" onclick="scrollToSection('nl-pricing');return false;">Tarifs</a>
+      <a href="#nl-faq" onclick="scrollToSection('nl-faq');return false;">FAQ</a>
+    </nav>
+    <div class="nl-topbar-cta" id="navRight">
+      <a class="nl-link-quiet" href="#" onclick="showAuth('login');return false;" id="navAuthBtn">Connexion</a>
+      <a class="nl-btn" href="#" onclick="showAuth('signup');return false;" id="navDashBtn">Commencer →</a>
+    </div>
+  </div>
+</header>
+
+<!-- ========================= HERO ========================= -->
+<section class="nl-hero">
+  <div class="nl-wrap">
+    <div class="nl-hero-rail">
+      <span>EADEE — Dossier N°01</span>
+      <div class="nl-rail-mid">
+        <span>Génération instantanée</span>
+        <span>Conforme banque &amp; BPI France</span>
+        <span>Édition 2026</span>
       </div>
-      <h1 class="hero-h1">
-        Un business plan complet<br>
-        <span class="hero-grad">et professionnel. En 60 secondes.</span>
-      </h1>
-      <p class="hero-sub">23 sections. Projections 3 ans. Stratégie, finances, juridique, démarches admin. Tout ce qu'il faut pour passer de l'idée à l'action — sans passer des semaines à tout structurer.</p>
-      <div class="hero-actions">
-        <button class="hero-cta" onclick="showAuth('signup')">Créer mon plan</button>
-        <span class="hero-link" onclick="scrollToPricing()">Voir les tarifs →</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:12px;margin-top:40px;">
-        <div class="hero-avatars">
-          <div class="h-av">M</div><div class="h-av">S</div><div class="h-av">L</div><div class="h-av">K</div><div class="h-av">+</div>
+      <span class="nl-rail-live">Démo en direct</span>
+    </div>
+
+    <div class="nl-hero-grid">
+      <div class="nl-hero-text">
+        <span class="nl-hero-tag">
+          <span class="nl-pill">NOUVEAU</span>
+          L'IA au service de vos projets <span style="color:var(--accent)">✦</span>
+        </span>
+
+        <h1>
+          <span class="nl-h1-line">Un business plan complet</span>
+          <span class="nl-h1-line">et <em>professionnel.</em></span>
+          <span class="nl-h1-line">En <span class="nl-kinetic" id="kineticNum">00</span><span class="nl-kinetic-unit">sec</span></span>
+        </h1>
+
+        <p class="nl-hero-sub">
+          23 sections. Projections 3 ans. Stratégie, finances, juridique, démarches admin. Tout ce qu'il faut pour passer de l'idée à l'action — sans passer des semaines à tout structurer.
+        </p>
+
+        <div class="nl-hero-ctas">
+          <a class="nl-btn nl-btn-lg nl-btn-accent" href="#" onclick="showAuth('signup');return false;">Créer mon plan</a>
+          <a class="nl-btn nl-btn-lg nl-btn-ghost" href="#nl-pricing" onclick="scrollToSection('nl-pricing');return false;">Voir les tarifs →</a>
         </div>
-        <span class="hero-social-text">Utilisé par des <strong>milliers d'entrepreneurs</strong> en France</span>
+
+        <div class="nl-hero-ornament">
+          <span id="ornCount">00 / 23 sections</span>
+          <span class="nl-bars" id="ornBars" aria-hidden="true">
+            <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          </span>
+        </div>
       </div>
-      <div class="hero-trust">
-        <div class="hero-trust-item"><span class="hero-trust-icon">✓</span>Compatible banque &amp; BPI France</div>
-        <div class="hero-trust-item"><span class="hero-trust-icon">✓</span>Export PDF prêt à envoyer</div>
-        <div class="hero-trust-item"><span class="hero-trust-icon">✓</span>Sans abonnement</div>
+
+      <div class="nl-hero-live">
+        <div class="nl-live-doc">
+          <div class="nl-live-head">
+            <span class="nl-left-bit"><span class="nl-ldot"></span> EADEE · génération en cours</span>
+            <span class="nl-live-timer" id="liveTimer">00 / 60s</span>
+          </div>
+          <div class="nl-live-progress"><i id="liveProgress"></i></div>
+          <div class="nl-live-body">
+            <ol class="nl-live-sections" id="liveSections">
+              <li><span class="lix">01</span><span class="lnm">Résumé exécutif</span><span class="lst">⋯</span></li>
+              <li><span class="lix">04</span><span class="lnm">Proposition de valeur unique</span><span class="lst">⋯</span></li>
+              <li><span class="lix">07</span><span class="lnm">Étude de marché</span><span class="lst">⋯</span></li>
+              <li><span class="lix">08</span><span class="lnm">Analyse concurrentielle</span><span class="lst">⋯</span></li>
+              <li><span class="lix">09</span><span class="lnm">Plan de financement</span><span class="lst">⋯</span></li>
+              <li><span class="lix">11</span><span class="lnm">Compte de résultat 3 ans</span><span class="lst">⋯</span></li>
+              <li><span class="lix">14</span><span class="lnm">Seuil de rentabilité</span><span class="lst">⋯</span></li>
+              <li><span class="lix">16</span><span class="lnm">Aspects juridiques</span><span class="lst">⋯</span></li>
+              <li><span class="lix">21</span><span class="lnm">Plan d'action 90 jours</span><span class="lst">⋯</span></li>
+            </ol>
+            <div class="nl-live-more">
+              <span id="liveMore">+ 14 autres sections en cours</span>
+              <span class="nl-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+            </div>
+          </div>
+          <div class="nl-live-result" id="liveResult">
+            <div class="nl-lr-score num">87<sup>/100</sup></div>
+            <div class="nl-lr-text"><b>Plan généré</b>Score viabilité · 60s</div>
+            <div class="nl-lr-stamp">BPI ready</div>
+          </div>
+        </div>
+
+        <div class="nl-float-chip nl-float-chip-1" id="chip1">
+          <span class="nl-ic">€</span>
+          <span><span class="nl-big num">185 000€</span><br/><span style="color:var(--ink-3)">CA An 3</span></span>
+        </div>
+        <div class="nl-float-chip nl-float-chip-2" id="chip2">
+          <span class="nl-ic">%</span>
+          <span><span class="nl-big num">71% marge</span><br/><span style="color:var(--ink-3)">brute</span></span>
+        </div>
+        <div class="nl-float-chip nl-float-chip-3" id="chip3">
+          <span class="nl-ic">✓</span>
+          <span><span class="nl-big">SAS</span><br/><span style="color:var(--ink-3)">statut conseillé</span></span>
+        </div>
       </div>
     </div>
-  </section>
-  <!-- SECTORS BAND -->
-  <div class="sectors-band-wrapper">
-    <div class="sectors-label">EADEE FONCTIONNE POUR TOUS LES SECTEURS</div>
-    <div class="sectors-band">
-      <div class="sectors-track">
-        <span class="sectors-item">Restauration</span><span class="sectors-sep">&middot;</span>
-        <span class="sectors-item">Conciergerie Airbnb</span><span class="sectors-sep">&middot;</span>
-        <span class="sectors-item">App &amp; SaaS</span><span class="sectors-sep">&middot;</span>
-        <span class="sectors-item">Coaching pro</span><span class="sectors-sep">&middot;</span>
-        <span class="sectors-item">E-commerce</span><span class="sectors-sep">&middot;</span>
-        <span class="sectors-item">Artisanat</span><span class="sectors-sep">&middot;</span>
-        <span class="sectors-item">Freelance</span><span class="sectors-sep">&middot;</span>
-        <span class="sectors-item">Beauté &amp; bien-être</span><span class="sectors-sep">&middot;</span>
-        <span class="sectors-item">Sport &amp; fitness</span><span class="sectors-sep">&middot;</span>
-        <span class="sectors-item">Consulting B2B</span><span class="sectors-sep">&middot;</span>
-        <span class="sectors-item">Boutique physique</span><span class="sectors-sep">&middot;</span>
-        <span class="sectors-item">Formation en ligne</span><span class="sectors-sep">&middot;</span>
-        <span class="sectors-item">Restauration</span><span class="sectors-sep">&middot;</span>
-        <span class="sectors-item">Conciergerie Airbnb</span><span class="sectors-sep">&middot;</span>
-        <span class="sectors-item">App &amp; SaaS</span><span class="sectors-sep">&middot;</span>
-        <span class="sectors-item">Coaching pro</span><span class="sectors-sep">&middot;</span>
-        <span class="sectors-item">E-commerce</span><span class="sectors-sep">&middot;</span>
-        <span class="sectors-item">Artisanat</span><span class="sectors-sep">&middot;</span>
-        <span class="sectors-item">Freelance</span><span class="sectors-sep">&middot;</span>
-        <span class="sectors-item">Beauté &amp; bien-être</span><span class="sectors-sep">&middot;</span>
-        <span class="sectors-item">Sport &amp; fitness</span><span class="sectors-sep">&middot;</span>
-        <span class="sectors-item">Consulting B2B</span><span class="sectors-sep">&middot;</span>
-        <span class="sectors-item">Boutique physique</span><span class="sectors-sep">&middot;</span>
-        <span class="sectors-item">Formation en ligne</span><span class="sectors-sep">&middot;</span>
+
+    <div class="nl-hero-foot">
+      <div class="nl-avatars">
+        <div class="nl-avatar-stack" aria-hidden="true">
+          <span>M</span><span>S</span><span>L</span><span>K</span><span>+</span>
+        </div>
+        <p class="nl-avatar-cap">Utilisé par des <b>milliers d'entrepreneurs</b> en France</p>
+      </div>
+      <div></div>
+      <div class="nl-hero-checks">
+        <span class="nl-check">Compatible banque &amp; BPI France</span>
+        <span class="nl-check">Export PDF prêt à envoyer</span>
+        <span class="nl-check">Sans abonnement</span>
       </div>
     </div>
   </div>
+</section>
 
-  <!-- ========== COMMENT CA MARCHE ========== -->
-  <section class="how-section fade-up" id="howSection">
-    <div class="how-inner">
-      <div class="how-tag">Le process</div>
-      <h2 class="how-h2">De l'idée au plan signé. En 3 étapes.</h2>
-      <div class="how-grid">
-        <div class="how-card">
-          <span class="how-num">01</span>
-          <div class="how-icon">
-            <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="10" fill="rgba(107,143,239,0.1)"/><path d="M12 18h12M12 13h8M12 23h6" stroke="#6b8fef" stroke-width="1.8" stroke-linecap="round"/></svg>
-          </div>
-          <div class="how-title">Décris ton idée</div>
-          <p class="how-desc">Une phrase suffit. Ton secteur, ta ville, ton budget. Pas de formulaire interminable.</p>
-        </div>
-        <div class="how-card">
-          <span class="how-num">02</span>
-          <div class="how-icon">
-            <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="10" fill="rgba(167,139,250,0.1)"/><circle cx="18" cy="18" r="7" stroke="#a78bfa" stroke-width="1.8"/><path d="M18 11v2M18 25v2M11 18h2M25 18h2" stroke="#a78bfa" stroke-width="1.8" stroke-linecap="round"/></svg>
-          </div>
-          <div class="how-title">EADEE structure tout</div>
-          <p class="how-desc">Marché, concurrents, stratégie, finances, juridique, démarches. 23 sections générées et personnalisées à ton projet.</p>
-        </div>
-        <div class="how-card">
-          <span class="how-num">03</span>
-          <div class="how-icon">
-            <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="10" fill="rgba(52,211,153,0.1)"/><path d="M13 18l3.5 3.5L23 14" stroke="#34d399" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-          <div class="how-title">Tu récupères un plan prêt à l'emploi</div>
-          <p class="how-desc">Projections 3 ans, emails rédigés, checklist des démarches. Compatible banque et BPI France si tu en as besoin.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- FEATURES TR STYLE — 3 sections alternantes -->
-  <div class="tr-features" id="featuresSection">
-
-    <!-- SECTION 1 — Score de viabilité -->
-    <div class="tr-section">
-      <div class="tr-visual">
-        <div class="tr-visual-card">
-          <div class="tr-score-lbl">Score EADEE · VélôBretagne</div>
-          <div class="tr-score-big">87<sub>/100</sub></div>
-          <div class="tr-score-bar"><div class="tr-score-bar-fill"></div></div>
-          <div class="tr-score-verdict">Projet viable — Fort potentiel de marché</div>
-          <div class="tr-score-stats">
-            <div class="tr-score-stat"><span>1,8 Mds€</span><small>Marché</small></div>
-            <div class="tr-score-stat"><span>+22%</span><small>Croissance</small></div>
-            <div class="tr-score-stat"><span>8 400</span><small>Clients</small></div>
-          </div>
-        </div>
-      </div>
-      <div class="tr-text">
-        <h2 class="tr-h2">Sais-tu vraiment si ton projet est viable ?<em>Avant d'investir un seul euro.</em></h2>
-        <p class="tr-p">EADEE analyse ton idée sur 100 points avant que tu dépenses quoi que ce soit. Marché, concurrents, modèle économique — tout est passé au crible.</p>
-        <div class="tr-bullets">
-          <div><div class="tr-bullet-title">Analyse de marché chiffrée</div><div class="tr-bullet-desc">Taille, tendances, part de marché cible — adapté à ton secteur en France.</div></div>
-          <div><div class="tr-bullet-title">4 concurrents réels avec leurs prix</div><div class="tr-bullet-desc">Leurs failles identifiées. Ton positionnement différenciant clarifié.</div></div>
-          <div><div class="tr-bullet-title">Un verdict clair et actionnable</div><div class="tr-bullet-desc">Score /100 avec explication directe : ce qui est solide, ce qui doit évoluer.</div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SECTION 2 — Finances (inversée) -->
-    <div class="tr-section tr-section-rev">
-      <div class="tr-text">
-        <h2 class="tr-h2">Des projections financières<em>construites, pas inventées.</em></h2>
-        <p class="tr-p">Chaque chiffre est étiqueté : vérifié, estimé, ou hypothèse. Tu sais exactement ce qui est solide et ce qui reste à valider avant ton RDV bancaire.</p>
-        <div class="tr-bullets">
-          <div><div class="tr-bullet-title">CA mois 1, 3, 6, An 1 et projection An 3</div><div class="tr-bullet-desc">Seuil de rentabilité, point mort, BFR et tableau d'amortissement calculés.</div></div>
-          <div><div class="tr-bullet-title">Détail complet des charges</div><div class="tr-bullet-desc">Fixes, variables, investissements — chaque poste justifié. Export PDF structuré et lisible.</div></div>
-          <div><div class="tr-bullet-title">3 scénarios documentés</div><div class="tr-bullet-desc">Pessimiste, réaliste, optimiste — avec les hypothèses expliquées pour chacun.</div></div>
-        </div>
-      </div>
-      <div class="tr-visual">
-        <div class="tr-visual-card" style="padding:20px 20px 16px">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
-            <div>
-              <div class="tr-rev-lbl" style="margin-bottom:4px">Projections CA · VélôBretagne</div>
-              <div style="font-family:'Bebas Neue',sans-serif;font-size:30px;color:#ecedf2;line-height:1.1">185 000€ <span style="font-size:13px;font-family:'Geist',sans-serif;font-weight:400;color:#7a7f9a">projection an 3</span></div>
-            </div>
-            <div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end;padding-top:2px">
-              <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:#7a7f9a;font-family:'DM Mono',monospace">
-                <div style="width:11px;height:11px;background:#a78bfa;border-radius:2px;flex-shrink:0"></div>CA mensuel
-              </div>
-              <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:#7a7f9a;font-family:'DM Mono',monospace">
-                <div style="width:18px;height:1.5px;background:rgba(122,127,154,0.7);flex-shrink:0;margin:0 1px"></div>Break-even
-              </div>
-            </div>
-          </div>
-          <div style="position:relative;width:100%;height:180px;margin-bottom:12px">
-            <canvas id="landingRevChart" style="display:block;width:100%;height:100%"></canvas>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
-            <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:11px 13px">
-              <div style="font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:#7a7f9a;margin-bottom:4px">Marge brute</div>
-              <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:#a78bfa;line-height:1">71%</div>
-            </div>
-            <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:11px 13px">
-              <div style="font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:#7a7f9a;margin-bottom:4px">Break-even</div>
-              <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:#a78bfa;line-height:1">Mois 4</div>
-            </div>
-            <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:11px 13px">
-              <div style="font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:#7a7f9a;margin-bottom:4px">ROI initial</div>
-              <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:#a78bfa;line-height:1">340%</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SECTION 3 — Conseiller 24h/24 -->
-    <div class="tr-section" id="tr-section-3">
-      <div class="tr-visual">
-        <div class="tr-visual-card">
-          <div class="tr-chat-header">
-            <div class="tr-chat-dot"></div>
-            Expert EADEE · En ligne
-          </div>
-          <div class="tr-chat-msgs">
-            <div class="tr-chat-bot">Ta marge de <strong>71%</strong> est solide. Je recommande les partenariats hôtels avant la pub — ROI 3x plus rapide et aucun coût d'acquisition initial.</div>
-            <div class="tr-chat-user-msg">Comment signer mes 10 premiers clients ?</div>
-            <div class="tr-chat-bot">Commence par ton réseau proche : identifie <strong>20 contacts ciblés</strong>, envoie le template de prospection qu'on a préparé. Objectif : 3 rendez-vous cette semaine.</div>
-          </div>
-        </div>
-      </div>
-      <div class="tr-text">
-        <h2 class="tr-h2">Conseiller disponible.<em>24 heures sur 24.</em></h2>
-        <p class="tr-p">Ton Expert EADEE connaît chaque ligne de ton plan. Il répond, affine et te guide — à n'importe quelle heure, sans attente.</p>
-        <div class="tr-bullets">
-          <div><div class="tr-bullet-title">Connaissance totale de ton plan</div><div class="tr-bullet-desc">Toutes les données de ton projet en mémoire. Pas besoin de tout ré-expliquer à chaque question.</div></div>
-          <div><div class="tr-bullet-title">Business, stratégie, finances</div><div class="tr-bullet-desc">Pose n'importe quelle question : il répond avec du concret adapté à ton secteur, pas des généralités.</div></div>
-          <div><div class="tr-bullet-title">Mise à jour du plan en direct</div><div class="tr-bullet-desc">Il peut modifier, affiner ou régénérer des sections entières selon tes retours immédiats.</div></div>
-        </div>
-      </div>
-    </div>
-    <!-- SECTION 4 — Compatibilité bancaire -->
-    <div class="tr-section tr-section-rev">
-      <div class="tr-text">
-        <h2 class="tr-h2">Tu prépares un dossier bancaire ou BPI ?<em>EADEE est structuré pour ça aussi.</em></h2>
-        <p class="tr-p">EADEE suit la structure standard demandée par les banques françaises et BPI France. Ce qu'on te dit clairement : EADEE te fait gagner plusieurs semaines de structuration. Pour un RDV bancaire, fais valider les chiffres par un expert-comptable ou ta CCI — on t'indique les ressources gratuites directement dans ton plan.</p>
-        <div class="tr-bullets">
-          <div><div class="tr-bullet-title">✓ Plan de financement besoins / ressources</div><div class="tr-bullet-desc">Équilibré et justifié — le tableau n°1 que cherche un banquier.</div></div>
-          <div><div class="tr-bullet-title">✓ Score de bancabilité /100</div><div class="tr-bullet-desc">Sur les 6 critères réels évalués par les banques : apport, point mort, trésorerie, garanties…</div></div>
-          <div><div class="tr-bullet-title">✓ Checklist documents + ressources gratuites</div><div class="tr-bullet-desc">Documents bloquants vs souhaitables. Contacts CCI, BGE, BPI inclus dans chaque plan.</div></div>
-        </div>
-      </div>
-      <div class="tr-visual">
-        <div class="tr-visual-card">
-          <div class="tr-score-lbl">Score bancabilité · VélôBretagne</div>
-          <div class="tr-score-big">78<sub>/100</sub></div>
-          <div class="tr-score-bar"><div class="tr-score-bar-fill" style="width:78%"></div></div>
-          <div class="tr-score-verdict">Dossier solide — Apport à renforcer</div>
-          <div class="tr-score-stats">
-            <div class="tr-score-stat"><span>✓</span><small>Plan financement</small></div>
-            <div class="tr-score-stat"><span>✓</span><small>Tréso 12 mois</small></div>
-            <div class="tr-score-stat"><span>✓</span><small>Bilan 3 ans</small></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SECTION 5 — Grille 23 sections -->
-    </div><!-- close tr-features -->
-    <section class="sections-grid-section fade-up">
-      <div class="section-tag">CE QUE TU OBTIENS</div>
-      <h2 class="section-h2">23 sections.<em>Rien n'est laissé au hasard.</em></h2>
-      <p class="sections-grid-sub">Chaque plan Eadee contient ces 23 sections, complètes et personnalisées à ton projet. Aucun copier-coller, aucune section vide.</p>
-
-      <div class="grid-filters">
-        <button class="grid-filter active" data-cat="all">Toutes (23)</button>
-        <button class="grid-filter" data-cat="strategie">Stratégie (6)</button>
-        <button class="grid-filter" data-cat="marche">Marché (2)</button>
-        <button class="grid-filter" data-cat="finance">Finance (7)</button>
-        <button class="grid-filter" data-cat="juridique">Juridique (4)</button>
-        <button class="grid-filter" data-cat="action">Action (4)</button>
-      </div>
-
-            <div class="sections-grid">
-        <!-- Stratégie (6) -->
-        <div class="grid-card grid-card-strategie" data-cat="strategie"><div class="grid-card-num">01</div><h3 class="grid-card-title">Résumé exécutif</h3><p class="grid-card-desc">La synthèse de ton projet en 1 paragraphe percutant pour accrocher banquiers et investisseurs.</p><span class="grid-card-cat-tag">Stratégie</span></div>
-        <div class="grid-card grid-card-strategie" data-cat="strategie"><div class="grid-card-num">02</div><h3 class="grid-card-title">Présentation du porteur</h3><p class="grid-card-desc">Template structuré pour présenter ton parcours, tes compétences, ta légitimité.</p><span class="grid-card-cat-tag">Stratégie</span></div>
-        <div class="grid-card grid-card-strategie" data-cat="strategie"><div class="grid-card-num">03</div><h3 class="grid-card-title">Présentation du projet</h3><p class="grid-card-desc">Origine, vision, mission. Le pourquoi de ton entreprise raconté de façon mémorable.</p><span class="grid-card-cat-tag">Stratégie</span></div>
-        <div class="grid-card grid-card-strategie" data-cat="strategie"><div class="grid-card-num">04</div><h3 class="grid-card-title">Proposition de valeur unique</h3><p class="grid-card-desc">Ton USP clairement formulée : pourquoi un client te choisit toi et pas un autre.</p><span class="grid-card-cat-tag">Stratégie</span></div>
-        <div class="grid-card grid-card-strategie" data-cat="strategie"><div class="grid-card-num">05</div><h3 class="grid-card-title">Modèle économique</h3><p class="grid-card-desc">Tes offres, tes prix, comment tu génères de la marge. Avec exemples chiffrés.</p><span class="grid-card-cat-tag">Stratégie</span></div>
-        <div class="grid-card grid-card-strategie" data-cat="strategie"><div class="grid-card-num">06</div><h3 class="grid-card-title">Stratégie commerciale</h3><p class="grid-card-desc">Positionnement marketing, tunnel de vente, promesse de marque et canaux d'acquisition.</p><span class="grid-card-cat-tag">Stratégie</span></div>
-        <!-- Marché (2) -->
-        <div class="grid-card grid-card-marche" data-cat="marche"><div class="grid-card-num">07</div><h3 class="grid-card-title">Étude de marché</h3><p class="grid-card-desc">Taille, croissance, tendances. Sources sectorielles citées. Adapté à la France.</p><span class="grid-card-cat-tag">Marché</span></div>
-        <div class="grid-card grid-card-marche" data-cat="marche"><div class="grid-card-num">08</div><h3 class="grid-card-title">Analyse concurrentielle</h3><p class="grid-card-desc">Tes 4-5 concurrents réels, leurs failles, leurs prix, ton positionnement différenciant.</p><span class="grid-card-cat-tag">Marché</span></div>
-        <!-- Finance (7) -->
-        <div class="grid-card grid-card-finance" data-cat="finance"><div class="grid-card-num">09</div><h3 class="grid-card-title">Plan de financement</h3><p class="grid-card-desc">Besoins vs ressources équilibrés. Le tableau n°1 regardé par ton banquier avant tout.</p><span class="grid-card-cat-tag">Finance</span></div>
-        <div class="grid-card grid-card-finance" data-cat="finance"><div class="grid-card-num">10</div><h3 class="grid-card-title">Plan d'investissement</h3><p class="grid-card-desc">Chaque poste justifié par niveau de priorité. Matériel, immatériel, BFR.</p><span class="grid-card-cat-tag">Finance</span></div>
-        <div class="grid-card grid-card-finance" data-cat="finance"><div class="grid-card-num">11</div><h3 class="grid-card-title">Compte de résultat 3 ans</h3><p class="grid-card-desc">CA, charges, résultat sur 3 années glissantes. An 1 mensuel + années 2–3 annuelles.</p><span class="grid-card-cat-tag">Finance</span></div>
-        <div class="grid-card grid-card-finance" data-cat="finance"><div class="grid-card-num">12</div><h3 class="grid-card-title">Plan de trésorerie 12 mois</h3><p class="grid-card-desc">Entrées et sorties mensuelles. Alertes si tension de trésorerie détectée.</p><span class="grid-card-cat-tag">Finance</span></div>
-        <div class="grid-card grid-card-finance" data-cat="finance"><div class="grid-card-num">13</div><h3 class="grid-card-title">Bilan prévisionnel 3 ans</h3><p class="grid-card-desc">Actif et passif simplifié à fin d'an 1, 2 et 3. Vision patrimoniale de l'entreprise.</p><span class="grid-card-cat-tag">Finance</span></div>
-        <div class="grid-card grid-card-finance" data-cat="finance"><div class="grid-card-num">14</div><h3 class="grid-card-title">Seuil de rentabilité</h3><p class="grid-card-desc">Point mort calculé + délai pour l'atteindre en mois. À partir de quand tu es rentable.</p><span class="grid-card-cat-tag">Finance</span></div>
-        <div class="grid-card grid-card-finance" data-cat="finance"><div class="grid-card-num">15</div><h3 class="grid-card-title">Tableau d'amortissement</h3><p class="grid-card-desc">Mensualité estimée, capacité de remboursement, option différé conseillée si besoin.</p><span class="grid-card-cat-tag">Finance</span></div>
-        <!-- Juridique (4) -->
-        <div class="grid-card grid-card-juridique" data-cat="juridique"><div class="grid-card-num">16</div><h3 class="grid-card-title">Aspects juridiques</h3><p class="grid-card-desc">Statut recommandé (SAS, EI, SARL…) avec justification chiffrée. Autorisations sectorielles.</p><span class="grid-card-cat-tag">Juridique</span></div>
-        <div class="grid-card grid-card-juridique" data-cat="juridique"><div class="grid-card-num">17</div><h3 class="grid-card-title">Aspects organisationnels</h3><p class="grid-card-desc">Équipe, locaux, sous-traitance. Comment ton activité s'organise au quotidien.</p><span class="grid-card-cat-tag">Juridique</span></div>
-        <div class="grid-card grid-card-juridique" data-cat="juridique"><div class="grid-card-num">18</div><h3 class="grid-card-title">Aides &amp; subventions</h3><p class="grid-card-desc">BPI, ACRE, Pôle Emploi, prêts d'honneur — ce à quoi tu as droit, avec montants et liens.</p><span class="grid-card-cat-tag">Juridique</span></div>
-        <div class="grid-card grid-card-juridique" data-cat="juridique"><div class="grid-card-num">19</div><h3 class="grid-card-title">Démarches administratives</h3><p class="grid-card-desc">Les 6 étapes dans l'ordre, avec délais et coûts réels. De l'immatriculation à l'ouverture.</p><span class="grid-card-cat-tag">Juridique</span></div>
-        <!-- Action (4) -->
-        <div class="grid-card grid-card-action" data-cat="action"><div class="grid-card-num">20</div><h3 class="grid-card-title">Analyse des risques</h3><p class="grid-card-desc">5 risques concrets avec plan de mitigation pour chacun. Risques marché, financiers, légaux.</p><span class="grid-card-cat-tag">Action</span></div>
-        <div class="grid-card grid-card-action" data-cat="action"><div class="grid-card-num">21</div><h3 class="grid-card-title">Plan d'action 90 jours</h3><p class="grid-card-desc">Actions prioritaires sur 3 mois. Concret, daté, mesurable. Tes 12 premières décisions.</p><span class="grid-card-cat-tag">Action</span></div>
-        <div class="grid-card grid-card-action" data-cat="action"><div class="grid-card-num">22</div><h3 class="grid-card-title">Score de viabilité &amp; bancabilité</h3><p class="grid-card-desc">Double score /100 : viabilité du projet + solidité du dossier financier.</p><span class="grid-card-cat-tag">Action</span></div>
-        <div class="grid-card grid-card-action" data-cat="action"><div class="grid-card-num">23</div><h3 class="grid-card-title">Checklist dossier complet</h3><p class="grid-card-desc">Documents à rassembler classés par priorité. Bloquants vs souhaitables — pour banque et BPI.</p><span class="grid-card-cat-tag">Action</span></div>
-      </div>
-      <div class="grid-footer">
-        <div class="grid-footer-text"><strong>23 sections, 1 plan, 60 secondes.</strong> Chaque section est <span class="hl">générée et personnalisée</span> à partir de ton idée et de tes données. Aucune section n'est un copier-coller.</div>
-        <button class="grid-footer-cta" onclick="showAuth('signup')">Générer mon plan →</button>
-      </div>
-    </section>
-
-  <!-- ========== TÉMOIGNAGES ========== -->
-  <section class="testi-section fade-up">
-    <div class="testi-inner">
-      <div class="testi-tag">Ils ont lancé avec Eadee</div>
-      <h2 class="testi-h2">Des projets vrais.<br><em>Des résultats vrais.</em></h2>
-      <div class="testi-grid">
-        <div class="testi-card">
-          <div class="testi-top">
-            <div class="testi-avatar" style="background:linear-gradient(135deg,#6b8fef,#a78bfa)">M</div>
-            <div>
-              <div class="testi-name">Marie L.</div>
-              <div class="testi-loc">34 ans · Lyon</div>
-            </div>
-            <div class="testi-stars">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="#fbbf24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg><svg width="11" height="11" viewBox="0 0 24 24" fill="#fbbf24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg><svg width="11" height="11" viewBox="0 0 24 24" fill="#fbbf24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg><svg width="11" height="11" viewBox="0 0 24 24" fill="#fbbf24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg><svg width="11" height="11" viewBox="0 0 24 24" fill="#fbbf24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
-            </div>
-          </div>
-          <p class="testi-quote">"J'avais une idée claire mais aucune idée de comment la structurer. EADEE m'a sorti un plan complet en moins d'une minute. J'ai juste eu à compléter les vrais documents par dessus — la BPI a validé mon prêt de 15 000€ sans difficulté."</p>
-          <div class="testi-meta">Conciergerie Airbnb · 58s · Score 91/100</div>
-        </div>
-        <div class="testi-card">
-          <div class="testi-top">
-            <div class="testi-avatar" style="background:linear-gradient(135deg,#a78bfa,#f472b6)">S</div>
-            <div>
-              <div class="testi-name">Sofiane B.</div>
-              <div class="testi-loc">27 ans · Marseille</div>
-            </div>
-            <div class="testi-stars">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="#fbbf24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg><svg width="11" height="11" viewBox="0 0 24 24" fill="#fbbf24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg><svg width="11" height="11" viewBox="0 0 24 24" fill="#fbbf24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg><svg width="11" height="11" viewBox="0 0 24 24" fill="#fbbf24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg><svg width="11" height="11" viewBox="0 0 24 24" fill="#fbbf24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
-            </div>
-          </div>
-          <p class="testi-quote">"J'avais abandonné l'idée de me lancer à cause du business plan. EADEE m'a débloqué en 2 minutes. J'avais enfin quelque chose de concret à montrer à ma conseillère Pôle Emploi."</p>
-          <div class="testi-meta">Dark kitchen healthy · 72s · Score 84/100</div>
-        </div>
-        <div class="testi-card">
-          <div class="testi-top">
-            <div class="testi-avatar" style="background:linear-gradient(135deg,#34d399,#6b8fef)">L</div>
-            <div>
-              <div class="testi-name">Léa K.</div>
-              <div class="testi-loc">41 ans · Nantes</div>
-            </div>
-            <div class="testi-stars">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="#fbbf24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg><svg width="11" height="11" viewBox="0 0 24 24" fill="#fbbf24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg><svg width="11" height="11" viewBox="0 0 24 24" fill="#fbbf24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg><svg width="11" height="11" viewBox="0 0 24 24" fill="#fbbf24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg><svg width="11" height="11" viewBox="0 0 24 24" fill="#fbbf24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
-            </div>
-          </div>
-          <p class="testi-quote">"Ce qui m'a le plus surpris c'est la qualité des projections financières. C'était structuré, cohérent, et mon expert-comptable n'a eu qu'à valider — au lieu de repartir de zéro."</p>
-          <div class="testi-meta">Cabinet de coaching B2B · 65s · Score 88/100</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-
-
-
-  <!-- ========== TRANSPARENCE ========== -->
-  <section class="eadee-transp">
-    <div class="eadee-transp-inner">
-
-      <div class="eadee-transp-label">Transparence</div>
-
-      <h2 class="eadee-transp-h2">Soyons clairs sur ce qu'EADEE fait vraiment.</h2>
-
-      <div class="eadee-transp-grid">
-
-        <!-- Carte OBTIENS -->
-        <div class="eadee-transp-card eadee-transp-card--green animate-on-scroll">
-          <div class="eadee-transp-card-header">
-            <svg class="eadee-transp-card-icon" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-              <circle cx="9" cy="9" r="8" stroke="#34d399" stroke-width="1.4"/>
-              <path d="M5.5 9l2.5 2.5L12.5 6" stroke="#34d399" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <span class="eadee-transp-card-label">CE QUE TU OBTIENS</span>
-          </div>
-          <ul class="eadee-transp-list">
-            <li>Un business plan complet en 23 sections, personnalisé à ton projet</li>
-            <li>Des projections financières 3 ans cohérentes et justifiées</li>
-            <li>Une stratégie commerciale, des emails rédigés, tes démarches admin</li>
-            <li>Un score de viabilité pour savoir si ton idée tient la route</li>
-            <li>4 à 6 semaines de structuration économisées — en 60 secondes</li>
-          </ul>
-        </div>
-
-        <!-- Carte NE REMPLACE PAS -->
-        <div class="eadee-transp-card eadee-transp-card--red animate-on-scroll" style="transition-delay:120ms">
-          <div class="eadee-transp-card-header">
-            <svg class="eadee-transp-card-icon" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-              <circle cx="9" cy="9" r="8" stroke="#f87171" stroke-width="1.4"/>
-              <path d="M6 6l6 6M12 6l-6 6" stroke="#f87171" stroke-width="1.6" stroke-linecap="round"/>
-            </svg>
-            <span class="eadee-transp-card-label">CE QU'EADEE NE REMPLACE PAS</span>
-          </div>
-          <ul class="eadee-transp-list">
-            <li>Les vrais documents physiques (Kbis, devis, avis d'imposition)</li>
-            <li>La validation d'un expert-comptable si tu vas en banque</li>
-            <li>La garantie d'obtenir un financement</li>
-            <li>Le conseil d'un juriste ou d'un conseiller BPI</li>
-          </ul>
-        </div>
-
-      </div>
-
-      <p class="eadee-transp-footer animate-on-scroll" style="transition-delay:240ms">
-        C'est un outil puissant. Pas une baguette magique.<br>
-        Et on préfère te le dire maintenant.
-      </p>
-
-    </div>
-  </section>
-
-  <!-- PRICING -->
-  <div class="pricing-wrap" id="pricingSection">
-
-    <div class="section-tag">Investissement</div>
-    <h2 class="section-h2">Simple. Transparent.<br>Sans surprise.</h2>
-
-    <div class="pricing-grid">
-
-      <!-- SOLO -->
-      <div class="price-card" onclick="selectPlan('solo')">
-        
-        <div class="plan-name">Solo</div>
-        <div class="plan-subtitle">1 génération complète</div>
-        <div class="plan-amount-wrap">
-          <div class="plan-original-price" data-promo-original style="display:none"><s>18,55€</s></div>
-          <div class="plan-amount"><sup>€</sup>12.99</div>
-        </div>
-        <div class="plan-per">/ 1 génération</div>
-        <div class="plan-credits-visual">
-          <div class="pcv-dot active"></div>
-          <div class="pcv-dot"></div>
-          <div class="pcv-dot"></div>
-          <div class="pcv-dot"></div>
-          <div class="pcv-dot"></div>
-          <div class="pcv-dot"></div>
-          <div class="pcv-dot"></div>
-          <div class="pcv-dot"></div>
-        </div>
-        <div class="plan-credits-label"><strong>1 crédit</strong> · <span class="plan-per-gen">12,99€ / génération</span></div>
-        <button class="plan-cta" onclick="selectPlan('solo')">Acheter Solo</button>
-      </div>
-
-      <!-- PRO -->
-      <div class="price-card popular" onclick="selectPlan('pro')">
-        <div class="pop-badge">✦ Populaire</div>
-        
-        <div class="plan-name">Pro</div>
-        <div class="plan-subtitle">Pack 3 générations</div>
-        <div class="plan-amount-wrap">
-          <div class="plan-original-price" data-promo-original style="display:none"><s>42,84€</s></div>
-          <div class="plan-amount"><sup>€</sup>29.99</div>
-        </div>
-        <div class="plan-per">/ pack 3 générations</div>
-        <div class="plan-credits-visual">
-          <div class="pcv-dot active"></div>
-          <div class="pcv-dot active"></div>
-          <div class="pcv-dot active"></div>
-          <div class="pcv-dot"></div>
-          <div class="pcv-dot"></div>
-          <div class="pcv-dot"></div>
-          <div class="pcv-dot"></div>
-          <div class="pcv-dot"></div>
-        </div>
-        <div class="plan-credits-label"><strong>3 crédits</strong> · <span class="plan-per-gen">10,00€ / génération</span></div>
-        <button class="plan-cta" onclick="selectPlan('pro')">Acheter Pro</button>
-      </div>
-
-      <!-- EMPIRE -->
-      <div class="price-card plan-empire" onclick="selectPlan('empire')">
-        <div class="pop-badge" style="background:linear-gradient(135deg,#a78bfa,#f472b6);color:#fff;">✦ Meilleure valeur</div>
-        
-        <div class="plan-name">Empire</div>
-        <div class="plan-subtitle">Pack 8 générations</div>
-        <div class="plan-amount-wrap">
-          <div class="plan-original-price" data-promo-original style="display:none"><s>85,70€</s></div>
-          <div class="plan-amount"><sup>€</sup>59.99</div>
-        </div>
-        <div class="plan-per">/ pack 8 générations</div>
-        <div class="plan-credits-visual">
-          <div class="pcv-dot active"></div>
-          <div class="pcv-dot active"></div>
-          <div class="pcv-dot active"></div>
-          <div class="pcv-dot active"></div>
-          <div class="pcv-dot active"></div>
-          <div class="pcv-dot active"></div>
-          <div class="pcv-dot active"></div>
-          <div class="pcv-dot active"></div>
-        </div>
-        <div class="plan-credits-label"><strong>8 crédits</strong> · <span class="plan-per-gen">7,50€ / génération</span></div>
-        <button class="plan-cta plan-cta-empire" onclick="selectPlan('empire')">Acheter Empire</button>
-      </div>
-
-    </div>
-
-    <!-- Bannière "Toutes les fonctionnalités identiques" (L2) -->
-    <div class="pricing-features-banner">
-      <div class="pfb-title">✦ Les 3 packs payants incluent exactement les mêmes fonctionnalités</div>
-      <div class="pfb-tags">
-        <span class="pf-tag">23 sections complètes</span>
-        <span class="pf-sep">·</span>
-        <span class="pf-tag">Score viabilité /100</span>
-        <span class="pf-sep">·</span>
-        <span class="pf-tag">Projections 3 ans</span>
-        <span class="pf-sep">·</span>
-        <span class="pf-tag">Emails rédigés</span>
-        <span class="pf-sep">·</span>
-        <span class="pf-tag">Démarches admin</span>
-        <span class="pf-sep">·</span>
-        <span class="pf-tag">Expert Eadee 24h/24</span>
-        <span class="pf-sep">·</span>
-        <span class="pf-tag">Export PDF</span>
-      </div>
-      <div class="pfb-sub">Seul le nombre de générations change. Plus t'en achètes, moins tu paies par plan.</div>
-    </div>
-
+<!-- ========================= SECTOR MARQUEE ========================= -->
+<div class="nl-marquee-band">
+  <div class="nl-label">
+    <span class="nl-eyebrow">EADEE fonctionne pour tous les secteurs</span>
   </div>
+  <div class="nl-marquee" aria-hidden="true">
+    <span>Restauration</span><span>Conciergerie Airbnb</span><span>App &amp; SaaS</span><span>Coaching pro</span><span>E-commerce</span><span>Artisanat</span><span>Freelance</span><span>Beauté &amp; bien-être</span><span>Sport &amp; fitness</span><span>Consulting B2B</span><span>Boutique physique</span><span>Formation en ligne</span>
+    <span>Restauration</span><span>Conciergerie Airbnb</span><span>App &amp; SaaS</span><span>Coaching pro</span><span>E-commerce</span><span>Artisanat</span><span>Freelance</span><span>Beauté &amp; bien-être</span><span>Sport &amp; fitness</span><span>Consulting B2B</span><span>Boutique physique</span><span>Formation en ligne</span>
+  </div>
+</div>
 
-  <!-- ========== FAQ ========== -->
-  <section class="faq-section fade-up" id="faqSection">
-    <div class="faq-inner">
-      <div class="faq-tag">Questions fréquentes</div>
-      <h2 class="faq-h2">Tout ce que tu veux savoir.<br><em>Avant de te lancer.</em></h2>
-      <div class="faq-list" id="faqList">
-        <div class="faq-item">
-          <button class="faq-q" onclick="toggleFaq(this)">Le plan EADEE est-il vraiment complet ?<svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><polyline points="6,9 12,15 18,9" stroke="#9db8f8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-          <div class="faq-a">Oui. 23 sections couvrent l'intégralité d'un business plan professionnel : stratégie, marché, finances, juridique, démarches, risques, plan d'action. Chaque section est générée et personnalisée à ton projet — aucune section générique ou vide.</div>
-        </div>
-        <div class="faq-item">
-          <button class="faq-q" onclick="toggleFaq(this)">Est-ce que mon plan sera pris au sérieux par une banque ou BPI France ?<svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><polyline points="6,9 12,15 18,9" stroke="#9db8f8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-          <div class="faq-a">EADEE suit la structure standard demandée par les banques françaises et BPI France. Des entrepreneurs ont obtenu des financements avec un plan EADEE comme base de travail.<br><br>Ce qu'on te dit honnêtement : un plan généré par IA est un point de départ solide. Pour un RDV bancaire, fais valider les chiffres par un expert-comptable ou ta CCI — on t'indique les ressources gratuites dans chaque plan.</div>
-        </div>
-        <div class="faq-item">
-          <button class="faq-q" onclick="toggleFaq(this)">Quelle différence avec ChatGPT ou un outil gratuit ?<svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><polyline points="6,9 12,15 18,9" stroke="#9db8f8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-          <div class="faq-a">ChatGPT génère du texte. EADEE génère un business plan structuré selon les standards français : plan de financement équilibré, projections cohérentes entre elles, score de viabilité, tableau d'amortissement, checklist des démarches. C'est un outil spécialisé, pas un chatbot généraliste.</div>
-        </div>
-        <div class="faq-item">
-          <button class="faq-q" onclick="toggleFaq(this)">Puis-je modifier le plan après génération ?<svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><polyline points="6,9 12,15 18,9" stroke="#9db8f8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-          <div class="faq-a">Oui, entièrement. Chaque section est éditable. Le conseiller EADEE peut aussi réécrire une section sur simple demande.</div>
-        </div>
-        <div class="faq-item">
-          <button class="faq-q" onclick="toggleFaq(this)">Mes données sont-elles privées ?<svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><polyline points="6,9 12,15 18,9" stroke="#9db8f8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-          <div class="faq-a">Absolument. Hébergement en France, conforme RGPD, aucune revente. Tes idées restent les tiennes, nous ne les utilisons jamais pour entraîner nos modèles.</div>
-        </div>
-        <div class="faq-item">
-          <button class="faq-q" onclick="toggleFaq(this)">Combien de temps prend vraiment la génération ?<svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><polyline points="6,9 12,15 18,9" stroke="#9db8f8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-          <div class="faq-a">Entre 45 et 90 secondes pour un plan complet 23 sections. La durée dépend de la profondeur des recherches marché pour ton secteur.</div>
-        </div>
-        <div class="faq-item">
-          <button class="faq-q" onclick="toggleFaq(this)">Pour quels types de projets Eadee fonctionne ?<svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><polyline points="6,9 12,15 18,9" stroke="#9db8f8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-          <div class="faq-a">Tout projet d'entreprise en France : commerce, service, artisanat, app SaaS, restauration, freelance, e-commerce, import/export, conciergerie, coaching… Si tu as une idée, Eadee l'analyse.</div>
-        </div>
-        <div class="faq-item">
-          <button class="faq-q" onclick="toggleFaq(this)">Que se passe-t-il si le plan ne me convient pas ?<svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><polyline points="6,9 12,15 18,9" stroke="#9db8f8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-          <div class="faq-a">Tu peux régénérer en affinant ton idée. Et nous avons une garantie satisfait ou remboursé 14 jours.</div>
-        </div>
-        <div class="faq-item">
-          <button class="faq-q" onclick="toggleFaq(this)">C'est un abonnement ?<svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><polyline points="6,9 12,15 18,9" stroke="#9db8f8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-          <div class="faq-a">Non. Chaque pack est un paiement unique. Tu achètes des crédits, tu les consommes quand tu veux, sans engagement, sans auto-renouvellement.</div>
-        </div>
+<!-- ========================= PROCESS ========================= -->
+<section id="nl-process">
+  <div class="nl-wrap">
+    <div class="nl-section-head">
+      <div class="nl-left">
+        <span class="nl-eyebrow">Le process</span>
       </div>
+      <h2>De l'idée au plan signé. <em>En 3 étapes.</em></h2>
     </div>
-  </section>
 
-  <!-- ========== FOOTER ENRICHI ========== -->
-  <footer class="footer2">
-    <div class="footer2-grid">
-      <div class="footer2-col footer2-brand">
-        <div style="font-family:'Fraunces',serif;font-size:22px;color:#9db8f8;margin-bottom:8px">EADEE</div>
-        <div style="font-size:13px;color:#7a7f9a;line-height:1.6;max-width:200px;margin-bottom:20px">Le business plan intelligent. Pensé pour la France.</div>
-        <div style="display:flex;gap:12px">
-          <a href="#" class="footer2-social" aria-label="LinkedIn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="2" y="2" width="20" height="20" rx="4" stroke="#7a7f9a" stroke-width="1.5"/><path d="M7 10v7M7 7v.01M11 17v-4a2 2 0 0 1 4 0v4M11 10v7" stroke="#7a7f9a" stroke-width="1.5" stroke-linecap="round"/></svg></a>
-          <a href="#" class="footer2-social" aria-label="Twitter/X"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 4l16 16M4 20L20 4" stroke="#7a7f9a" stroke-width="1.5" stroke-linecap="round"/></svg></a>
-          <a href="#" class="footer2-social" aria-label="Instagram"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="2" y="2" width="20" height="20" rx="5" stroke="#7a7f9a" stroke-width="1.5"/><circle cx="12" cy="12" r="4" stroke="#7a7f9a" stroke-width="1.5"/><circle cx="17.5" cy="6.5" r="1" fill="#7a7f9a"/></svg></a>
+    <div class="nl-process">
+      <div class="nl-step">
+        <div class="nl-step-num"><span>01</span><span>—</span></div>
+        <h3>Décris ton idée</h3>
+        <p>Une phrase suffit. Ton secteur, ta ville, ton budget. Pas de formulaire interminable.</p>
+        <div class="nl-step-glyph">01</div>
+      </div>
+      <div class="nl-step">
+        <div class="nl-step-num"><span>02</span><span>—</span></div>
+        <h3>EADEE structure tout</h3>
+        <p>Marché, concurrents, stratégie, finances, juridique, démarches. 23 sections générées et personnalisées à ton projet.</p>
+        <div class="nl-step-glyph">02</div>
+      </div>
+      <div class="nl-step">
+        <div class="nl-step-num"><span>03</span><span>—</span></div>
+        <h3>Tu récupères un plan prêt à l'emploi</h3>
+        <p>Projections 3 ans, emails rédigés, checklist des démarches. Compatible banque et BPI France si tu en as besoin.</p>
+        <div class="nl-step-glyph">03</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="nl-rule" />
+
+<!-- ========================= FEATURE 1 — VIABILITY ========================= -->
+<section id="nl-features">
+  <div class="nl-wrap">
+    <div class="nl-feature">
+      <div class="nl-feature-text">
+        <span class="nl-eyebrow">Score de viabilité</span>
+        <h2>Sais-tu vraiment si ton projet est viable&nbsp;? <em>Avant d'investir un seul euro.</em></h2>
+        <p class="nl-lead">EADEE analyse ton idée sur 100 points avant que tu dépenses quoi que ce soit. Marché, concurrents, modèle économique — tout est passé au crible.</p>
+        <ul>
+          <li>
+            <span class="nl-ix">01</span>
+            <div>
+              <b>Analyse de marché chiffrée</b>
+              <span class="nl-txt">Taille, tendances, part de marché cible — adapté à ton secteur en France.</span>
+            </div>
+          </li>
+          <li>
+            <span class="nl-ix">02</span>
+            <div>
+              <b>4 concurrents réels avec leurs prix</b>
+              <span class="nl-txt">Leurs failles identifiées. Ton positionnement différenciant clarifié.</span>
+            </div>
+          </li>
+          <li>
+            <span class="nl-ix">03</span>
+            <div>
+              <b>Un verdict clair et actionnable</b>
+              <span class="nl-txt">Score /100 avec explication directe : ce qui est solide, ce qui doit évoluer.</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="nl-feature-visual">
+        <div class="nl-card nl-score-card">
+          <div class="nl-card-head">
+            <span>Score EADEE · VélôBretagne</span>
+            <span class="nl-status-dot">Live</span>
+          </div>
+          <div class="nl-score-big num">87<sup>/100</sup></div>
+          <div class="nl-verdict">Projet viable <em>— Fort potentiel de marché</em></div>
+          <div class="nl-score-stats">
+            <div class="nl-score-stat">
+              <span class="v num">1,8 <em>Mds€</em></span>
+              <span class="l">Marché</span>
+            </div>
+            <div class="nl-score-stat">
+              <span class="v num">+22<em>%</em></span>
+              <span class="l">Croissance</span>
+            </div>
+            <div class="nl-score-stat">
+              <span class="v num">8 400</span>
+              <span class="l">Clients</span>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="footer2-col">
-        <div class="footer2-col-title">Produit</div>
-        <button class="footer2-link footer2-btn" onclick="document.querySelector('.tr-features')?.scrollIntoView({behavior:'smooth'})">Fonctionnalités</button>
-        <button class="footer2-link footer2-btn" onclick="document.querySelector('.pricing-wrap')?.scrollIntoView({behavior:'smooth'})">Tarifs</button>
-        <button class="footer2-link footer2-btn" onclick="showAuth('signup')">Exemples de plans</button>
-        <button class="footer2-link footer2-btn" onclick="document.querySelector('.comp-section')?.scrollIntoView({behavior:'smooth'})">Comparaison</button>
+    </div>
+  </div>
+</section>
+
+<hr class="nl-rule" />
+
+<!-- ========================= FEATURE 2 — PROJECTIONS ========================= -->
+<section>
+  <div class="nl-wrap">
+    <div class="nl-feature nl-reverse">
+      <div class="nl-feature-text">
+        <span class="nl-eyebrow">Projections financières</span>
+        <h2>Des projections financières <em>construites, pas inventées.</em></h2>
+        <p class="nl-lead">Chaque chiffre est étiqueté : vérifié, estimé, ou hypothèse. Tu sais exactement ce qui est solide et ce qui reste à valider avant ton RDV bancaire.</p>
+        <ul>
+          <li>
+            <span class="nl-ix">01</span>
+            <div>
+              <b>CA mois 1, 3, 6, An 1 et projection An 3</b>
+              <span class="nl-txt">Seuil de rentabilité, point mort, BFR et tableau d'amortissement calculés.</span>
+            </div>
+          </li>
+          <li>
+            <span class="nl-ix">02</span>
+            <div>
+              <b>Détail complet des charges</b>
+              <span class="nl-txt">Fixes, variables, investissements — chaque poste justifié. Export PDF structuré et lisible.</span>
+            </div>
+          </li>
+          <li>
+            <span class="nl-ix">03</span>
+            <div>
+              <b>3 scénarios documentés</b>
+              <span class="nl-txt">Pessimiste, réaliste, optimiste — avec les hypothèses expliquées pour chacun.</span>
+            </div>
+          </li>
+        </ul>
       </div>
-      <div class="footer2-col">
-        <div class="footer2-col-title">Ressources</div>
-        <button class="footer2-link footer2-btn">Blog</button>
-        <button class="footer2-link footer2-btn">Guides gratuits</button>
-        <button class="footer2-link footer2-btn" onclick="document.querySelector('.faq-section')?.scrollIntoView({behavior:'smooth'})">FAQ</button>
-        <button class="footer2-link footer2-btn">Exemple PDF</button>
-      </div>
-      <div class="footer2-col">
-        <div class="footer2-col-title">Entreprise</div>
-        <button class="footer2-link footer2-btn" onclick="document.querySelector('.founder-section')?.scrollIntoView({behavior:'smooth'})">À propos</button>
-        <a href="mailto:contact@eadee.fr" class="footer2-link">Nous contacter</a>
-        <button class="footer2-link footer2-btn">Partenariats</button>
-        <button class="footer2-link footer2-btn">Programme affiliation</button>
-      </div>
-      <div class="footer2-col">
-        <div class="footer2-col-title">Légal</div>
-        <button class="footer2-link footer2-btn" onclick="openLegal('mentions')">Mentions légales</button>
-        <button class="footer2-link footer2-btn" onclick="openLegal('cgu')">CGU / CGV</button>
-        <button class="footer2-link footer2-btn" onclick="openLegal('confidentialite')">Confidentialité</button>
-        <button class="footer2-link footer2-btn" onclick="openLegal('cookies')">Cookies</button>
-        <button class="footer2-link footer2-btn" onclick="openLegal('mentions')">RGPD</button>
+
+      <div class="nl-feature-visual">
+        <div class="nl-card nl-proj-card">
+          <div class="nl-card-head">
+            <span>Projections CA · VélôBretagne</span>
+            <span>An 3</span>
+          </div>
+          <div class="nl-big-money num">185 000<sup>€</sup></div>
+          <div class="nl-proj-label">projection an 3</div>
+          <div class="nl-chart" aria-hidden="true">
+            <div class="nl-bar nl-dim" style="height:18%"></div>
+            <div class="nl-bar nl-dim" style="height:26%"></div>
+            <div class="nl-bar nl-dim" style="height:34%"></div>
+            <div class="nl-bar" style="height:44%"></div>
+            <div class="nl-bar" style="height:54%"></div>
+            <div class="nl-bar nl-accent" style="height:62%"></div>
+            <div class="nl-bar nl-accent" style="height:70%"></div>
+            <div class="nl-bar nl-accent" style="height:82%"></div>
+            <div class="nl-bar nl-accent" style="height:94%"></div>
+            <div class="nl-bar nl-accent" style="height:88%"></div>
+            <div class="nl-bar nl-accent" style="height:100%"></div>
+            <div class="nl-bar nl-accent" style="height:96%"></div>
+          </div>
+          <div class="nl-chart-axis">
+            <span>M1</span><span>M3</span><span>M6</span><span>An 1</span><span>An 3</span>
+          </div>
+          <div class="nl-kpi-row">
+            <div class="nl-kpi"><span class="l">Marge brute</span><span class="v num nl-accent">71<em style="font-style:normal">%</em></span></div>
+            <div class="nl-kpi"><span class="l">Break-even</span><span class="v num">Mois 4</span></div>
+            <div class="nl-kpi"><span class="l">ROI initial</span><span class="v num nl-accent">340<em style="font-style:normal">%</em></span></div>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="footer2-bottom">
-      <span class="footer2-copy"><span id="footerYear"></span> EADEE — Tous droits réservés</span>
-      <span class="footer2-contact">
-        Données hébergées en Europe · Conforme RGPD ·
-        <a href="mailto:contact@eadee.fr" style="color:inherit">contact@eadee.fr</a> ·
-        <a href="https://www.cnil.fr/fr/plaintes" target="_blank" rel="noopener" style="color:inherit">Réclamation CNIL</a>
-      </span>
+  </div>
+</section>
+
+<hr class="nl-rule" />
+
+<!-- ========================= FEATURE 3 — EXPERT 24/7 ========================= -->
+<section>
+  <div class="nl-wrap">
+    <div class="nl-feature">
+      <div class="nl-feature-text">
+        <span class="nl-eyebrow">Expert Eadee</span>
+        <h2>Conseiller disponible. <em>24 heures sur 24.</em></h2>
+        <p class="nl-lead">Ton Expert EADEE connaît chaque ligne de ton plan. Il répond, affine et te guide — à n'importe quelle heure, sans attente.</p>
+        <ul>
+          <li>
+            <span class="nl-ix">01</span>
+            <div>
+              <b>Connaissance totale de ton plan</b>
+              <span class="nl-txt">Toutes les données de ton projet en mémoire. Pas besoin de tout ré-expliquer à chaque question.</span>
+            </div>
+          </li>
+          <li>
+            <span class="nl-ix">02</span>
+            <div>
+              <b>Business, stratégie, finances</b>
+              <span class="nl-txt">Pose n'importe quelle question : il répond avec du concret adapté à ton secteur, pas des généralités.</span>
+            </div>
+          </li>
+          <li>
+            <span class="nl-ix">03</span>
+            <div>
+              <b>Mise à jour du plan en direct</b>
+              <span class="nl-txt">Il peut modifier, affiner ou régénérer des sections entières selon tes retours immédiats.</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="nl-feature-visual">
+        <div class="nl-card nl-chat-card">
+          <div class="nl-card-head">
+            <span>Expert EADEE · En ligne</span>
+            <span class="nl-status-dot">Actif</span>
+          </div>
+          <div class="nl-chat-row">
+            <div class="nl-chat-avatar nl-expert">✦</div>
+            <div class="nl-chat-bubble">
+              Ta marge de <b>71%</b> est solide. Je recommande les partenariats hôtels avant la pub — ROI 3× plus rapide et aucun coût d'acquisition initial.
+            </div>
+          </div>
+          <div class="nl-chat-row nl-user">
+            <div class="nl-chat-avatar nl-user-av">T</div>
+            <div class="nl-chat-bubble">
+              Comment signer mes 10 premiers clients&nbsp;?
+            </div>
+          </div>
+          <div class="nl-chat-row">
+            <div class="nl-chat-avatar nl-expert">✦</div>
+            <div class="nl-chat-bubble">
+              Commence par ton réseau proche : identifie <b>20 contacts ciblés</b>, envoie le template de prospection qu'on a préparé. Objectif : 3 rendez-vous cette semaine.
+            </div>
+          </div>
+          <div class="nl-typing">EXPERT EN TRAIN DE RÉFLÉCHIR…</div>
+        </div>
+      </div>
     </div>
-    <div style="border-top:1px solid rgba(255,255,255,0.05);padding:14px 0;text-align:center">
-      <span style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,0.2);letter-spacing:0.05em">
+  </div>
+</section>
+
+<hr class="nl-rule" />
+
+<!-- ========================= FEATURE 4 — BANK / BPI ========================= -->
+<section style="background:var(--bg-2)">
+  <div class="nl-wrap">
+    <div class="nl-feature nl-reverse">
+      <div class="nl-feature-text">
+        <span class="nl-eyebrow">Dossier bancaire &amp; BPI</span>
+        <h2>Tu prépares un dossier bancaire ou BPI&nbsp;? <em>EADEE est structuré pour ça aussi.</em></h2>
+        <p class="nl-lead">EADEE suit la structure standard demandée par les banques françaises et BPI France. Ce qu'on te dit clairement : EADEE te fait gagner plusieurs semaines de structuration. Pour un RDV bancaire, fais valider les chiffres par un expert-comptable ou ta CCI — on t'indique les ressources gratuites directement dans ton plan.</p>
+        <ul>
+          <li>
+            <span class="nl-ix">✓</span>
+            <div>
+              <b>Plan de financement besoins / ressources</b>
+              <span class="nl-txt">Équilibré et justifié — le tableau n°1 que cherche un banquier.</span>
+            </div>
+          </li>
+          <li>
+            <span class="nl-ix">✓</span>
+            <div>
+              <b>Score de bancabilité /100</b>
+              <span class="nl-txt">Sur les 6 critères réels évalués par les banques : apport, point mort, trésorerie, garanties…</span>
+            </div>
+          </li>
+          <li>
+            <span class="nl-ix">✓</span>
+            <div>
+              <b>Checklist documents + ressources gratuites</b>
+              <span class="nl-txt">Documents bloquants vs souhaitables. Contacts CCI, BGE, BPI inclus dans chaque plan.</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="nl-feature-visual">
+        <div class="nl-card nl-banca-card">
+          <div class="nl-card-head">
+            <span>Score bancabilité · VélôBretagne</span>
+            <span>BPI ready</span>
+          </div>
+          <div class="nl-score-big num">78<sup>/100</sup></div>
+          <div class="nl-verdict">Dossier solide <em>— Apport à renforcer</em></div>
+          <div class="nl-banca-list">
+            <div class="nl-row"><span class="nl-check-ic">✓</span><span>Plan financement</span><span class="v">Équilibré</span></div>
+            <div class="nl-row"><span class="nl-check-ic">✓</span><span>Trésorerie 12 mois</span><span class="v">Sans tension</span></div>
+            <div class="nl-row"><span class="nl-check-ic">✓</span><span>Bilan prévisionnel 3 ans</span><span class="v">Cohérent</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= 23 SECTIONS TOC ========================= -->
+<section id="nl-sections-grid">
+  <div class="nl-wrap">
+    <div class="nl-section-head">
+      <div class="nl-left">
+        <span class="nl-eyebrow">Ce que tu obtiens</span>
+      </div>
+      <h2>23 sections. <em>Rien n'est laissé au hasard.</em></h2>
+    </div>
+    <p class="nl-section-lead">Chaque plan Eadee contient ces 23 sections, complètes et personnalisées à ton projet. Aucun copier-coller, aucune section vide.</p>
+
+    <div class="nl-toc-tabs" role="tablist">
+      <button class="nl-toc-tab active" data-filter="all">Toutes<span class="ct">23</span></button>
+      <button class="nl-toc-tab" data-filter="Stratégie">Stratégie<span class="ct">6</span></button>
+      <button class="nl-toc-tab" data-filter="Marché">Marché<span class="ct">2</span></button>
+      <button class="nl-toc-tab" data-filter="Finance">Finance<span class="ct">7</span></button>
+      <button class="nl-toc-tab" data-filter="Juridique">Juridique<span class="ct">4</span></button>
+      <button class="nl-toc-tab" data-filter="Action">Action<span class="ct">4</span></button>
+    </div>
+
+    <div class="nl-toc-grid" id="sectionsGrid">
+      <div class="nl-toc-item" data-cat="Stratégie"><div class="nl-toc-item-head"><span class="nl-ix">01</span><span class="nl-tag" data-cat="Stratégie">Stratégie</span></div><h4>Résumé exécutif</h4><p>La synthèse de ton projet en 1 paragraphe percutant pour accrocher banquiers et investisseurs.</p></div>
+      <div class="nl-toc-item" data-cat="Stratégie"><div class="nl-toc-item-head"><span class="nl-ix">02</span><span class="nl-tag" data-cat="Stratégie">Stratégie</span></div><h4>Présentation du porteur</h4><p>Template structuré pour présenter ton parcours, tes compétences, ta légitimité.</p></div>
+      <div class="nl-toc-item" data-cat="Stratégie"><div class="nl-toc-item-head"><span class="nl-ix">03</span><span class="nl-tag" data-cat="Stratégie">Stratégie</span></div><h4>Présentation du projet</h4><p>Origine, vision, mission. Le pourquoi de ton entreprise raconté de façon mémorable.</p></div>
+      <div class="nl-toc-item" data-cat="Stratégie"><div class="nl-toc-item-head"><span class="nl-ix">04</span><span class="nl-tag" data-cat="Stratégie">Stratégie</span></div><h4>Proposition de valeur unique</h4><p>Ton USP clairement formulée : pourquoi un client te choisit toi et pas un autre.</p></div>
+      <div class="nl-toc-item" data-cat="Stratégie"><div class="nl-toc-item-head"><span class="nl-ix">05</span><span class="nl-tag" data-cat="Stratégie">Stratégie</span></div><h4>Modèle économique</h4><p>Tes offres, tes prix, comment tu génères de la marge. Avec exemples chiffrés.</p></div>
+      <div class="nl-toc-item" data-cat="Stratégie"><div class="nl-toc-item-head"><span class="nl-ix">06</span><span class="nl-tag" data-cat="Stratégie">Stratégie</span></div><h4>Stratégie commerciale</h4><p>Positionnement marketing, tunnel de vente, promesse de marque et canaux d'acquisition.</p></div>
+      <div class="nl-toc-item" data-cat="Marché"><div class="nl-toc-item-head"><span class="nl-ix">07</span><span class="nl-tag" data-cat="Marché">Marché</span></div><h4>Étude de marché</h4><p>Taille, croissance, tendances. Sources sectorielles citées. Adapté à la France.</p></div>
+      <div class="nl-toc-item" data-cat="Marché"><div class="nl-toc-item-head"><span class="nl-ix">08</span><span class="nl-tag" data-cat="Marché">Marché</span></div><h4>Analyse concurrentielle</h4><p>Tes 4-5 concurrents réels, leurs failles, leurs prix, ton positionnement différenciant.</p></div>
+      <div class="nl-toc-item" data-cat="Finance"><div class="nl-toc-item-head"><span class="nl-ix">09</span><span class="nl-tag" data-cat="Finance">Finance</span></div><h4>Plan de financement</h4><p>Besoins vs ressources équilibrés. Le tableau n°1 regardé par ton banquier avant tout.</p></div>
+      <div class="nl-toc-item" data-cat="Finance"><div class="nl-toc-item-head"><span class="nl-ix">10</span><span class="nl-tag" data-cat="Finance">Finance</span></div><h4>Plan d'investissement</h4><p>Chaque poste justifié par niveau de priorité. Matériel, immatériel, BFR.</p></div>
+      <div class="nl-toc-item" data-cat="Finance"><div class="nl-toc-item-head"><span class="nl-ix">11</span><span class="nl-tag" data-cat="Finance">Finance</span></div><h4>Compte de résultat 3 ans</h4><p>CA, charges, résultat sur 3 années glissantes. An 1 mensuel + années 2–3 annuelles.</p></div>
+      <div class="nl-toc-item" data-cat="Finance"><div class="nl-toc-item-head"><span class="nl-ix">12</span><span class="nl-tag" data-cat="Finance">Finance</span></div><h4>Plan de trésorerie 12 mois</h4><p>Entrées et sorties mensuelles. Alertes si tension de trésorerie détectée.</p></div>
+      <div class="nl-toc-item" data-cat="Finance"><div class="nl-toc-item-head"><span class="nl-ix">13</span><span class="nl-tag" data-cat="Finance">Finance</span></div><h4>Bilan prévisionnel 3 ans</h4><p>Actif et passif simplifié à fin d'an 1, 2 et 3. Vision patrimoniale de l'entreprise.</p></div>
+      <div class="nl-toc-item" data-cat="Finance"><div class="nl-toc-item-head"><span class="nl-ix">14</span><span class="nl-tag" data-cat="Finance">Finance</span></div><h4>Seuil de rentabilité</h4><p>Point mort calculé + délai pour l'atteindre en mois. À partir de quand tu es rentable.</p></div>
+      <div class="nl-toc-item" data-cat="Finance"><div class="nl-toc-item-head"><span class="nl-ix">15</span><span class="nl-tag" data-cat="Finance">Finance</span></div><h4>Tableau d'amortissement</h4><p>Mensualité estimée, capacité de remboursement, option différé conseillée si besoin.</p></div>
+      <div class="nl-toc-item" data-cat="Juridique"><div class="nl-toc-item-head"><span class="nl-ix">16</span><span class="nl-tag" data-cat="Juridique">Juridique</span></div><h4>Aspects juridiques</h4><p>Statut recommandé (SAS, EI, SARL…) avec justification chiffrée. Autorisations sectorielles.</p></div>
+      <div class="nl-toc-item" data-cat="Juridique"><div class="nl-toc-item-head"><span class="nl-ix">17</span><span class="nl-tag" data-cat="Juridique">Juridique</span></div><h4>Aspects organisationnels</h4><p>Équipe, locaux, sous-traitance. Comment ton activité s'organise au quotidien.</p></div>
+      <div class="nl-toc-item" data-cat="Juridique"><div class="nl-toc-item-head"><span class="nl-ix">18</span><span class="nl-tag" data-cat="Juridique">Juridique</span></div><h4>Aides &amp; subventions</h4><p>BPI, ACRE, Pôle Emploi, prêts d'honneur — ce à quoi tu as droit, avec montants et liens.</p></div>
+      <div class="nl-toc-item" data-cat="Juridique"><div class="nl-toc-item-head"><span class="nl-ix">19</span><span class="nl-tag" data-cat="Juridique">Juridique</span></div><h4>Démarches administratives</h4><p>Les 6 étapes dans l'ordre, avec délais et coûts réels. De l'immatriculation à l'ouverture.</p></div>
+      <div class="nl-toc-item" data-cat="Action"><div class="nl-toc-item-head"><span class="nl-ix">20</span><span class="nl-tag" data-cat="Action">Action</span></div><h4>Analyse des risques</h4><p>5 risques concrets avec plan de mitigation pour chacun. Risques marché, financiers, légaux.</p></div>
+      <div class="nl-toc-item" data-cat="Action"><div class="nl-toc-item-head"><span class="nl-ix">21</span><span class="nl-tag" data-cat="Action">Action</span></div><h4>Plan d'action 90 jours</h4><p>Actions prioritaires sur 3 mois. Concret, daté, mesurable. Tes 12 premières décisions.</p></div>
+      <div class="nl-toc-item" data-cat="Action"><div class="nl-toc-item-head"><span class="nl-ix">22</span><span class="nl-tag" data-cat="Action">Action</span></div><h4>Score de viabilité &amp; bancabilité</h4><p>Double score /100 : viabilité du projet + solidité du dossier financier.</p></div>
+      <div class="nl-toc-item" data-cat="Action"><div class="nl-toc-item-head"><span class="nl-ix">23</span><span class="nl-tag" data-cat="Action">Action</span></div><h4>Checklist dossier complet</h4><p>Documents à rassembler classés par priorité. Bloquants vs souhaitables — pour banque et BPI.</p></div>
+    </div>
+
+    <div class="nl-toc-cta">
+      <p><b>23 sections, 1 plan, 60 secondes.</b> Chaque section est générée et personnalisée à partir de ton idée et de tes données. Aucune section n'est un copier-coller.</p>
+      <a class="nl-btn nl-btn-lg nl-btn-accent" href="#" onclick="showAuth('signup');return false;">Générer mon plan →</a>
+    </div>
+  </div>
+</section>
+
+<hr class="nl-rule" />
+
+<!-- ========================= TESTIMONIALS ========================= -->
+<section>
+  <div class="nl-wrap">
+    <div class="nl-section-head">
+      <div class="nl-left">
+        <span class="nl-eyebrow">Ils ont lancé avec Eadee</span>
+      </div>
+      <h2>Des projets vrais. <em>Des résultats vrais.</em></h2>
+    </div>
+
+    <div class="nl-testimonials">
+      <article class="nl-testim">
+        <div class="nl-testim-mark">"</div>
+        <p class="nl-testim-quote">J'avais une idée claire mais aucune idée de comment la structurer. EADEE m'a sorti un plan complet en moins d'une minute. J'ai juste eu à compléter les vrais documents par dessus — la BPI a validé mon prêt de 15 000€ sans difficulté.</p>
+        <div class="nl-testim-meta">Conciergerie Airbnb · 58s · Score 91/100</div>
+        <div class="nl-testim-byline">
+          <span class="nl-ph" style="background:oklch(0.55 0.10 30)">M</span>
+          <div class="nl-who"><b>Marie L.</b><span>34 ANS · LYON</span></div>
+        </div>
+      </article>
+      <article class="nl-testim">
+        <div class="nl-testim-mark">"</div>
+        <p class="nl-testim-quote">J'avais abandonné l'idée de me lancer à cause du business plan. EADEE m'a débloqué en 2 minutes. J'avais enfin quelque chose de concret à montrer à ma conseillère Pôle Emploi.</p>
+        <div class="nl-testim-meta">Dark kitchen healthy · 72s · Score 84/100</div>
+        <div class="nl-testim-byline">
+          <span class="nl-ph" style="background:oklch(0.42 0.07 160)">S</span>
+          <div class="nl-who"><b>Sofiane B.</b><span>27 ANS · MARSEILLE</span></div>
+        </div>
+      </article>
+      <article class="nl-testim">
+        <div class="nl-testim-mark">"</div>
+        <p class="nl-testim-quote">Ce qui m'a le plus surpris c'est la qualité des projections financières. C'était structuré, cohérent, et mon expert-comptable n'a eu qu'à valider — au lieu de repartir de zéro.</p>
+        <div class="nl-testim-meta">Cabinet de coaching B2B · 65s · Score 88/100</div>
+        <div class="nl-testim-byline">
+          <span class="nl-ph" style="background:oklch(0.38 0.08 250)">L</span>
+          <div class="nl-who"><b>Léa K.</b><span>41 ANS · NANTES</span></div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= TRANSPARENCY ========================= -->
+<section>
+  <div class="nl-wrap">
+    <div class="nl-section-head">
+      <div class="nl-left">
+        <span class="nl-eyebrow">Transparence</span>
+      </div>
+      <h2>Soyons clairs sur ce qu'EADEE <em>fait vraiment.</em></h2>
+    </div>
+
+    <div class="nl-trans-grid">
+      <div class="nl-trans-col nl-yes">
+        <h3>Ce que tu obtiens</h3>
+        <ul>
+          <li>Un business plan complet en 23 sections, personnalisé à ton projet</li>
+          <li>Des projections financières 3 ans cohérentes et justifiées</li>
+          <li>Une stratégie commerciale, des emails rédigés, tes démarches admin</li>
+          <li>Un score de viabilité pour savoir si ton idée tient la route</li>
+          <li>4 à 6 semaines de structuration économisées — en 60 secondes</li>
+        </ul>
+      </div>
+      <div class="nl-trans-col nl-no">
+        <h3>Ce qu'EADEE ne remplace pas</h3>
+        <ul>
+          <li>Les vrais documents physiques (Kbis, devis, avis d'imposition)</li>
+          <li>La validation d'un expert-comptable si tu vas en banque</li>
+          <li>La garantie d'obtenir un financement</li>
+          <li>Le conseil d'un juriste ou d'un conseiller BPI</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="nl-trans-foot">C'est un outil puissant. Pas une baguette magique.<br/><em>Et on préfère te le dire maintenant.</em></p>
+  </div>
+</section>
+
+<!-- ========================= PRICING ========================= -->
+<section id="nl-pricing" style="background:var(--bg-2)">
+  <div class="nl-wrap">
+    <div class="nl-section-head">
+      <div class="nl-left">
+        <span class="nl-eyebrow">Investissement</span>
+      </div>
+      <h2>Simple. Transparent. <em>Sans surprise.</em></h2>
+    </div>
+
+    <div class="nl-pricing" id="pricingSection">
+      <div class="nl-price" onclick="selectPlan('solo')">
+        <div class="nl-price-name">Solo</div>
+        <div class="nl-price-sub">1 génération complète</div>
+        <div class="nl-price-row">
+          <span class="nl-strike">18,55€</span>
+          <span class="nl-price-big num">12,99€</span>
+        </div>
+        <div class="nl-price-credit">/ 1 génération</div>
+        <div class="nl-price-meta"><b>1 crédit</b> · 12,99€ / génération</div>
+        <a class="nl-btn nl-btn-lg nl-btn-ghost" href="#" onclick="selectPlan('solo');showAuth('signup');return false;" style="border-color:var(--ink)">Acheter Solo</a>
+      </div>
+      <div class="nl-price nl-featured">
+        <div class="nl-price-badge">✦ Populaire</div>
+        <div class="nl-price-name">Pro</div>
+        <div class="nl-price-sub">Pack 3 générations</div>
+        <div class="nl-price-row">
+          <span class="nl-strike">42,84€</span>
+          <span class="nl-price-big num">29,99€</span>
+        </div>
+        <div class="nl-price-credit">/ pack 3 générations</div>
+        <div class="nl-price-meta"><b>3 crédits</b> · 10,00€ / génération</div>
+        <a class="nl-btn nl-btn-lg nl-btn-accent" href="#" onclick="selectPlan('pro');showAuth('signup');return false;">Acheter Pro</a>
+      </div>
+      <div class="nl-price">
+        <div class="nl-price-badge">✦ Meilleure valeur</div>
+        <div class="nl-price-name">Empire</div>
+        <div class="nl-price-sub">Pack 8 générations</div>
+        <div class="nl-price-row">
+          <span class="nl-strike">85,70€</span>
+          <span class="nl-price-big num">59,99€</span>
+        </div>
+        <div class="nl-price-credit">/ pack 8 générations</div>
+        <div class="nl-price-meta"><b>8 crédits</b> · 7,50€ / génération</div>
+        <a class="nl-btn nl-btn-lg nl-btn-ghost" href="#" onclick="selectPlan('empire');showAuth('signup');return false;" style="border-color:var(--ink)">Acheter Empire</a>
+      </div>
+    </div>
+
+    <div class="nl-price-foot">
+      <div>
+        <div class="nl-l">✦ Les 3 packs payants incluent exactement les mêmes fonctionnalités</div>
+        <p style="margin-top:8px"><b>Seul le nombre de générations change.</b> Plus t'en achètes, moins tu paies par plan.</p>
+      </div>
+    </div>
+
+    <div class="nl-price-bullets">
+      <span>23 sections complètes</span>
+      <span>Score viabilité /100</span>
+      <span>Projections 3 ans</span>
+      <span>Emails rédigés</span>
+      <span>Démarches admin</span>
+      <span>Expert Eadee 24h/24</span>
+      <span>Export PDF</span>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= FAQ ========================= -->
+<section id="nl-faq">
+  <div class="nl-wrap">
+    <div class="nl-section-head">
+      <div class="nl-left">
+        <span class="nl-eyebrow">Questions fréquentes</span>
+      </div>
+      <h2>Tout ce que tu veux savoir. <em>Avant de te lancer.</em></h2>
+    </div>
+
+    <div class="nl-faq" id="faqSection">
+      <details class="nl-q" open>
+        <summary>Le plan EADEE est-il vraiment complet&nbsp;?</summary>
+        <div class="nl-a"><p>Oui. 23 sections couvrent l'intégralité d'un business plan professionnel : stratégie, marché, finances, juridique, démarches, risques, plan d'action. Chaque section est générée et personnalisée à ton projet — aucune section générique ou vide.</p></div>
+      </details>
+      <details class="nl-q">
+        <summary>Est-ce que mon plan sera pris au sérieux par une banque ou BPI France&nbsp;?</summary>
+        <div class="nl-a">
+          <p>EADEE suit la structure standard demandée par les banques françaises et BPI France. Des entrepreneurs ont obtenu des financements avec un plan EADEE comme base de travail.</p>
+          <p>Ce qu'on te dit honnêtement : un plan généré par IA est un point de départ solide. Pour un RDV bancaire, fais valider les chiffres par un expert-comptable ou ta CCI — on t'indique les ressources gratuites dans chaque plan.</p>
+        </div>
+      </details>
+      <details class="nl-q">
+        <summary>Quelle différence avec ChatGPT ou un outil gratuit&nbsp;?</summary>
+        <div class="nl-a"><p>ChatGPT génère du texte. EADEE génère un business plan structuré selon les standards français : plan de financement équilibré, projections cohérentes entre elles, score de viabilité, tableau d'amortissement, checklist des démarches. C'est un outil spécialisé, pas un chatbot généraliste.</p></div>
+      </details>
+      <details class="nl-q">
+        <summary>Puis-je modifier le plan après génération&nbsp;?</summary>
+        <div class="nl-a"><p>Oui, entièrement. Chaque section est éditable. Le conseiller EADEE peut aussi réécrire une section sur simple demande.</p></div>
+      </details>
+      <details class="nl-q">
+        <summary>Mes données sont-elles privées&nbsp;?</summary>
+        <div class="nl-a"><p>Absolument. Hébergement en France, conforme RGPD, aucune revente. Tes idées restent les tiennes, nous ne les utilisons jamais pour entraîner nos modèles.</p></div>
+      </details>
+      <details class="nl-q">
+        <summary>Combien de temps prend vraiment la génération&nbsp;?</summary>
+        <div class="nl-a"><p>Entre 45 et 90 secondes pour un plan complet 23 sections. La durée dépend de la profondeur des recherches marché pour ton secteur.</p></div>
+      </details>
+      <details class="nl-q">
+        <summary>Pour quels types de projets Eadee fonctionne&nbsp;?</summary>
+        <div class="nl-a"><p>Tout projet d'entreprise en France : commerce, service, artisanat, app SaaS, restauration, freelance, e-commerce, import/export, conciergerie, coaching… Si tu as une idée, Eadee l'analyse.</p></div>
+      </details>
+      <details class="nl-q">
+        <summary>Que se passe-t-il si le plan ne me convient pas&nbsp;?</summary>
+        <div class="nl-a"><p>Tu peux régénérer en affinant ton idée. Et nous avons une garantie satisfait ou remboursé 14 jours.</p></div>
+      </details>
+      <details class="nl-q">
+        <summary>C'est un abonnement&nbsp;?</summary>
+        <div class="nl-a"><p>Non. Chaque pack est un paiement unique. Tu achètes des crédits, tu les consommes quand tu veux, sans engagement, sans auto-renouvellement.</p></div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= FOOTER ========================= -->
+<footer class="nl-footer">
+  <div class="nl-wrap">
+    <div class="nl-foot-grid">
+      <div class="nl-foot-intro">
+        <a class="nl-brand" href="#" onclick="showPage('landing');return false;"><span class="nl-brand-mark">E</span><span class="nl-brand-word">EADEE</span></a>
+        <p>Le business plan intelligent. Pensé pour la France.</p>
+        <div class="nl-socials">
+          <a href="#" aria-label="X">X</a>
+          <a href="#" aria-label="LinkedIn">in</a>
+          <a href="#" aria-label="Instagram">ig</a>
+        </div>
+      </div>
+      <div class="nl-foot-col">
+        <h4>Produit</h4>
+        <ul>
+          <li><a href="#nl-features" onclick="scrollToSection('nl-features');return false;">Fonctionnalités</a></li>
+          <li><a href="#nl-pricing" onclick="scrollToSection('nl-pricing');return false;">Tarifs</a></li>
+          <li><a href="#" onclick="showAuth('signup');return false;">Exemples de plans</a></li>
+          <li><a href="#">Comparaison</a></li>
+        </ul>
+      </div>
+      <div class="nl-foot-col">
+        <h4>Ressources</h4>
+        <ul>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Guides gratuits</a></li>
+          <li><a href="#nl-faq" onclick="scrollToSection('nl-faq');return false;">FAQ</a></li>
+          <li><a href="#">Exemple PDF</a></li>
+        </ul>
+      </div>
+      <div class="nl-foot-col">
+        <h4>Entreprise</h4>
+        <ul>
+          <li><a href="#">À propos</a></li>
+          <li><a href="mailto:contact@eadee.fr">Nous contacter</a></li>
+          <li><a href="#">Partenariats</a></li>
+          <li><a href="#">Programme affiliation</a></li>
+        </ul>
+      </div>
+      <div class="nl-foot-col">
+        <h4>Légal</h4>
+        <ul>
+          <li><a href="#" onclick="openLegal('mentions');return false;">Mentions légales</a></li>
+          <li><a href="#" onclick="openLegal('cgu');return false;">CGU / CGV</a></li>
+          <li><a href="#" onclick="openLegal('confidentialite');return false;">Confidentialité</a></li>
+          <li><a href="#" onclick="openLegal('cookies');return false;">Cookies</a></li>
+          <li><a href="#" onclick="openLegal('mentions');return false;">RGPD</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="nl-foot-bottom">
+      <p class="nl-small">
+        EADEE — Tous droits réservés · Données hébergées en Europe · Conforme RGPD · <a href="mailto:contact@eadee.fr">contact@eadee.fr</a> · <a href="https://www.cnil.fr/fr/plaintes">Réclamation CNIL</a><br/><br/>
         Les plans générés sont produits par intelligence artificielle (Anthropic Claude). À valider par un professionnel avant tout engagement.
-      </span>
+      </p>
+      <div class="nl-foot-mark">eadee.</div>
     </div>
-  </footer>
-  <script>document.getElementById('footerYear').textContent = '© ' + new Date().getFullYear();</script>
-
+  </div>
+</footer>
+<script>document.getElementById && (function(){ var y = document.querySelector('.nl-foot-bottom p'); })();</script>
 </div>
 
 <!-- ========== BANDEAU COOKIES (CNIL) ========== -->
