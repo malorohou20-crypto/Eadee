@@ -14,9 +14,10 @@
 <link rel="canonical" href="https://eadee.fr/">
 <link rel="icon" href="/favicon.svg">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Fraunces:ital,wght@0,300;0,400;1,300;1,400&family=Geist:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
-<link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@800,700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/public/css/00-base.css?v=3">
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/public/css/00-base.css?v=4">
 <link rel="stylesheet" href="/public/css/01-nav.css?v=3">
 <link rel="stylesheet" href="/public/css/02-auth.css?v=3">
 <link rel="stylesheet" href="/public/css/03-components.css?v=3">
@@ -41,6 +42,10 @@
 <link rel="stylesheet" href="/public/css/87-pages-anim.css?v=1">
 <link rel="stylesheet" href="/public/css/88-landing-anim.css?v=1">
 <link rel="stylesheet" href="/public/css/89-transp.css?v=1">
+<link rel="stylesheet" href="/public/css/91-new-landing.css?v=1">
+<link rel="stylesheet" href="/public/css/92-new-app.css?v=1">
+<link rel="stylesheet" href="/public/css/93-new-plan.css?v=1">
+<link rel="stylesheet" href="/public/css/94-new-theme.css?v=1">
 <body>
 
 <!-- ========== TOAST ========== -->
@@ -49,9 +54,9 @@
 <!-- ========== NAV ========== -->
 <nav id="mainNav">
   <div class="nav-logo" onclick="showPage('landing')" style="display:flex;align-items:center;gap:10px">
-    <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#6b8fef,#a78bfa);display:flex;align-items:center;justify-content:center;font-weight:700;color:white;font-size:14px;box-shadow:0 3px 12px rgba(107,143,239,0.4)">E</div>
-    <span style="font-family:'Fraunces',serif;font-size:20px;color:#9db8f8;letter-spacing:0.5px">EADEE</span>
-    <span class="logo-pulse" style="margin-left:2px"></span>
+    <div style="width:30px;height:30px;border-radius:6px;background:var(--ink);display:grid;place-items:center;font-family:var(--serif);font-style:italic;font-size:20px;color:var(--paper);line-height:1">E</div>
+    <span style="font-family:var(--serif);font-size:22px;letter-spacing:0.04em">EADEE</span>
+    <span class="logo-pulse" style="margin-left:4px;width:7px;height:7px"></span>
   </div>
   <div class="nav-links" id="navLinks">
     <a class="nav-link" onclick="scrollToSection('howSection')">Comment ça marche</a>
