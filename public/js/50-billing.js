@@ -1,28 +1,51 @@
 ﻿// ========== PAYMENT ==========
 function selectPlan(planId) {
   const plans = { solo: { name: 'Solo', price: 12.99, credits: 1 }, pro: { name: 'Pro', price: 29.99, credits: 3 }, empire: { name: 'Empire', price: 59.99, credits: 8 } };
-  if (!user) { showAuth('signup'); return; }
+  if (!user) { if (typeof showAuth === 'function') showAuth('signup'); return; }
   selectedPayPlan = plans[planId];
-  showPage('dashboard');
-  showView('billing');
+  // Navigation compatible v1 et v2
+  if (typeof window.go === 'function') { window.go('credits'); }
+  else if (typeof showPage === 'function') { showPage('dashboard'); }
+  if (typeof showView === 'function') { showView('billing'); }
   const option = document.querySelector(`[data-plan="${planId}"]`);
   if (option) selectPayPlan(option);
 }
 
 function selectPayPlan(el) {
-  document.querySelectorAll('.pay-plan-option').forEach(o => o.classList.remove('selected'));
+  if (!el) return;
+  // Compatible .pack (v2) et .pay-plan-option (v1)
+  document.querySelectorAll('.pay-plan-option, .pack').forEach(o => o.classList.remove('selected', 'on'));
   el.classList.add('selected');
+  el.classList.add('on');
   const plan = el.dataset.plan;
   const price = el.dataset.price;
   const credits = parseInt(el.dataset.credits) || (plan === 'solo' ? 1 : plan === 'pro' ? 3 : 8);
-  selectedPayPlan = { name: plan === 'solo' ? 'Solo' : plan === 'pro' ? 'Pro' : 'Empire', price: parseFloat(price), credits };
-  document.getElementById('osPlan').textContent = selectedPayPlan.name;
-  document.getElementById('osTotal').textContent = selectedPayPlan.price.toFixed(2) + '€';
-  document.getElementById('osCredits').textContent = credits + ' générations';
+  selectedPayPlan = { name: plan === 'solo' ? 'Solo' : plan === 'pro' ? 'Pro' : 'Empire', price: parseFloat(price) || 29.99, credits };
+
+  // osPlan/osTotal/osCredits sont mappés vers sum-pack/sum-total/sum-cred via compat layer
+  const osPlanEl = document.getElementById('osPlan');
+  if (osPlanEl) osPlanEl.textContent = selectedPayPlan.name;
+  const osTotalEl = document.getElementById('osTotal');
+  if (osTotalEl) osTotalEl.textContent = selectedPayPlan.price.toFixed(2) + '€';
+  const osCreditsEl = document.getElementById('osCredits');
+  if (osCreditsEl) osCreditsEl.textContent = credits + ' générations';
+
+  // Mettre à jour le bouton payer
+  const payBtn = document.getElementById('payBtn');
+  if (payBtn) payBtn.textContent = 'Acheter mes crédits — ' + selectedPayPlan.price.toFixed(2) + '€';
 
   const feats = ['Business plan complet — 23 sections','Généré en 60 secondes','Compatible dossier banque & BPI','Démarches administratives pré-remplies','Emails prêts à envoyer','Sans abonnement · Sans expiration','Conseiller Eadee 24h/24'];
+  const osFeaturesEl = document.getElementById('osFeatures');
+  if (osFeaturesEl) osFeaturesEl.innerHTML = feats.map(f => `<div class="os-feat">${f}</div>`).join('');
+}
 
-  document.getElementById('osFeatures').innerHTML = feats.map(f => `<div class="os-feat">${f}</div>`).join('');
+// Initialisation de la vue billing (appelée par go('credits'))
+function initBillingView() {
+  // Sélectionner le pack actif par défaut (pro)
+  const defaultPack = document.querySelector('.pack.on') || document.querySelector('.pack');
+  if (defaultPack && defaultPack.dataset.plan) {
+    selectPayPlan(defaultPack);
+  }
 }
 
 function formatCard(input) {

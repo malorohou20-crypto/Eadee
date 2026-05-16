@@ -1108,14 +1108,13 @@
           </div>
         </div>
 
-        <div class="chat-grid">
+        <div class="chat-grid" id="chatViewWrap">
           <aside class="chat-side">
-            <button class="chat-new">+ Nouvelle conversation</button>
+            <button class="chat-new" onclick="startNewChatConv()">+ Nouvelle conversation</button>
             <div class="chat-hist">
               <span class="label">Historique</span>
-              <div class="conv active">
-                <b>Plan sans nom</b>
-                <span class="meta">3 messages · 71/100</span>
+              <div id="chatConvsList">
+                <div style="font-size:12px;color:#7a7f9a;padding:12px 0">Aucune conversation. Choisis un plan pour commencer.</div>
               </div>
             </div>
           </aside>
@@ -1126,36 +1125,44 @@
                 <span class="av">✦</span>
                 <div>
                   <b>Expert Eadee</b>
-                  <div class="ctx">Sur ton plan : Plan sans nom</div>
+                  <div class="ctx" id="chatViewSub">Sur ton plan : —</div>
                 </div>
               </div>
-              <div class="plan-sel">— Choisir un plan —</div>
+              <select class="plan-sel" id="chatPlanSelect" onchange="selectChatPlan(this.value,'view')" style="background:transparent;border:none;color:inherit;font-size:inherit;cursor:pointer">
+                <option value="">— Choisir un plan —</option>
+              </select>
             </div>
 
-            <div class="chat-body">
+            <div class="chat-body" id="chatViewMessages">
               <div class="msg">
                 <span class="av">✦</span>
-                <div class="bb">Salut <b>Admin</b> ! Je connais ton plan <b>Plan sans nom</b> par cœur. Score actuel : <b>71/100</b>.<br/><br/>Comment puis-je t'aider aujourd'hui ?</div>
+                <div class="bb">Bonjour ! Sélectionne un plan pour commencer.</div>
               </div>
             </div>
 
-            <div class="quick-chips">
-              <button>Améliore mon score</button>
-              <button>Aide-moi avec le statut juridique</button>
-              <button>Prépare-moi pour la banque</button>
-              <button>Mes 3 plus gros risques</button>
-              <button>Réécris mon résumé exécutif</button>
-              <button>Plan d'action 30 jours</button>
+            <div class="quick-chips" id="chatViewQuick">
+              <button onclick="sendQuickAction('Améliore mon score','view')">Améliore mon score</button>
+              <button onclick="sendQuickAction('Aide-moi avec le statut juridique','view')">Aide-moi avec le statut juridique</button>
+              <button onclick="sendQuickAction('Prépare-moi pour la banque','view')">Prépare-moi pour la banque</button>
+              <button onclick="sendQuickAction('Mes 3 plus gros risques','view')">Mes 3 plus gros risques</button>
+              <button onclick="sendQuickAction('Réécris mon résumé exécutif','view')">Réécris mon résumé exécutif</button>
+              <button onclick="sendQuickAction(&quot;Plan d&apos;action 30 jours&quot;,'view')">Plan d'action 30 jours</button>
             </div>
 
             <div class="chat-input">
-              <input type="text" placeholder="Pose ta question…" />
-              <button class="chat-send" aria-label="Envoyer">
+              <input type="text" id="chatViewInput" placeholder="Pose ta question…"
+                onkeydown="chatKeyDown(event,'view')" oninput="autoGrow(this)" />
+              <button class="chat-send" id="chatViewSend" aria-label="Envoyer"
+                onclick="sendChatMessage('view')">
                 <svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
               </button>
             </div>
           </div>
         </div>
+
+        <!-- Chat Drawer (mobile / plan result) -->
+        <div id="chatDrawer" style="display:none"></div>
+        <div id="chatBackdrop" style="display:none"></div>
       </div>
     </section>
 
@@ -1184,7 +1191,7 @@
           </div>
         </div>
 
-        <div class="plans-table">
+        <div class="plans-table" id="historyGrid">
           <div class="plans-thead">
             <span>#</span>
             <span>Dossier</span>
@@ -1319,7 +1326,7 @@
         <div class="pay-grid">
           <!-- LEFT: packs + card form -->
           <div>
-            <div class="pack" id="pack-solo">
+            <div class="pack" id="pack-solo" data-plan="solo" data-price="12.99" data-credits="1">
               <span class="radio"></span>
               <div class="pack-body">
                 <div class="pack-name"><b>Solo</b><span class="pack-price">12,99€</span></div>
@@ -1329,7 +1336,7 @@
               <span style="font-family:var(--mono);font-size:10.5px;color:var(--ink-3);letter-spacing:0.06em">×1</span>
             </div>
 
-            <div class="pack on" id="pack-pro">
+            <div class="pack on" id="pack-pro" data-plan="pro" data-price="29.99" data-credits="3">
               <span class="radio"></span>
               <div class="pack-body">
                 <div class="pack-name"><b>Pro</b><span class="pack-price">29,99€</span></div>
@@ -1339,7 +1346,7 @@
               <span style="font-family:var(--mono);font-size:10.5px;color:var(--ink-3);letter-spacing:0.06em">×3</span>
             </div>
 
-            <div class="pack" id="pack-emp">
+            <div class="pack" id="pack-emp" data-plan="empire" data-price="59.99" data-credits="8">
               <span class="pack-best">★ Meilleur choix</span>
               <span class="radio"></span>
               <div class="pack-body">
@@ -1370,7 +1377,7 @@
                 </div>
               </div>
               <div class="pay-actions">
-                <button class="btn btn-accent btn-lg btn-block">Acheter mes crédits — 29,99€</button>
+                <button id="payBtn" class="btn btn-accent btn-lg btn-block" onclick="processPayment()">Acheter mes crédits — 29,99€</button>
               </div>
             </div>
           </div>
@@ -1436,11 +1443,11 @@
               <h2 style="margin-top:8px">Mon profil</h2>
               <p class="desc">Comment l'Expert Eadee t'appelle et où il t'envoie tes notifications.</p>
               <div class="fields">
-                <div><label>Prénom &amp; Nom</label><input type="text" placeholder="Admin Eadee" /></div>
-                <div><label>Email</label><input type="text" placeholder="contact@eadee.fr" /></div>
+                <div><label>Prénom &amp; Nom</label><input type="text" id="settingsName" placeholder="Admin Eadee" /></div>
+                <div><label>Email</label><input type="text" id="settingsEmail" placeholder="contact@eadee.fr" /></div>
               </div>
               <div class="set-foot">
-                <button class="btn">Sauvegarder</button>
+                <button class="btn" onclick="saveSettings()">Sauvegarder</button>
               </div>
             </div>
 
@@ -1450,12 +1457,12 @@
               <h2 style="margin-top:8px">Mot de passe</h2>
               <p class="desc">Choisis un mot de passe d'au moins 12 caractères. Active la 2FA pour plus de tranquillité.</p>
               <div class="fields">
-                <div><label>Nouveau mot de passe</label><input type="password" placeholder="••••••••" /></div>
-                <div><label>Confirmer</label><input type="password" placeholder="••••••••" /></div>
+                <div><label>Nouveau mot de passe</label><input type="password" id="settingsNewPwd" placeholder="••••••••" /></div>
+                <div><label>Confirmer</label><input type="password" id="settingsConfirmPwd" placeholder="••••••••" /></div>
               </div>
               <div class="set-foot">
                 <button class="btn btn-ghost">Activer la 2FA</button>
-                <button class="btn">Changer le mot de passe</button>
+                <button class="btn" onclick="updatePassword()">Changer le mot de passe</button>
               </div>
             </div>
 
@@ -1482,8 +1489,8 @@
               <h2 style="margin-top:8px">Mes données personnelles</h2>
               <p class="desc">Conformément au RGPD, tu peux télécharger toutes les données qu'Eadee détient sur toi à tout moment.</p>
               <div class="set-foot" style="justify-content:flex-start">
-                <button class="btn">Télécharger mes données (JSON)</button>
-                <button class="btn btn-ghost">Demander une rectification</button>
+                <button class="btn" onclick="exportMyData()">Télécharger mes données (JSON)</button>
+                <button class="btn btn-ghost" onclick="requestRectification()">Demander une rectification</button>
               </div>
             </div>
 
@@ -1493,8 +1500,8 @@
               <h2 style="margin-top:8px;color:var(--red)">Supprimer mon compte</h2>
               <p class="desc">La suppression est <b>définitive</b>. Tes plans, conversations et données seront supprimés sous 30 jours conformément au RGPD.</p>
               <div class="set-foot" style="justify-content:flex-start">
-                <button class="btn btn-red">Supprimer définitivement mon compte</button>
-                <button class="btn btn-ghost" style="border-color:var(--red);color:var(--red)">Se déconnecter</button>
+                <button class="btn btn-red" onclick="confirmDeleteAccount()">Supprimer définitivement mon compte</button>
+                <button class="btn btn-ghost" style="border-color:var(--red);color:var(--red)" onclick="typeof supabaseClient!=='undefined'&&supabaseClient.auth.signOut().then(()=>{user=null;window.location.reload()})">Se déconnecter</button>
               </div>
             </div>
           </div>
@@ -1579,7 +1586,50 @@
     document.querySelectorAll('.side-link').forEach(l => l.classList.toggle('active', l.dataset.screen === name));
     crumb.textContent = labels[name] || '—';
     window.scrollTo({top:0, behavior:'instant'});
+    // Déclencher le chargement des données selon la section (après chargement des scripts)
+    setTimeout(function() {
+      if (name === 'plans'    && typeof renderHistory === 'function')      { try { renderHistory(); } catch(e) { console.warn('renderHistory:', e); } }
+      if (name === 'expert'   && typeof openChatFullscreen === 'function') { try { openChatFullscreen(null); } catch(e) { console.warn('openChatFullscreen:', e); } }
+      if (name === 'settings' && typeof populateSettings === 'function')   { try { populateSettings(); } catch(e) { console.warn('populateSettings:', e); } }
+      if (name === 'credits'  && typeof initBillingView === 'function')    { try { initBillingView(); } catch(e) { console.warn('initBillingView:', e); } }
+    }, 50);
   }
+  // Exposer go() globalement pour openFromHistory et autres JS
+  window.go = go;
+
+  // Après chargement des JS backend, surcharger showView/showPage pour déléguer à go()
+  // Map ancien nom de vue → nouvelle screen v2
+  const VIEW_MAP = {
+    'generator':'gen', 'gen':'gen',
+    'history':'plans',   'plans':'plans',
+    'chat':'expert',     'expert':'expert',
+    'billing':'credits', 'credits':'credits',
+    'settings':'settings',
+    'help':'help',
+  };
+  window.addEventListener('load', function() {
+    // Override showView
+    if (typeof showView === 'function') {
+      var _origShowView = showView;
+      window.showView = function(name) {
+        var mapped = VIEW_MAP[name];
+        if (mapped) { go(mapped); }
+        else { try { _origShowView(name); } catch(e) {} }
+      };
+    }
+    // Override showPage (dans v2, on n'a pas de page-dashboard/page-landing séparés)
+    if (typeof showPage === 'function') {
+      window.showPage = function(name) {
+        // 'dashboard' → rester sur l'app v2, 'landing' → recharger ou ignorer
+        if (name === 'landing') { window.location.href = '/'; }
+        // sinon ne rien faire (on est déjà sur le dashboard v2)
+      };
+    }
+    // Pré-remplir les settings si l'utilisateur est connecté
+    if (typeof populateSettings === 'function' && typeof user !== 'undefined' && user) {
+      populateSettings();
+    }
+  });
   links.forEach(l => l.addEventListener('click', e => {
     e.preventDefault();
     go(l.dataset.screen);
@@ -1609,7 +1659,11 @@
       document.getElementById('sum-cred').textContent = d.cred;
       document.getElementById('sum-unit').textContent = d.unit;
       document.getElementById('sum-total').textContent = d.total;
-      document.querySelector('.pay-actions .btn').textContent = 'Acheter mes crédits — ' + d.btn;
+      const payBtn = document.getElementById('payBtn');
+      if (payBtn) payBtn.textContent = 'Acheter mes crédits — ' + d.btn;
+      else { const b = document.querySelector('.pay-actions .btn'); if (b) b.textContent = 'Acheter mes crédits — ' + d.btn; }
+      // Appeler le handler billing backend si disponible
+      if (typeof selectPayPlan === 'function') { try { selectPayPlan(p); } catch(e) {} }
     });
   });
 
@@ -1641,10 +1695,17 @@
     document.getElementById = function(id) {
       if (id === 'dashResult')    return _orig('dashPlanResult');
       if (id === 'genStatusText') return _orig('genStatus');
+      // Billing: mapper les anciens IDs vers les nouveaux du résumé de commande
+      if (id === 'osPlan')     return _orig('sum-pack');
+      if (id === 'osTotal')    return _orig('sum-total');
+      if (id === 'osCredits')  return _orig('sum-cred');
       // usageFill / usageCount / noCredit-banner → créer des éléments fantômes si absents
       // pour éviter les erreurs 'cannot set property of null'
       const el = _orig(id);
-      if (!el && (id === 'usageFill' || id === 'usageCount' || id === 'noCredit-banner' ||
+      if (!el && (id === 'osFeatures' || id === 'chatUpsell' ||
+                  id === 'chatDrawerMessages' || id === 'chatDrawerInput' ||
+                  id === 'chatDrawerSend' || id === 'chatDrawerQuick' || id === 'chatDrawerSub' ||
+                  id === 'usageFill' || id === 'usageCount' || id === 'noCredit-banner' ||
                   id === 'navRight' || id === 'navLinks' || id === 'sc-buy-btn' ||
                   id === 'sc-recharge-btn' || id === 'kpiCaAn3' || id === 'kpiInvest' ||
                   id === 'kpiMarket' || id === 'kpiPointMort' || id === 'planHeroKpis' ||
