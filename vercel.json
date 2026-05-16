@@ -1,6 +1,7 @@
 {
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/eadee-app-v2.html", "destination": "/eadee-app-v2.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
