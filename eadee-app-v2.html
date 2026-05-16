@@ -1,1645 +1,1355 @@
-﻿<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EADEE — Génère ton business plan complet en 60 secondes</title>
-<!-- ========== SEO / META ========== -->
-<meta name="description" content="EADEE génère un business plan professionnel en 60 secondes : 23 sections, projections financières 3 ans, stratégie, juridique, démarches admin. Compatible banque et BPI France. Dès 12,99€, sans abonnement.">
-<meta property="og:title" content="EADEE — Un business plan complet et sérieux. En 60 secondes.">
-<meta property="og:description" content="23 sections personnalisées, projections 3 ans, score de viabilité, export PDF. Pour les entrepreneurs qui veulent avancer vite et bien.">
-<meta property="og:image" content="/og-image.png">
-<meta property="og:url" content="https://eadee.fr/">
-<meta name="twitter:card" content="summary_large_image">
-<link rel="canonical" href="https://eadee.fr/">
-<link rel="icon" href="/favicon.svg">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>EADEE — Espace de travail</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="/public/css/91-new-landing.css?v=1">
-<link rel="stylesheet" href="/public/css/92-new-app.css?v=1">
-<link rel="stylesheet" href="/public/css/93-new-plan.css?v=1">
+<style>
+  :root{
+    --bg:        oklch(0.965 0.012 85);
+    --bg-2:      oklch(0.945 0.014 82);
+    --paper:     oklch(0.99 0.008 90);
+    --ink:       oklch(0.20 0.012 60);
+    --ink-2:     oklch(0.34 0.012 60);
+    --ink-3:     oklch(0.52 0.012 60);
+    --ink-4:     oklch(0.74 0.010 70);
+    --rule:      oklch(0.86 0.012 75);
+    --rule-2:    oklch(0.78 0.012 70);
+    --accent:    oklch(0.58 0.14 35);
+    --accent-bg: oklch(0.95 0.04 35);
+    --accent-ink:oklch(0.42 0.12 32);
+    --green:     oklch(0.48 0.08 145);
+    --green-bg:  oklch(0.94 0.04 145);
+    --red:       oklch(0.52 0.16 22);
+    --red-bg:    oklch(0.94 0.04 22);
+    --serif: "Instrument Serif", Georgia, serif;
+    --sans: "Geist", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);}
+  body{font-family:var(--sans);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;font-feature-settings:"ss01","cv11";letter-spacing:-0.003em}
+  ::selection{background:var(--accent);color:var(--paper)}
+  a{color:inherit}
+  button{font:inherit;cursor:pointer}
+
+  .num{font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-0.01em}
+  .serif{font-family:var(--serif);font-weight:400;letter-spacing:-0.015em}
+  .italic{font-family:var(--serif);font-style:italic;font-weight:400}
+  .label{font-family:var(--mono);font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);font-weight:500}
+
+  /* ========= LAYOUT ========= */
+  .app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+
+  /* ========= SIDEBAR ========= */
+  .side{
+    border-right:1px solid var(--rule);
+    display:flex;flex-direction:column;
+    background:var(--bg);
+    position:sticky;top:0;height:100vh;
+  }
+  .side-brand{
+    display:flex;align-items:center;gap:10px;
+    padding:18px 22px;border-bottom:1px solid var(--rule);
+    text-decoration:none;color:var(--ink);
+  }
+  .side-mark{
+    width:30px;height:30px;border-radius:6px;background:var(--ink);color:var(--paper);
+    display:grid;place-items:center;font-family:var(--serif);font-style:italic;font-size:20px;line-height:1;
+  }
+  .side-word{font-family:var(--serif);font-size:22px;letter-spacing:0.04em}
+  .side-status{
+    margin-left:auto;width:7px;height:7px;border-radius:999px;background:var(--green);
+    box-shadow:0 0 0 0 oklch(0.48 0.08 145 / 0.6);animation:pulse 1.8s ease-out infinite;
+  }
+  @keyframes pulse{0%{box-shadow:0 0 0 0 oklch(0.48 0.08 145/.55)}100%{box-shadow:0 0 0 8px oklch(0.48 0.08 145/0)}}
+
+  .side-nav{flex:1;overflow:auto;padding:16px 12px}
+  .side-section{font-family:var(--mono);font-size:10px;letter-spacing:0.18em;color:var(--ink-3);text-transform:uppercase;padding:14px 10px 8px}
+  .side-link{
+    display:grid;grid-template-columns:18px 1fr auto;gap:12px;align-items:center;
+    padding:10px 10px;border-radius:6px;text-decoration:none;color:var(--ink-2);
+    font-size:14px;cursor:pointer;
+  }
+  .side-link:hover{background:var(--paper)}
+  .side-link.active{background:var(--ink);color:var(--paper)}
+  .side-link .ic{width:18px;height:18px;display:grid;place-items:center;color:currentColor}
+  .side-link .ic svg{width:16px;height:16px;stroke:currentColor;stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .side-link .kbd{font-family:var(--mono);font-size:10px;color:var(--ink-3);opacity:0;transition:opacity .15s}
+  .side-link:hover .kbd{opacity:1}
+  .side-link.active .kbd{color:oklch(0.7 0.01 70);opacity:1}
+
+  .side-credits{
+    margin:12px;padding:18px;border:1px solid var(--rule);border-radius:10px;background:var(--paper);
+  }
+  .credits-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+  .credits-num{font-family:var(--serif);font-size:48px;line-height:0.9;letter-spacing:-0.03em}
+  .credits-label{font-family:var(--mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-3);margin-top:4px;display:block}
+  .credits-bar{margin:12px 0 10px;height:3px;background:var(--rule);border-radius:2px;overflow:hidden}
+  .credits-bar i{display:block;height:100%;background:var(--accent);width:22%}
+  .credits-meta{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin-bottom:12px}
+  .credits-cta{
+    display:block;text-align:center;text-decoration:none;
+    background:var(--ink);color:var(--paper);padding:9px 12px;border-radius:6px;font-size:13px;
+  }
+
+  /* ========= TOPBAR ========= */
+  .main{display:flex;flex-direction:column;min-width:0}
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 32px;border-bottom:1px solid var(--rule);background:var(--bg);
+    position:sticky;top:0;z-index:20;backdrop-filter:saturate(140%) blur(8px);
+  }
+  .crumb{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-3)}
+  .crumb b{color:var(--ink);font-weight:500}
+  .crumb .sep{color:var(--ink-4)}
+  .top-right{display:flex;align-items:center;gap:14px}
+  .top-pill{
+    font-family:var(--mono);font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;
+    padding:5px 10px;border:1px solid var(--rule);border-radius:999px;color:var(--ink-2);
+  }
+  .top-pill.pro{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .top-icon{
+    width:34px;height:34px;border-radius:999px;border:1px solid var(--rule);
+    display:grid;place-items:center;background:var(--bg);color:var(--ink-2);
+  }
+  .top-icon svg{width:16px;height:16px;stroke:currentColor;stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .top-user{
+    display:flex;align-items:center;gap:10px;padding:5px 14px 5px 5px;
+    border:1px solid var(--rule);border-radius:999px;background:var(--bg);
+  }
+  .top-user .av{width:26px;height:26px;border-radius:999px;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-family:var(--serif);font-size:14px}
+  .top-user .nm{font-size:13px}
+  .top-user .ch{color:var(--ink-3);font-size:10px}
+
+  /* ========= CONTENT PAGE ========= */
+  .page{padding:36px 40px 80px;max-width:1400px;width:100%}
+  .page-head{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end;margin-bottom:36px}
+  .page-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);display:block;margin-bottom:8px}
+  .page h1{
+    font-family:var(--serif);font-weight:400;font-size:56px;line-height:1.0;letter-spacing:-0.022em;margin:0;
+  }
+  .page h1 em{font-style:italic;color:var(--accent-ink)}
+  .page-sub{color:var(--ink-2);font-size:15.5px;margin:10px 0 0;max-width:680px;line-height:1.5}
+
+  /* shared cards */
+  .card{
+    background:var(--paper);border:1px solid var(--rule);border-radius:12px;
+    padding:24px;box-shadow:0 1px 0 var(--rule);
+  }
+  .card-head{
+    display:flex;justify-content:space-between;align-items:center;
+    padding-bottom:14px;margin-bottom:18px;border-bottom:1px solid var(--rule);
+  }
+  .card-head .label{margin:0}
+
+  /* generic buttons */
+  .btn{appearance:none;border:1px solid var(--ink);background:var(--ink);color:var(--paper);padding:9px 16px;border-radius:8px;font:inherit;font-size:13.5px;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:transform .15s ease}
+  .btn:hover{transform:translateY(-1px)}
+  .btn-ghost{background:transparent;color:var(--ink)}
+  .btn-accent{background:var(--accent);border-color:var(--accent);color:var(--paper)}
+  .btn-red{background:var(--red);border-color:var(--red);color:var(--paper)}
+  .btn-lg{padding:14px 22px;font-size:14.5px;border-radius:10px}
+  .btn-block{width:100%;justify-content:center}
+
+  /* sections / screens */
+  .screen{display:none}
+  .screen.active{display:block}
+
+  /* ====================== SCREEN: GENERATOR ====================== */
+  .gen-banner{
+    display:flex;align-items:center;justify-content:space-between;gap:20px;
+    border:1px dashed var(--rule);background:var(--accent-bg);
+    padding:16px 22px;border-radius:10px;margin-bottom:36px;
+  }
+  .gen-banner .b-left{display:flex;align-items:center;gap:14px}
+  .gen-banner .dot{width:8px;height:8px;border-radius:999px;background:var(--accent)}
+  .gen-banner .ttl{font-size:14px;color:var(--ink);font-weight:500}
+  .gen-banner .drft{font-family:var(--serif);font-style:italic;color:var(--ink-2);font-size:14.5px}
+  .gen-banner .b-right{display:flex;gap:8px}
+  .gen-banner .b-right .btn{padding:7px 13px;font-size:12.5px}
+
+  .gen-grid{display:grid;grid-template-columns:1.05fr 1fr;gap:28px;align-items:start}
+
+  .gen-form{padding:0}
+  .gen-block{padding:22px 24px;border-bottom:1px solid var(--rule)}
+  .gen-block:last-child{border-bottom:0}
+  .gen-block h3{font-family:var(--mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);margin:0 0 14px;font-weight:500}
+  .field{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+  .field:last-child{margin-bottom:0}
+  .field-head{display:flex;align-items:center;justify-content:space-between}
+  .field label{font-size:13.5px;color:var(--ink)}
+  .field label .req{color:var(--accent);margin-left:2px}
+  .field .examples{font-family:var(--mono);font-size:11px;color:var(--accent-ink);text-decoration:none;border-bottom:1px dashed var(--accent);padding-bottom:1px}
+  .field textarea, .field input[type=text]{
+    font:inherit;font-size:14px;color:var(--ink);
+    border:1px solid var(--rule);background:var(--bg);
+    padding:12px 14px;border-radius:8px;outline:none;
+    transition:border .15s, background .15s;
+    width:100%;
+  }
+  .field textarea{min-height:120px;resize:vertical;line-height:1.5}
+  .field textarea:focus, .field input:focus{border-color:var(--ink);background:var(--paper)}
+  .field-meta{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;color:var(--ink-3);letter-spacing:0.04em}
+  .seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:0;border:1px solid var(--rule);border-radius:8px;background:var(--bg);overflow:hidden}
+  .seg button{
+    border:0;background:transparent;padding:10px 8px;font-size:13px;color:var(--ink-2);
+    border-right:1px solid var(--rule);cursor:pointer;transition:background .15s;
+  }
+  .seg button:last-child{border-right:0}
+  .seg button.on{background:var(--ink);color:var(--paper)}
+  .seg button:hover:not(.on){background:var(--paper)}
+  .row-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .help{font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:0.02em;display:inline-flex;align-items:center;gap:6px}
+  .help::before{content:"ⓘ";font-family:var(--sans);color:var(--ink-3)}
+
+  .gen-submit{padding:24px;border-top:1px solid var(--rule);background:var(--bg-2);display:flex;flex-direction:column;gap:12px;border-radius:0 0 12px 12px;margin:-1px}
+  .gen-submit .btn{font-family:var(--mono);letter-spacing:0.04em;text-transform:uppercase;font-size:12.5px}
+  .gen-submit .meta{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);text-align:center;letter-spacing:0.04em}
+  .gen-submit .meta span::after{content:"·";margin:0 8px;color:var(--rule-2)}
+  .gen-submit .meta span:last-child::after{content:""}
+
+  /* Brief side */
+  .brief{padding:0;background:transparent;border:0;box-shadow:none}
+  .brief-head{display:flex;flex-direction:column;gap:8px;margin-bottom:18px}
+  .brief-head h2{font-family:var(--serif);font-size:32px;line-height:1.05;letter-spacing:-0.015em;margin:0;font-weight:400}
+  .brief-list{display:flex;flex-direction:column;gap:0;border-top:1px solid var(--rule)}
+  .brief-item{
+    display:grid;grid-template-columns:36px 1fr;gap:16px;
+    padding:18px 0;border-bottom:1px solid var(--rule);
+  }
+  .brief-item .ix{
+    font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:0.06em;padding-top:4px;
+  }
+  .brief-item .ttl{font-size:14.5px;color:var(--ink);font-weight:500;display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+  .brief-item .ttl .tag{font-family:var(--mono);font-size:10px;color:var(--ink-3);letter-spacing:0.1em;text-transform:uppercase;font-weight:400}
+  .brief-item q{display:block;font-family:var(--serif);font-style:italic;color:var(--ink-2);font-size:15px;margin-top:6px;line-height:1.4}
+  .brief-item .note{
+    margin-top:10px;padding:10px 14px;background:var(--accent-bg);border-radius:8px;
+    font-size:13px;color:var(--accent-ink);display:flex;gap:10px;align-items:flex-start;line-height:1.45;
+  }
+  .brief-item .note::before{content:"✦";color:var(--accent);flex:none;margin-top:1px}
+  .brief-foot{margin-top:18px;font-size:13.5px;color:var(--ink-2);line-height:1.55}
+  .brief-foot b{font-weight:500;color:var(--ink)}
+  .brief-foot u{text-decoration:none;background:linear-gradient(transparent 70%, var(--accent-bg) 70%);padding:0 2px}
+
+  /* ====================== SCREEN: EXPERT ====================== */
+  .chat-grid{display:grid;grid-template-columns:280px 1fr;gap:28px;align-items:start}
+  .chat-side{padding:0;background:transparent;border:0;box-shadow:none}
+  .chat-side h3{font-family:var(--serif);font-size:26px;line-height:1.1;margin:0 0 6px;font-weight:400;letter-spacing:-0.01em}
+  .chat-side h3::before{content:"✦ ";color:var(--accent);font-style:italic}
+  .chat-side .sub{color:var(--ink-3);font-size:13px;margin-bottom:18px}
+  .chat-new{
+    width:100%;display:flex;align-items:center;justify-content:center;gap:8px;
+    border:1px dashed var(--rule);background:var(--paper);color:var(--ink);
+    padding:12px;border-radius:8px;font-size:13.5px;
+  }
+  .chat-new:hover{border-color:var(--accent);color:var(--accent-ink)}
+  .chat-hist{margin-top:24px}
+  .chat-hist .label{margin-bottom:10px}
+  .conv{
+    padding:14px;border:1px solid var(--rule);border-radius:8px;background:var(--paper);
+    cursor:pointer;transition:border .15s;
+  }
+  .conv:hover{border-color:var(--ink)}
+  .conv.active{border-color:var(--ink);box-shadow:inset 3px 0 0 var(--accent)}
+  .conv b{font-size:14px;font-weight:500;display:block}
+  .conv .meta{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);letter-spacing:0.04em;margin-top:4px}
+
+  .chat-main{
+    background:var(--paper);border:1px solid var(--rule);border-radius:12px;
+    min-height:680px;display:flex;flex-direction:column;
+  }
+  .chat-head{
+    padding:18px 24px;border-bottom:1px solid var(--rule);
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .chat-head .who{display:flex;align-items:center;gap:12px}
+  .chat-head .av{
+    width:36px;height:36px;border-radius:999px;background:var(--ink);color:var(--paper);
+    display:grid;place-items:center;font-family:var(--serif);font-size:18px;font-style:italic;flex:none;
+  }
+  .chat-head b{display:block;font-size:15px;font-weight:500}
+  .chat-head .ctx{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);letter-spacing:0.08em;margin-top:2px}
+  .chat-head .plan-sel{
+    display:flex;align-items:center;gap:8px;padding:7px 12px;
+    border:1px solid var(--rule);background:var(--bg);border-radius:8px;font-size:12.5px;color:var(--ink-2);
+  }
+  .chat-head .plan-sel::after{content:"▾";font-size:10px;color:var(--ink-3)}
+
+  .chat-body{flex:1;padding:24px 32px;display:flex;flex-direction:column;gap:18px}
+  .msg{display:grid;grid-template-columns:32px 1fr;gap:14px;align-items:flex-start;max-width:78%}
+  .msg .av{width:32px;height:32px;border-radius:999px;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-family:var(--serif);font-size:14px;font-style:italic;flex:none}
+  .msg .bb{
+    background:var(--bg-2);border:1px solid var(--rule);border-radius:14px;
+    padding:14px 16px;font-size:14.5px;line-height:1.55;color:var(--ink);
+  }
+  .msg .bb b{color:var(--accent-ink);font-weight:600}
+  .msg.you{grid-template-columns:1fr 32px;justify-self:flex-end;margin-left:auto}
+  .msg.you .av{background:var(--accent);order:2}
+  .msg.you .bb{background:var(--ink);color:var(--paper);border-color:var(--ink);order:1}
+  .msg.you .bb b{color:var(--paper)}
+
+  .quick-chips{display:flex;flex-wrap:wrap;gap:8px;padding:0 24px 18px}
+  .quick-chips button{
+    font-family:var(--mono);font-size:11.5px;letter-spacing:0.04em;color:var(--ink-2);
+    background:var(--bg);border:1px solid var(--rule);border-radius:999px;padding:7px 12px;cursor:pointer;
+  }
+  .quick-chips button:hover{background:var(--paper);border-color:var(--ink);color:var(--ink)}
+
+  .chat-input{
+    border-top:1px solid var(--rule);padding:14px 16px;display:flex;gap:10px;align-items:center;background:var(--bg);
+    border-radius:0 0 12px 12px;
+  }
+  .chat-input input{
+    flex:1;border:1px solid var(--rule);background:var(--paper);border-radius:10px;padding:12px 14px;font:inherit;font-size:14px;outline:none;
+  }
+  .chat-input input:focus{border-color:var(--ink)}
+  .chat-send{
+    width:42px;height:42px;border-radius:10px;border:0;background:var(--accent);color:var(--paper);
+    display:grid;place-items:center;
+  }
+  .chat-send svg{width:18px;height:18px;stroke:currentColor;stroke-width:2;fill:none}
+
+  /* ====================== SCREEN: PLANS ====================== */
+  .plans-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;gap:18px;flex-wrap:wrap}
+  .filter-tabs{display:flex;gap:6px;flex-wrap:wrap}
+  .filter-tabs button{
+    appearance:none;border:1px solid var(--rule);background:var(--paper);color:var(--ink-2);
+    padding:7px 12px;border-radius:999px;font:inherit;font-size:12.5px;cursor:pointer;
+    font-family:var(--mono);letter-spacing:0.04em;
+  }
+  .filter-tabs button.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .filter-tabs button .ct{margin-left:6px;color:var(--ink-3);font-size:10.5px}
+  .filter-tabs button.on .ct{color:oklch(0.7 0.01 70)}
+  .plans-search{display:flex;align-items:center;gap:8px;border:1px solid var(--rule);background:var(--paper);border-radius:999px;padding:7px 14px;font-size:13px;color:var(--ink-3);min-width:220px}
+  .plans-search input{border:0;outline:0;background:transparent;font:inherit;font-size:13px;flex:1;color:var(--ink)}
+
+  .plans-table{
+    border:1px solid var(--rule);border-radius:12px;background:var(--paper);overflow:hidden;
+  }
+  .plans-thead{
+    display:grid;grid-template-columns:48px 2.4fr 110px 110px 130px 100px;
+    gap:18px;padding:12px 22px;border-bottom:1px solid var(--rule);background:var(--bg);
+    font-family:var(--mono);font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);
+    align-items:center;
+  }
+  .plan-row{
+    display:grid;grid-template-columns:48px 2.4fr 110px 110px 130px 100px;
+    gap:18px;padding:18px 22px;border-bottom:1px solid var(--rule);align-items:center;
+    transition:background .15s;
+  }
+  .plan-row:last-child{border-bottom:0}
+  .plan-row:hover{background:var(--bg)}
+  .plan-icon{
+    width:42px;height:42px;border-radius:8px;background:var(--bg-2);border:1px solid var(--rule);
+    display:grid;place-items:center;font-family:var(--serif);font-size:20px;color:var(--ink);
+  }
+  .plan-name{font-size:15.5px;font-weight:500;line-height:1.3}
+  .plan-name span{display:block;color:var(--ink-3);font-weight:400;font-size:12.5px;margin-top:3px;font-family:var(--serif);font-style:italic}
+  .plan-score{font-family:var(--serif);font-size:28px;line-height:1;letter-spacing:-0.02em;color:var(--ink)}
+  .plan-score sup{font-size:11px;color:var(--ink-3);font-family:var(--mono);font-weight:400;margin-left:2px;vertical-align:8px}
+  .plan-score.s-green{color:var(--green)}
+  .plan-budget{font-family:var(--mono);font-size:14px;font-variant-numeric:tabular-nums;color:var(--ink)}
+  .plan-date{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:0.04em}
+  .plan-cta{justify-self:end}
+  .plan-cta .btn{padding:7px 13px;font-size:12.5px}
+
+  .plans-foot{
+    margin-top:18px;display:flex;justify-content:space-between;align-items:center;color:var(--ink-3);font-size:13px;
+  }
+
+  /* ====================== SCREEN: INSPIRATION ====================== */
+  .insp-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);
+    border-top:1px solid var(--rule);border-left:1px solid var(--rule);background:var(--paper);
+    border-radius:12px;overflow:hidden;
+  }
+  .insp{
+    padding:26px 26px 22px;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);
+    display:flex;flex-direction:column;gap:10px;cursor:pointer;transition:background .15s;
+  }
+  .insp:hover{background:var(--bg)}
+  .insp-head{display:flex;justify-content:space-between;align-items:baseline}
+  .insp-ix{font-family:var(--mono);font-size:11px;letter-spacing:0.06em;color:var(--ink-3)}
+  .insp-cat{display:flex;gap:6px}
+  .insp-cat span{font-family:var(--mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;padding:3px 8px;border:1px solid var(--rule);border-radius:999px;color:var(--ink-3)}
+  .insp h4{font-family:var(--serif);font-size:24px;line-height:1.1;font-weight:400;letter-spacing:-0.01em;margin:0}
+  .insp p{font-size:13.5px;color:var(--ink-2);margin:0;line-height:1.5}
+  .insp-meta{
+    display:flex;align-items:center;gap:14px;font-family:var(--mono);font-size:10.5px;
+    color:var(--ink-3);margin-top:8px;letter-spacing:0.04em;
+  }
+  .insp-meta .mkt{color:var(--accent-ink)}
+  .insp-cta{
+    margin-top:6px;font-family:var(--mono);font-size:11.5px;color:var(--ink);
+    letter-spacing:0.06em;display:inline-flex;align-items:center;gap:6px;
+    text-transform:uppercase;
+  }
+  .insp:hover .insp-cta{color:var(--accent-ink)}
+
+  /* ====================== SCREEN: CRÉDITS ====================== */
+  .pay-grid{display:grid;grid-template-columns:1.05fr 1fr;gap:32px;align-items:start}
+  .pack{
+    display:grid;grid-template-columns:24px 1fr auto;gap:18px;align-items:center;
+    padding:22px 24px;border:1px solid var(--rule);border-radius:12px;background:var(--paper);
+    cursor:pointer;margin-bottom:14px;transition:border .15s, background .15s;
+    position:relative;
+  }
+  .pack:hover{border-color:var(--ink)}
+  .pack.on{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink) inset}
+  .pack .radio{
+    width:18px;height:18px;border-radius:999px;border:1.5px solid var(--rule);
+    display:grid;place-items:center;
+  }
+  .pack.on .radio{border-color:var(--ink)}
+  .pack.on .radio::after{content:"";width:8px;height:8px;border-radius:999px;background:var(--accent)}
+  .pack-body{display:flex;flex-direction:column;gap:4px}
+  .pack-name{font-family:var(--serif);font-size:28px;line-height:1;letter-spacing:-0.015em;display:flex;align-items:baseline;gap:14px}
+  .pack-name b{font-weight:400}
+  .pack-price{font-family:var(--mono);font-size:18px;letter-spacing:-0.02em;color:var(--ink);font-variant-numeric:tabular-nums}
+  .pack-sub{font-size:13.5px;color:var(--ink-2)}
+  .pack-meta{font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:0.04em;margin-top:6px}
+  .pack-best{
+    position:absolute;top:-10px;right:18px;
+    font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;
+    background:var(--accent);color:var(--paper);padding:4px 10px;border-radius:999px;
+  }
+
+  .pay-form{padding:0}
+  .pay-form-head{padding:22px 24px;border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:10px}
+  .pay-form-head .label{margin:0}
+  .pay-form-head .secure{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--green);letter-spacing:0.08em;display:inline-flex;align-items:center;gap:6px}
+  .pay-form-head .secure::before{content:"●";font-size:8px}
+  .pay-fields{padding:18px 24px;display:flex;flex-direction:column;gap:14px}
+  .pay-fields .row-2{grid-template-columns:1fr 100px}
+  .pay-fields input{
+    width:100%;font:inherit;font-size:14px;color:var(--ink);
+    border:1px solid var(--rule);background:var(--bg);padding:12px 14px;border-radius:8px;outline:none;
+  }
+  .pay-fields input:focus{border-color:var(--ink);background:var(--paper)}
+  .pay-fields label{font-family:var(--mono);font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);display:block;margin-bottom:6px}
+  .pay-actions{padding:18px 24px;border-top:1px solid var(--rule);background:var(--bg-2);border-radius:0 0 12px 12px}
+
+  .invoice{padding:0;background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .invoice .label{color:oklch(0.65 0.01 70)}
+  .invoice-head{padding:22px 24px;border-bottom:1px solid oklch(0.30 0.01 60);display:flex;justify-content:space-between;align-items:baseline}
+  .invoice-head h3{font-family:var(--serif);font-size:22px;letter-spacing:0.04em;margin:0;font-weight:400}
+  .invoice-no{font-family:var(--mono);font-size:11px;color:oklch(0.65 0.01 70);letter-spacing:0.1em}
+  .invoice-body{padding:8px 24px}
+  .invoice-row{display:flex;justify-content:space-between;align-items:baseline;padding:12px 0;border-bottom:1px dashed oklch(0.30 0.01 60);font-size:14px}
+  .invoice-row:last-child{border-bottom:0}
+  .invoice-row .k{color:oklch(0.78 0.01 70)}
+  .invoice-row .v{font-family:var(--mono);font-variant-numeric:tabular-nums}
+  .invoice-total{
+    display:flex;justify-content:space-between;align-items:baseline;
+    padding:18px 24px;border-top:1px solid oklch(0.30 0.01 60);
+  }
+  .invoice-total .k{font-family:var(--mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:oklch(0.78 0.01 70)}
+  .invoice-total .v{font-family:var(--serif);font-size:42px;letter-spacing:-0.025em;font-variant-numeric:tabular-nums}
+  .invoice-incl{padding:0 24px 24px}
+  .invoice-incl .label{padding-top:18px;border-top:1px solid oklch(0.30 0.01 60);display:block;margin-bottom:10px}
+  .invoice-incl ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+  .invoice-incl li{font-size:13.5px;color:oklch(0.92 0.01 70);display:flex;gap:10px}
+  .invoice-incl li::before{content:"✓";color:var(--accent);font-family:var(--mono);font-weight:500;flex:none;width:14px}
+
+  /* ====================== SCREEN: PARAMÈTRES ====================== */
+  .set-grid{display:grid;grid-template-columns:240px 1fr;gap:36px;align-items:start}
+  .set-toc{position:sticky;top:90px}
+  .set-toc h4{font-family:var(--mono);font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);margin:0 0 12px}
+  .set-toc a{
+    display:block;padding:8px 12px;border-radius:6px;color:var(--ink-2);text-decoration:none;font-size:13.5px;
+  }
+  .set-toc a:hover{background:var(--paper)}
+  .set-toc a.on{background:var(--ink);color:var(--paper)}
+  .set-section{margin-bottom:28px;scroll-margin-top:90px}
+  .set-section h2{font-family:var(--serif);font-size:32px;letter-spacing:-0.015em;margin:0 0 6px;font-weight:400}
+  .set-section .desc{color:var(--ink-2);font-size:14px;margin:0 0 18px;max-width:540px;line-height:1.5}
+  .set-section .fields{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .set-section input{
+    width:100%;font:inherit;font-size:14px;color:var(--ink);
+    border:1px solid var(--rule);background:var(--bg);padding:12px 14px;border-radius:8px;outline:none;
+  }
+  .set-section input:focus{border-color:var(--ink);background:var(--paper)}
+  .set-section label{font-family:var(--mono);font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);display:block;margin-bottom:6px}
+  .set-foot{margin-top:18px;display:flex;justify-content:flex-end;gap:10px}
+
+  .ref-card{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;padding:18px 22px}
+  .ref-link{font-family:var(--mono);font-size:15px;color:var(--ink);background:var(--bg-2);border:1px dashed var(--rule);padding:10px 14px;border-radius:8px;display:inline-flex;align-items:center;gap:14px}
+  .ref-link b{font-weight:500;color:var(--accent-ink)}
+  .ref-stats{margin-top:14px;display:flex;gap:24px;font-family:var(--mono);font-size:12px;color:var(--ink-3);letter-spacing:0.04em}
+  .ref-stats b{color:var(--ink);font-weight:500}
+
+  .danger{border-color:var(--red);background:var(--red-bg)}
+  .danger .label{color:var(--red)}
+  .danger .desc{color:var(--ink-2)}
+  .danger b{color:var(--red);font-weight:500}
+
+  /* ====================== SCREEN: AIDE ====================== */
+  .help-grid{display:grid;grid-template-columns:1fr 320px;gap:36px;align-items:start}
+  .faqs{border-top:1px solid var(--ink)}
+  details.q{border-bottom:1px solid var(--rule);padding:0}
+  details.q summary{
+    list-style:none;cursor:pointer;padding:22px 4px;
+    display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;
+    font-family:var(--serif);font-size:22px;line-height:1.2;font-weight:400;
+  }
+  details.q summary::-webkit-details-marker{display:none}
+  details.q summary::after{content:"+";font-family:var(--mono);font-size:20px;color:var(--ink-3);transition:transform .2s}
+  details.q[open] summary::after{content:"−";color:var(--accent)}
+  details.q .a{padding:0 4px 22px;color:var(--ink-2);font-size:14.5px;line-height:1.6;max-width:760px}
+
+  .help-side{
+    position:sticky;top:90px;display:flex;flex-direction:column;gap:14px;
+  }
+  .help-card{padding:20px 22px;background:var(--paper);border:1px solid var(--rule);border-radius:12px}
+  .help-card h4{font-family:var(--serif);font-size:22px;margin:0 0 8px;font-weight:400}
+  .help-card p{font-size:13.5px;color:var(--ink-2);margin:0 0 12px;line-height:1.5}
+  .help-card.cta-dark{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .help-card.cta-dark p{color:oklch(0.85 0.01 70)}
+  .help-card.cta-dark .btn{background:var(--accent);border-color:var(--accent)}
+  .help-mini{display:flex;gap:8px;align-items:center;font-family:var(--mono);font-size:11.5px;letter-spacing:0.06em;color:var(--ink-3)}
+  .help-mini b{color:var(--ink);font-weight:500}
+
+  /* ========= responsive ========= */
+  @media (max-width:1200px){
+    .gen-grid,.chat-grid,.pay-grid,.set-grid,.help-grid{grid-template-columns:1fr}
+    .insp-grid{grid-template-columns:repeat(2,1fr)}
+    .set-toc{position:static}
+  }
+  @media (max-width:880px){
+    .app{grid-template-columns:1fr}
+    .side{position:relative;height:auto;border-right:0;border-bottom:1px solid var(--rule)}
+    .insp-grid{grid-template-columns:1fr}
+    .plans-thead, .plan-row{grid-template-columns:42px 1fr auto;gap:12px}
+    .plans-thead .h-budget,.plans-thead .h-date,.plan-budget,.plan-date{display:none}
+    .page{padding:24px 20px 80px}
+    .page h1{font-size:40px}
+  }
+</style>
+</head>
 <body>
 
-<!-- ========== TOAST ========== -->
-<div class="toast" id="toast"></div>
-
-<!-- ========== LANDING ========== -->
-<div class="page active" id="page-landing">
-
-<!-- ========================= TOP BAR ========================= -->
-<header class="nl-topbar" id="mainNav">
-  <div class="nl-topbar-inner">
-    <a class="nl-brand" href="#" onclick="showPage('landing');return false;" aria-label="EADEE">
-      <span class="nl-brand-mark">E</span>
-      <span class="nl-brand-word">EADEE</span>
+<div class="app">
+  <!-- =================== SIDEBAR =================== -->
+  <aside class="side">
+    <a class="side-brand" href="#">
+      <span class="side-mark">E</span>
+      <span class="side-word">EADEE</span>
+      <span class="side-status" aria-hidden="true"></span>
     </a>
-    <nav class="nl-nav" id="navLinks">
-      <a href="#nl-process" onclick="scrollToSection('nl-process');return false;">Comment ça marche</a>
-      <a href="#nl-features" onclick="scrollToSection('nl-features');return false;">Fonctionnalités</a>
-      <a href="#nl-pricing" onclick="scrollToSection('nl-pricing');return false;">Tarifs</a>
-      <a href="#nl-faq" onclick="scrollToSection('nl-faq');return false;">FAQ</a>
+
+    <nav class="side-nav">
+      <div class="side-section">Production</div>
+      <a class="side-link active" data-screen="gen">
+        <span class="ic"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg></span>
+        <span>Générateur</span><span class="kbd">G</span>
+      </a>
+      <a class="side-link" data-screen="expert">
+        <span class="ic"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></span>
+        <span>Expert Eadee</span><span class="kbd">E</span>
+      </a>
+      <a class="side-link" data-screen="plans">
+        <span class="ic"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg></span>
+        <span>Mes plans</span><span class="kbd">P</span>
+      </a>
+      <a class="side-link" data-screen="insp">
+        <span class="ic"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4M12 2a7 7 0 00-4 12.7c1.2 1 2 1.7 2 3.3h4c0-1.6.8-2.3 2-3.3A7 7 0 0012 2z"/></svg></span>
+        <span>Inspiration</span><span class="kbd">I</span>
+      </a>
+
+      <div class="side-section">Compte</div>
+      <a class="side-link" data-screen="credits">
+        <span class="ic"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 11h20M6 16h4"/></svg></span>
+        <span>Crédits</span><span class="kbd">C</span>
+      </a>
+      <a class="side-link" data-screen="settings">
+        <span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg></span>
+        <span>Paramètres</span><span class="kbd">,</span>
+      </a>
+      <a class="side-link" data-screen="help">
+        <span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 015.8 1c0 2-3 3-3 3M12 17h0"/></svg></span>
+        <span>Aide &amp; Support</span><span class="kbd">?</span>
+      </a>
     </nav>
-    <div class="nl-topbar-cta" id="navRight">
-      <a class="nl-link-quiet" href="#" onclick="showAuth('login');return false;" id="navAuthBtn">Connexion</a>
-      <a class="nl-btn" href="#" onclick="showAuth('signup');return false;" id="navDashBtn">Commencer →</a>
-    </div>
-  </div>
-</header>
 
-<!-- ========================= HERO ========================= -->
-<section class="nl-hero">
-  <div class="nl-wrap">
-    <div class="nl-hero-rail">
-      <span>EADEE — Dossier N°01</span>
-      <div class="nl-rail-mid">
-        <span>Génération instantanée</span>
-        <span>Conforme banque &amp; BPI France</span>
-        <span>Édition 2026</span>
-      </div>
-      <span class="nl-rail-live">Démo en direct</span>
-    </div>
-
-    <div class="nl-hero-grid">
-      <div class="nl-hero-text">
-        <span class="nl-hero-tag">
-          <span class="nl-pill">NOUVEAU</span>
-          L'IA au service de vos projets <span style="color:var(--accent)">✦</span>
-        </span>
-
-        <h1>
-          <span class="nl-h1-line">Un business plan complet</span>
-          <span class="nl-h1-line">et <em>professionnel.</em></span>
-          <span class="nl-h1-line">En <span class="nl-kinetic" id="kineticNum">00</span><span class="nl-kinetic-unit">sec</span></span>
-        </h1>
-
-        <p class="nl-hero-sub">
-          23 sections. Projections 3 ans. Stratégie, finances, juridique, démarches admin. Tout ce qu'il faut pour passer de l'idée à l'action — sans passer des semaines à tout structurer.
-        </p>
-
-        <div class="nl-hero-ctas">
-          <a class="nl-btn nl-btn-lg nl-btn-accent" href="#" onclick="showAuth('signup');return false;">Créer mon plan</a>
-          <a class="nl-btn nl-btn-lg nl-btn-ghost" href="#nl-pricing" onclick="scrollToSection('nl-pricing');return false;">Voir les tarifs →</a>
+    <div class="side-credits">
+      <div class="credits-head">
+        <div>
+          <span class="credits-label">Crédits restants</span>
+          <span class="credits-num num">02</span>
         </div>
+        <span class="label">/ 03</span>
+      </div>
+      <div class="credits-bar"><i></i></div>
+      <div class="credits-meta">générations disponibles · pack Pro</div>
+      <a class="credits-cta" data-screen="credits">Recharger</a>
+    </div>
+  </aside>
 
-        <div class="nl-hero-ornament">
-          <span id="ornCount">00 / 23 sections</span>
-          <span class="nl-bars" id="ornBars" aria-hidden="true">
-            <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+  <!-- =================== MAIN =================== -->
+  <main class="main">
+    <header class="topbar">
+      <div class="crumb">
+        <span>EADEE</span><span class="sep">/</span><b id="crumb">Générateur</b>
+      </div>
+      <div class="top-right">
+        <span class="top-pill pro">★ Pro</span>
+        <span class="top-icon" title="Notifications"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"/></svg></span>
+        <div class="top-user">
+          <span class="av">A</span>
+          <span>
+            <span class="nm">Admin</span>
+            <span class="ch">Mon espace ▾</span>
           </span>
         </div>
       </div>
+    </header>
 
-      <div class="nl-hero-live">
-        <div class="nl-live-doc">
-          <div class="nl-live-head">
-            <span class="nl-left-bit"><span class="nl-ldot"></span> EADEE · génération en cours</span>
-            <span class="nl-live-timer" id="liveTimer">00 / 60s</span>
-          </div>
-          <div class="nl-live-progress"><i id="liveProgress"></i></div>
-          <div class="nl-live-body">
-            <ol class="nl-live-sections" id="liveSections">
-              <li><span class="lix">01</span><span class="lnm">Résumé exécutif</span><span class="lst">⋯</span></li>
-              <li><span class="lix">04</span><span class="lnm">Proposition de valeur unique</span><span class="lst">⋯</span></li>
-              <li><span class="lix">07</span><span class="lnm">Étude de marché</span><span class="lst">⋯</span></li>
-              <li><span class="lix">08</span><span class="lnm">Analyse concurrentielle</span><span class="lst">⋯</span></li>
-              <li><span class="lix">09</span><span class="lnm">Plan de financement</span><span class="lst">⋯</span></li>
-              <li><span class="lix">11</span><span class="lnm">Compte de résultat 3 ans</span><span class="lst">⋯</span></li>
-              <li><span class="lix">14</span><span class="lnm">Seuil de rentabilité</span><span class="lst">⋯</span></li>
-              <li><span class="lix">16</span><span class="lnm">Aspects juridiques</span><span class="lst">⋯</span></li>
-              <li><span class="lix">21</span><span class="lnm">Plan d'action 90 jours</span><span class="lst">⋯</span></li>
-            </ol>
-            <div class="nl-live-more">
-              <span id="liveMore">+ 14 autres sections en cours</span>
-              <span class="nl-dots" aria-hidden="true"><i></i><i></i><i></i></span>
-            </div>
-          </div>
-          <div class="nl-live-result" id="liveResult">
-            <div class="nl-lr-score num">87<sup>/100</sup></div>
-            <div class="nl-lr-text"><b>Plan généré</b>Score viabilité · 60s</div>
-            <div class="nl-lr-stamp">BPI ready</div>
-          </div>
-        </div>
+    <!-- =================== GENERATOR =================== -->
+    <section class="screen active" data-screen="gen">
+      <div class="page">
 
-        <div class="nl-float-chip nl-float-chip-1" id="chip1">
-          <span class="nl-ic">€</span>
-          <span><span class="nl-big num">185 000€</span><br/><span style="color:var(--ink-3)">CA An 3</span></span>
-        </div>
-        <div class="nl-float-chip nl-float-chip-2" id="chip2">
-          <span class="nl-ic">%</span>
-          <span><span class="nl-big num">71% marge</span><br/><span style="color:var(--ink-3)">brute</span></span>
-        </div>
-        <div class="nl-float-chip nl-float-chip-3" id="chip3">
-          <span class="nl-ic">✓</span>
-          <span><span class="nl-big">SAS</span><br/><span style="color:var(--ink-3)">statut conseillé</span></span>
-        </div>
-      </div>
-    </div>
-
-    <div class="nl-hero-foot">
-      <div class="nl-avatars">
-        <div class="nl-avatar-stack" aria-hidden="true">
-          <span>M</span><span>S</span><span>L</span><span>K</span><span>+</span>
-        </div>
-        <p class="nl-avatar-cap">Utilisé par des <b>milliers d'entrepreneurs</b> en France</p>
-      </div>
-      <div></div>
-      <div class="nl-hero-checks">
-        <span class="nl-check">Compatible banque &amp; BPI France</span>
-        <span class="nl-check">Export PDF prêt à envoyer</span>
-        <span class="nl-check">Sans abonnement</span>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ========================= SECTOR MARQUEE ========================= -->
-<div class="nl-marquee-band">
-  <div class="nl-label">
-    <span class="nl-eyebrow">EADEE fonctionne pour tous les secteurs</span>
-  </div>
-  <div class="nl-marquee" aria-hidden="true">
-    <span>Restauration</span><span>Conciergerie Airbnb</span><span>App &amp; SaaS</span><span>Coaching pro</span><span>E-commerce</span><span>Artisanat</span><span>Freelance</span><span>Beauté &amp; bien-être</span><span>Sport &amp; fitness</span><span>Consulting B2B</span><span>Boutique physique</span><span>Formation en ligne</span>
-    <span>Restauration</span><span>Conciergerie Airbnb</span><span>App &amp; SaaS</span><span>Coaching pro</span><span>E-commerce</span><span>Artisanat</span><span>Freelance</span><span>Beauté &amp; bien-être</span><span>Sport &amp; fitness</span><span>Consulting B2B</span><span>Boutique physique</span><span>Formation en ligne</span>
-  </div>
-</div>
-
-<!-- ========================= PROCESS ========================= -->
-<section id="nl-process">
-  <div class="nl-wrap">
-    <div class="nl-section-head">
-      <div class="nl-left">
-        <span class="nl-eyebrow">Le process</span>
-      </div>
-      <h2>De l'idée au plan signé. <em>En 3 étapes.</em></h2>
-    </div>
-
-    <div class="nl-process">
-      <div class="nl-step">
-        <div class="nl-step-num"><span>01</span><span>—</span></div>
-        <h3>Décris ton idée</h3>
-        <p>Une phrase suffit. Ton secteur, ta ville, ton budget. Pas de formulaire interminable.</p>
-        <div class="nl-step-glyph">01</div>
-      </div>
-      <div class="nl-step">
-        <div class="nl-step-num"><span>02</span><span>—</span></div>
-        <h3>EADEE structure tout</h3>
-        <p>Marché, concurrents, stratégie, finances, juridique, démarches. 23 sections générées et personnalisées à ton projet.</p>
-        <div class="nl-step-glyph">02</div>
-      </div>
-      <div class="nl-step">
-        <div class="nl-step-num"><span>03</span><span>—</span></div>
-        <h3>Tu récupères un plan prêt à l'emploi</h3>
-        <p>Projections 3 ans, emails rédigés, checklist des démarches. Compatible banque et BPI France si tu en as besoin.</p>
-        <div class="nl-step-glyph">03</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<hr class="nl-rule" />
-
-<!-- ========================= FEATURE 1 — VIABILITY ========================= -->
-<section id="nl-features">
-  <div class="nl-wrap">
-    <div class="nl-feature">
-      <div class="nl-feature-text">
-        <span class="nl-eyebrow">Score de viabilité</span>
-        <h2>Sais-tu vraiment si ton projet est viable&nbsp;? <em>Avant d'investir un seul euro.</em></h2>
-        <p class="nl-lead">EADEE analyse ton idée sur 100 points avant que tu dépenses quoi que ce soit. Marché, concurrents, modèle économique — tout est passé au crible.</p>
-        <ul>
-          <li>
-            <span class="nl-ix">01</span>
+        <div class="gen-banner">
+          <div class="b-left">
+            <span class="dot"></span>
             <div>
-              <b>Analyse de marché chiffrée</b>
-              <span class="nl-txt">Taille, tendances, part de marché cible — adapté à ton secteur en France.</span>
-            </div>
-          </li>
-          <li>
-            <span class="nl-ix">02</span>
-            <div>
-              <b>4 concurrents réels avec leurs prix</b>
-              <span class="nl-txt">Leurs failles identifiées. Ton positionnement différenciant clarifié.</span>
-            </div>
-          </li>
-          <li>
-            <span class="nl-ix">03</span>
-            <div>
-              <b>Un verdict clair et actionnable</b>
-              <span class="nl-txt">Score /100 avec explication directe : ce qui est solide, ce qui doit évoluer.</span>
-            </div>
-          </li>
-        </ul>
-      </div>
-
-      <div class="nl-feature-visual">
-        <div class="nl-card nl-score-card">
-          <div class="nl-card-head">
-            <span>Score EADEE · VélôBretagne</span>
-            <span class="nl-status-dot">Live</span>
-          </div>
-          <div class="nl-score-big num">87<sup>/100</sup></div>
-          <div class="nl-verdict">Projet viable <em>— Fort potentiel de marché</em></div>
-          <div class="nl-score-stats">
-            <div class="nl-score-stat">
-              <span class="v num">1,8 <em>Mds€</em></span>
-              <span class="l">Marché</span>
-            </div>
-            <div class="nl-score-stat">
-              <span class="v num">+22<em>%</em></span>
-              <span class="l">Croissance</span>
-            </div>
-            <div class="nl-score-stat">
-              <span class="v num">8 400</span>
-              <span class="l">Clients</span>
+              <div class="ttl">Tu avais commencé à décrire une idée.</div>
+              <div class="drft">« je veux cree un site et une application qui repertorie toute… »</div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<hr class="nl-rule" />
-
-<!-- ========================= FEATURE 2 — PROJECTIONS ========================= -->
-<section>
-  <div class="nl-wrap">
-    <div class="nl-feature nl-reverse">
-      <div class="nl-feature-text">
-        <span class="nl-eyebrow">Projections financières</span>
-        <h2>Des projections financières <em>construites, pas inventées.</em></h2>
-        <p class="nl-lead">Chaque chiffre est étiqueté : vérifié, estimé, ou hypothèse. Tu sais exactement ce qui est solide et ce qui reste à valider avant ton RDV bancaire.</p>
-        <ul>
-          <li>
-            <span class="nl-ix">01</span>
-            <div>
-              <b>CA mois 1, 3, 6, An 1 et projection An 3</b>
-              <span class="nl-txt">Seuil de rentabilité, point mort, BFR et tableau d'amortissement calculés.</span>
-            </div>
-          </li>
-          <li>
-            <span class="nl-ix">02</span>
-            <div>
-              <b>Détail complet des charges</b>
-              <span class="nl-txt">Fixes, variables, investissements — chaque poste justifié. Export PDF structuré et lisible.</span>
-            </div>
-          </li>
-          <li>
-            <span class="nl-ix">03</span>
-            <div>
-              <b>3 scénarios documentés</b>
-              <span class="nl-txt">Pessimiste, réaliste, optimiste — avec les hypothèses expliquées pour chacun.</span>
-            </div>
-          </li>
-        </ul>
-      </div>
-
-      <div class="nl-feature-visual">
-        <div class="nl-card nl-proj-card">
-          <div class="nl-card-head">
-            <span>Projections CA · VélôBretagne</span>
-            <span>An 3</span>
-          </div>
-          <div class="nl-big-money num">185 000<sup>€</sup></div>
-          <div class="nl-proj-label">projection an 3</div>
-          <div class="nl-chart" aria-hidden="true">
-            <div class="nl-bar nl-dim" style="height:18%"></div>
-            <div class="nl-bar nl-dim" style="height:26%"></div>
-            <div class="nl-bar nl-dim" style="height:34%"></div>
-            <div class="nl-bar" style="height:44%"></div>
-            <div class="nl-bar" style="height:54%"></div>
-            <div class="nl-bar nl-accent" style="height:62%"></div>
-            <div class="nl-bar nl-accent" style="height:70%"></div>
-            <div class="nl-bar nl-accent" style="height:82%"></div>
-            <div class="nl-bar nl-accent" style="height:94%"></div>
-            <div class="nl-bar nl-accent" style="height:88%"></div>
-            <div class="nl-bar nl-accent" style="height:100%"></div>
-            <div class="nl-bar nl-accent" style="height:96%"></div>
-          </div>
-          <div class="nl-chart-axis">
-            <span>M1</span><span>M3</span><span>M6</span><span>An 1</span><span>An 3</span>
-          </div>
-          <div class="nl-kpi-row">
-            <div class="nl-kpi"><span class="l">Marge brute</span><span class="v num nl-accent">71<em style="font-style:normal">%</em></span></div>
-            <div class="nl-kpi"><span class="l">Break-even</span><span class="v num">Mois 4</span></div>
-            <div class="nl-kpi"><span class="l">ROI initial</span><span class="v num nl-accent">340<em style="font-style:normal">%</em></span></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<hr class="nl-rule" />
-
-<!-- ========================= FEATURE 3 — EXPERT 24/7 ========================= -->
-<section>
-  <div class="nl-wrap">
-    <div class="nl-feature">
-      <div class="nl-feature-text">
-        <span class="nl-eyebrow">Expert Eadee</span>
-        <h2>Conseiller disponible. <em>24 heures sur 24.</em></h2>
-        <p class="nl-lead">Ton Expert EADEE connaît chaque ligne de ton plan. Il répond, affine et te guide — à n'importe quelle heure, sans attente.</p>
-        <ul>
-          <li>
-            <span class="nl-ix">01</span>
-            <div>
-              <b>Connaissance totale de ton plan</b>
-              <span class="nl-txt">Toutes les données de ton projet en mémoire. Pas besoin de tout ré-expliquer à chaque question.</span>
-            </div>
-          </li>
-          <li>
-            <span class="nl-ix">02</span>
-            <div>
-              <b>Business, stratégie, finances</b>
-              <span class="nl-txt">Pose n'importe quelle question : il répond avec du concret adapté à ton secteur, pas des généralités.</span>
-            </div>
-          </li>
-          <li>
-            <span class="nl-ix">03</span>
-            <div>
-              <b>Mise à jour du plan en direct</b>
-              <span class="nl-txt">Il peut modifier, affiner ou régénérer des sections entières selon tes retours immédiats.</span>
-            </div>
-          </li>
-        </ul>
-      </div>
-
-      <div class="nl-feature-visual">
-        <div class="nl-card nl-chat-card">
-          <div class="nl-card-head">
-            <span>Expert EADEE · En ligne</span>
-            <span class="nl-status-dot">Actif</span>
-          </div>
-          <div class="nl-chat-row">
-            <div class="nl-chat-avatar nl-expert">✦</div>
-            <div class="nl-chat-bubble">
-              Ta marge de <b>71%</b> est solide. Je recommande les partenariats hôtels avant la pub — ROI 3× plus rapide et aucun coût d'acquisition initial.
-            </div>
-          </div>
-          <div class="nl-chat-row nl-user">
-            <div class="nl-chat-avatar nl-user-av">T</div>
-            <div class="nl-chat-bubble">
-              Comment signer mes 10 premiers clients&nbsp;?
-            </div>
-          </div>
-          <div class="nl-chat-row">
-            <div class="nl-chat-avatar nl-expert">✦</div>
-            <div class="nl-chat-bubble">
-              Commence par ton réseau proche : identifie <b>20 contacts ciblés</b>, envoie le template de prospection qu'on a préparé. Objectif : 3 rendez-vous cette semaine.
-            </div>
-          </div>
-          <div class="nl-typing">EXPERT EN TRAIN DE RÉFLÉCHIR…</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<hr class="nl-rule" />
-
-<!-- ========================= FEATURE 4 — BANK / BPI ========================= -->
-<section style="background:var(--bg-2)">
-  <div class="nl-wrap">
-    <div class="nl-feature nl-reverse">
-      <div class="nl-feature-text">
-        <span class="nl-eyebrow">Dossier bancaire &amp; BPI</span>
-        <h2>Tu prépares un dossier bancaire ou BPI&nbsp;? <em>EADEE est structuré pour ça aussi.</em></h2>
-        <p class="nl-lead">EADEE suit la structure standard demandée par les banques françaises et BPI France. Ce qu'on te dit clairement : EADEE te fait gagner plusieurs semaines de structuration. Pour un RDV bancaire, fais valider les chiffres par un expert-comptable ou ta CCI — on t'indique les ressources gratuites directement dans ton plan.</p>
-        <ul>
-          <li>
-            <span class="nl-ix">✓</span>
-            <div>
-              <b>Plan de financement besoins / ressources</b>
-              <span class="nl-txt">Équilibré et justifié — le tableau n°1 que cherche un banquier.</span>
-            </div>
-          </li>
-          <li>
-            <span class="nl-ix">✓</span>
-            <div>
-              <b>Score de bancabilité /100</b>
-              <span class="nl-txt">Sur les 6 critères réels évalués par les banques : apport, point mort, trésorerie, garanties…</span>
-            </div>
-          </li>
-          <li>
-            <span class="nl-ix">✓</span>
-            <div>
-              <b>Checklist documents + ressources gratuites</b>
-              <span class="nl-txt">Documents bloquants vs souhaitables. Contacts CCI, BGE, BPI inclus dans chaque plan.</span>
-            </div>
-          </li>
-        </ul>
-      </div>
-
-      <div class="nl-feature-visual">
-        <div class="nl-card nl-banca-card">
-          <div class="nl-card-head">
-            <span>Score bancabilité · VélôBretagne</span>
-            <span>BPI ready</span>
-          </div>
-          <div class="nl-score-big num">78<sup>/100</sup></div>
-          <div class="nl-verdict">Dossier solide <em>— Apport à renforcer</em></div>
-          <div class="nl-banca-list">
-            <div class="nl-row"><span class="nl-check-ic">✓</span><span>Plan financement</span><span class="v">Équilibré</span></div>
-            <div class="nl-row"><span class="nl-check-ic">✓</span><span>Trésorerie 12 mois</span><span class="v">Sans tension</span></div>
-            <div class="nl-row"><span class="nl-check-ic">✓</span><span>Bilan prévisionnel 3 ans</span><span class="v">Cohérent</span></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ========================= 23 SECTIONS TOC ========================= -->
-<section id="nl-sections-grid">
-  <div class="nl-wrap">
-    <div class="nl-section-head">
-      <div class="nl-left">
-        <span class="nl-eyebrow">Ce que tu obtiens</span>
-      </div>
-      <h2>23 sections. <em>Rien n'est laissé au hasard.</em></h2>
-    </div>
-    <p class="nl-section-lead">Chaque plan Eadee contient ces 23 sections, complètes et personnalisées à ton projet. Aucun copier-coller, aucune section vide.</p>
-
-    <div class="nl-toc-tabs" role="tablist">
-      <button class="nl-toc-tab active" data-filter="all">Toutes<span class="ct">23</span></button>
-      <button class="nl-toc-tab" data-filter="Stratégie">Stratégie<span class="ct">6</span></button>
-      <button class="nl-toc-tab" data-filter="Marché">Marché<span class="ct">2</span></button>
-      <button class="nl-toc-tab" data-filter="Finance">Finance<span class="ct">7</span></button>
-      <button class="nl-toc-tab" data-filter="Juridique">Juridique<span class="ct">4</span></button>
-      <button class="nl-toc-tab" data-filter="Action">Action<span class="ct">4</span></button>
-    </div>
-
-    <div class="nl-toc-grid" id="sectionsGrid">
-      <div class="nl-toc-item" data-cat="Stratégie"><div class="nl-toc-item-head"><span class="nl-ix">01</span><span class="nl-tag" data-cat="Stratégie">Stratégie</span></div><h4>Résumé exécutif</h4><p>La synthèse de ton projet en 1 paragraphe percutant pour accrocher banquiers et investisseurs.</p></div>
-      <div class="nl-toc-item" data-cat="Stratégie"><div class="nl-toc-item-head"><span class="nl-ix">02</span><span class="nl-tag" data-cat="Stratégie">Stratégie</span></div><h4>Présentation du porteur</h4><p>Template structuré pour présenter ton parcours, tes compétences, ta légitimité.</p></div>
-      <div class="nl-toc-item" data-cat="Stratégie"><div class="nl-toc-item-head"><span class="nl-ix">03</span><span class="nl-tag" data-cat="Stratégie">Stratégie</span></div><h4>Présentation du projet</h4><p>Origine, vision, mission. Le pourquoi de ton entreprise raconté de façon mémorable.</p></div>
-      <div class="nl-toc-item" data-cat="Stratégie"><div class="nl-toc-item-head"><span class="nl-ix">04</span><span class="nl-tag" data-cat="Stratégie">Stratégie</span></div><h4>Proposition de valeur unique</h4><p>Ton USP clairement formulée : pourquoi un client te choisit toi et pas un autre.</p></div>
-      <div class="nl-toc-item" data-cat="Stratégie"><div class="nl-toc-item-head"><span class="nl-ix">05</span><span class="nl-tag" data-cat="Stratégie">Stratégie</span></div><h4>Modèle économique</h4><p>Tes offres, tes prix, comment tu génères de la marge. Avec exemples chiffrés.</p></div>
-      <div class="nl-toc-item" data-cat="Stratégie"><div class="nl-toc-item-head"><span class="nl-ix">06</span><span class="nl-tag" data-cat="Stratégie">Stratégie</span></div><h4>Stratégie commerciale</h4><p>Positionnement marketing, tunnel de vente, promesse de marque et canaux d'acquisition.</p></div>
-      <div class="nl-toc-item" data-cat="Marché"><div class="nl-toc-item-head"><span class="nl-ix">07</span><span class="nl-tag" data-cat="Marché">Marché</span></div><h4>Étude de marché</h4><p>Taille, croissance, tendances. Sources sectorielles citées. Adapté à la France.</p></div>
-      <div class="nl-toc-item" data-cat="Marché"><div class="nl-toc-item-head"><span class="nl-ix">08</span><span class="nl-tag" data-cat="Marché">Marché</span></div><h4>Analyse concurrentielle</h4><p>Tes 4-5 concurrents réels, leurs failles, leurs prix, ton positionnement différenciant.</p></div>
-      <div class="nl-toc-item" data-cat="Finance"><div class="nl-toc-item-head"><span class="nl-ix">09</span><span class="nl-tag" data-cat="Finance">Finance</span></div><h4>Plan de financement</h4><p>Besoins vs ressources équilibrés. Le tableau n°1 regardé par ton banquier avant tout.</p></div>
-      <div class="nl-toc-item" data-cat="Finance"><div class="nl-toc-item-head"><span class="nl-ix">10</span><span class="nl-tag" data-cat="Finance">Finance</span></div><h4>Plan d'investissement</h4><p>Chaque poste justifié par niveau de priorité. Matériel, immatériel, BFR.</p></div>
-      <div class="nl-toc-item" data-cat="Finance"><div class="nl-toc-item-head"><span class="nl-ix">11</span><span class="nl-tag" data-cat="Finance">Finance</span></div><h4>Compte de résultat 3 ans</h4><p>CA, charges, résultat sur 3 années glissantes. An 1 mensuel + années 2–3 annuelles.</p></div>
-      <div class="nl-toc-item" data-cat="Finance"><div class="nl-toc-item-head"><span class="nl-ix">12</span><span class="nl-tag" data-cat="Finance">Finance</span></div><h4>Plan de trésorerie 12 mois</h4><p>Entrées et sorties mensuelles. Alertes si tension de trésorerie détectée.</p></div>
-      <div class="nl-toc-item" data-cat="Finance"><div class="nl-toc-item-head"><span class="nl-ix">13</span><span class="nl-tag" data-cat="Finance">Finance</span></div><h4>Bilan prévisionnel 3 ans</h4><p>Actif et passif simplifié à fin d'an 1, 2 et 3. Vision patrimoniale de l'entreprise.</p></div>
-      <div class="nl-toc-item" data-cat="Finance"><div class="nl-toc-item-head"><span class="nl-ix">14</span><span class="nl-tag" data-cat="Finance">Finance</span></div><h4>Seuil de rentabilité</h4><p>Point mort calculé + délai pour l'atteindre en mois. À partir de quand tu es rentable.</p></div>
-      <div class="nl-toc-item" data-cat="Finance"><div class="nl-toc-item-head"><span class="nl-ix">15</span><span class="nl-tag" data-cat="Finance">Finance</span></div><h4>Tableau d'amortissement</h4><p>Mensualité estimée, capacité de remboursement, option différé conseillée si besoin.</p></div>
-      <div class="nl-toc-item" data-cat="Juridique"><div class="nl-toc-item-head"><span class="nl-ix">16</span><span class="nl-tag" data-cat="Juridique">Juridique</span></div><h4>Aspects juridiques</h4><p>Statut recommandé (SAS, EI, SARL…) avec justification chiffrée. Autorisations sectorielles.</p></div>
-      <div class="nl-toc-item" data-cat="Juridique"><div class="nl-toc-item-head"><span class="nl-ix">17</span><span class="nl-tag" data-cat="Juridique">Juridique</span></div><h4>Aspects organisationnels</h4><p>Équipe, locaux, sous-traitance. Comment ton activité s'organise au quotidien.</p></div>
-      <div class="nl-toc-item" data-cat="Juridique"><div class="nl-toc-item-head"><span class="nl-ix">18</span><span class="nl-tag" data-cat="Juridique">Juridique</span></div><h4>Aides &amp; subventions</h4><p>BPI, ACRE, Pôle Emploi, prêts d'honneur — ce à quoi tu as droit, avec montants et liens.</p></div>
-      <div class="nl-toc-item" data-cat="Juridique"><div class="nl-toc-item-head"><span class="nl-ix">19</span><span class="nl-tag" data-cat="Juridique">Juridique</span></div><h4>Démarches administratives</h4><p>Les 6 étapes dans l'ordre, avec délais et coûts réels. De l'immatriculation à l'ouverture.</p></div>
-      <div class="nl-toc-item" data-cat="Action"><div class="nl-toc-item-head"><span class="nl-ix">20</span><span class="nl-tag" data-cat="Action">Action</span></div><h4>Analyse des risques</h4><p>5 risques concrets avec plan de mitigation pour chacun. Risques marché, financiers, légaux.</p></div>
-      <div class="nl-toc-item" data-cat="Action"><div class="nl-toc-item-head"><span class="nl-ix">21</span><span class="nl-tag" data-cat="Action">Action</span></div><h4>Plan d'action 90 jours</h4><p>Actions prioritaires sur 3 mois. Concret, daté, mesurable. Tes 12 premières décisions.</p></div>
-      <div class="nl-toc-item" data-cat="Action"><div class="nl-toc-item-head"><span class="nl-ix">22</span><span class="nl-tag" data-cat="Action">Action</span></div><h4>Score de viabilité &amp; bancabilité</h4><p>Double score /100 : viabilité du projet + solidité du dossier financier.</p></div>
-      <div class="nl-toc-item" data-cat="Action"><div class="nl-toc-item-head"><span class="nl-ix">23</span><span class="nl-tag" data-cat="Action">Action</span></div><h4>Checklist dossier complet</h4><p>Documents à rassembler classés par priorité. Bloquants vs souhaitables — pour banque et BPI.</p></div>
-    </div>
-
-    <div class="nl-toc-cta">
-      <p><b>23 sections, 1 plan, 60 secondes.</b> Chaque section est générée et personnalisée à partir de ton idée et de tes données. Aucune section n'est un copier-coller.</p>
-      <a class="nl-btn nl-btn-lg nl-btn-accent" href="#" onclick="showAuth('signup');return false;">Générer mon plan →</a>
-    </div>
-  </div>
-</section>
-
-<hr class="nl-rule" />
-
-<!-- ========================= TESTIMONIALS ========================= -->
-<section>
-  <div class="nl-wrap">
-    <div class="nl-section-head">
-      <div class="nl-left">
-        <span class="nl-eyebrow">Ils ont lancé avec Eadee</span>
-      </div>
-      <h2>Des projets vrais. <em>Des résultats vrais.</em></h2>
-    </div>
-
-    <div class="nl-testimonials">
-      <article class="nl-testim">
-        <div class="nl-testim-mark">"</div>
-        <p class="nl-testim-quote">J'avais une idée claire mais aucune idée de comment la structurer. EADEE m'a sorti un plan complet en moins d'une minute. J'ai juste eu à compléter les vrais documents par dessus — la BPI a validé mon prêt de 15 000€ sans difficulté.</p>
-        <div class="nl-testim-meta">Conciergerie Airbnb · 58s · Score 91/100</div>
-        <div class="nl-testim-byline">
-          <span class="nl-ph" style="background:oklch(0.55 0.10 30)">M</span>
-          <div class="nl-who"><b>Marie L.</b><span>34 ANS · LYON</span></div>
-        </div>
-      </article>
-      <article class="nl-testim">
-        <div class="nl-testim-mark">"</div>
-        <p class="nl-testim-quote">J'avais abandonné l'idée de me lancer à cause du business plan. EADEE m'a débloqué en 2 minutes. J'avais enfin quelque chose de concret à montrer à ma conseillère Pôle Emploi.</p>
-        <div class="nl-testim-meta">Dark kitchen healthy · 72s · Score 84/100</div>
-        <div class="nl-testim-byline">
-          <span class="nl-ph" style="background:oklch(0.42 0.07 160)">S</span>
-          <div class="nl-who"><b>Sofiane B.</b><span>27 ANS · MARSEILLE</span></div>
-        </div>
-      </article>
-      <article class="nl-testim">
-        <div class="nl-testim-mark">"</div>
-        <p class="nl-testim-quote">Ce qui m'a le plus surpris c'est la qualité des projections financières. C'était structuré, cohérent, et mon expert-comptable n'a eu qu'à valider — au lieu de repartir de zéro.</p>
-        <div class="nl-testim-meta">Cabinet de coaching B2B · 65s · Score 88/100</div>
-        <div class="nl-testim-byline">
-          <span class="nl-ph" style="background:oklch(0.38 0.08 250)">L</span>
-          <div class="nl-who"><b>Léa K.</b><span>41 ANS · NANTES</span></div>
-        </div>
-      </article>
-    </div>
-  </div>
-</section>
-
-<!-- ========================= TRANSPARENCY ========================= -->
-<section>
-  <div class="nl-wrap">
-    <div class="nl-section-head">
-      <div class="nl-left">
-        <span class="nl-eyebrow">Transparence</span>
-      </div>
-      <h2>Soyons clairs sur ce qu'EADEE <em>fait vraiment.</em></h2>
-    </div>
-
-    <div class="nl-trans-grid">
-      <div class="nl-trans-col nl-yes">
-        <h3>Ce que tu obtiens</h3>
-        <ul>
-          <li>Un business plan complet en 23 sections, personnalisé à ton projet</li>
-          <li>Des projections financières 3 ans cohérentes et justifiées</li>
-          <li>Une stratégie commerciale, des emails rédigés, tes démarches admin</li>
-          <li>Un score de viabilité pour savoir si ton idée tient la route</li>
-          <li>4 à 6 semaines de structuration économisées — en 60 secondes</li>
-        </ul>
-      </div>
-      <div class="nl-trans-col nl-no">
-        <h3>Ce qu'EADEE ne remplace pas</h3>
-        <ul>
-          <li>Les vrais documents physiques (Kbis, devis, avis d'imposition)</li>
-          <li>La validation d'un expert-comptable si tu vas en banque</li>
-          <li>La garantie d'obtenir un financement</li>
-          <li>Le conseil d'un juriste ou d'un conseiller BPI</li>
-        </ul>
-      </div>
-    </div>
-
-    <p class="nl-trans-foot">C'est un outil puissant. Pas une baguette magique.<br/><em>Et on préfère te le dire maintenant.</em></p>
-  </div>
-</section>
-
-<!-- ========================= PRICING ========================= -->
-<section id="nl-pricing" style="background:var(--bg-2)">
-  <div class="nl-wrap">
-    <div class="nl-section-head">
-      <div class="nl-left">
-        <span class="nl-eyebrow">Investissement</span>
-      </div>
-      <h2>Simple. Transparent. <em>Sans surprise.</em></h2>
-    </div>
-
-    <div class="nl-pricing" id="pricingSection">
-      <div class="nl-price" onclick="selectPlan('solo')">
-        <div class="nl-price-name">Solo</div>
-        <div class="nl-price-sub">1 génération complète</div>
-        <div class="nl-price-row">
-          <span class="nl-strike">18,55€</span>
-          <span class="nl-price-big num">12,99€</span>
-        </div>
-        <div class="nl-price-credit">/ 1 génération</div>
-        <div class="nl-price-meta"><b>1 crédit</b> · 12,99€ / génération</div>
-        <a class="nl-btn nl-btn-lg nl-btn-ghost" href="#" onclick="selectPlan('solo');showAuth('signup');return false;" style="border-color:var(--ink)">Acheter Solo</a>
-      </div>
-      <div class="nl-price nl-featured">
-        <div class="nl-price-badge">✦ Populaire</div>
-        <div class="nl-price-name">Pro</div>
-        <div class="nl-price-sub">Pack 3 générations</div>
-        <div class="nl-price-row">
-          <span class="nl-strike">42,84€</span>
-          <span class="nl-price-big num">29,99€</span>
-        </div>
-        <div class="nl-price-credit">/ pack 3 générations</div>
-        <div class="nl-price-meta"><b>3 crédits</b> · 10,00€ / génération</div>
-        <a class="nl-btn nl-btn-lg nl-btn-accent" href="#" onclick="selectPlan('pro');showAuth('signup');return false;">Acheter Pro</a>
-      </div>
-      <div class="nl-price">
-        <div class="nl-price-badge">✦ Meilleure valeur</div>
-        <div class="nl-price-name">Empire</div>
-        <div class="nl-price-sub">Pack 8 générations</div>
-        <div class="nl-price-row">
-          <span class="nl-strike">85,70€</span>
-          <span class="nl-price-big num">59,99€</span>
-        </div>
-        <div class="nl-price-credit">/ pack 8 générations</div>
-        <div class="nl-price-meta"><b>8 crédits</b> · 7,50€ / génération</div>
-        <a class="nl-btn nl-btn-lg nl-btn-ghost" href="#" onclick="selectPlan('empire');showAuth('signup');return false;" style="border-color:var(--ink)">Acheter Empire</a>
-      </div>
-    </div>
-
-    <div class="nl-price-foot">
-      <div>
-        <div class="nl-l">✦ Les 3 packs payants incluent exactement les mêmes fonctionnalités</div>
-        <p style="margin-top:8px"><b>Seul le nombre de générations change.</b> Plus t'en achètes, moins tu paies par plan.</p>
-      </div>
-    </div>
-
-    <div class="nl-price-bullets">
-      <span>23 sections complètes</span>
-      <span>Score viabilité /100</span>
-      <span>Projections 3 ans</span>
-      <span>Emails rédigés</span>
-      <span>Démarches admin</span>
-      <span>Expert Eadee 24h/24</span>
-      <span>Export PDF</span>
-    </div>
-  </div>
-</section>
-
-<!-- ========================= FAQ ========================= -->
-<section id="nl-faq">
-  <div class="nl-wrap">
-    <div class="nl-section-head">
-      <div class="nl-left">
-        <span class="nl-eyebrow">Questions fréquentes</span>
-      </div>
-      <h2>Tout ce que tu veux savoir. <em>Avant de te lancer.</em></h2>
-    </div>
-
-    <div class="nl-faq" id="faqSection">
-      <details class="nl-q" open>
-        <summary>Le plan EADEE est-il vraiment complet&nbsp;?</summary>
-        <div class="nl-a"><p>Oui. 23 sections couvrent l'intégralité d'un business plan professionnel : stratégie, marché, finances, juridique, démarches, risques, plan d'action. Chaque section est générée et personnalisée à ton projet — aucune section générique ou vide.</p></div>
-      </details>
-      <details class="nl-q">
-        <summary>Est-ce que mon plan sera pris au sérieux par une banque ou BPI France&nbsp;?</summary>
-        <div class="nl-a">
-          <p>EADEE suit la structure standard demandée par les banques françaises et BPI France. Des entrepreneurs ont obtenu des financements avec un plan EADEE comme base de travail.</p>
-          <p>Ce qu'on te dit honnêtement : un plan généré par IA est un point de départ solide. Pour un RDV bancaire, fais valider les chiffres par un expert-comptable ou ta CCI — on t'indique les ressources gratuites dans chaque plan.</p>
-        </div>
-      </details>
-      <details class="nl-q">
-        <summary>Quelle différence avec ChatGPT ou un outil gratuit&nbsp;?</summary>
-        <div class="nl-a"><p>ChatGPT génère du texte. EADEE génère un business plan structuré selon les standards français : plan de financement équilibré, projections cohérentes entre elles, score de viabilité, tableau d'amortissement, checklist des démarches. C'est un outil spécialisé, pas un chatbot généraliste.</p></div>
-      </details>
-      <details class="nl-q">
-        <summary>Puis-je modifier le plan après génération&nbsp;?</summary>
-        <div class="nl-a"><p>Oui, entièrement. Chaque section est éditable. Le conseiller EADEE peut aussi réécrire une section sur simple demande.</p></div>
-      </details>
-      <details class="nl-q">
-        <summary>Mes données sont-elles privées&nbsp;?</summary>
-        <div class="nl-a"><p>Absolument. Hébergement en France, conforme RGPD, aucune revente. Tes idées restent les tiennes, nous ne les utilisons jamais pour entraîner nos modèles.</p></div>
-      </details>
-      <details class="nl-q">
-        <summary>Combien de temps prend vraiment la génération&nbsp;?</summary>
-        <div class="nl-a"><p>Entre 45 et 90 secondes pour un plan complet 23 sections. La durée dépend de la profondeur des recherches marché pour ton secteur.</p></div>
-      </details>
-      <details class="nl-q">
-        <summary>Pour quels types de projets Eadee fonctionne&nbsp;?</summary>
-        <div class="nl-a"><p>Tout projet d'entreprise en France : commerce, service, artisanat, app SaaS, restauration, freelance, e-commerce, import/export, conciergerie, coaching… Si tu as une idée, Eadee l'analyse.</p></div>
-      </details>
-      <details class="nl-q">
-        <summary>Que se passe-t-il si le plan ne me convient pas&nbsp;?</summary>
-        <div class="nl-a"><p>Tu peux régénérer en affinant ton idée. Et nous avons une garantie satisfait ou remboursé 14 jours.</p></div>
-      </details>
-      <details class="nl-q">
-        <summary>C'est un abonnement&nbsp;?</summary>
-        <div class="nl-a"><p>Non. Chaque pack est un paiement unique. Tu achètes des crédits, tu les consommes quand tu veux, sans engagement, sans auto-renouvellement.</p></div>
-      </details>
-    </div>
-  </div>
-</section>
-
-<!-- ========================= FOOTER ========================= -->
-<footer class="nl-footer">
-  <div class="nl-wrap">
-    <div class="nl-foot-grid">
-      <div class="nl-foot-intro">
-        <a class="nl-brand" href="#" onclick="showPage('landing');return false;"><span class="nl-brand-mark">E</span><span class="nl-brand-word">EADEE</span></a>
-        <p>Le business plan intelligent. Pensé pour la France.</p>
-        <div class="nl-socials">
-          <a href="#" aria-label="X">X</a>
-          <a href="#" aria-label="LinkedIn">in</a>
-          <a href="#" aria-label="Instagram">ig</a>
-        </div>
-      </div>
-      <div class="nl-foot-col">
-        <h4>Produit</h4>
-        <ul>
-          <li><a href="#nl-features" onclick="scrollToSection('nl-features');return false;">Fonctionnalités</a></li>
-          <li><a href="#nl-pricing" onclick="scrollToSection('nl-pricing');return false;">Tarifs</a></li>
-          <li><a href="#" onclick="showAuth('signup');return false;">Exemples de plans</a></li>
-          <li><a href="#">Comparaison</a></li>
-        </ul>
-      </div>
-      <div class="nl-foot-col">
-        <h4>Ressources</h4>
-        <ul>
-          <li><a href="#">Blog</a></li>
-          <li><a href="#">Guides gratuits</a></li>
-          <li><a href="#nl-faq" onclick="scrollToSection('nl-faq');return false;">FAQ</a></li>
-          <li><a href="#">Exemple PDF</a></li>
-        </ul>
-      </div>
-      <div class="nl-foot-col">
-        <h4>Entreprise</h4>
-        <ul>
-          <li><a href="#">À propos</a></li>
-          <li><a href="mailto:contact@eadee.fr">Nous contacter</a></li>
-          <li><a href="#">Partenariats</a></li>
-          <li><a href="#">Programme affiliation</a></li>
-        </ul>
-      </div>
-      <div class="nl-foot-col">
-        <h4>Légal</h4>
-        <ul>
-          <li><a href="#" onclick="openLegal('mentions');return false;">Mentions légales</a></li>
-          <li><a href="#" onclick="openLegal('cgu');return false;">CGU / CGV</a></li>
-          <li><a href="#" onclick="openLegal('confidentialite');return false;">Confidentialité</a></li>
-          <li><a href="#" onclick="openLegal('cookies');return false;">Cookies</a></li>
-          <li><a href="#" onclick="openLegal('mentions');return false;">RGPD</a></li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="nl-foot-bottom">
-      <p class="nl-small">
-        EADEE — Tous droits réservés · Données hébergées en Europe · Conforme RGPD · <a href="mailto:contact@eadee.fr">contact@eadee.fr</a> · <a href="https://www.cnil.fr/fr/plaintes">Réclamation CNIL</a><br/><br/>
-        Les plans générés sont produits par intelligence artificielle (Anthropic Claude). À valider par un professionnel avant tout engagement.
-      </p>
-      <div class="nl-foot-mark">eadee.</div>
-    </div>
-  </div>
-</footer>
-<script>document.getElementById && (function(){ var y = document.querySelector('.nl-foot-bottom p'); })();</script>
-</div>
-
-<!-- ========== BANDEAU COOKIES (CNIL) ========== -->
-<div id="cookieBanner" class="cookie-banner" style="display:none">
-  <div class="cookie-inner">
-    <div class="cookie-text">
-      <strong>🍪 Cookies & données</strong><br>
-      Nous utilisons des cookies essentiels au fonctionnement du site. Aucun cookie publicitaire tiers n'est utilisé sans votre consentement.
-      <button class="cookie-learn" onclick="openLegal('cookies')">En savoir plus</button>
-    </div>
-    <div class="cookie-actions">
-      <button class="cookie-btn-refuse" onclick="setCookieConsent('refuse')">Refuser</button>
-      <button class="cookie-btn-accept" onclick="setCookieConsent('accept')">Tout accepter</button>
-    </div>
-  </div>
-</div>
-
-<!-- ========== MODAUX LÉGAUX ========== -->
-<div id="legalModal" class="legal-modal-overlay" style="display:none" onclick="if(event.target===this)closeLegal()">
-  <div class="legal-modal">
-    <div class="legal-modal-header">
-      <div class="legal-modal-title" id="legalModalTitle"></div>
-      <button class="legal-modal-close" onclick="closeLegal()">✕</button>
-    </div>
-    <div class="legal-modal-body" id="legalModalBody"></div>
-  </div>
-</div>
-
-<!-- ========== AUTH PAGE ========== -->
-<div class="page" id="page-auth">
-  <div class="auth-page">
-    <div class="auth-card">
-      <button class="auth-back" onclick="showPage('landing')">← Retour</button>
-      <div class="auth-logo">Eadee<span style="color:var(--acid);background:var(--ink);padding:2px 6px">.</span></div>
-      <div class="auth-sub" id="authSubtext">Crée ton compte</div>
-
-      <div class="auth-tabs">
-        <button class="auth-tab active" id="tab-signup" onclick="switchAuthTab('signup')">Inscription</button>
-        <button class="auth-tab" id="tab-login" onclick="switchAuthTab('login')">Connexion</button>
-      </div>
-
-      <button class="google-btn" onclick="handleGoogleAuth()">
-        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z"/><path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 0 1-7.18-2.54H1.83v2.07A8 8 0 0 0 8.98 17z"/><path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 0 1 0-3.04V5.41H1.83a8 8 0 0 0 0 7.18l2.67-2.07z"/><path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 0 0 1.83 5.4L4.5 7.49a4.77 4.77 0 0 1 4.48-3.3z"/></svg>
-        Continuer avec Google
-      </button>
-
-      <div class="divider-line">ou</div>
-
-      <div id="signupFields">
-        <div class="form-group">
-          <label class="form-label">Prénom & Nom</label>
-          <input type="text" class="form-input" id="authName" placeholder="Jean Dupont">
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Email</label>
-        <input type="email" class="form-input" id="authEmail" placeholder="jean@exemple.fr">
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Mot de passe</label>
-        <input type="password" class="form-input" id="authPassword" placeholder="••••••••">
-      </div>
-
-      <div id="authError" class="auth-error"></div>
-      <button class="auth-submit" id="authSubmitBtn" onclick="handleAuth()">CRÉER MON COMPTE</button>
-
-      <div class="auth-note" id="authNote">
-        En t'inscrivant, tu acceptes nos <a href="#" style="color:var(--ink)">CGU</a> et notre <a href="#" style="color:var(--ink)">politique de confidentialité</a>.
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ========== DASHBOARD ========== -->
-<div class="page" id="page-dashboard">
-  <div class="dashboard">
-    <div class="dash-layout">
-
-      <!-- SIDEBAR -->
-      <aside class="sidebar">
-        <!-- Logo -->
-        <div class="sidebar-logo">
-          <div class="sidebar-logo-dot"></div>
-          <div class="sidebar-logo-text">EADEE</div>
-        </div>
-
-        <!-- Navigation principale -->
-        <div class="sidebar-nav">
-          <div class="sidebar-link active" onclick="showView('generator')" data-view="generator">
-            <span class="sidebar-icon"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><polygon points="11,2 3,12 10,12 9,18 17,8 10,8" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
-            Générateur
-          </div>
-          <div class="sidebar-link" id="chat-sidebar-link" onclick="openChatFullscreen()" data-view="chat">
-            <span class="sidebar-icon"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M18 9c0 4-3.6 7-8 7a8.8 8.8 0 01-3.5-.7L2 17l1.7-4A6.5 6.5 0 012 9c0-4 3.6-7 8-7s8 3 8 7z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
-            Expert Eadee
-          </div>
-          <div class="sidebar-link" onclick="showView('history')" data-view="history">
-            <span class="sidebar-icon"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><rect x="3" y="2" width="14" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/><line x1="7" y1="7" x2="13" y2="7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="7" y1="10" x2="13" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="7" y1="13" x2="10" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
-            Mes plans
-          </div>
-          <div class="sidebar-link" onclick="showView('inspiration')" data-view="inspiration">
-            <span class="sidebar-icon"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="8" r="5" stroke="currentColor" stroke-width="1.6"/><path d="M8 13h4M9 16h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
-            Inspiration
-          </div>
-
-          <div class="sidebar-section">Compte</div>
-
-          <div class="sidebar-link" onclick="showView('billing')" data-view="billing">
-            <span class="sidebar-icon"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><rect x="2" y="5" width="16" height="11" rx="2" stroke="currentColor" stroke-width="1.6"/><line x1="2" y1="9" x2="18" y2="9" stroke="currentColor" stroke-width="1.5"/><line x1="5" y1="13" x2="8" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
-            Crédits
-          </div>
-          <div class="sidebar-link" onclick="showView('settings')" data-view="settings">
-            <span class="sidebar-icon"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.22 4.22l1.42 1.42M14.36 14.36l1.42 1.42M4.22 15.78l1.42-1.42M14.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
-            Paramètres
-          </div>
-          <div class="sidebar-link" onclick="showView('help')" data-view="help">
-            <span class="sidebar-icon"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.6"/><path d="M10 14v-1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M10 10c0-2 3-2 3-4a3 3 0 10-6 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
-            Aide &amp; Support
+          <div class="b-right">
+            <button class="btn btn-accent">Reprendre</button>
+            <button class="btn btn-ghost">Effacer</button>
           </div>
         </div>
 
-        <!-- Widget crédits -->
-        <div class="sidebar-credits" id="sidebar-credits-widget">
-          <div class="sc-label">Crédits restants</div>
-          <div class="sc-count" id="usageCount">0</div>
-          <div class="sc-bar"><div class="sc-fill" id="usageFill" style="width:0%"></div></div>
-          <div class="sc-sub">générations disponibles</div>
-          <button class="sc-btn" onclick="showView('billing')" id="sc-recharge-btn">Recharger</button>
-          <button class="sc-btn" id="sc-buy-btn" onclick="showView('billing')" style="display:none;background:linear-gradient(135deg,#6b8fef,#a78bfa);color:#fff;border:none;margin-top:6px">Acheter un pack</button>
+        <div class="page-head">
+          <div>
+            <span class="page-eyebrow">Dossier N°03 · brouillon</span>
+            <h1>Bonjour Admin, <em>prêt à valider</em><br/>ta prochaine idée&nbsp;?</h1>
+            <p class="page-sub">Tu as déjà généré <b style="color:var(--ink)">2 plans</b> · Continue ou explore une nouvelle idée.</p>
+          </div>
         </div>
-      </aside>
 
-      <!-- MAIN -->
-      <main class="dash-main">
-        <button class="dash-burger" onclick="toggleSidebar()" aria-label="Menu">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-        </button>
-
-        <!-- GENERATOR VIEW -->
-        <div class="dash-view active" id="view-generator">
-
-          <!-- Bannière reprise brouillon -->
-          <div id="draft-resume-banner" style="display:none;margin-bottom:16px;padding:14px 16px;background:rgba(107,143,239,0.08);border:1px solid rgba(107,143,239,0.25);border-radius:10px;align-items:center;gap:12px;flex-wrap:wrap">
-            <div style="flex:1;min-width:200px">
-              <div style="font-size:13px;color:#ecedf2;margin-bottom:3px">Tu avais commencé à décrire une idée.</div>
-              <div style="font-size:12px;color:#7a7f9a;font-style:italic" id="draft-preview-text"></div>
-            </div>
-            <div style="display:flex;gap:8px;flex-shrink:0">
-              <button onclick="resumeDraft()" style="padding:6px 14px;background:linear-gradient(135deg,#6b8fef,#a78bfa);color:#fff;border:none;border-radius:7px;font-size:12px;cursor:pointer">Reprendre</button>
-              <button onclick="discardDraft()" style="padding:6px 14px;background:transparent;border:1px solid rgba(255,255,255,0.12);color:#7a7f9a;border-radius:7px;font-size:12px;cursor:pointer">Effacer</button>
-            </div>
-          </div>
-          <!-- Indicateur draft sauvegardé -->
-          <div id="draft-indicator" style="font-family:'DM Mono',monospace;font-size:10px;color:#7a7f9a;text-align:right;margin-bottom:8px;opacity:0;transition:opacity .3s;margin-top:-8px"></div>
-
-          <!-- Bannière onboarding -->
-          <div id="onboarding-banner" style="display:none;margin-bottom:20px;padding:20px;background:linear-gradient(135deg,rgba(107,143,239,0.08),rgba(167,139,250,0.08));border:1px solid rgba(107,143,239,0.25);border-radius:12px;">
-            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px">
-              <div style="font-family:'Fraunces',serif;font-size:18px;font-weight:300;color:#ecedf2" id="onboarding-title">Bienvenue !</div>
-              <button onclick="dismissOnboarding()" style="background:none;border:none;color:#7a7f9a;cursor:pointer;font-size:16px;line-height:1;padding:0;flex-shrink:0">✕</button>
-            </div>
-            <div style="font-size:13px;color:#9db8f8;margin-bottom:14px">Comment générer ton premier plan en 60 secondes :</div>
-            <div style="display:flex;flex-direction:column;gap:8px">
-              <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#ecedf2"><span style="font-family:'DM Mono',monospace;font-size:11px;color:#6b8fef;min-width:18px">01</span> Décris ton idée en quelques phrases</div>
-              <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#ecedf2"><span style="font-family:'DM Mono',monospace;font-size:11px;color:#6b8fef;min-width:18px">02</span> Choisis budget, secteur, disponibilité</div>
-              <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#ecedf2"><span style="font-family:'DM Mono',monospace;font-size:11px;color:#6b8fef;min-width:18px">03</span> Clique sur "Générer" — Eadee construit ton plan</div>
-            </div>
-            <button onclick="dismissOnboarding()" style="margin-top:16px;padding:8px 20px;background:rgba(107,143,239,0.15);border:1px solid rgba(107,143,239,0.3);border-radius:8px;color:#9db8f8;font-family:'Geist',sans-serif;font-size:13px;cursor:pointer;transition:background .2s">Compris, masquer</button>
-          </div>
-
-          <div class="view-header">
-            <div class="view-title" id="dash-gen-title">Génère ton plan</div>
-            <div class="view-sub" id="dash-gen-sub">Décris ton idée — ton plan complet est prêt en 60 secondes</div>
-          </div>
-
-          <div class="gen-layout">
-            <!-- FORM -->
-            <div class="gen-panel">
-              <div class="gen-panel-title">Ton idée</div>
-
-              <div class="form-group">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-                  <label class="form-label" style="margin-bottom:0">Décris ton idée <span style="color:#f87171">*</span></label>
-                  <button type="button" onclick="openInspireModal()" style="background:rgba(107,143,239,0.1);border:1px solid rgba(107,143,239,0.25);border-radius:6px;color:#9db8f8;font-family:'Geist',sans-serif;font-size:11px;padding:3px 10px;cursor:pointer;transition:all .2s">Exemples d'idées</button>
+        <div class="gen-grid">
+          <!-- FORM -->
+          <div class="card gen-form" style="padding:0">
+            <div class="gen-block">
+              <h3>Ton idée</h3>
+              <div class="field">
+                <div class="field-head">
+                  <label>Décris ton idée <span class="req">*</span></label>
+                  <a class="examples" href="#">Exemples d'idées →</a>
                 </div>
-                <textarea class="form-textarea" id="dashIdea" placeholder="Ex: Je veux créer une application de méditation pour entrepreneurs stressés avec des sessions de 5 minutes..." oninput="onIdeaInput(this)"></textarea>
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px">
-                  <div style="font-size:11px;color:#7a7f9a;font-family:'DM Mono',monospace" id="idea-quality-msg">Plus tu détailles, meilleur sera ton plan.</div>
-                  <div style="font-size:11px;font-family:'DM Mono',monospace;color:#7a7f9a" id="idea-char-count">0 / 500</div>
+                <textarea id="dashIdea" placeholder="Ex: Je veux créer une application de méditation pour entrepreneurs stressés avec des sessions de 5 minutes…"></textarea>
+                <div class="field-meta">
+                  <span>Plus tu détailles, meilleur sera ton plan.</span>
+                  <span>0 / 500</span>
                 </div>
               </div>
+            </div>
 
-              <div class="form-row">
-                <div class="form-group">
-                  <label class="form-label">Budget</label>
-                  <select class="form-select" id="dashBudget">
-                    <option value="moins de 500€">Moins de 500€</option>
-                    <option value="500€ à 2 000€" selected>500€ à 2 000€</option>
-                    <option value="2 000€ à 10 000€">2k€ à 10 000€</option>
-                    <option value="10 000€ à 50 000€">10k€ à 50 000€</option>
-                    <option value="plus de 50 000€">+ 50 000€</option>
-                    <option value="budget non défini">Sur mesure / je ne sais pas</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
-                    <label class="form-label" style="margin-bottom:0">Profil <span style="color:#f87171">*</span></label>
-                    <div class="tooltip-wrap">
-                      <span style="width:14px;height:14px;border-radius:50%;border:1px solid rgba(255,255,255,0.2);display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:#7a7f9a;cursor:help;font-family:'DM Mono',monospace">ⓘ</span>
-                      <div class="tooltip-box">Débutant → Eadee explique chaque étape simplement.<br>Intermédiaire → équilibre conseil et action.<br>Expert → direct, sans rappels de base.</div>
-                    </div>
+            <div class="gen-block">
+              <h3>Contexte projet</h3>
+              <div class="row-2">
+                <div class="field">
+                  <label>Budget</label>
+                  <div class="seg">
+                    <button>&lt; 500€</button>
+                    <button class="on">500–2k€</button>
+                    <button>2–10k€</button>
+                    <button>10–50k€</button>
                   </div>
-                  <select class="form-select" id="dashProfile">
-                    <option value="débutant">Débutant</option>
-                    <option value="intermédiaire" selected>Intermédiaire</option>
-                    <option value="expert">Expert</option>
-                  </select>
                 </div>
-              </div>
-
-              <div class="form-row">
-                <div class="form-group">
-                  <label class="form-label">Secteur</label>
-                  <select class="form-select" id="dashSector">
-                    <option value="non défini">Non défini</option>
-                    <option value="tech/SaaS">Tech / SaaS</option>
-                    <option value="e-commerce">E-commerce</option>
-                    <option value="services B2B">Services B2B</option>
-                    <option value="food">Food &amp; Resto</option>
-                    <option value="santé">Santé &amp; Bien-être</option>
-                    <option value="éducation">Éducation</option>
-                    <option value="artisanat">Artisanat</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
-                    <label class="form-label" style="margin-bottom:0">Disponibilité <span style="color:#f87171">*</span></label>
-                    <div class="tooltip-wrap">
-                      <span style="width:14px;height:14px;border-radius:50%;border:1px solid rgba(255,255,255,0.2);display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:#7a7f9a;cursor:help;font-family:'DM Mono',monospace">ⓘ</span>
-                      <div class="tooltip-box">Détermine les hypothèses de CA et de charge de travail dans tes projections financières.</div>
-                    </div>
+                <div class="field">
+                  <div class="field-head">
+                    <label>Profil <span class="req">*</span></label>
+                    <span class="help">Adapte le ton du plan</span>
                   </div>
-                  <select class="form-select" id="dashTime">
-                    <option value="quelques heures/semaine">Quelques h/sem</option>
-                    <option value="mi-temps" selected>Mi-temps</option>
-                    <option value="temps plein">Temps plein</option>
-                  </select>
+                  <div class="seg">
+                    <button>Débutant</button>
+                    <button class="on">Intermédiaire</button>
+                    <button>Expert</button>
+                  </div>
                 </div>
               </div>
-
-              <div class="form-group" style="margin-top:4px">
-                <label class="form-label">Nom du plan <span style="font-size:10px;color:#7a7f9a;font-weight:400">(optionnel)</span></label>
-                <input type="text" class="form-input" id="dashPlanName" placeholder="Ex: NestManager Lyon, Dark Kitchen Paris...">
-              </div>
-
-              <button class="gen-btn" id="dashGenBtn" onclick="generateDashPlan()">
-                GÉNÉRER MON BUSINESS PLAN
-              </button>
-
-              <!-- Bannière 0 crédit -->
-              <div id="noCredit-banner" style="display:none;margin-top:12px;padding:16px;background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.3);border-radius:10px;align-items:flex-start;gap:12px;">
-                <div style="flex:1">
-                  <div style="font-size:13px;font-weight:600;color:#ecedf2;margin-bottom:4px">Tu n'as plus de crédits</div>
-                  <div style="font-size:12px;color:#7a7f9a;margin-bottom:10px">Achète un pack pour générer ton plan</div>
-                  <button onclick="showView('billing')" style="padding:7px 16px;background:linear-gradient(135deg,#6b8fef,#a78bfa);color:#fff;border:none;border-radius:7px;font-family:'Geist',sans-serif;font-size:12px;font-weight:600;cursor:pointer;">Voir les packs</button>
+              <div class="row-2" style="margin-top:14px">
+                <div class="field">
+                  <label>Secteur</label>
+                  <div class="seg">
+                    <button class="on">Non défini</button>
+                    <button>Tech</button>
+                    <button>Food</button>
+                    <button>Services</button>
+                  </div>
+                </div>
+                <div class="field">
+                  <div class="field-head">
+                    <label>Disponibilité <span class="req">*</span></label>
+                    <span class="help">Détermine les hypothèses de CA</span>
+                  </div>
+                  <div class="seg">
+                    <button>Quelques h/sem</button>
+                    <button class="on">Mi-temps</button>
+                    <button>Temps plein</button>
+                  </div>
                 </div>
               </div>
-              <!-- Ligne info permanente sous le bouton -->
-              <div style="margin-top:10px;font-family:'DM Mono',monospace;font-size:11px;color:#7a7f9a;text-align:center;letter-spacing:0.03em">60 secondes · 1 crédit par génération · Non modifiable · Garantie 14 jours</div>
             </div>
 
-            <!-- RESULT — full document -->
-            <div class="result-panel" id="resultPanel" style="background:var(--ink);border-radius:6px;padding:0;overflow:hidden;min-height:500px;display:flex;flex-direction:column;">
-              <!-- ÉTAT A : Aperçu animé + idées populaires -->
-              <div id="preview-state-A" style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
-                <div class="rd-panel">
-
-                  <!-- BLOC 1 : Guide idée -->
-                  <div class="rd-block1">
-                    <div class="rd-title">Pour un plan vraiment détaillé</div>
-                    <div class="rd-subtitle">Ce que l'IA a besoin de savoir</div>
-
-                    <div class="guide-tips">
-
-                      <div class="guide-tip">
-                        <div class="guide-tip-icon">01</div>
-                        <div class="guide-tip-body">
-                          <div class="guide-tip-label">Ton idée en 1 phrase</div>
-                          <div class="guide-tip-example">"Je veux ouvrir une boulangerie bio à Lyon centre"</div>
-                        </div>
-                      </div>
-
-                      <div class="guide-tip">
-                        <div class="guide-tip-icon">02</div>
-                        <div class="guide-tip-body">
-                          <div class="guide-tip-label">Ton profil / ton expérience</div>
-                          <div class="guide-tip-example">"3 ans en restauration, reconversion après licenciement"</div>
-                        </div>
-                      </div>
-
-                      <div class="guide-tip">
-                        <div class="guide-tip-icon">03</div>
-                        <div class="guide-tip-body">
-                          <div class="guide-tip-label">Ton budget de départ</div>
-                          <div class="guide-tip-example">"15 000€ d'économies + prêt possible"</div>
-                        </div>
-                      </div>
-
-                      <div class="guide-tip">
-                        <div class="guide-tip-icon">04</div>
-                        <div class="guide-tip-body">
-                          <div class="guide-tip-label">Ta ville / zone <span style="font-size:9px;font-weight:400;color:#7a7f9a;margin-left:4px">— si applicable</span></div>
-                          <div class="guide-tip-example">"Lyon, quartier Guillotière, forte densité"</div>
-                          <div class="guide-tip-note">💡 <strong>Activité digitale ou e-commerce ?</strong> Pas besoin de ville — l'IA considère la France entière comme ton marché.</div>
-                        </div>
-                      </div>
-
-                      <div class="guide-tip">
-                        <div class="guide-tip-icon">05</div>
-                        <div class="guide-tip-body">
-                          <div class="guide-tip-label">Ton objectif</div>
-                          <div class="guide-tip-example">"Vivre de mon activité en moins de 12 mois"</div>
-                        </div>
-                      </div>
-
-                      <div class="guide-tip">
-                        <div class="guide-tip-icon">06</div>
-                        <div class="guide-tip-body">
-                          <div class="guide-tip-label">Ton local / tes ressources humaines</div>
-                          <div class="guide-tip-example">"Je loue un local 60m² à Paris 11e + 1 salarié"</div>
-                          <div class="guide-tip-note">💡 Si tu prévois un local, un bureau ou des employés, <strong>mentionne-le ici</strong> — sinon l'IA ne l'inclut pas dans le budget.</div>
-                        </div>
-                      </div>
-
-                    </div><!-- .guide-tips -->
-
-                    <div class="rd-cta">
-                      Plus tu es précis, plus le plan est <span class="rd-cta-gold">personnalisé et actionnable</span>. L'IA adapte chaque section à ta situation réelle.
-                    </div>
-                  </div><!-- .rd-block1 -->
-
-                </div><!-- .rd-panel -->
+            <div class="gen-block">
+              <h3>Identification</h3>
+              <div class="field">
+                <div class="field-head">
+                  <label>Nom du plan</label>
+                  <span style="font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:0.04em">optionnel</span>
+                </div>
+                <input id="dashName" type="text" placeholder="Ex: NestManager Lyon, Dark Kitchen Paris…" />
               </div>
+            </div>
 
-              <!-- ÉTAT B : Conseils brief -->
-              <div id="preview-state-B" style="display:none;flex:1;padding:24px;flex-direction:column;gap:16px">
+            <div class="gen-submit">
+              <button id="dashGenBtn" class="btn btn-accent btn-lg btn-block" onclick="generateDashPlan()">Générer mon business plan ↗</button>
+              <div class="meta">
+                <span>60 secondes</span><span>1 crédit par génération</span><span>Non modifiable</span><span>Garantie 14 jours</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- BRIEF -->
+          <div class="brief">
+            <div class="brief-head">
+              <span class="page-eyebrow">Méthode</span>
+              <h2>Pour un plan vraiment détaillé</h2>
+              <p style="color:var(--ink-2);font-size:14px;margin:6px 0 0;line-height:1.5">Ce que l'IA a besoin de savoir.</p>
+            </div>
+
+            <div class="brief-list">
+              <div class="brief-item">
+                <span class="ix">01</span>
                 <div>
-                  <div style="font-family:'Fraunces',serif;font-size:18px;font-weight:300;color:#ecedf2;margin-bottom:6px">💡 Astuces pour ton brief</div>
-                  <div style="font-size:12px;color:#7a7f9a">Plus ton idée est précise, meilleur sera le plan.</div>
-                </div>
-                <div style="display:flex;flex-direction:column;gap:10px" id="tips-list">
-                  <div class="tip-item" id="tip-ville" data-keywords="ville,région,paris,lyon,marseille,bordeaux,nantes,toulouse,lille,strasbourg,france">
-                    <span class="tip-check">○</span>
-                    <span>Mentionne ta ville ou région cible</span>
-                  </div>
-                  <div class="tip-item" id="tip-public" data-keywords="b2b,b2c,client,cible,public,entreprise,particulier,femme,homme,jeune,senior,professionnel">
-                    <span class="tip-check">○</span>
-                    <span>Précise ton public (B2B, B2C, niche, âge)</span>
-                  </div>
-                  <div class="tip-item" id="tip-usp" data-keywords="différence,unique,meilleur,plus rapide,moins cher,exclusif,premier,innovation,nouveau">
-                    <span class="tip-check">○</span>
-                    <span>Indique ton USP (ce qui te différencie)</span>
-                  </div>
-                  <div class="tip-item" id="tip-model" data-keywords="commission,abonnement,vente,freemium,saas,mensuel,annuel,forfait,prix,tarif">
-                    <span class="tip-check">○</span>
-                    <span>Donne ton modèle (commission, abonnement, vente...)</span>
-                  </div>
+                  <div class="ttl">Ton idée en 1 phrase<span class="tag">Pitch</span></div>
+                  <q>Je veux ouvrir une boulangerie bio à Lyon centre</q>
                 </div>
               </div>
-
-              <!-- ÉTAT C : Stream sections loading -->
-              <div id="preview-state-C" style="display:none;flex:1;padding:24px;flex-direction:column;gap:0">
-                <div id="genStatusText" style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:0.1em;margin-bottom:16px">Génération en cours…</div>
-                <div id="gen-sections-list" style="flex:1;display:flex;flex-direction:column;gap:0;overflow:hidden"></div>
-                <div style="margin-top:16px">
-                  <div style="height:3px;background:rgba(255,255,255,0.07);border-radius:2px;overflow:hidden">
-                    <div id="gen-progress-bar" style="height:100%;background:linear-gradient(90deg,#6b8fef,#a78bfa);border-radius:2px;width:0%;transition:width 1s ease"></div>
-                  </div>
+              <div class="brief-item">
+                <span class="ix">02</span>
+                <div>
+                  <div class="ttl">Ton profil / ton expérience<span class="tag">Porteur</span></div>
+                  <q>3 ans en restauration, reconversion après licenciement</q>
                 </div>
               </div>
-
-              <!-- ÉTAT D : compat (gardés vides) -->
-              <div id="dashEmptyState" style="display:none"></div>
-              <div id="dashGenerating" style="display:none"></div>
-
-              <!-- FULL PLAN DOCUMENT -->
-              <div id="dashResult" style="display:none;flex-direction:column;flex:1;">
-
-                <!-- PLAN HEADER -->
-                <div style="padding:24px 28px 20px;border-bottom:1px solid rgba(255,255,255,0.07);">
-                  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;">
-                    <div>
-                      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.2em;color:rgba(255,255,255,0.2);text-transform:uppercase;margin-bottom:6px;">Business Plan · Eadee</div>
-                      <div id="dBizName" style="font-family:'Fraunces',serif;font-size:32px;font-weight:300;line-height:1.1;color:#ecedf2;">—</div>
-                      <div id="dBizTagline" style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,0.35);margin-top:5px;">—</div>
-                    </div>
-                    <div id="dPlanBadge" style="flex-shrink:0;background:rgba(167,139,250,0.15);border:1px solid rgba(167,139,250,0.3);color:#a78bfa;font-family:'Geist',sans-serif;font-size:12px;font-weight:600;padding:5px 12px;border-radius:20px;white-space:nowrap;margin-top:4px;"></div>
-                    <div style="display:flex;gap:8px;margin-left:auto;flex-shrink:0;">
-                      <button onclick="resetGenerator()" style="padding:6px 14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:rgba(255,255,255,0.5);font-family:'DM Mono',monospace;font-size:11px;cursor:pointer" onmouseover="this.style.color='#ecedf2'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">← Modifier</button>
-                      <button class="plan-coach-btn" id="planCoachBtn" onclick="openChatDrawerFromPlan()">✦ Discuter avec Eadee</button>
-                    </div>
-                  </div>
-
-                  <!-- VIABILITY SCORE -->
-                  <div style="display:flex;align-items:center;gap:12px;">
-                    <div style="font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,0.25);letter-spacing:0.1em;text-transform:uppercase;white-space:nowrap;">Viabilité</div>
-                    <div style="flex:1;height:4px;background:rgba(255,255,255,0.07);border-radius:2px;overflow:hidden;">
-                      <div id="dScoreBar" style="height:100%;background:#34d399;border-radius:2px;transition:width 1s ease;width:0%"></div>
-                    </div>
-                    <div id="dScore" style="font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:#34d399;">—</div>
-                  </div>
+              <div class="brief-item">
+                <span class="ix">03</span>
+                <div>
+                  <div class="ttl">Ton budget de départ<span class="tag">Capital</span></div>
+                  <q>15 000€ d'économies + prêt possible</q>
                 </div>
-
-                <!-- HERO KPIs -->
-                <div class="hero-kpis" id="planHeroKpis" style="display:none">
-                  <div class="kpi-cell finance"><div class="kpi-label">CA An 3</div><div class="kpi-value" id="kpiCaAn3" style="color:var(--cat-finance)">—</div><div class="kpi-sub" id="kpiCaAn3Sub"></div></div>
-                  <div class="kpi-cell action"><div class="kpi-label">Point mort</div><div class="kpi-value" id="kpiPointMort" style="color:var(--gold)">—</div><div class="kpi-sub" id="kpiPointMortSub"></div></div>
-                  <div class="kpi-cell strategy"><div class="kpi-label">Investissement total</div><div class="kpi-value" id="kpiInvest" style="color:var(--acid)">—</div><div class="kpi-sub" id="kpiInvestSub"></div></div>
-                  <div class="kpi-cell market"><div class="kpi-label">Part marché cible</div><div class="kpi-value" id="kpiMarket" style="color:var(--rust)">—</div><div class="kpi-sub" id="kpiMarketSub"></div></div>
+              </div>
+              <div class="brief-item">
+                <span class="ix">04</span>
+                <div>
+                  <div class="ttl">Ta ville / zone<span class="tag">— si applicable</span></div>
+                  <q>Lyon, quartier Guillotière, forte densité</q>
+                  <div class="note"><span><b>Activité digitale ou e-commerce ?</b> Pas besoin de ville — l'IA considère la France entière comme ton marché.</span></div>
                 </div>
-
-                <!-- PLAN LAYOUT -->
-                <div class="plan-layout" style="flex:1;min-height:0;">
-                  <nav class="plan-sidebar" id="planSidebar"></nav>
-                  <div class="plan-content">
-                    <div id="planScrollBody" style="padding:0 0 60px;">
-
-                  <!-- AI ACT DISCLAIMER + LÉGENDE FIABILITÉ -->
-                  <div class="ai-disclaimer">
-                    <div class="ai-disclaimer-text">
-                      <strong>Contenu généré par intelligence artificielle.</strong>
-                      Ce plan est produit par un modèle d'IA (Anthropic Claude) à partir de tes données. Il peut contenir des erreurs ou des estimations approximatives. <strong>Avant tout engagement financier ou démarche officielle</strong> (banque, BPI, expert-comptable), fais valider ce plan par un professionnel.
-                    </div>
-                  </div>
-                  <div class="rel-disclaimer">
-                    <div>
-                      Fiabilité des données — <span class="rel-legend">
-                        <span class="rel-legend-item"><span class="rel-dot verifie"></span>Vérifié</span>
-                        <span class="rel-legend-item"><span class="rel-dot estimation"></span>Estimation</span>
-                        <span class="rel-legend-item"><span class="rel-dot hypothese"></span>Hypothèse</span>
-                      </span>
-                    </div>
-                  </div>
-
-                  <!-- ACTIONS -->
-                  <div style="display:flex;gap:10px;margin-top:8px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.07);">
-                    <button class="res-btn" onclick="copyPlan()">Copier</button>
-                    <button class="res-btn" onclick="savePlan()">Sauvegarder</button>
-                    <button class="res-btn primary" onclick="generateDossier()">Dossier Création</button>
-                  </div>
-                    </div><!-- /planScrollBody -->
-                  </div><!-- /plan-content -->
-                </div><!-- /plan-layout -->
-              </div><!-- /dashResult -->
+              </div>
+              <div class="brief-item">
+                <span class="ix">05</span>
+                <div>
+                  <div class="ttl">Ton objectif<span class="tag">Horizon</span></div>
+                  <q>Vivre de mon activité en moins de 12 mois</q>
+                </div>
+              </div>
+              <div class="brief-item">
+                <span class="ix">06</span>
+                <div>
+                  <div class="ttl">Ton local / tes ressources humaines<span class="tag">Opérations</span></div>
+                  <q>Je loue un local 60m² à Paris 11e + 1 salarié</q>
+                  <div class="note"><span>Si tu prévois un local, un bureau ou des employés, <b>mentionne-le ici</b> — sinon l'IA ne l'inclut pas dans le budget.</span></div>
+                </div>
+              </div>
             </div>
+
+            <p class="brief-foot">Plus tu es précis, plus le plan est <u>personnalisé et actionnable</u>. L'IA adapte chaque section à ta situation réelle.</p>
           </div>
         </div>
-
-        <!-- HISTORY VIEW -->
-        <div class="dash-view" id="view-history">
-          <div class="view-header">
-            <div class="view-title">Mes plans</div>
-            <div class="view-sub">Tous tes business plans générés</div>
-          </div>
-          <div class="history-grid" id="historyGrid">
-            <!-- Populated by JS -->
-          </div>
-        </div>
-
-        <!-- BILLING VIEW -->
-        <div class="dash-view" id="view-billing">
-          <div class="view-header">
-            <div class="view-title">Crédits</div>
-            <div class="view-sub">Recharge tes générations</div>
-          </div>
-
-          <div class="payment-layout">
-            <div>
-              <div class="pay-plan-selector" id="planSelector">
-                <!-- SOLO -->
-                <div class="pay-plan-option" data-plan="solo" data-price="12.99" data-credits="1" onclick="selectPayPlan(this)">
-                  <div class="radio-circle"><div class="radio-dot"></div></div>
-                  <div style="flex:1;margin-left:14px">
-                    <div class="mh-hdr">
-                      <div class="ppo-name">Solo</div>
-                      <div class="ppo-price">12,99€<span style="font-size:12px;font-weight:400;color:var(--muted)"> / 1 génération</span></div>
-                    </div>
-                    <div style="font-size:12px;color:var(--muted);margin-top:4px"><strong>1 crédit</strong> · 12,99€ / génération</div>
-                    <div style="font-size:11px;color:var(--muted);font-style:italic;margin-top:2px">1 génération complète</div>
-                  </div>
-                </div>
-                <!-- PRO -->
-                <div class="pay-plan-option selected" data-plan="pro" data-price="29.99" data-credits="3" onclick="selectPayPlan(this)">
-                  <div class="radio-circle"><div class="radio-dot"></div></div>
-                  <div style="flex:1;margin-left:14px">
-                    <div class="mh-hdr">
-                      <div class="ppo-name">Pro</div>
-                      <div class="ppo-price">29,99€<span style="font-size:12px;font-weight:400;color:var(--muted)"> / 3 générations</span></div>
-                    </div>
-                    <div style="font-size:12px;color:var(--muted);margin-top:4px"><strong>3 crédits</strong> · 10,00€ / génération</div>
-                    <div style="font-size:11px;color:var(--muted);font-style:italic;margin-top:2px">Pack 3 générations</div>
-                  </div>
-                </div>
-                <!-- EMPIRE -->
-                <div class="pay-plan-option pay-plan-empire" data-plan="empire" data-price="59.99" data-credits="8" onclick="selectPayPlan(this)">
-                  <div style="position:absolute;top:-12px;right:16px;background:linear-gradient(135deg,#a78bfa,#6b8fef);color:#fff;font-family:'Geist',sans-serif;font-weight:700;font-size:10px;letter-spacing:0.12em;padding:4px 12px;border-radius:20px;">MEILLEUR CHOIX</div>
-                  <div class="radio-circle"><div class="radio-dot"></div></div>
-                  <div style="flex:1;margin-left:14px">
-                    <div class="mh-hdr">
-                      <div class="ppo-name">Empire <span style="color:rgba(255,255,255,0.4);font-size:14px">✦</span></div>
-                      <div class="ppo-price">59,99€<span style="font-size:12px;font-weight:400;color:var(--muted)"> / 8 générations</span></div>
-                    </div>
-                    <div style="font-size:12px;color:var(--muted);margin-top:4px"><strong>8 crédits</strong> · 7,50€ / génération</div>
-                    <div style="font-size:11px;color:var(--muted);font-style:italic;margin-top:2px">Pack 8 générations</div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="stripe-form">
-                <div class="stripe-title">Paiement sécurisé</div>
-
-                <div class="form-group">
-                  <label class="form-label">Titulaire de la carte</label>
-                  <input type="text" class="form-input" id="cardName" placeholder="Jean Dupont">
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label">Numéro de carte</label>
-                  <div class="card-element-wrap">
-                    <div class="fake-card-field">
-                      <span class="fake-card-icon">◻</span>
-                      <input type="text" id="cardNum" placeholder="1234 5678 9012 3456"
-                        style="border:none;background:transparent;font-family:'DM Mono',monospace;font-size:14px;outline:none;flex:1;color:var(--ink);letter-spacing:0.1em"
-                        maxlength="19" oninput="formatCard(this)">
-                      <span class="fake-card-lock">▪</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="card-row">
-                  <div class="form-group" style="margin:0">
-                    <label class="form-label">Expiration</label>
-                    <input type="text" class="form-input" id="cardExp" placeholder="MM/AA" maxlength="5" oninput="formatExp(this)">
-                  </div>
-                  <div class="form-group" style="margin:0">
-                    <label class="form-label">CVC</label>
-                    <input type="text" class="form-input" id="cardCvc" placeholder="123" maxlength="3">
-                  </div>
-                </div>
-
-                <button class="pay-submit" id="payBtn" onclick="processPayment()">
-                  ACHETER MES CRÉDITS
-                </button>
-
-                <div class="stripe-badge">
-                  <span>Paiement 100% sécurisé par Stripe — SSL 256-bit</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="order-summary" id="orderSummary">
-              <div class="os-title">Récapitulatif</div>
-              <div class="os-line">
-                <span class="os-label">Pack sélectionné</span>
-                <span class="os-value" id="osPlan">Pro</span>
-              </div>
-              <div class="os-line">
-                <span class="os-label">Crédits obtenus</span>
-                <span class="os-value" id="osCredits">3 générations</span>
-              </div>
-              <div class="os-line">
-                <span class="os-label">Validité</span>
-                <span class="os-value">Sans expiration</span>
-              </div>
-              <div class="os-line os-total">
-                <span class="os-label">Total</span>
-                <span class="os-value" id="osTotal">29,99€</span>
-              </div>
-              <div class="os-features" id="osFeatures">
-                <div class="os-feat">Business plan complet — 23 sections</div>
-                <div class="os-feat">Généré en 60 secondes</div>
-                <div class="os-feat">Compatible dossier banque & BPI</div>
-                <div class="os-feat">Démarches administratives pré-remplies</div>
-                <div class="os-feat">Emails prêts à envoyer</div>
-                <div class="os-feat">Sans abonnement · Sans expiration</div>
-                <div class="os-feat">Conseiller Eadee 24h/24</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- SETTINGS VIEW -->
-        <div class="dash-view" id="view-settings">
-          <div class="view-header">
-            <div class="view-title">Paramètres</div>
-            <div class="view-sub">Gère ton compte</div>
-          </div>
-          <div style="max-width:480px;display:flex;flex-direction:column;gap:20px">
-            <div class="gen-panel">
-              <div class="gen-panel-title" style="display:flex;align-items:center;gap:8px">
-                <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="7" r="3" stroke="#9db8f8" stroke-width="1.6"/><path d="M3 17c0-3.3 3.1-6 7-6s7 2.7 7 6" stroke="#9db8f8" stroke-width="1.6" stroke-linecap="round"/></svg>
-                Mon profil
-              </div>
-              <div class="form-group">
-                <label class="form-label">Prénom &amp; Nom</label>
-                <input type="text" class="form-input" id="settingsName" value="">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Email</label>
-                <input type="email" class="form-input" id="settingsEmail" value="">
-              </div>
-              <button class="gen-btn" style="margin-top:4px;font-size:16px;padding:12px" onclick="saveSettings()">SAUVEGARDER</button>
-            </div>
-            <div class="gen-panel">
-              <div class="gen-panel-title" style="display:flex;align-items:center;gap:8px">
-                <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 1L3 5v6c0 3.6 3 6.5 7 7 4-0.5 7-3.4 7-7V5L10 1z" stroke="#9db8f8" stroke-width="1.6" stroke-linejoin="round"/></svg>
-                Sécurité
-              </div>
-              <div class="form-group">
-                <label class="form-label">Nouveau mot de passe</label>
-                <input type="password" class="form-input" placeholder="••••••••">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Confirmer</label>
-                <input type="password" class="form-input" placeholder="••••••••">
-              </div>
-              <button class="gen-btn" style="margin-top:4px;font-size:16px;padding:12px" onclick="toast('Mot de passe mis à jour','success')">CHANGER LE MOT DE PASSE</button>
-            </div>
-            <!-- Inviter un ami -->
-            <div class="gen-panel">
-              <div class="gen-panel-title" style="display:flex;align-items:center;gap:8px">
-                <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M13 10a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM7 18c0-3 2.7-5 6-5s6 2 6 5" stroke="#9db8f8" stroke-width="1.6" stroke-linecap="round"/><path d="M1 14s1-4 5-4" stroke="#9db8f8" stroke-width="1.6" stroke-linecap="round"/><path d="M3 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" stroke="#9db8f8" stroke-width="1.6"/></svg>
-                Inviter un ami
-              </div>
-              <div style="font-size:13px;color:#7a7f9a;margin-bottom:14px">Pour chaque ami qui crée un compte, vous recevez <strong style="color:#ecedf2">1 crédit chacun</strong>.</div>
-              <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px;display:flex;align-items:center;gap:10px;margin-bottom:12px">
-                <div style="flex:1;font-family:'DM Mono',monospace;font-size:12px;color:#9db8f8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="referral-link-settings">eadee.fr/ref/ALEX2024</div>
-                <button onclick="navigator.clipboard.writeText(document.getElementById('referral-link-settings').textContent).then(()=>toast('Lien copié','success'))" style="padding:6px 14px;background:linear-gradient(135deg,#6b8fef,#a78bfa);color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap">Copier</button>
-              </div>
-              <div style="font-size:12px;color:#7a7f9a">0 ami(s) invité(s) · 0 crédit(s) gagné(s)</div>
-            </div>
-
-            <!-- RGPD — MES DONNÉES -->
-            <div class="gen-panel">
-              <div class="gen-panel-title" style="display:flex;align-items:center;gap:8px">
-                <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="14" rx="2" stroke="#9db8f8" stroke-width="1.6"/><path d="M7 10h6M7 7h6M7 13h4" stroke="#9db8f8" stroke-width="1.4" stroke-linecap="round"/></svg>
-                Mes données personnelles
-              </div>
-              <div style="font-size:13px;color:#7a7f9a;margin-bottom:16px;line-height:1.6">Conformément au RGPD, tu peux télécharger toutes les données qu'Eadee détient sur toi à tout moment.</div>
-              <div style="display:flex;gap:10px;flex-wrap:wrap">
-                <button onclick="exportMyData()" style="padding:10px 18px;background:linear-gradient(135deg,#6b8fef,#a78bfa);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Geist',sans-serif">Télécharger mes données (JSON)</button>
-                <button onclick="requestRectification()" style="padding:10px 18px;background:rgba(255,255,255,0.06);color:#ecedf2;border:1px solid rgba(255,255,255,0.12);border-radius:8px;font-size:13px;cursor:pointer;font-family:'Geist',sans-serif">Demander une rectification</button>
-              </div>
-            </div>
-
-            <!-- RGPD — ZONE DE DANGER -->
-            <div class="gen-panel" style="border-color:rgba(239,68,68,0.25)">
-              <div class="gen-panel-title" style="display:flex;align-items:center;gap:8px;color:#f87171">
-                <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 3L2 17h16L10 3z" stroke="#f87171" stroke-width="1.6" stroke-linejoin="round"/><path d="M10 9v4M10 14.5v.5" stroke="#f87171" stroke-width="1.6" stroke-linecap="round"/></svg>
-                Zone de danger
-              </div>
-              <div style="font-size:13px;color:#7a7f9a;margin-bottom:16px;line-height:1.6">La suppression est <strong style="color:#ecedf2">définitive</strong>. Tes plans, conversations et données seront supprimés sous 30 jours conformément au RGPD.</div>
-              <button onclick="confirmDeleteAccount()" style="padding:10px 18px;background:rgba(239,68,68,0.1);color:#f87171;border:1px solid rgba(239,68,68,0.3);border-radius:8px;font-size:13px;cursor:pointer;font-family:'Geist',sans-serif">Supprimer définitivement mon compte</button>
-            </div>
-
-            <div style="text-align:right">
-              <button onclick="logout()" style="background:none;border:none;color:#f87171;cursor:pointer;font-size:13px;font-family:'Geist',sans-serif;opacity:.7;transition:opacity .2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.7">Se déconnecter</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- CHAT VIEW -->
-        <div class="dash-view" id="view-chat">
-          <div style="display:flex;height:100%;overflow:hidden;margin:-24px;gap:0">
-            <!-- Colonne conversations -->
-            <div class="chat-convs-col" id="chatConvsCol">
-              <div class="chat-convs-title">✦ Expert Eadee</div>
-              <div class="chat-convs-sub">Ton conseiller business</div>
-              <button class="chat-new-btn" onclick="startNewChatConv()">+ Nouvelle conversation</button>
-              <div class="chat-convs-label">Historique</div>
-              <div id="chatConvsList">
-                <div style="font-size:12px;color:#7a7f9a;padding:12px 0">Aucune conversation. Choisis un plan pour commencer.</div>
-              </div>
-            </div>
-            <!-- Col principale chat -->
-            <div class="chat-main-col">
-              <div class="chat-wrap" id="chatViewWrap" style="display:flex">
-                <div class="chat-hdr">
-                  <div class="chat-hdr-avatar">✦</div>
-                  <div style="flex:1">
-                    <div class="chat-hdr-title">Expert Eadee</div>
-                    <div class="chat-hdr-sub" id="chatViewSub">Sélectionne un plan</div>
-                  </div>
-                  <select id="chatPlanSelect" onchange="selectChatPlan(this.value,'view')"
-                    style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#ecedf2;font-size:12px;padding:6px 10px;cursor:pointer;font-family:'Geist',sans-serif;">
-                    <option value="">-- Choisir un plan --</option>
-                  </select>
-                </div>
-                <div class="chat-messages" id="chatViewMessages"></div>
-                <div class="chat-quick" id="chatViewQuick"></div>
-                <div class="chat-input-row">
-                  <textarea class="chat-input" id="chatViewInput" placeholder="Pose ta question..." rows="1"
-                    onkeydown="chatKeyDown(event,'view')" oninput="autoGrow(this)"></textarea>
-                  <button class="chat-send" id="chatViewSend" onclick="sendChatMessage('view')">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- INSPIRATION VIEW -->
-        <div class="dash-view" id="view-inspiration">
-          <div class="view-header">
-            <div class="view-title">Inspiration</div>
-            <div class="view-sub">Idées de business validées — clique pour générer ton plan</div>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px">
-            <div class="inspi-card" onclick="prefillIdea('airbnb');showView('generator')">
-              <div class="inspi-title">Conciergerie locative</div>
-              <div class="inspi-desc">Gestion déléguée de biens en location courte durée. Commission sur revenus. Marché : 2,4 Md€.</div>
-              <div class="inspi-tags"><span>Immobilier</span><span>Service</span></div>
-            </div>
-            <div class="inspi-card" onclick="prefillIdea('kitchen');showView('generator')">
-              <div class="inspi-title">Dark Kitchen Healthy</div>
-              <div class="inspi-desc">Cuisine saine livrée via plateformes. Clientèle active 25-40 ans. Fort potentiel de croissance.</div>
-              <div class="inspi-tags"><span>Food</span><span>Livraison</span></div>
-            </div>
-            <div class="inspi-card" onclick="prefillIdea('coaching');showView('generator')">
-              <div class="inspi-title">Coaching freelance B2B</div>
-              <div class="inspi-desc">Accompagnement de consultants indépendants pour scaler leur activité. 100% en ligne.</div>
-              <div class="inspi-tags"><span>Services B2B</span><span>Formation</span></div>
-            </div>
-            <div class="inspi-card" onclick="prefillIdea('saas');showView('generator')">
-              <div class="inspi-title">SaaS micro-entreprises</div>
-              <div class="inspi-desc">Outil de gestion tout-en-un pour auto-entrepreneurs. Abonnement mensuel. 2M de cibles en France.</div>
-              <div class="inspi-tags"><span>Tech</span><span>SaaS</span></div>
-            </div>
-            <div class="inspi-card" onclick="prefillIdea('yoga');showView('generator')">
-              <div class="inspi-title">Studio bien-être</div>
-              <div class="inspi-desc">Cours collectifs + séances privées en présentiel et en ligne. Marché bien-être : 5,5 Md€ en France.</div>
-              <div class="inspi-tags"><span>Santé</span><span>Sport</span></div>
-            </div>
-            <div class="inspi-card" onclick="prefillIdea('ecommerce');showView('generator')">
-              <div class="inspi-title">Marque e-commerce niche</div>
-              <div class="inspi-desc">Produits spécialisés vendus en ligne avec audience ciblée. Faibles coûts fixes, marge élevée.</div>
-              <div class="inspi-tags"><span>E-commerce</span><span>Marque</span></div>
-            </div>
-            <div class="inspi-card" onclick="prefillIdea('formation');showView('generator')">
-              <div class="inspi-title">Formation en ligne</div>
-              <div class="inspi-desc">Programme d'apprentissage sur une expertise métier. Revenus passifs une fois créé. Scalable.</div>
-              <div class="inspi-tags"><span>Éducation</span><span>Digital</span></div>
-            </div>
-            <div class="inspi-card" onclick="prefillIdea('agence');showView('generator')">
-              <div class="inspi-title">Agence de services digitaux</div>
-              <div class="inspi-desc">Création de contenu, réseaux sociaux ou SEO pour PME. Modèle retainer mensuel récurrent.</div>
-              <div class="inspi-tags"><span>Agence</span><span>Digital</span></div>
-            </div>
-            <div class="inspi-card" onclick="prefillIdea('artisanat');showView('generator')">
-              <div class="inspi-title">Artisanat premium</div>
-              <div class="inspi-desc">Produits faits main à forte valeur perçue, vendus en ligne et en boutique. Marché du fait-maison en hausse.</div>
-              <div class="inspi-tags"><span>Artisanat</span><span>Créatif</span></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- REFERRAL VIEW -->
-        <div class="dash-view" id="view-referral">
-          <div class="view-header">
-            <div class="view-title">Inviter un ami</div>
-            <div class="view-sub">Vous gagnez chacun 1 crédit gratuit</div>
-          </div>
-          <div style="max-width:480px">
-            <div class="gen-panel" style="text-align:center">
-              <div style="font-family:'Fraunces',serif;font-size:22px;font-weight:300;color:#ecedf2;margin-bottom:8px">Partage Eadee, gagne des crédits</div>
-              <div style="font-size:13px;color:#7a7f9a;margin-bottom:20px">Pour chaque ami qui crée un compte, vous recevez <strong style="color:#ecedf2">1 crédit chacun</strong>.</div>
-              <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px;display:flex;align-items:center;gap:10px;margin-bottom:16px">
-                <div style="flex:1;font-family:'DM Mono',monospace;font-size:12px;color:#9db8f8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="referral-link">eadee.fr/ref/ALEX2024</div>
-                <button onclick="navigator.clipboard.writeText(document.getElementById('referral-link').textContent).then(()=>toast('Lien copié ✓','success'))" style="padding:6px 14px;background:linear-gradient(135deg,#6b8fef,#a78bfa);color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap">Copier</button>
-              </div>
-              <div style="font-size:12px;color:#7a7f9a">0 ami(s) invité(s) · 0 crédit(s) gagné(s)</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- HELP VIEW -->
-        <div class="dash-view" id="view-help">
-          <div class="view-header">
-            <div class="view-title">Aide &amp; Support</div>
-            <div class="view-sub">Questions fréquentes et contact</div>
-          </div>
-          <div style="max-width:600px;display:flex;flex-direction:column;gap:16px">
-            <div class="gen-panel">
-              <div class="gen-panel-title">Questions fréquentes</div>
-              <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
-                <div style="padding:12px;background:rgba(255,255,255,0.02);border-radius:8px;font-size:13px;color:#ecedf2"><strong>Mon plan ne se génère pas ?</strong><br><span style="color:#7a7f9a">Vérifie que tu as des crédits et que ta description fait au moins 10 caractères.</span></div>
-                <div style="padding:12px;background:rgba(255,255,255,0.02);border-radius:8px;font-size:13px;color:#ecedf2"><strong>Comment racheter des crédits ?</strong><br><span style="color:#7a7f9a">Va dans "Crédits" dans le menu et choisis un pack.</span></div>
-                <div style="padding:12px;background:rgba(255,255,255,0.02);border-radius:8px;font-size:13px;color:#ecedf2"><strong>Les plans sont-ils sauvegardés ?</strong><br><span style="color:#7a7f9a">Oui, retrouve-les dans "Mes plans". Ils sont stockés localement.</span></div>
-              </div>
-            </div>
-            <div class="gen-panel" style="text-align:center">
-              <div style="font-size:13px;color:#7a7f9a;margin-bottom:12px">Besoin d'aide supplémentaire ?</div>
-              <a href="mailto:support@eadee.fr" style="display:inline-block;padding:10px 24px;background:linear-gradient(135deg,#6b8fef,#a78bfa);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none">Contacter le support →</a>
-            </div>
-          </div>
-        </div>
-
-      </main>
-
-      <!-- MOBILE BOTTOM NAV -->
-      <div class="mobile-nav" id="mobileNav">
-        <button class="mob-nav-btn active" id="mob-generator" onclick="showView('generator');setMobActive('generator')">
-          <span class="mob-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><polygon points="11,2 3,12 10,12 9,18 17,8 10,8" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" fill="none"/></svg></span>Générateur
-        </button>
-        <button class="mob-nav-btn" id="mob-history" onclick="showView('history');setMobActive('history')">
-          <span class="mob-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="2" width="14" height="16" rx="2" stroke="currentColor" stroke-width="1.5"/><line x1="7" y1="7" x2="13" y2="7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="7" y1="10" x2="13" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="7" y1="13" x2="10" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>Mes plans
-        </button>
-        <button class="mob-nav-btn" id="mob-billing" onclick="showView('billing');setMobActive('billing')">
-          <span class="mob-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="2" y="5" width="16" height="11" rx="2" stroke="currentColor" stroke-width="1.5"/><line x1="2" y1="9" x2="18" y2="9" stroke="currentColor" stroke-width="1.5"/><line x1="5" y1="13" x2="8" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>Crédits
-        </button>
-        <button class="mob-nav-btn" id="mob-chat" onclick="openChatFullscreen();setMobActive('chat')">
-          <span class="mob-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M18 9c0 4-3.6 7-8 7a8.8 8.8 0 01-3.5-.7L2 17l1.7-4A6.5 6.5 0 012 9c0-4 3.6-7 8-7s8 3 8 7z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span>Expert Eadee
-        </button>
-        <button class="mob-nav-btn" id="mob-settings" onclick="showView('settings');setMobActive('settings')">
-          <span class="mob-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.22 4.22l1.42 1.42M14.36 14.36l1.42 1.42M4.22 15.78l1.42-1.42M14.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>Réglages
-        </button>
       </div>
 
-    </div>
-  </div>
-</div>
-
-<!-- PLAN PREVIEW MODAL -->
-<div id="planPreviewModal" class="preview-modal-overlay" style="display:none" onclick="if(event.target===this)closePlanPreview()">
-  <div class="preview-modal">
-    <div class="preview-modal-header">
-      <div>
-        <div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:4px">Exemple de résultat</div>
-        <div class="preview-modal-title" id="previewModalTitle">Business Plan — Restaurant Le Phare</div>
+      <!-- Generating state -->
+      <div id="dashGenerating" style="display:none;flex-direction:column;align-items:center;justify-content:center;min-height:320px;gap:24px;padding:40px">
+        <div id="genSectionsWrap" style="width:100%;max-width:600px"></div>
+        <div id="genStatus" style="font-family:var(--mono);font-size:12px;color:var(--ink-3);letter-spacing:0.1em"></div>
       </div>
-      <button class="preview-modal-close" onclick="closePlanPreview()">✕</button>
-    </div>
-    <div class="preview-modal-body" id="previewModalBody"></div>
-  </div>
+
+      <!-- Empty / error state -->
+      <div id="dashEmptyState" style="display:none;flex-direction:column;align-items:center;justify-content:center;min-height:280px;gap:16px;padding:40px;text-align:center">
+        <div id="dashErrMsg" style="font-size:14px;color:var(--ink-2)"></div>
+      </div>
+
+      <!-- Plan result -->
+      <div id="dashPlanResult" style="display:none;padding:32px 0">
+        <div id="planResultContent"></div>
+      </div>
+
+    </section>
+
+    <!-- =================== EXPERT =================== -->
+    <section class="screen" data-screen="expert">
+      <div class="page">
+        <div class="page-head">
+          <div>
+            <span class="page-eyebrow">Conseil business · 24h/24</span>
+            <h1>Expert Eadee, <em>à ton service.</em></h1>
+            <p class="page-sub">Pose n'importe quelle question sur ton plan. L'Expert connaît chaque ligne de ton dossier.</p>
+          </div>
+        </div>
+
+        <div class="chat-grid">
+          <aside class="chat-side">
+            <button class="chat-new">+ Nouvelle conversation</button>
+            <div class="chat-hist">
+              <span class="label">Historique</span>
+              <div class="conv active">
+                <b>Plan sans nom</b>
+                <span class="meta">3 messages · 71/100</span>
+              </div>
+            </div>
+          </aside>
+
+          <div class="chat-main">
+            <div class="chat-head">
+              <div class="who">
+                <span class="av">✦</span>
+                <div>
+                  <b>Expert Eadee</b>
+                  <div class="ctx">Sur ton plan : Plan sans nom</div>
+                </div>
+              </div>
+              <div class="plan-sel">— Choisir un plan —</div>
+            </div>
+
+            <div class="chat-body">
+              <div class="msg">
+                <span class="av">✦</span>
+                <div class="bb">Salut <b>Admin</b> ! Je connais ton plan <b>Plan sans nom</b> par cœur. Score actuel : <b>71/100</b>.<br/><br/>Comment puis-je t'aider aujourd'hui ?</div>
+              </div>
+            </div>
+
+            <div class="quick-chips">
+              <button>Améliore mon score</button>
+              <button>Aide-moi avec le statut juridique</button>
+              <button>Prépare-moi pour la banque</button>
+              <button>Mes 3 plus gros risques</button>
+              <button>Réécris mon résumé exécutif</button>
+              <button>Plan d'action 30 jours</button>
+            </div>
+
+            <div class="chat-input">
+              <input type="text" placeholder="Pose ta question…" />
+              <button class="chat-send" aria-label="Envoyer">
+                <svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================== PLANS =================== -->
+    <section class="screen" data-screen="plans">
+      <div class="page">
+        <div class="page-head">
+          <div>
+            <span class="page-eyebrow">Dossiers générés · 2</span>
+            <h1>Mes plans</h1>
+            <p class="page-sub">Tous tes business plans générés. Cliquer pour rouvrir, dupliquer ou ajuster avec l'Expert.</p>
+          </div>
+          <a class="btn btn-accent btn-lg" data-screen="gen">+ Nouveau plan</a>
+        </div>
+
+        <div class="plans-bar">
+          <div class="filter-tabs">
+            <button class="on">Tous<span class="ct">02</span></button>
+            <button>Brouillons<span class="ct">00</span></button>
+            <button>Finalisés<span class="ct">02</span></button>
+            <button>Archivés<span class="ct">00</span></button>
+          </div>
+          <div class="plans-search">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
+            <input type="text" placeholder="Rechercher un plan…" />
+          </div>
+        </div>
+
+        <div class="plans-table">
+          <div class="plans-thead">
+            <span>#</span>
+            <span>Dossier</span>
+            <span>Viabilité</span>
+            <span class="h-budget">Budget</span>
+            <span class="h-date">Généré le</span>
+            <span></span>
+          </div>
+
+          <div class="plan-row">
+            <div class="plan-icon italic">C</div>
+            <div class="plan-name">
+              CocktailVault
+              <span>« je veux cree un site et une application »</span>
+            </div>
+            <div class="plan-score num">71<sup>/100</sup></div>
+            <div class="plan-budget">7 500€</div>
+            <div class="plan-date">12 MAI 2026</div>
+            <div class="plan-cta"><a class="btn btn-ghost" href="#">Voir le plan →</a></div>
+          </div>
+
+          <div class="plan-row">
+            <div class="plan-icon italic">F</div>
+            <div class="plan-name">
+              FinZen
+              <span>« je veux cree une application de sante fi »</span>
+            </div>
+            <div class="plan-score num s-green">78<sup>/100</sup></div>
+            <div class="plan-budget">5 500€</div>
+            <div class="plan-date">29 AVR 2026</div>
+            <div class="plan-cta"><a class="btn btn-ghost" href="#">Voir le plan →</a></div>
+          </div>
+        </div>
+
+        <div class="plans-foot">
+          <span>2 plans · Stockage local · Export PDF disponible sur chaque plan</span>
+          <span class="num">02 / 02</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================== INSPIRATION =================== -->
+    <section class="screen" data-screen="insp">
+      <div class="page">
+        <div class="page-head">
+          <div>
+            <span class="page-eyebrow">Catalogue · 9 idées validées</span>
+            <h1>Inspiration</h1>
+            <p class="page-sub">Idées de business validées — clique pour générer ton plan.</p>
+          </div>
+        </div>
+
+        <div class="insp-grid">
+          <div class="insp">
+            <div class="insp-head"><span class="insp-ix">N°01</span><span class="insp-cat"><span>Immobilier</span><span>Service</span></span></div>
+            <h4>Conciergerie locative</h4>
+            <p>Gestion déléguée de biens en location courte durée. Commission sur revenus.</p>
+            <div class="insp-meta"><span class="mkt">Marché 2,4 Md€</span><span>Capex faible</span></div>
+            <span class="insp-cta">Générer ce plan →</span>
+          </div>
+          <div class="insp">
+            <div class="insp-head"><span class="insp-ix">N°02</span><span class="insp-cat"><span>Food</span><span>Livraison</span></span></div>
+            <h4>Dark Kitchen Healthy</h4>
+            <p>Cuisine saine livrée via plateformes. Clientèle active 25-40 ans. Fort potentiel de croissance.</p>
+            <div class="insp-meta"><span class="mkt">Marché 5,1 Md€</span><span>Capex moyen</span></div>
+            <span class="insp-cta">Générer ce plan →</span>
+          </div>
+          <div class="insp">
+            <div class="insp-head"><span class="insp-ix">N°03</span><span class="insp-cat"><span>Services B2B</span><span>Formation</span></span></div>
+            <h4>Coaching freelance B2B</h4>
+            <p>Accompagnement de consultants indépendants pour scaler leur activité. 100% en ligne.</p>
+            <div class="insp-meta"><span class="mkt">Marché 800 M€</span><span>Capex faible</span></div>
+            <span class="insp-cta">Générer ce plan →</span>
+          </div>
+          <div class="insp">
+            <div class="insp-head"><span class="insp-ix">N°04</span><span class="insp-cat"><span>Tech</span><span>SaaS</span></span></div>
+            <h4>SaaS micro-entreprises</h4>
+            <p>Outil de gestion tout-en-un pour auto-entrepreneurs. Abonnement mensuel. 2M de cibles en France.</p>
+            <div class="insp-meta"><span class="mkt">Marché 1,2 Md€</span><span>Capex moyen</span></div>
+            <span class="insp-cta">Générer ce plan →</span>
+          </div>
+          <div class="insp">
+            <div class="insp-head"><span class="insp-ix">N°05</span><span class="insp-cat"><span>Santé</span><span>Sport</span></span></div>
+            <h4>Studio bien-être</h4>
+            <p>Cours collectifs + séances privées en présentiel et en ligne.</p>
+            <div class="insp-meta"><span class="mkt">Marché 5,5 Md€</span><span>Capex élevé</span></div>
+            <span class="insp-cta">Générer ce plan →</span>
+          </div>
+          <div class="insp">
+            <div class="insp-head"><span class="insp-ix">N°06</span><span class="insp-cat"><span>E-commerce</span><span>Marque</span></span></div>
+            <h4>Marque e-commerce niche</h4>
+            <p>Produits spécialisés vendus en ligne avec audience ciblée. Faibles coûts fixes, marge élevée.</p>
+            <div class="insp-meta"><span class="mkt">Marché variable</span><span>Capex faible</span></div>
+            <span class="insp-cta">Générer ce plan →</span>
+          </div>
+          <div class="insp">
+            <div class="insp-head"><span class="insp-ix">N°07</span><span class="insp-cat"><span>Éducation</span><span>Digital</span></span></div>
+            <h4>Formation en ligne</h4>
+            <p>Programme d'apprentissage sur une expertise métier. Revenus passifs une fois créé. Scalable.</p>
+            <div class="insp-meta"><span class="mkt">Marché 3,4 Md€</span><span>Capex faible</span></div>
+            <span class="insp-cta">Générer ce plan →</span>
+          </div>
+          <div class="insp">
+            <div class="insp-head"><span class="insp-ix">N°08</span><span class="insp-cat"><span>Agence</span><span>Digital</span></span></div>
+            <h4>Agence de services digitaux</h4>
+            <p>Création de contenu, réseaux sociaux ou SEO pour PME. Modèle retainer mensuel récurrent.</p>
+            <div class="insp-meta"><span class="mkt">Marché 2,1 Md€</span><span>Capex faible</span></div>
+            <span class="insp-cta">Générer ce plan →</span>
+          </div>
+          <div class="insp">
+            <div class="insp-head"><span class="insp-ix">N°09</span><span class="insp-cat"><span>Artisanat</span><span>Créatif</span></span></div>
+            <h4>Artisanat premium</h4>
+            <p>Produits faits main à forte valeur perçue, vendus en ligne et en boutique. Marché du fait-maison en hausse.</p>
+            <div class="insp-meta"><span class="mkt">Marché 1,8 Md€</span><span>Capex moyen</span></div>
+            <span class="insp-cta">Générer ce plan →</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================== CRÉDITS =================== -->
+    <section class="screen" data-screen="credits">
+      <div class="page">
+        <div class="page-head">
+          <div>
+            <span class="page-eyebrow">Compte · facturation</span>
+            <h1>Crédits.<br/><em>Recharge tes générations.</em></h1>
+            <p class="page-sub">Paiement unique. Sans abonnement. Sans expiration. Tu consommes tes crédits quand tu veux.</p>
+          </div>
+        </div>
+
+        <div class="pay-grid">
+          <!-- LEFT: packs + card form -->
+          <div>
+            <div class="pack" id="pack-solo">
+              <span class="radio"></span>
+              <div class="pack-body">
+                <div class="pack-name"><b>Solo</b><span class="pack-price">12,99€</span></div>
+                <div class="pack-sub">1 génération complète · 1 crédit</div>
+                <div class="pack-meta">12,99€ / génération</div>
+              </div>
+              <span style="font-family:var(--mono);font-size:10.5px;color:var(--ink-3);letter-spacing:0.06em">×1</span>
+            </div>
+
+            <div class="pack on" id="pack-pro">
+              <span class="radio"></span>
+              <div class="pack-body">
+                <div class="pack-name"><b>Pro</b><span class="pack-price">29,99€</span></div>
+                <div class="pack-sub">Pack 3 générations · 3 crédits</div>
+                <div class="pack-meta">10,00€ / génération · économie 30%</div>
+              </div>
+              <span style="font-family:var(--mono);font-size:10.5px;color:var(--ink-3);letter-spacing:0.06em">×3</span>
+            </div>
+
+            <div class="pack" id="pack-emp">
+              <span class="pack-best">★ Meilleur choix</span>
+              <span class="radio"></span>
+              <div class="pack-body">
+                <div class="pack-name"><b>Empire</b><span class="pack-price">59,99€</span></div>
+                <div class="pack-sub">Pack 8 générations · 8 crédits</div>
+                <div class="pack-meta">7,50€ / génération · économie 42%</div>
+              </div>
+              <span style="font-family:var(--mono);font-size:10.5px;color:var(--ink-3);letter-spacing:0.06em">×8</span>
+            </div>
+
+            <div class="card pay-form" style="padding:0;margin-top:18px">
+              <div class="pay-form-head">
+                <span class="label">Paiement sécurisé</span>
+                <span class="secure">SSL 256-bit · Stripe</span>
+              </div>
+              <div class="pay-fields">
+                <div class="field">
+                  <label>Titulaire de la carte</label>
+                  <input type="text" placeholder="Jean Dupont" />
+                </div>
+                <div class="field">
+                  <label>Numéro de carte</label>
+                  <input type="text" placeholder="1234 5678 9012 3456" />
+                </div>
+                <div class="row-2">
+                  <div class="field"><label>Expiration</label><input type="text" placeholder="MM/AA" /></div>
+                  <div class="field"><label>CVC</label><input type="text" placeholder="123" /></div>
+                </div>
+              </div>
+              <div class="pay-actions">
+                <button class="btn btn-accent btn-lg btn-block">Acheter mes crédits — 29,99€</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT: invoice -->
+          <div class="card invoice">
+            <div class="invoice-head">
+              <h3>Récapitulatif</h3>
+              <span class="invoice-no">N°2026-0517</span>
+            </div>
+            <div class="invoice-body">
+              <div class="invoice-row"><span class="k">Pack sélectionné</span><span class="v" id="sum-pack">Pro</span></div>
+              <div class="invoice-row"><span class="k">Crédits obtenus</span><span class="v" id="sum-cred">3 générations</span></div>
+              <div class="invoice-row"><span class="k">Prix unitaire</span><span class="v" id="sum-unit">10,00 €</span></div>
+              <div class="invoice-row"><span class="k">Validité</span><span class="v">Sans expiration</span></div>
+            </div>
+            <div class="invoice-total">
+              <span class="k">Total à payer</span>
+              <span class="v num" id="sum-total">29,99€</span>
+            </div>
+            <div class="invoice-incl">
+              <span class="label">Inclus dans chaque génération</span>
+              <ul>
+                <li>Business plan complet — 23 sections</li>
+                <li>Généré en 60 secondes</li>
+                <li>Compatible dossier banque &amp; BPI</li>
+                <li>Démarches administratives pré-remplies</li>
+                <li>Emails prêts à envoyer</li>
+                <li>Sans abonnement · Sans expiration</li>
+                <li>Conseiller Eadee 24h/24</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================== PARAMÈTRES =================== -->
+    <section class="screen" data-screen="settings">
+      <div class="page">
+        <div class="page-head">
+          <div>
+            <span class="page-eyebrow">Compte · préférences</span>
+            <h1>Paramètres</h1>
+            <p class="page-sub">Gère ton compte, ta sécurité, tes données et ton lien d'invitation.</p>
+          </div>
+        </div>
+
+        <div class="set-grid">
+          <aside class="set-toc">
+            <h4>Sections</h4>
+            <a class="on" href="#s-profil">Mon profil</a>
+            <a href="#s-secu">Sécurité</a>
+            <a href="#s-invite">Inviter un ami</a>
+            <a href="#s-rgpd">Mes données</a>
+            <a href="#s-danger" style="color:var(--red)">Zone de danger</a>
+          </aside>
+
+          <div>
+            <!-- profil -->
+            <div class="card set-section" id="s-profil">
+              <span class="label">01 · Identité</span>
+              <h2 style="margin-top:8px">Mon profil</h2>
+              <p class="desc">Comment l'Expert Eadee t'appelle et où il t'envoie tes notifications.</p>
+              <div class="fields">
+                <div><label>Prénom &amp; Nom</label><input type="text" placeholder="Admin Eadee" /></div>
+                <div><label>Email</label><input type="text" placeholder="contact@eadee.fr" /></div>
+              </div>
+              <div class="set-foot">
+                <button class="btn">Sauvegarder</button>
+              </div>
+            </div>
+
+            <!-- securité -->
+            <div class="card set-section" id="s-secu">
+              <span class="label">02 · Sécurité</span>
+              <h2 style="margin-top:8px">Mot de passe</h2>
+              <p class="desc">Choisis un mot de passe d'au moins 12 caractères. Active la 2FA pour plus de tranquillité.</p>
+              <div class="fields">
+                <div><label>Nouveau mot de passe</label><input type="password" placeholder="••••••••" /></div>
+                <div><label>Confirmer</label><input type="password" placeholder="••••••••" /></div>
+              </div>
+              <div class="set-foot">
+                <button class="btn btn-ghost">Activer la 2FA</button>
+                <button class="btn">Changer le mot de passe</button>
+              </div>
+            </div>
+
+            <!-- invite -->
+            <div class="card set-section ref-card" id="s-invite" style="display:block">
+              <span class="label">03 · Parrainage</span>
+              <h2 style="margin-top:8px">Inviter un ami</h2>
+              <p class="desc">Pour chaque ami qui crée un compte, vous recevez <b style="color:var(--ink);font-weight:500">1 crédit chacun</b>.</p>
+              <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+                <div class="ref-link"><b>eadee.fr/ref/</b>ALEX2024</div>
+                <button class="btn btn-ghost">Copier</button>
+                <button class="btn">Partager</button>
+              </div>
+              <div class="ref-stats">
+                <span><b>0</b> amis invités</span>
+                <span><b>0</b> crédits gagnés</span>
+                <span><b>∞</b> crédits possibles</span>
+              </div>
+            </div>
+
+            <!-- RGPD -->
+            <div class="card set-section" id="s-rgpd">
+              <span class="label">04 · RGPD</span>
+              <h2 style="margin-top:8px">Mes données personnelles</h2>
+              <p class="desc">Conformément au RGPD, tu peux télécharger toutes les données qu'Eadee détient sur toi à tout moment.</p>
+              <div class="set-foot" style="justify-content:flex-start">
+                <button class="btn">Télécharger mes données (JSON)</button>
+                <button class="btn btn-ghost">Demander une rectification</button>
+              </div>
+            </div>
+
+            <!-- danger -->
+            <div class="card set-section danger" id="s-danger">
+              <span class="label">05 · Zone de danger</span>
+              <h2 style="margin-top:8px;color:var(--red)">Supprimer mon compte</h2>
+              <p class="desc">La suppression est <b>définitive</b>. Tes plans, conversations et données seront supprimés sous 30 jours conformément au RGPD.</p>
+              <div class="set-foot" style="justify-content:flex-start">
+                <button class="btn btn-red">Supprimer définitivement mon compte</button>
+                <button class="btn btn-ghost" style="border-color:var(--red);color:var(--red)">Se déconnecter</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================== AIDE =================== -->
+    <section class="screen" data-screen="help">
+      <div class="page">
+        <div class="page-head">
+          <div>
+            <span class="page-eyebrow">Support · 24h/24</span>
+            <h1>Aide &amp; Support.<br/><em>On répond vite.</em></h1>
+            <p class="page-sub">Questions fréquentes, contact direct et statut système.</p>
+          </div>
+        </div>
+
+        <div class="help-grid">
+          <div class="faqs">
+            <details class="q" open>
+              <summary>Mon plan ne se génère pas&nbsp;?</summary>
+              <div class="a"><p>Vérifie que tu as des crédits et que ta description fait au moins 10 caractères. Si l'erreur persiste, contacte le support — on remboursera ton crédit en cas de bug avéré.</p></div>
+            </details>
+            <details class="q">
+              <summary>Comment racheter des crédits&nbsp;?</summary>
+              <div class="a"><p>Va dans « Crédits » dans le menu et choisis un pack. Solo (1 crédit), Pro (3 crédits) ou Empire (8 crédits). Plus le pack est gros, moins tu paies par génération.</p></div>
+            </details>
+            <details class="q">
+              <summary>Les plans sont-ils sauvegardés&nbsp;?</summary>
+              <div class="a"><p>Oui, retrouve-les dans « Mes plans ». Ils sont stockés localement et synchronisés à ton compte. Tu peux exporter chaque plan en PDF à tout moment.</p></div>
+            </details>
+            <details class="q">
+              <summary>Comment l'Expert Eadee accède à mon plan&nbsp;?</summary>
+              <div class="a"><p>Quand tu ouvres une conversation, tu choisis quel plan tu veux travailler. L'Expert reçoit le contenu complet de ce plan en contexte, jamais d'autres plans, jamais ceux d'autres utilisateurs.</p></div>
+            </details>
+            <details class="q">
+              <summary>Mes données sont-elles partagées&nbsp;?</summary>
+              <div class="a"><p>Non. Aucune revente. Hébergement en France. Aucune donnée n'est utilisée pour entraîner nos modèles. Tu peux télécharger ou supprimer toutes tes données à tout moment depuis Paramètres.</p></div>
+            </details>
+          </div>
+
+          <aside class="help-side">
+            <div class="help-card cta-dark">
+              <h4>Besoin d'aide supplémentaire&nbsp;?</h4>
+              <p>Notre équipe répond en moins de 4 heures, du lundi au samedi.</p>
+              <a class="btn btn-accent" href="mailto:support@eadee.fr">Contacter le support →</a>
+            </div>
+            <div class="help-card">
+              <span class="label">Statut système</span>
+              <div class="help-mini" style="margin-top:10px"><span style="width:7px;height:7px;border-radius:999px;background:var(--green);display:inline-block"></span><b>Tous les services sont opérationnels</b></div>
+              <div class="help-mini" style="margin-top:8px"><span>Génération · 100%</span></div>
+              <div class="help-mini" style="margin-top:6px"><span>Expert IA · 100%</span></div>
+              <div class="help-mini" style="margin-top:6px"><span>Paiement Stripe · 100%</span></div>
+            </div>
+            <div class="help-card">
+              <span class="label">Ressources</span>
+              <ul style="list-style:none;padding:0;margin:10px 0 0;display:flex;flex-direction:column;gap:8px;font-size:13.5px">
+                <li>📘 <a href="#">Guide du business plan parfait</a></li>
+                <li>📊 <a href="#">Comprendre ton score viabilité</a></li>
+                <li>🏦 <a href="#">Préparer un RDV bancaire</a></li>
+                <li>📝 <a href="#">Templates emails fournisseurs</a></li>
+              </ul>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+  </main>
 </div>
 
-<!-- DOSSIER CREATION MODAL -->
-<div id="dossierModal" class="dossier-overlay" style="display:none;">
-  <div class="dossier-header">
-    <div>
-      <div class="dossier-header-title" id="dossierTitle">DOSSIER DE CRÉATION</div>
-      <div class="dossier-header-sub" id="dossierSub">Documents pré-remplis pour créer ton entreprise</div>
-    </div>
-    <div class="dossier-header-actions">
-      <button class="dossier-btn print" onclick="window.print()">Imprimer / PDF</button>
-      <button class="dossier-btn close-btn" onclick="closeDossier()">✕ Fermer</button>
-    </div>
-  </div>
-  <div class="dossier-tabs" id="dossierTabs"></div>
-  <div class="dossier-body" id="dossierBody">
-    <div class="dossier-loading" id="dossierLoading">
-      <div class="dossier-spinner"></div>
-      <div class="dossier-loading-text" id="dossierLoadingText">Analyse du projet en cours...</div>
-    </div>
-  </div>
-</div>
+<script>
+  // ===== Navigation =====
+  const screens = document.querySelectorAll('.screen');
+  const links = document.querySelectorAll('[data-screen]');
+  const crumb = document.getElementById('crumb');
+  const labels = {gen:'Générateur', expert:'Expert Eadee', plans:'Mes plans', insp:'Inspiration', credits:'Crédits', settings:'Paramètres', help:'Aide & Support'};
 
+  function go(name){
+    screens.forEach(s => s.classList.toggle('active', s.dataset.screen === name));
+    document.querySelectorAll('.side-link').forEach(l => l.classList.toggle('active', l.dataset.screen === name));
+    crumb.textContent = labels[name] || '—';
+    window.scrollTo({top:0, behavior:'instant'});
+  }
+  links.forEach(l => l.addEventListener('click', e => {
+    e.preventDefault();
+    go(l.dataset.screen);
+  }));
+
+  // ===== Keyboard shortcuts =====
+  const keys = {g:'gen', e:'expert', p:'plans', i:'insp', c:'credits', ',':'settings', '?':'help'};
+  document.addEventListener('keydown', e => {
+    if (e.target.matches('input, textarea')) return;
+    const k = e.key.toLowerCase();
+    if (keys[k]) { e.preventDefault(); go(keys[k]); }
+  });
+
+  // ===== Credit packs (invoice live update) =====
+  const packs = {
+    'pack-solo':{name:'Solo', cred:'1 génération', unit:'12,99 €', total:'12,99€', btn:'12,99€'},
+    'pack-pro' :{name:'Pro',  cred:'3 générations', unit:'10,00 €', total:'29,99€', btn:'29,99€'},
+    'pack-emp' :{name:'Empire', cred:'8 générations', unit:'7,50 €', total:'59,99€', btn:'59,99€'}
+  };
+  document.querySelectorAll('.pack').forEach(p => {
+    p.addEventListener('click', () => {
+      document.querySelectorAll('.pack').forEach(x => x.classList.remove('on'));
+      p.classList.add('on');
+      const d = packs[p.id];
+      if (!d) return;
+      document.getElementById('sum-pack').textContent = d.name;
+      document.getElementById('sum-cred').textContent = d.cred;
+      document.getElementById('sum-unit').textContent = d.unit;
+      document.getElementById('sum-total').textContent = d.total;
+      document.querySelector('.pay-actions .btn').textContent = 'Acheter mes crédits — ' + d.btn;
+    });
+  });
+
+  // ===== Segmented buttons =====
+  document.querySelectorAll('.seg').forEach(s => {
+    s.querySelectorAll('button').forEach(b => {
+      b.addEventListener('click', () => {
+        s.querySelectorAll('button').forEach(x => x.classList.remove('on'));
+        b.classList.add('on');
+      });
+    });
+  });
+
+  // ===== Filter tabs (plans) =====
+  document.querySelectorAll('.filter-tabs button').forEach(b => {
+    b.addEventListener('click', () => {
+      b.parentElement.querySelectorAll('button').forEach(x => x.classList.remove('on'));
+      b.classList.add('on');
+    });
+  });
+
+  // ===== FAQ single-open =====
+  document.querySelectorAll('details.q').forEach(d => {
+    d.addEventListener('toggle', () => {
+      if (d.open) document.querySelectorAll('details.q').forEach(o => { if (o !== d) o.open = false; });
+    });
+  });
+
+  // ===== Settings TOC scrollspy + click =====
+  document.querySelectorAll('.set-toc a').forEach(a => {
+    a.addEventListener('click', e => {
+      document.querySelectorAll('.set-toc a').forEach(x => x.classList.remove('on'));
+      a.classList.add('on');
+    });
+  });
+</script>
+
+<!-- ========================= BACKEND JS ========================= -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/public/js/00-state.js?v=3"></script>
 <script src="/public/js/01-utils.js?v=3"></script>
 <script src="/public/js/02-router.js?v=4"></script>
@@ -1657,93 +1367,10 @@
 <script src="/public/js/60-dossier.js?v=3"></script>
 <script src="/public/js/70-cookies.js?v=3"></script>
 <script src="/public/js/71-legal.js?v=3"></script>
-<script src="/public/js/80-hero.js?v=3"></script>
 <script src="/public/js/81-misc.js?v=3"></script>
-<script src="/public/js/82-pricing-stats.js?v=3"></script>
-<script src="/public/js/83-promo.js?v=3"></script>
-<script src="/public/js/84-sections-grid.js?v=3"></script>
 <script src="/public/js/85-gen-animations.js?v=5"></script>
-<script src="/public/js/87-pages-anim.js?v=1"></script>
-<script src="/public/js/88-landing-anim.js?v=1"></script>
 <script src="/public/js/40-chat.js?v=3"></script>
 <script src="/public/js/main.js?v=3"></script>
-<!-- ========== CHAT DRAWER ========== -->
-<div class="chat-backdrop" id="chatBackdrop" onclick="closeChatDrawer()"></div>
-<aside class="chat-drawer" id="chatDrawer">
-  <div class="chat-wrap" id="chatDrawerWrap">
-    <div class="chat-hdr">
-      <div class="chat-hdr-avatar">✦</div>
-      <div>
-        <div class="chat-hdr-title">Expert Eadee</div>
-        <div class="chat-hdr-sub" id="chatDrawerSub">Ton conseiller business</div>
-      </div>
-      <button class="chat-hdr-close" onclick="closeChatDrawer()" title="Fermer">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-      </button>
-    </div>
-    <div class="chat-messages" id="chatDrawerMessages"></div>
-    <div class="chat-quick" id="chatDrawerQuick"></div>
-    <div class="chat-input-row">
-      <textarea class="chat-input" id="chatDrawerInput" placeholder="Pose ta question..." rows="1"
-        onkeydown="chatKeyDown(event,'drawer')" oninput="autoGrow(this)"></textarea>
-      <button class="chat-send" id="chatDrawerSend" onclick="sendChatMessage('drawer')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
-    </div>
-  </div>
-</aside>
 
-<!-- INSPIRE MODAL -->
-<div id="inspire-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeInspireModal()">
-  <div style="background:#1a1d26;border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:28px;max-width:540px;width:100%;max-height:80vh;overflow-y:auto">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
-      <div style="font-family:'Fraunces',serif;font-size:20px;font-weight:300;color:#ecedf2">Exemples d'idées</div>
-      <button onclick="closeInspireModal()" style="background:none;border:none;color:#7a7f9a;cursor:pointer;font-size:18px">✕</button>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <button class="inspire-option" onclick="pickInspire(IDEA_PROMPTS.airbnb)">Conciergerie locative — gestion déléguée de biens en location courte durée</button>
-      <button class="inspire-option" onclick="pickInspire(IDEA_PROMPTS.kitchen)">Dark kitchen healthy — repas équilibrés livrés via plateformes</button>
-      <button class="inspire-option" onclick="pickInspire(IDEA_PROMPTS.coaching)">Coaching freelance B2B — accompagnement de consultants indépendants</button>
-      <button class="inspire-option" onclick="pickInspire(IDEA_PROMPTS.saas)">SaaS micro-entreprises — outil de gestion tout-en-un pour auto-entrepreneurs</button>
-      <button class="inspire-option" onclick="pickInspire(IDEA_PROMPTS.yoga)">Studio bien-être — cours collectifs yoga et sophrologie</button>
-      <button class="inspire-option" onclick="pickInspire(IDEA_PROMPTS.formation)">Formation en ligne — programme d'apprentissage sur une expertise métier</button>
-      <button class="inspire-option" onclick="pickInspire(IDEA_PROMPTS.agence)">Agence digitale — gestion des réseaux sociaux pour PME locales</button>
-      <button class="inspire-option" onclick="pickInspire(IDEA_PROMPTS.artisanat)">Artisanat premium — produits faits main à forte valeur perçue</button>
-    </div>
-  </div>
-</div>
-
-<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
-
-<script type="application/ld+json">
-{
-  "@context":"https://schema.org",
-  "@graph":[
-    {"@type":"Product","name":"Eadee","description":"Générateur de business plan IA spécialisé France","offers":{"@type":"Offer","price":"12.99","priceCurrency":"EUR","availability":"https://schema.org/InStock"}},
-    {"@type":"FAQPage","mainEntity":[
-      {"@type":"Question","name":"Le plan EADEE est-il vraiment complet ?","acceptedAnswer":{"@type":"Answer","text":"Oui. 23 sections couvrent l'intégralité d'un business plan professionnel : stratégie, marché, finances, juridique, démarches, risques, plan d'action."}},
-      {"@type":"Question","name":"Est-ce que mon plan sera pris au sérieux par une banque ou BPI France ?","acceptedAnswer":{"@type":"Answer","text":"EADEE suit la structure standard demandée par les banques françaises et BPI France. Un plan IA est un point de départ solide — fais valider les chiffres par un expert-comptable ou la CCI avant le RDV."}},
-      {"@type":"Question","name":"Quelle différence avec ChatGPT ou un outil gratuit ?","acceptedAnswer":{"@type":"Answer","text":"ChatGPT génère du texte. EADEE génère un business plan structuré selon les standards français : plan de financement, projections cohérentes, score de viabilité, tableau d'amortissement, checklist des démarches."}},
-      {"@type":"Question","name":"Puis-je modifier le plan après génération ?","acceptedAnswer":{"@type":"Answer","text":"Oui, entièrement. Chaque section est éditable. Le conseiller EADEE peut aussi réécrire une section sur simple demande."}},
-      {"@type":"Question","name":"Mes données sont-elles privées ?","acceptedAnswer":{"@type":"Answer","text":"Absolument. Hébergement en France, conforme RGPD, aucune revente."}},
-      {"@type":"Question","name":"Combien de temps prend vraiment la génération ?","acceptedAnswer":{"@type":"Answer","text":"Entre 45 et 90 secondes pour un plan complet 23 sections."}},
-      {"@type":"Question","name":"Pour quels types de projets Eadee fonctionne ?","acceptedAnswer":{"@type":"Answer","text":"Tout projet en France : commerce, service, artisanat, SaaS, restauration, freelance, e-commerce, conciergerie, coaching…"}},
-      {"@type":"Question","name":"Que se passe-t-il si le plan ne me convient pas ?","acceptedAnswer":{"@type":"Answer","text":"Garantie satisfait ou remboursé 14 jours."}},
-      {"@type":"Question","name":"C'est un abonnement ?","acceptedAnswer":{"@type":"Answer","text":"Non. Paiement unique. Tu achètes des crédits, tu les consommes quand tu veux, sans engagement."}}
-    ]}
-  ]
-}
-</script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
