@@ -1922,7 +1922,7 @@
 <script src="/public/js/23-draft.js?v=4"></script>
 <script src="/public/js/27-plan-preview.js?v=3"></script>
 <script src="/public/js/30-history.js?v=4"></script>
-<script src="/public/js/28-plan-renderer-v2.js?v=3"></script>
+<script src="/public/js/28-plan-renderer-v2.js?v=4"></script>
 <script src="/public/js/50-billing.js?v=3"></script>
 <script src="/public/js/51-settings.js?v=3"></script>
 <script src="/public/js/31-plan-actions.js?v=3"></script>
@@ -1950,6 +1950,27 @@
   }
 })();
 </script>
+
+<!-- =================== DOSSIER MODAL =================== -->
+<div id="dossierModal" class="dossier-overlay" style="display:none">
+  <div class="dossier-header">
+    <div>
+      <div class="dossier-header-title" id="dossierTitle">DOSSIER DE CRÉATION</div>
+      <div class="dossier-header-sub" id="dossierSub">Documents pré-remplis pour créer ton entreprise</div>
+    </div>
+    <div class="dossier-header-actions">
+      <button class="dossier-btn print" onclick="window.print()">Imprimer</button>
+      <button class="dossier-btn close-btn" onclick="closeDossier()">✕ Fermer</button>
+    </div>
+  </div>
+  <div class="dossier-tabs" id="dossierTabs"></div>
+  <div class="dossier-body" id="dossierBody">
+    <div class="dossier-loading" id="dossierLoading">
+      <div class="dossier-spinner"></div>
+      <div class="dossier-loading-text" id="dossierLoadingText">Génération du dossier en cours…</div>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>

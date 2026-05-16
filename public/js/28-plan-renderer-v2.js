@@ -620,6 +620,30 @@
       }
     });
 
+    // ── DOCUMENTS TÉLÉCHARGEABLES ─────────────────────────────────────────
+    html += '<div style="background:var(--paper);border:1px solid var(--rule);border-radius:12px;padding:24px;margin-bottom:20px">';
+    html += '<div style="font-family:var(--mono);font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:14px">Documents annexes — téléchargeables</div>';
+    html += '<div class="docs-grid" id="dDocsGrid"></div>';
+    html += '</div>';
+
+    // ── CHECKLIST BANCABILITÉ ─────────────────────────────────────────────
+    html += '<div style="background:var(--paper);border:1px solid var(--rule);border-radius:12px;padding:24px;margin-bottom:20px">';
+    html += '<div style="font-family:var(--mono);font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:14px">Préparation bancaire — checklist</div>';
+    html += '<div class="banc-score-bar">';
+    html += '<div class="banc-track"><div class="banc-fill" id="dBancFill" style="width:0%"></div></div>';
+    html += '<div class="banc-pct" id="dBancPct">0%</div>';
+    html += '<div class="banc-label" id="dBancLabel">À compléter</div>';
+    html += '</div>';
+    html += '<div class="banc-items" id="dBancItems"></div>';
+    html += '</div>';
+
+    // ── DOSSIER DE CRÉATION ───────────────────────────────────────────────
+    html += '<div style="background:var(--paper);border:1px solid var(--rule);border-radius:12px;padding:24px;margin-bottom:20px">';
+    html += '<div style="font-family:var(--mono);font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px">Dossier de création — documents juridiques</div>';
+    html += '<p style="font-size:13px;color:var(--ink-3);margin:0 0 14px;line-height:1.5">Statuts, checklist URSSAF, ouverture compte pro, coûts administratifs — tous pré-remplis pour ton projet.</p>';
+    html += '<button onclick="generateDossier()" class="btn btn-ghost">Générer mon dossier complet →</button>';
+    html += '</div>';
+
     // ── BOUTONS ───────────────────────────────────────────────────────────
     html += '<div style="display:flex;gap:12px;margin-top:28px;flex-wrap:wrap">' +
       '<button onclick="(function(){var r=document.getElementById(\'dashPlanResult\');if(r)r.style.display=\'none\';var f=document.querySelector(\'.gen-grid\');if(f)f.style.display=\'\';var b=document.querySelector(\'.gen-banner\');if(b)b.style.display=\'\';var h=document.querySelector(\'.page-head\');if(h)h.style.display=\'\';})()" class="btn btn-ghost">← Nouveau plan</button>' +
@@ -628,6 +652,11 @@
 
     html += '</div>';
     container.innerHTML = html;
+
+    // Remplir les sections dynamiques
+    if (typeof fillDocumentsAnnexes === 'function') fillDocumentsAnnexes(plan);
+    if (typeof fillBancabilite === 'function') fillBancabilite(plan);
+    if (typeof applyReliabilityIndicators === 'function') applyReliabilityIndicators(container);
 
     if (typeof window.updateUsage === 'function') window.updateUsage();
   };
