@@ -28,6 +28,8 @@ function renderHistory() {
     var thead = grid.querySelector('.plans-thead');
     grid.innerHTML = '';
     if (thead) grid.appendChild(thead);
+    // Snapshot de plansHistory au moment du rendu pour éviter les race conditions
+    window.__historySnapshot = plansHistory.slice();
     plansHistory.forEach(function(p, i) {
       var score = p.score_viabilite || p.score || null;
       var name = p.nom_business || p.nom_entreprise || 'Plan sans nom';
@@ -38,14 +40,17 @@ function renderHistory() {
       var row = document.createElement('div');
       row.className = 'plan-row';
       row.style.cursor = 'pointer';
-      row.onclick = function() { openFromHistory(i); };
+      // Capturer l'objet plan (pas l'index) pour éviter la désync avec plansHistory
+      (function(planRef) {
+        row.onclick = function() { openFromHistory(planRef); };
+      })(p);
       row.innerHTML =
         '<div class="plan-icon italic">' + initial + '</div>' +
         '<div class="plan-name">' + name + (idea ? '<span>« ' + idea + ' »</span>' : '') + '</div>' +
         (score ? '<div class="plan-score ' + scoreClass + '">' + score + '<sup>/100</sup></div>' : '<div class="plan-score">—</div>') +
         '<div class="plan-budget">—</div>' +
         '<div class="plan-date">' + dateStr + '</div>' +
-        '<div class="plan-cta"><button class="btn btn-ghost" onclick="event.stopPropagation();openFromHistory(' + i + ')">Voir le plan →</button></div>';
+        '<div class="plan-cta"><button class="btn btn-ghost" onclick="event.stopPropagation();openFromHistory(window.__historySnapshot[' + i + '])">Voir le plan →</button></div>';
       grid.appendChild(row);
     });
   } else {
@@ -66,8 +71,17 @@ function renderHistory() {
   }
 }
 
-function openFromHistory(index) {
-  var p = plansHistory[index];
+function openFromHistory(indexOrPlan) {
+  var p;
+  if (indexOrPlan && typeof indexOrPlan === 'object') {
+    // Objet plan passé directement (nouveau comportement)
+    p = indexOrPlan;
+  } else {
+    // Index numérique (ancien comportement — fallback)
+    p = plansHistory[indexOrPlan];
+    // Essayer aussi le snapshot si plansHistory a changé
+    if (!p && window.__historySnapshot) p = window.__historySnapshot[indexOrPlan];
+  }
   if (!p) return;
   currentResult = p;
 

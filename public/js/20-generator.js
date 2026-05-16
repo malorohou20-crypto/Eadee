@@ -277,7 +277,23 @@ async function generateDashPlan() {
     if (IS_DEMO) {
       localStorage.setItem('eadee_demo_credits', String(userCredits));
     } else if (supabaseClient && user) {
-      supabaseClient.from('profiles').update({ credits: userCredits }).eq('id', (await supabaseClient.auth.getUser()).data.user?.id).then(() => {});
+      const userId = (await supabaseClient.auth.getUser()).data.user?.id;
+      // Sauvegarder le plan dans Supabase (persistance cross-session)
+      supabaseClient.from('plans').insert({
+        user_id: userId,
+        name: plan.nom_business || 'Plan sans nom',
+        score: plan.score_viabilite || null,
+        sections: plan,
+      }).then(function(result) {
+        if (result.error) { console.error('Save plan Supabase:', result.error); }
+        else if (result.data && result.data[0]) {
+          // Mettre à jour l'ID en mémoire avec l'ID Supabase
+          currentResult._supabaseId = result.data[0].id;
+          currentResult.id = result.data[0].id;
+        }
+      });
+      // Décrémenter les crédits
+      supabaseClient.from('profiles').update({ credits: userCredits }).eq('id', userId).then(() => {});
     }
 
     stopGenSectionsAnim();
