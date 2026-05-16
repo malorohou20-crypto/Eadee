@@ -1589,7 +1589,7 @@
     // Déclencher le chargement des données selon la section (après chargement des scripts)
     setTimeout(function() {
       if (name === 'plans'    && typeof renderHistory === 'function')      { try { renderHistory(); } catch(e) { console.warn('renderHistory:', e); } }
-      if (name === 'expert'   && typeof openChatFullscreen === 'function') { try { openChatFullscreen(null); } catch(e) { console.warn('openChatFullscreen:', e); } }
+      if (name === 'expert'   && typeof _initChatView === 'function') { try { _initChatView(); } catch(e) { console.warn('_initChatView:', e); } }
       if (name === 'settings' && typeof populateSettings === 'function')   { try { populateSettings(); } catch(e) { console.warn('populateSettings:', e); } }
       if (name === 'credits'  && typeof initBillingView === 'function')    { try { initBillingView(); } catch(e) { console.warn('initBillingView:', e); } }
     }, 50);
@@ -1607,11 +1607,32 @@
     'settings':'settings',
     'help':'help',
   };
+  // _initChatView : initialise l'UI chat SANS naviguer (évite la boucle infinie)
+  window._initChatView = function() {
+    if (typeof populateChatPlanSelect === 'function') populateChatPlanSelect();
+    if (typeof renderChatConvsList === 'function') renderChatConvsList();
+    if (typeof renderChatQuickActions === 'function') renderChatQuickActions('view');
+    var plans = typeof getChatPlansList === 'function' ? getChatPlansList() : [];
+    if (plans.length && typeof selectChatPlan === 'function') {
+      selectChatPlan(plans[0].id, 'view');
+    }
+  };
+
   window.addEventListener('load', function() {
-    // Override showView
+    // Override showView — chat/expert → _initChatView au lieu de go() pour éviter la boucle
     if (typeof showView === 'function') {
       var _origShowView = showView;
       window.showView = function(name) {
+        if (name === 'chat' || name === 'expert') {
+          // Ne pas re-naviguer, juste initialiser l'UI si déjà sur expert
+          var activeScreen = document.querySelector('.screen.active');
+          if (activeScreen && activeScreen.dataset.screen === 'expert') {
+            window._initChatView && window._initChatView();
+          } else {
+            go('expert');
+          }
+          return;
+        }
         var mapped = VIEW_MAP[name];
         if (mapped) { go(mapped); }
         else { try { _origShowView(name); } catch(e) {} }
