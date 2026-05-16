@@ -1,12 +1,46 @@
 // ========== SETTINGS ==========
+
+// Pré-remplir les champs avec les données de l'utilisateur connecté
+function populateSettings() {
+  if (!user) return;
+  const nameEl = document.getElementById('settingsName');
+  const emailEl = document.getElementById('settingsEmail');
+  if (nameEl && user.name) nameEl.value = user.name;
+  if (emailEl && user.email) emailEl.value = user.email;
+}
+
 function saveSettings() {
   if (!user) return;
-  const name = document.getElementById('settingsName').value.trim();
-  const email = document.getElementById('settingsEmail').value.trim();
+  const nameEl = document.getElementById('settingsName');
+  const emailEl = document.getElementById('settingsEmail');
+  const name = nameEl ? nameEl.value.trim() : '';
+  const email = emailEl ? emailEl.value.trim() : '';
   if (name) user.name = name;
   if (email) user.email = email;
-  updateNav(); initChat();
-  toast('Profil mis à jour ✓', 'success');
+  if (typeof updateNav === 'function') updateNav();
+  if (typeof initChat === 'function') initChat();
+  if (typeof toast === 'function') toast('Profil mis à jour ✓', 'success');
+}
+
+// Changer le mot de passe via Supabase
+async function updatePassword() {
+  if (!user || !supabaseClient) { if (typeof toast === 'function') toast('Connecte-toi d\'abord', 'error'); return; }
+  const newPwdEl = document.getElementById('settingsNewPwd');
+  const confirmEl = document.getElementById('settingsConfirmPwd');
+  const newPwd = newPwdEl ? newPwdEl.value.trim() : '';
+  const confirmPwd = confirmEl ? confirmEl.value.trim() : '';
+  if (!newPwd) { if (typeof toast === 'function') toast('Saisis un nouveau mot de passe', 'error'); return; }
+  if (newPwd.length < 8) { if (typeof toast === 'function') toast('Mot de passe trop court (min. 8 caractères)', 'error'); return; }
+  if (newPwd !== confirmPwd) { if (typeof toast === 'function') toast('Les mots de passe ne correspondent pas', 'error'); return; }
+  try {
+    const { error } = await supabaseClient.auth.updateUser({ password: newPwd });
+    if (error) throw error;
+    if (newPwdEl) newPwdEl.value = '';
+    if (confirmEl) confirmEl.value = '';
+    if (typeof toast === 'function') toast('Mot de passe mis à jour ✓', 'success');
+  } catch(e) {
+    if (typeof toast === 'function') toast('Erreur : ' + (e.message || 'Réessaie'), 'error');
+  }
 }
 
 // ========== RGPD — EXPORT DONNÉES ==========
