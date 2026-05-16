@@ -1898,5 +1898,22 @@
 <script src="/public/js/40-chat.js?v=3"></script>
 <script src="/public/js/main.js?v=3"></script>
 
+<script>
+// Charge les plans Supabase après que tous les scripts soient prêts
+(async function() {
+  // main.js a déjà tourné — appeler loadCurrentUser() pour peupler plansHistory
+  if (typeof loadCurrentUser === 'function' && window.supabaseClient) {
+    await loadCurrentUser();
+    // Si on est sur la page Plans, re-render maintenant qu'on a les données
+    const active = document.querySelector('.screen.active');
+    if (active && active.dataset.screen === 'plans' && typeof renderHistory === 'function') {
+      renderHistory();
+    }
+    // Mettre à jour le header avec les vraies données user
+    if (typeof updateDashHeader === 'function') updateDashHeader();
+  }
+})();
+</script>
+
 </body>
 </html>
