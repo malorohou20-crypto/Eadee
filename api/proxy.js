@@ -5,6 +5,8 @@ import { jsonrepair } from 'jsonrepair';
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+
   try {
     // Validation minimale : éviter l'abus de max_tokens et forcer le modèle autorisé
     const body = req.body;
@@ -25,8 +27,16 @@ export default async function handler(req, res) {
         'x-api-key': process.env.ANTHROPIC_API_KEY,
         'anthropic-version': '2023-06-01'
       },
-      body: JSON.stringify(safeBody)
+      body: JSON.stringify(safeBody),
+      signal: AbortSignal.timeout(60000), // 60s timeout
     });
+
+    // Gestion rate limit
+    if (response.status === 429) {
+      const retryAfter = response.headers.get('retry-after') || '30';
+      res.setHeader('Retry-After', retryAfter);
+      return res.status(429).json({ error: { message: `Rate limit atteint. Réessaie dans ${retryAfter}s.` } });
+    }
 
     const data = await response.json();
 

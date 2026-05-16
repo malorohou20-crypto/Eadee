@@ -533,6 +533,305 @@
 </head>
 <body>
 
+<!-- ============================================================
+     EADEE v2 — COMPAT + AUTH GUARD
+     Ce bloc doit rester en premier dans le body.
+     Il neutralise les fonctions JS legacy conçues pour l'ancien
+     SPA (showPage / showView / updateNav / updateUsage) et fournit
+     les stubs nécessaires pour que 20-generator.js + les autres
+     modules backend fonctionnent dans le nouveau HTML.
+     ============================================================ -->
+<script>
+(function() {
+  'use strict';
+
+  // ── Flag global — signale à tous les scripts qu'on est dans le nouveau HTML ──
+  window.__EADEE_V2 = true;
+
+  // ── Auth guard — redirige vers la landing si non connecté ───────────────────
+  // (exécuté en async non-bloquant; le body affiche le skeleton en attendant)
+  (async function authGuard() {
+    try {
+      // Attendre que le SDK Supabase soit chargé (il est au bas de la page)
+      // On passe par supabase via la clé globale anon exposée en dur
+      const SB_URL = 'https://hfpupafqozajvdjkgppk.supabase.co';
+      const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhmcHVwYWZxb3phanZkamtncHBrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzgzMzA1NzIsImV4cCI6MjA1MzkwNjU3Mn0.YEoVDIGG5ZFiM1TvFQ0P9M8F8bZIxqBPPiF5-3lWGxU';
+
+      // Mode démo — pas de redirect
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('preview') === 'eadee2024') {
+        window._eadeeUser = { email: 'admin@eadee.fr', id: 'demo', plan: 'pro' };
+        window._eadeeCredits = parseInt(localStorage.getItem('eadee_demo_credits') ?? '3', 10);
+        // Initialise les globals legacy attendus par 20-generator.js
+        window.user = { name: 'Admin', email: 'admin@eadee.fr', id: 'demo', plan: 'pro' };
+        window.userCredits = window._eadeeCredits;
+        window.currentPlan = 'pro';
+        _updateV2UserUI();
+        return;
+      }
+
+      // Attendre que supabase SDK soit disponible (max 3s)
+      let waited = 0;
+      while (!window.supabase && waited < 3000) {
+        await new Promise(r => setTimeout(r, 100));
+        waited += 100;
+      }
+      if (!window.supabase) { window.location.href = '/'; return; }
+
+      const sb = window.supabase.createClient(SB_URL, SB_KEY);
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) { window.location.href = '/'; return; }
+
+      window._eadeeSb   = sb;
+      window._eadeeUser = session.user;
+
+      // Charger le profil pour les crédits
+      const { data: profile } = await sb.from('profiles').select('credits,plan,first_name,last_name').eq('id', session.user.id).single();
+      window._eadeeCredits = profile?.credits ?? 0;
+      window._eadeePlan    = profile?.plan ?? 'free';
+
+      // Initialise les globals legacy attendus par 20-generator.js
+      const firstName = profile?.first_name || session.user.email.split('@')[0];
+      window.user = {
+        id:    session.user.id,
+        email: session.user.email,
+        name:  ((profile?.first_name || '') + ' ' + (profile?.last_name || '')).trim() || firstName,
+        plan:  profile?.plan || 'free',
+      };
+      window.userCredits  = window._eadeeCredits;
+      window.currentPlan  = window._eadeePlan;
+      window.supabaseClient = sb;
+
+      _updateV2UserUI();
+    } catch (e) {
+      console.warn('[v2 auth guard]', e);
+      // En cas d'erreur réseau, on ne redirect pas (meilleure UX offline)
+    }
+  })();
+
+  // ── Met à jour les éléments UI avec les infos user ────────────────────────
+  function _updateV2UserUI() {
+    // Sidebar crédits
+    const numEl = document.querySelector('.credits-num');
+    if (numEl && window._eadeeCredits !== undefined) {
+      numEl.textContent = String(window._eadeeCredits).padStart(2, '0');
+    }
+    // Topbar nom utilisateur
+    const nmEl = document.querySelector('.top-user .nm');
+    if (nmEl && window.user?.name) {
+      nmEl.textContent = window.user.name.split(' ')[0];
+    }
+    const avEl = document.querySelector('.top-user .av');
+    if (avEl && window.user?.name) {
+      avEl.textContent = window.user.name[0].toUpperCase();
+    }
+    // Bouton générer : désactiver si 0 crédits
+    const btn = document.getElementById('dashGenBtn');
+    if (btn && window._eadeeCredits <= 0) {
+      btn.disabled = true;
+      btn.style.opacity = '0.4';
+      btn.style.cursor  = 'not-allowed';
+      btn.title = 'Plus de crédits — recharge dans l\'onglet Crédits';
+    }
+  }
+
+  // ── Stubs legacy : ces fonctions sont appelées par les scripts backend ────
+
+  // showPage / showView → mappées sur go() pour les cas d'appel interne
+  window.showPage = function(name) {
+    // Sur la v2, on ne navigue pas vers dashboard/landing — on est déjà dessus
+    if (name === 'landing') { window.location.href = '/'; return; }
+    if (name === 'auth')    { window.location.href = '/?login=true'; return; }
+    // dashboard, etc. → no-op (déjà sur la page)
+  };
+
+  window.showView = function(name) {
+    // Mapper les anciens noms de vues vers les screens v2
+    const map = {
+      generator: 'gen',
+      billing:   'credits',
+      history:   'plans',
+      settings:  'settings',
+      help:      'help',
+      chat:      'expert',
+    };
+    const target = map[name] || name;
+    if (typeof window.go === 'function') window.go(target);
+  };
+
+  // updateNav → no-op (nav gérée en HTML statique + auth guard)
+  window.updateNav = function() {};
+
+  // updateDashHeader → no-op (header statique)
+  window.updateDashHeader = function() {};
+
+  // initChat → no-op (chat non connecté dans la v2)
+  window.initChat = function() {};
+
+  // checkOnboarding / checkDraft → no-op
+  window.checkOnboarding = function() {};
+  window.checkDraft      = function() {};
+
+  // showAuth → redirect vers landing avec flag login
+  window.showAuth = function(mode) {
+    window.location.href = '/?login=true&mode=' + (mode || 'signup');
+  };
+
+  // logout → via Supabase si dispo, puis redirect
+  window.logout = async function() {
+    try {
+      if (window._eadeeSb) await window._eadeeSb.auth.signOut();
+    } catch(e) {}
+    window.location.href = '/';
+  };
+
+  // updateUsage → met à jour la sidebar crédits v2
+  window.updateUsage = function() {
+    const credits = window.userCredits ?? window._eadeeCredits ?? 0;
+    const numEl = document.querySelector('.credits-num');
+    if (numEl) numEl.textContent = String(credits).padStart(2, '0');
+    const btn = document.getElementById('dashGenBtn');
+    if (btn) {
+      if (credits <= 0) {
+        btn.disabled = true; btn.style.opacity = '0.4'; btn.style.cursor = 'not-allowed';
+      } else {
+        btn.disabled = false; btn.style.opacity = ''; btn.style.cursor = '';
+      }
+    }
+    // Barre de progression crédits
+    const maxC = window.currentPlan === 'empire' ? 8 : window.currentPlan === 'pro' ? 3 : 1;
+    const pct  = Math.min((credits / maxC) * 100, 100);
+    const bar  = document.querySelector('.credits-bar i');
+    if (bar) bar.style.width = pct + '%';
+  };
+
+  // toast → notification légère dans le nouveau design
+  window.toast = function(msg, type) {
+    const existing = document.getElementById('v2-toast');
+    if (existing) existing.remove();
+    const t = document.createElement('div');
+    t.id = 'v2-toast';
+    const bg = type === 'success' ? 'var(--green)' : type === 'error' ? 'var(--red)' : 'var(--ink)';
+    t.style.cssText = `position:fixed;bottom:24px;right:24px;z-index:9999;
+      background:${bg};color:#fff;padding:12px 20px;border-radius:10px;
+      font-family:var(--mono);font-size:12.5px;letter-spacing:0.06em;
+      box-shadow:0 8px 24px rgba(0,0,0,0.18);
+      animation:v2toastIn .2s ease;max-width:360px;line-height:1.4`;
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => {
+      t.style.opacity = '0'; t.style.transform = 'translateY(8px)'; t.style.transition = '.2s';
+      setTimeout(() => t.remove(), 220);
+    }, 3200);
+  };
+  // Keyframe pour le toast
+  if (!document.getElementById('v2-toast-style')) {
+    const s = document.createElement('style');
+    s.id = 'v2-toast-style';
+    s.textContent = '@keyframes v2toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}';
+    document.head.appendChild(s);
+  }
+
+  // setPreviewState → adapté au nouveau HTML de la v2
+  // States : 'C' = génération en cours, 'A' = idle, null = résultat affiché
+  window.setPreviewState = function(state) {
+    const genEl = document.getElementById('dashGenerating');
+    const resEl = document.getElementById('dashPlanResult');
+    if (!genEl) return;
+    if (state === 'C') {
+      // Montrer la zone de chargement
+      genEl.style.display = 'flex';
+      if (resEl) resEl.style.display = 'none';
+      // Lancer l'animation de sections dans genSectionsWrap
+      const wrap = document.getElementById('genSectionsWrap');
+      if (wrap) _v2StartGenAnim(wrap);
+    } else {
+      genEl.style.display = 'none';
+    }
+  };
+
+  // Animation de génération v2 — affiche les sections qui défilent
+  function _v2StartGenAnim(wrap) {
+    const sections = [
+      'Résumé Exécutif','Porteur de Projet','Présentation du Projet',
+      'Étude de Marché','Analyse Concurrentielle','Proposition de Valeur',
+      'Modèle Économique','Stratégie Commerciale','Plan d\'Acquisition',
+      'Aspects Juridiques','Aspects Organisationnels','Projections Financières',
+      'Plan de Trésorerie','Plan d\'Investissement','Bilan Prévisionnel',
+      'Seuil de Rentabilité','Risques & Mitigation','Plan d\'Action 90 Jours',
+      'Aides & Subventions','Annexes & Checklist'
+    ];
+    wrap.innerHTML = `
+      <div style="font-family:var(--mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:16px">Génération en cours…</div>
+      <div id="v2-progress-bar-wrap" style="height:3px;background:var(--rule);border-radius:2px;margin-bottom:20px;overflow:hidden">
+        <div id="v2-progress-bar" style="height:100%;background:var(--accent);width:0%;transition:width .4s ease;border-radius:2px"></div>
+      </div>
+      <div id="v2-sections-list" style="display:grid;grid-template-columns:1fr 1fr;gap:6px 16px"></div>
+    `;
+    const list = document.getElementById('v2-sections-list');
+    const bar  = document.getElementById('v2-progress-bar');
+    const statusEl = document.getElementById('genStatus');
+
+    list.innerHTML = sections.map((s,i) =>
+      `<div id="v2-s-${i}" style="display:flex;align-items:center;gap:8px;padding:5px 0;color:var(--ink-3);font-family:var(--mono);font-size:11.5px;transition:color .2s">
+        <span id="v2-ic-${i}" style="width:14px;text-align:center">·</span>${s}
+      </div>`).join('');
+
+    let idx = 0;
+    const thoughts = [
+      'Analyse de l\'idée…','Recherche du marché…','Données INSEE…',
+      'Modélisation financière…','Score de viabilité…','Rédaction stratégique…',
+      'Plan d\'action 90 jours…','Aides disponibles…','Finalisation…','Vérification finale…'
+    ];
+    const timer = setInterval(() => {
+      if (idx > 0) {
+        const prev = document.getElementById('v2-s-' + (idx-1));
+        const prevIc = document.getElementById('v2-ic-' + (idx-1));
+        if (prev) { prev.style.color = 'var(--green)'; prev.style.fontWeight = '500'; }
+        if (prevIc) prevIc.textContent = '✓';
+      }
+      if (idx < sections.length) {
+        const row = document.getElementById('v2-s-' + idx);
+        const ic  = document.getElementById('v2-ic-' + idx);
+        if (row) { row.style.color = 'var(--ink)'; }
+        if (ic)  ic.textContent = '⟳';
+        if (bar) bar.style.width = Math.min(((idx+1)/sections.length*100), 95) + '%';
+        if (statusEl) statusEl.textContent = thoughts[Math.floor(idx / 2)] || thoughts[thoughts.length-1];
+      }
+      idx++;
+      if (idx > sections.length) clearInterval(timer);
+    }, 2500);
+    // Stocker le timer pour pouvoir l'arrêter
+    window._v2GenAnimTimer = timer;
+  }
+
+  // Override stopGenSectionsAnim pour aussi arrêter l'animation v2
+  window.stopGenSectionsAnim = function() {
+    if (window._v2GenAnimTimer) clearInterval(window._v2GenAnimTimer);
+    // Tout cocher en vert
+    for (let i = 0; i < 20; i++) {
+      const row = document.getElementById('v2-s-' + i);
+      const ic  = document.getElementById('v2-ic-' + i);
+      if (row) { row.style.color = 'var(--green)'; row.style.fontWeight = '500'; }
+      if (ic)  ic.textContent = '✓';
+    }
+    const bar = document.getElementById('v2-progress-bar');
+    if (bar) bar.style.width = '100%';
+  };
+
+  // stopLiveFeed / startLiveFeed → no-op sur la v2
+  window.stopLiveFeed  = function() {};
+  window.startLiveFeed = function() {};
+})();
+</script>
+
+<!-- Inputs hidden synchronisés avec les boutons .seg — lus par 20-generator.js -->
+<input type="hidden" id="dashBudget"  value="500–2k€">
+<input type="hidden" id="dashProfile" value="Intermédiaire">
+<input type="hidden" id="dashSector"  value="Non défini">
+<input type="hidden" id="dashTime"    value="Mi-temps">
+<!-- Alias dashResult → pointe vers dashPlanResult via JS (résolu dans le script inline ci-dessous) -->
+
 <div class="app">
   <!-- =================== SIDEBAR =================== -->
   <aside class="side">
@@ -1314,15 +1613,60 @@
     });
   });
 
-  // ===== Segmented buttons =====
+  // ===== Segmented buttons (+ sync vers hidden inputs lus par 20-generator.js) =====
   document.querySelectorAll('.seg').forEach(s => {
     s.querySelectorAll('button').forEach(b => {
       b.addEventListener('click', () => {
         s.querySelectorAll('button').forEach(x => x.classList.remove('on'));
         b.classList.add('on');
+
+        // Sync vers les inputs hidden correspondants
+        const field = s.closest('.field');
+        if (!field) return;
+        const label = (field.querySelector('label')?.textContent || '').toLowerCase().trim();
+        const val   = b.textContent.trim();
+        if (label.includes('budget'))       { const el = document.getElementById('dashBudget');  if (el) el.value = val; }
+        if (label.includes('profil'))       { const el = document.getElementById('dashProfile'); if (el) el.value = val; }
+        if (label.includes('secteur'))      { const el = document.getElementById('dashSector');  if (el) el.value = val; }
+        if (label.includes('disponibilité')){ const el = document.getElementById('dashTime');    if (el) el.value = val; }
       });
     });
   });
+
+  // ===== Alias dashResult → dashPlanResult (legacy compat pour 20-generator.js) =====
+  // 20-generator.js cherche getElementById('dashResult') qui n'existe plus dans la v2
+  // On patch getElementById pour retourner dashPlanResult quand 'dashResult' est demandé
+  (function patchGetElementById() {
+    const _orig = document.getElementById.bind(document);
+    document.getElementById = function(id) {
+      if (id === 'dashResult')    return _orig('dashPlanResult');
+      if (id === 'genStatusText') return _orig('genStatus');
+      // usageFill / usageCount / noCredit-banner → créer des éléments fantômes si absents
+      // pour éviter les erreurs 'cannot set property of null'
+      const el = _orig(id);
+      if (!el && (id === 'usageFill' || id === 'usageCount' || id === 'noCredit-banner' ||
+                  id === 'navRight' || id === 'navLinks' || id === 'sc-buy-btn' ||
+                  id === 'sc-recharge-btn' || id === 'kpiCaAn3' || id === 'kpiInvest' ||
+                  id === 'kpiMarket' || id === 'kpiPointMort' || id === 'planHeroKpis' ||
+                  id === 'planSidebar' || id === 'dBizName' || id === 'dBizTagline' ||
+                  id === 'dPlanBadge' || id === 'dScore' || id === 'dScoreBar' ||
+                  id === 'planScrollBody' || id === 'dConcurrents' || id === 'dCrescendoGrid' ||
+                  id === 'dInvestissement' || id === 'dDemarchesBlock' || id === 'dEmailsBlock' ||
+                  id === 'revenueChart' || id === 'gen-sections-list' || id === 'gen-progress-bar' ||
+                  id === 'genSectionsWrap')) {
+        // Retourner un élément ghost pour éviter les crash null
+        const ghost = document.createElement('div');
+        ghost.id = id;
+        ghost.setAttribute('data-v2-ghost', '1');
+        ghost.style.display = 'none';
+        // Attacher au dashGenerating pour que setPreviewState puisse le trouver proprement
+        const parent = _orig('dashGenerating') || document.body;
+        parent.appendChild(ghost);
+        return ghost;
+      }
+      return el;
+    };
+  })();
 
   // ===== Filter tabs (plans) =====
   document.querySelectorAll('.filter-tabs button').forEach(b => {
@@ -1346,6 +1690,127 @@
       a.classList.add('on');
     });
   });
+
+  // ===== Hook résultat plan — rendu simplifié dans dashPlanResult =====
+  // Quand 20-generator.js termine et affiche dashPlanResult (alias dashResult),
+  // on génère un rendu lisible dans planResultContent avec les données du plan.
+  (function() {
+    const _origStyle = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'style');
+    // Observer : surveille les changements de display sur dashPlanResult
+    const mo = new MutationObserver(function() {
+      const el = document.getElementById('dashPlanResult');
+      if (!el || el.style.display === 'none') return;
+      // Si le planResultContent est vide, générer le rendu
+      const content = document.getElementById('planResultContent');
+      if (!content || content.innerHTML.trim()) return;
+      // Récupérer le plan depuis window.currentResult
+      const plan = window.currentResult;
+      if (!plan) return;
+      _renderV2PlanResult(plan, content);
+    });
+    mo.observe(document.body, { subtree: true, attributes: true, attributeFilter: ['style'] });
+
+    window._renderV2PlanResult = function(plan, container) {
+      if (!plan || !container) return;
+      const score = plan.scores?.score_viabilite?.note || plan.score_viabilite || '—';
+      const scoreColor = score >= 75 ? 'var(--green)' : score >= 50 ? 'var(--accent)' : 'var(--red)';
+      const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+      // Concurrents
+      const concs = (plan.concurrents || []).map(c =>
+        `<div style="padding:14px 0;border-bottom:1px solid var(--rule)">
+          <b style="font-size:14.5px">${esc(c.nom)}</b>
+          <span style="float:right;font-family:var(--mono);font-size:11px;color:var(--ink-3);text-transform:uppercase">${esc(c.menace)}</span>
+          <p style="color:var(--ink-2);font-size:13.5px;margin:6px 0 0;line-height:1.5">${esc(c.description)}</p>
+        </div>`).join('');
+
+      // Actions 90 jours
+      const actions = (plan.actions || []).map(a =>
+        `<div style="display:grid;grid-template-columns:80px 1fr;gap:14px;padding:12px 0;border-bottom:1px solid var(--rule);align-items:start">
+          <span style="font-family:var(--mono);font-size:10.5px;color:var(--ink-3);letter-spacing:0.08em;padding-top:2px">${esc(a.phase)}</span>
+          <div><b style="font-size:14px">${esc(a.titre)}</b><p style="color:var(--ink-2);font-size:13px;margin:4px 0 0;line-height:1.45">${esc(a.detail)}</p></div>
+        </div>`).join('');
+
+      // Projections financières
+      const revs = [
+        ['M+1', plan.rev_m1], ['M+3', plan.rev_m3], ['M+6', plan.rev_m6],
+        ['An 1', plan.rev_m12], ['An 2', plan.rev_m24], ['An 3', plan.rev_m36]
+      ].filter(([,v]) => v).map(([k,v]) =>
+        `<div style="text-align:center;padding:16px 12px;border:1px solid var(--rule);border-radius:8px;background:var(--bg)">
+          <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.12em;color:var(--ink-3);text-transform:uppercase;margin-bottom:6px">${k}</div>
+          <div style="font-family:var(--serif);font-size:22px;letter-spacing:-0.02em;color:var(--ink)">${esc(String(v).replace(/\{\{[^}]+\}\}/g, m => m.match(/:[^|]+\|/)?.[0]?.slice(1,-1) || m))}</div>
+        </div>`).join('');
+
+      container.innerHTML = `
+        <div style="max-width:920px;margin:0 auto;padding:0 40px 80px">
+          <!-- En-tête plan -->
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-bottom:36px">
+            <div>
+              <span style="font-family:var(--mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--green);display:block;margin-bottom:8px">Plan généré ✓</span>
+              <h2 style="font-family:var(--serif);font-size:48px;line-height:1;letter-spacing:-0.022em;margin:0;font-weight:400">${esc(plan.nom_business || 'Business Plan')}</h2>
+              <p style="font-family:var(--serif);font-style:italic;color:var(--ink-2);font-size:18px;margin:8px 0 0">${esc(plan.tagline || '')}</p>
+            </div>
+            <div style="text-align:center;flex:none;padding:20px 24px;background:var(--paper);border:1px solid var(--rule);border-radius:12px">
+              <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px">Score viabilité</div>
+              <div style="font-family:var(--serif);font-size:64px;line-height:0.9;letter-spacing:-0.03em;color:${scoreColor}">${score}</div>
+              <div style="font-family:var(--mono);font-size:11px;color:var(--ink-3);margin-top:4px">/100</div>
+            </div>
+          </div>
+
+          <!-- Pitch -->
+          ${plan.pitch_30s ? `<div style="padding:20px 24px;background:var(--accent-bg);border:1px solid oklch(0.82 0.05 35);border-radius:10px;margin-bottom:28px">
+            <div style="font-family:var(--mono);font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent-ink);margin-bottom:8px">Pitch 30s</div>
+            <p style="font-size:15px;color:var(--ink);margin:0;line-height:1.6">${esc(plan.pitch_30s)}</p>
+          </div>` : ''}
+
+          <!-- Résumé exécutif -->
+          ${plan.resume_executif ? `<div style="padding:24px;background:var(--paper);border:1px solid var(--rule);border-radius:12px;margin-bottom:28px">
+            <div style="font-family:var(--mono);font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:14px">Résumé exécutif</div>
+            <p style="font-size:14.5px;color:var(--ink-2);margin:0;line-height:1.65">${esc(plan.resume_executif)}</p>
+          </div>` : ''}
+
+          <!-- Projections financières -->
+          ${revs ? `<div style="padding:24px;background:var(--paper);border:1px solid var(--rule);border-radius:12px;margin-bottom:28px">
+            <div style="font-family:var(--mono);font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:14px">Projections de revenus</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px">${revs}</div>
+          </div>` : ''}
+
+          <!-- Concurrents -->
+          ${concs ? `<div style="padding:24px;background:var(--paper);border:1px solid var(--rule);border-radius:12px;margin-bottom:28px">
+            <div style="font-family:var(--mono);font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:4px">Analyse concurrentielle</div>
+            ${concs}
+          </div>` : ''}
+
+          <!-- Plan 90 jours -->
+          ${actions ? `<div style="padding:24px;background:var(--paper);border:1px solid var(--rule);border-radius:12px;margin-bottom:28px">
+            <div style="font-family:var(--mono);font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:4px">Plan d'action 90 jours</div>
+            ${actions}
+          </div>` : ''}
+
+          <!-- Risques -->
+          ${(plan.risques||[]).length ? `<div style="padding:24px;background:var(--paper);border:1px solid var(--rule);border-radius:12px;margin-bottom:28px">
+            <div style="font-family:var(--mono);font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:14px">Risques &amp; mitigation</div>
+            ${(plan.risques||[]).map(r => {
+              const c = r.niveau==='élevé'?'var(--red)':r.niveau==='moyen'?'var(--accent)':'var(--green)';
+              return `<div style="display:grid;grid-template-columns:1fr auto;gap:12px;padding:12px 0;border-bottom:1px solid var(--rule)">
+                <div><b style="font-size:14px">${esc(r.titre)}</b><p style="color:var(--ink-2);font-size:13px;margin:4px 0 0">${esc(r.solution)}</p></div>
+                <span style="font-family:var(--mono);font-size:10px;text-transform:uppercase;color:${c};align-self:center">${esc(r.niveau)}</span>
+              </div>`;
+            }).join('')}
+          </div>` : ''}
+
+          <!-- Actions -->
+          <div style="display:flex;gap:12px;margin-top:8px">
+            <button onclick="window.copyPlan&&window.copyPlan()" class="btn btn-ghost">Copier le texte</button>
+            <button onclick="window.go&&window.go('expert')" class="btn btn-accent">Affiner avec l'Expert →</button>
+          </div>
+        </div>
+      `;
+
+      // Mettre à jour les crédits affichés
+      if (typeof window.updateUsage === 'function') window.updateUsage();
+    };
+  })();
 </script>
 
 <!-- ========================= BACKEND JS ========================= -->
@@ -1368,7 +1833,7 @@
 <script src="/public/js/70-cookies.js?v=3"></script>
 <script src="/public/js/71-legal.js?v=3"></script>
 <script src="/public/js/81-misc.js?v=3"></script>
-<script src="/public/js/85-gen-animations.js?v=5"></script>
+<script src="/public/js/85-gen-animations.js?v=6"></script>
 <script src="/public/js/40-chat.js?v=3"></script>
 <script src="/public/js/main.js?v=3"></script>
 

@@ -158,7 +158,9 @@ Si une donnée n'est pas trouvable, mets value: null et fiabilite: "HYPOTHESE".`
 
       if (!resp.ok) {
         const err = await resp.text();
-        console.error('[web_search] API error:', err);
+        console.error('[web_search] API error:', resp.status, err);
+        // En cas de 429/529, on skippe la recherche web sans crasher le pipeline
+        if (resp.status === 429 || resp.status === 529) return null;
         return null;
       }
 
@@ -626,6 +628,10 @@ function extractJSON(text) {
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
+  // Sécurité : pas de cache sur les réponses de génération
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+
   const startTime = Date.now();
 
   try {
@@ -706,7 +712,20 @@ export default async function handler(req, res) {
     });
 
     if (!planResp.ok) {
-      const err = await planResp.json();
+      const err = await planResp.json().catch(() => ({}));
+      // Gestion explicite du rate limit Anthropic
+      if (planResp.status === 429) {
+        const retryAfter = planResp.headers.get('retry-after') || '60';
+        res.setHeader('Retry-After', retryAfter);
+        return res.status(429).json({
+          error: { message: `Limite de requêtes atteinte. Réessaie dans ${retryAfter} secondes.` }
+        });
+      }
+      if (planResp.status === 529) {
+        return res.status(503).json({
+          error: { message: 'API Claude surchargée. Réessaie dans quelques secondes.' }
+        });
+      }
       return res.status(planResp.status).json(err);
     }
 

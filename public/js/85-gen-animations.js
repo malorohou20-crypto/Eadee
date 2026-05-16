@@ -1,7 +1,13 @@
 // ========== GENERATOR PAGE ANIMATIONS v2 ==========
+// Guard : ce script est conçu pour l'ancien SPA (page-dashboard / view-generator)
+// Sur le nouveau HTML (eadee-app-v2.html), on désactive les parties qui cherchent
+// les anciens sélecteurs pour éviter les crashs silencieux.
+const __IS_V2 = !!window.__EADEE_V2;
 
 // ── Entry point — appelée depuis showView('generator') ───────────────────────
 function initGenAnimations() {
+  // Sur le nouveau HTML, les sélecteurs #view-generator / #page-dashboard n'existent pas
+  if (__IS_V2) return;
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // Injecter les éléments UI en premier (breadcrumb, séparateurs, flèche)
@@ -131,6 +137,8 @@ function _genSetupBtn() {
 
 // ── Auto-init si la vue générateur est active au chargement ──────────────────
 (function() {
+  // Sur le nouveau HTML, pas d'auto-init (la nav est gérée par go())
+  if (__IS_V2) return;
   function _tryAutoInit() {
     const view = document.getElementById('view-generator');
     if (view && view.classList.contains('active')) initGenAnimations();
