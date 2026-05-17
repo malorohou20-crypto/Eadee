@@ -576,39 +576,299 @@ function bloc11(plan) {
   var bp = plan.bilan_previsionnel;
   if (!bp) return '';
   if (typeof bp === 'string') return card('Bilan prévisionnel', para(bp));
-  var annees = bp.annees || [];
-  if (!annees.length) return '';
-  var cid = uid();
-  var lbls = annees.map(function(a){ return 'An'+a.annee; });
+
+  // ── Ancien format (bp.annees[]) ─────────────────────────
+  if (bp.annees && bp.annees.length) {
+    var annees = bp.annees;
+    var cid0 = uid();
+    var lbls0 = annees.map(function(a){ return 'An'+a.annee; });
+    var actifDS = [
+      {lbl:'Immobilisations',key:'immobilisations',c:CC.accent,s:'actif'},
+      {lbl:'Stocks',key:'stocks',c:CC.orange,s:'actif'},
+      {lbl:'Créances',key:'creances_clients',c:CC.gray,s:'actif'},
+      {lbl:'Disponibilités',key:'disponibilites',c:CC.green,s:'actif'}
+    ];
+    var passifDS = [
+      {lbl:'Capitaux propres',key:'capitaux_propres',c:CC.accent,s:'passif'},
+      {lbl:'Dettes fin.',key:'dettes_financieres',c:CC.gray,s:'passif'},
+      {lbl:'Dettes four.',key:'dettes_fournisseurs',c:CC.orange,s:'passif'},
+      {lbl:'Dettes fisc.',key:'dettes_fiscales_sociales',c:CC.tan,s:'passif'}
+    ];
+    var datasets0 = actifDS.concat(passifDS).map(function(ds) {
+      return { label:ds.lbl, data:annees.map(function(a){ return numVal(a[ds.s]&&a[ds.s][ds.key]); }),
+        backgroundColor:ds.c, stack:ds.s, borderRadius:2 };
+    });
+    var h0 = '<div style="background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:24px 28px;margin-bottom:20px">';
+    h0 += '<div style="font-family:var(--serif);font-size:17px;color:var(--ink);border-bottom:1px solid var(--rule);padding-bottom:10px;margin-bottom:16px">Bilan prévisionnel</div>';
+    h0 += cvs(cid0, 220);
+    queue(cid0, { type:'bar', data:{labels:lbls0,datasets:datasets0},
+      options:{ animation:false, maintainAspectRatio:false, plugins:{legend:{display:false}},
+        scales:{x:{stacked:true,grid:{color:CC.grid},ticks:{color:CC.text}},
+          y:{stacked:true,grid:{color:CC.grid},ticks:{color:CC.text,callback:function(v){return v.toLocaleString('fr')+'€';}}}} } });
+    h0 += legend(actifDS.concat(passifDS).map(function(ds){ return {c:ds.c,l:ds.lbl}; }));
+    return h0 + '</div>';
+  }
+
+  // ── Nouveau format (bp.annee_1 / annee_2 / annee_3) ─────
+  function hasContent(yr) {
+    if (!yr || !yr.actif) return false;
+    return Object.keys(yr.actif).some(function(k) {
+      var v = yr.actif[k];
+      return v && v !== '{}' && clean(v) !== '{}';
+    });
+  }
+  var years = [];
+  if (hasContent(bp.annee_1)) years.push({label:'Année 1', data: bp.annee_1});
+  if (hasContent(bp.annee_2)) years.push({label:'Année 2', data: bp.annee_2});
+  if (hasContent(bp.annee_3)) years.push({label:'Année 3', data: bp.annee_3});
+  if (!years.length) return '';
+
+  var tabBase = uid();
+
+  function tabOnclick(idx) {
+    var code = '';
+    years.forEach(function(_, j) {
+      code += 'document.getElementById(\'' + tabBase + '_p' + j + '\').style.display=\'' + (j===idx?'block':'none') + '\';';
+    });
+    code += 'var bs=this.parentNode.children;for(var k=0;k<bs.length;k++){bs[k].style.background=\'transparent\';bs[k].style.color=\'var(--ink-3)\';}this.style.background=\'var(--paper)\';this.style.color=\'var(--ink)\';';
+    return code;
+  }
+
+  var actifMap  = {immobilisations_nettes:'Immobilisations nettes',stocks:'Stocks',creances_clients:'Créances clients',disponibilites:'Disponibilités',total_actif:'TOTAL ACTIF'};
+  var passifMap = {capital_social:'Capital social',reserves:'Réserves',resultat:'Résultat',dettes_financieres:'Dettes financières',dettes_fournisseurs:'Dettes fournisseurs',dettes_fiscales_sociales:'Dettes fiscales & sociales',total_passif:'TOTAL PASSIF'};
 
   var h = '<div style="background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:24px 28px;margin-bottom:20px">';
   h += '<div style="font-family:var(--serif);font-size:17px;color:var(--ink);border-bottom:1px solid var(--rule);padding-bottom:10px;margin-bottom:16px">Bilan prévisionnel</div>';
-  h += cvs(cid, 220);
 
-  var actifDS = [
-    {lbl:'Immobilisations',key:'immobilisations',c:CC.accent,s:'actif'},
-    {lbl:'Stocks',key:'stocks',c:CC.orange,s:'actif'},
-    {lbl:'Créances',key:'creances_clients',c:CC.gray,s:'actif'},
-    {lbl:'Disponibilités',key:'disponibilites',c:CC.green,s:'actif'}
-  ];
-  var passifDS = [
-    {lbl:'Capitaux propres',key:'capitaux_propres',c:CC.accent,s:'passif'},
-    {lbl:'Dettes fin.',key:'dettes_financieres',c:CC.gray,s:'passif'},
-    {lbl:'Dettes four.',key:'dettes_fournisseurs',c:CC.orange,s:'passif'},
-    {lbl:'Dettes fisc.',key:'dettes_fiscales_sociales',c:CC.tan,s:'passif'}
-  ];
+  // Onglets années
+  if (years.length > 1) {
+    h += '<div style="display:flex;gap:2px;background:var(--bg);border-radius:6px;padding:3px;margin-bottom:18px;width:fit-content">';
+    years.forEach(function(yr, i) {
+      h += '<button onclick="' + tabOnclick(i) + '" style="padding:7px 20px;border:none;border-radius:4px;cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:0.06em;font-weight:600;' +
+        (i===0?'background:var(--paper);color:var(--ink)':'background:transparent;color:var(--ink-3)') + '">' + esc(yr.label) + '</button>';
+    });
+    h += '</div>';
+  }
 
-  var datasets = actifDS.concat(passifDS).map(function(ds) {
-    return { label:ds.lbl, data:annees.map(function(a){ return numVal(a[ds.s]&&a[ds.s][ds.key]); }),
-      backgroundColor:ds.c, stack:ds.s, borderRadius:2 };
+  // Panneaux par année
+  years.forEach(function(yr, i) {
+    var d = yr.data;
+    var actif  = d.actif  || {};
+    var passif = d.passif || {};
+    var ratios = d.ratios || {};
+    var cr     = d.compte_resultat || null;
+
+    h += '<div id="' + tabBase + '_p' + i + '" style="display:' + (i===0?'block':'none') + '">';
+
+    // Actif / Passif côte à côte
+    h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:16px">';
+
+    // Actif
+    h += '<div>';
+    h += lbl('Actif');
+    Object.keys(actifMap).forEach(function(k) {
+      if (!actif[k] || clean(actif[k]) === 'null') return;
+      var isTotal = k === 'total_actif';
+      h += '<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--rule);font-size:13.5px' + (isTotal?';font-weight:700;border-top:2px solid var(--rule-2,var(--rule));border-bottom:none;margin-top:6px;padding-top:10px':'') + '">' +
+        '<span style="color:var(--ink-2)">' + actifMap[k] + '</span>' +
+        '<span style="font-family:var(--mono);color:' + (isTotal?'var(--accent)':'var(--ink)') + '">' + esc(clean(actif[k])) + '</span></div>';
+    });
+    h += '</div>';
+
+    // Passif
+    h += '<div>';
+    h += lbl('Passif');
+    Object.keys(passifMap).forEach(function(k) {
+      if (!passif[k] || clean(passif[k]) === 'null') return;
+      var isTotal = k === 'total_passif';
+      h += '<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--rule);font-size:13.5px' + (isTotal?';font-weight:700;border-top:2px solid var(--rule-2,var(--rule));border-bottom:none;margin-top:6px;padding-top:10px':'') + '">' +
+        '<span style="color:var(--ink-2)">' + passifMap[k] + '</span>' +
+        '<span style="font-family:var(--mono);color:' + (isTotal?'var(--green)':'var(--ink)') + '">' + esc(clean(passif[k])) + '</span></div>';
+    });
+    h += '</div>';
+
+    h += '</div>'; // fin grid actif/passif
+
+    // Ratios
+    if (ratios.autonomie_financiere || ratios.ratio_endettement) {
+      h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">';
+      if (ratios.autonomie_financiere) h += statCell('Autonomie financière', ratios.autonomie_financiere, null);
+      if (ratios.ratio_endettement)    h += statCell('Ratio endettement',    ratios.ratio_endettement, null);
+      h += '</div>';
+      if (ratios.interpretation) {
+        h += '<div style="border-left:2px solid var(--rule);padding-left:12px;margin-bottom:14px">' +
+          '<p style="font-size:13px;color:var(--ink-3);font-style:italic;margin:0;line-height:1.5">' + esc(ratios.interpretation) + '</p></div>';
+      }
+    }
+
+    // Compte de résultat
+    if (cr) {
+      h += '<div style="border-top:1px solid var(--rule);padding-top:14px">';
+      h += lbl('Compte de résultat');
+      h += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">';
+      var crItems = [
+        ['CA HT', cr.ca_ht, false],
+        ['Marge brute', cr.marge_brute, false],
+        ['Charges fixes', cr.charges_fixes, false],
+        ['Charges variables', cr.charges_variables, false],
+        ['Résultat exploitation', cr.resultat_exploitation, false],
+        ['Résultat net', cr.resultat_net, true]
+      ];
+      crItems.forEach(function(it) {
+        if (!it[1] || clean(it[1]) === 'null') return;
+        var isRes = it[2];
+        var resNum = isRes ? numVal(it[1]) : 0;
+        var col = isRes ? (resNum >= 0 ? 'var(--green)' : 'var(--red)') : 'var(--ink)';
+        h += '<div style="padding:12px;background:var(--bg);border-radius:6px;border:1px solid var(--rule)">' +
+          '<div style="font-family:var(--mono);font-size:10px;color:var(--ink-3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px">' + esc(it[0]) + '</div>' +
+          '<div style="font-family:var(--mono);font-size:14px;color:' + col + ';font-weight:' + (isRes?'600':'400') + '">' + esc(clean(it[1])) + '</div></div>';
+      });
+      h += '</div>';
+      if (cr.taux_marge_nette) {
+        h += '<div style="margin-top:10px;font-family:var(--mono);font-size:12px;color:var(--ink-3)">Taux marge nette : <span style="color:var(--ink);font-weight:600">' + esc(clean(cr.taux_marge_nette)) + '</span></div>';
+      }
+      h += '</div>';
+    }
+
+    h += '</div>'; // fin panneau
   });
 
-  queue(cid, { type:'bar', data:{labels:lbls,datasets:datasets},
-    options:{ animation:false, maintainAspectRatio:false, plugins:{legend:{display:false}},
-      scales:{x:{stacked:true,grid:{color:CC.grid},ticks:{color:CC.text}},
-        y:{stacked:true,grid:{color:CC.grid},ticks:{color:CC.text,callback:function(v){return v.toLocaleString('fr')+'€';}}}} } });
+  return h + '</div>';
+}
 
-  h += legend(actifDS.concat(passifDS).map(function(ds){ return {c:ds.c,l:ds.lbl}; }));
+// ── BLOC 13 — Projections An2 / An3 ──────────────────────
+function bloc13(plan) {
+  var pa = plan.projections_an2_an3;
+  if (!pa) return '';
+
+  var years = [];
+  if (pa.annee_2 && pa.annee_2.tableau_trimestriel && pa.annee_2.tableau_trimestriel.length) {
+    years.push({label:'Année 2', data: pa.annee_2, croissKey:'taux_croissance_vs_an1', croissLabel:'Croissance vs An1'});
+  }
+  if (pa.annee_3 && pa.annee_3.tableau_trimestriel && pa.annee_3.tableau_trimestriel.length) {
+    years.push({label:'Année 3', data: pa.annee_3, croissKey:'taux_croissance_vs_an2', croissLabel:'Croissance vs An2'});
+  }
+  if (!years.length && !pa.synthese_3_ans) return '';
+
+  var tabBase = uid();
+  var chartId  = uid();
+
+  function tabOnclick(idx) {
+    var code = '';
+    years.forEach(function(_, j) {
+      code += 'document.getElementById(\'' + tabBase + '_p' + j + '\').style.display=\'' + (j===idx?'block':'none') + '\';';
+    });
+    code += 'var bs=this.parentNode.children;for(var k=0;k<bs.length;k++){bs[k].style.background=\'transparent\';bs[k].style.color=\'var(--ink-3)\';}this.style.background=\'var(--paper)\';this.style.color=\'var(--ink)\';';
+    return code;
+  }
+
+  var h = '<div style="background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:24px 28px;margin-bottom:20px">';
+  h += '<div style="font-family:var(--serif);font-size:17px;color:var(--ink);border-bottom:1px solid var(--rule);padding-bottom:10px;margin-bottom:16px">Projections An2 / An3</div>';
+
+  // Graphique comparatif An2 vs An3 (barres trimestrielles)
+  if (years.length === 2) {
+    var an2ca = years[0].data.tableau_trimestriel.map(function(t){ return numVal(t.ca_ht); });
+    var an3ca = years[1].data.tableau_trimestriel.map(function(t){ return numVal(t.ca_ht); });
+    if (an2ca.some(function(v){ return v>0; }) || an3ca.some(function(v){ return v>0; })) {
+      h += cvs(chartId, 220);
+      h += legend([{c:CC.accent,l:'CA An2'},{c:CC.green,l:'CA An3'}]);
+      queue(chartId, { type:'bar',
+        data:{ labels:['T1','T2','T3','T4'],
+          datasets:[
+            {label:'CA An2', data:an2ca, backgroundColor:CC.accent, borderRadius:3, borderSkipped:false},
+            {label:'CA An3', data:an3ca, backgroundColor:CC.green,  borderRadius:3, borderSkipped:false}
+          ]
+        },
+        options:{ animation:false, maintainAspectRatio:false, plugins:{legend:{display:false}},
+          scales:{ x:{grid:{color:CC.grid},ticks:{color:CC.text}},
+            y:{grid:{color:CC.grid},ticks:{color:CC.text,callback:function(v){return v.toLocaleString('fr')+'€';}},min:0} } }
+      });
+    }
+  }
+
+  // Onglets An2 / An3
+  if (years.length > 1) {
+    h += '<div style="display:flex;gap:2px;background:var(--bg);border-radius:6px;padding:3px;margin:16px 0;width:fit-content">';
+    years.forEach(function(yr, i) {
+      h += '<button onclick="' + tabOnclick(i) + '" style="padding:7px 20px;border:none;border-radius:4px;cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:0.06em;font-weight:600;' +
+        (i===0?'background:var(--paper);color:var(--ink)':'background:transparent;color:var(--ink-3)') + '">' + esc(yr.label) + '</button>';
+    });
+    h += '</div>';
+  }
+
+  // Panneau de chaque année
+  years.forEach(function(yr, i) {
+    var d   = yr.data;
+    var tbl = d.tableau_trimestriel || [];
+
+    h += '<div id="' + tabBase + '_p' + i + '" style="display:' + (i===0?'block':'none') + '">';
+
+    // Stat cards
+    h += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">';
+    if (d.ca_annuel) {
+      h += statCell('CA annuel', d.ca_annuel, null);
+    }
+    if (d.resultat_annuel) {
+      var rn = numVal(d.resultat_annuel);
+      h += '<div style="padding:14px;background:var(--bg);border-radius:6px;border:1px solid var(--rule)">' +
+        '<div style="font-family:var(--mono);font-size:10px;color:var(--ink-3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px">Résultat annuel</div>' +
+        '<div style="font-family:var(--mono);font-size:15px;font-weight:600;color:' + (rn>=0?'var(--green)':'var(--red)') + '">' + esc(clean(d.resultat_annuel)) + '</div></div>';
+    }
+    if (d[yr.croissKey]) {
+      h += statCell(yr.croissLabel, d[yr.croissKey], null);
+    }
+    h += '</div>';
+
+    // Tableau trimestriel
+    if (tbl.length) {
+      h += '<div style="overflow-x:auto;margin-bottom:4px"><table style="width:100%;border-collapse:collapse;font-size:12.5px">';
+      h += '<thead><tr style="background:var(--bg)">';
+      ['Trimestre','CA HT','Charges fixes','Charges var.','Résultat net'].forEach(function(hd, hi) {
+        h += '<th style="padding:9px 12px;font-family:var(--mono);font-size:10px;color:var(--ink-3);letter-spacing:0.08em;text-transform:uppercase;border-bottom:1px solid var(--rule);text-align:' + (hi===0?'left':'right') + ';white-space:nowrap">' + esc(hd) + '</th>';
+      });
+      h += '</tr></thead><tbody>';
+      tbl.forEach(function(row, ri) {
+        var res = numVal(row.resultat_net);
+        h += '<tr style="background:' + (ri%2===0?'var(--paper)':'var(--bg)') + '">' +
+          '<td style="padding:9px 12px;border-bottom:1px solid var(--rule);font-family:var(--mono);font-size:11px;color:var(--ink-3)">' + esc(row.trimestre||'') + '</td>' +
+          '<td style="padding:9px 12px;border-bottom:1px solid var(--rule);text-align:right;font-family:var(--mono);color:var(--accent)">' + esc(clean(row.ca_ht||'—')) + '</td>' +
+          '<td style="padding:9px 12px;border-bottom:1px solid var(--rule);text-align:right;font-family:var(--mono);color:var(--ink-2)">' + esc(clean(row.charges_fixes||'—')) + '</td>' +
+          '<td style="padding:9px 12px;border-bottom:1px solid var(--rule);text-align:right;font-family:var(--mono);color:var(--ink-2)">' + esc(clean(row.charges_variables||'—')) + '</td>' +
+          '<td style="padding:9px 12px;border-bottom:1px solid var(--rule);text-align:right;font-family:var(--mono);font-weight:600;color:' + (res>=0?'var(--green)':'var(--red)') + '">' + esc(clean(row.resultat_net||'—')) + '</td></tr>';
+      });
+      h += '</tbody></table></div>';
+    }
+
+    h += '</div>'; // fin panneau
+  });
+
+  // Synthèse 3 ans
+  var syn = pa.synthese_3_ans;
+  if (syn && (syn.evolution_ca || syn.evolution_rentabilite || syn.message_banquier)) {
+    h += '<div style="border-top:1px solid var(--rule);padding-top:16px;margin-top:4px">';
+    h += lbl('Synthèse 3 ans');
+    if (syn.evolution_ca || syn.evolution_rentabilite) {
+      h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">';
+      if (syn.evolution_ca) {
+        h += '<div style="padding:14px;background:var(--bg);border-radius:6px;border:1px solid var(--rule)">' +
+          '<div style="font-family:var(--mono);font-size:10px;color:var(--ink-3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px">Évolution CA</div>' +
+          '<p style="font-size:13px;color:var(--ink-2);margin:0;line-height:1.5">' + esc(syn.evolution_ca) + '</p></div>';
+      }
+      if (syn.evolution_rentabilite) {
+        h += '<div style="padding:14px;background:var(--bg);border-radius:6px;border:1px solid var(--rule)">' +
+          '<div style="font-family:var(--mono);font-size:10px;color:var(--ink-3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px">Rentabilité</div>' +
+          '<p style="font-size:13px;color:var(--ink-2);margin:0;line-height:1.5">' + esc(syn.evolution_rentabilite) + '</p></div>';
+      }
+      h += '</div>';
+    }
+    if (syn.message_banquier) {
+      h += '<div style="background:var(--accent-bg);border-left:2px solid var(--accent);padding:12px 16px;border-radius:0 6px 6px 0">' +
+        '<div style="font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent-ink);margin-bottom:6px;opacity:0.7">Message banquier</div>' +
+        '<p style="font-family:var(--serif);font-style:italic;color:var(--accent-ink);font-size:13px;margin:0;line-height:1.55">' + esc(syn.message_banquier) + '</p></div>';
+    }
+    h += '</div>';
+  }
+
   return h + '</div>';
 }
 
@@ -771,6 +1031,7 @@ window._renderV2PlanResult = function(plan, container) {
   if (plan.aspects_organisationnels) html += card('Organisation', para(plan.aspects_organisationnels));
   html += bloc8(plan);
   html += bloc9(plan);
+  html += bloc13(plan);
 
   // FINANCES DÉTAIL
   if (plan.finances_detail && plan.finances_detail.length) html += card('Finances — tableau de bord',
