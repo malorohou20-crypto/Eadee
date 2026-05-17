@@ -26,6 +26,18 @@
     --serif: "Instrument Serif", "Iowan Old Style", "Apple Garamond", Georgia, serif;
     --sans: "Geist", "Söhne", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
     --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+    /* ─── Design Layer: easing + spacing tokens ─── */
+    --ease-out:   cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-in:    cubic-bezier(0.55, 0, 1, 0.45);
+    --ease-spring:cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease-smooth:cubic-bezier(0.4, 0, 0.2, 1);
+    --dur-fast:  120ms;
+    --dur-base:  200ms;
+    --dur-slow:  340ms;
+    --sp-1:8px;--sp-2:16px;--sp-3:24px;--sp-4:32px;--sp-5:40px;--sp-6:48px;
+    --shadow-lift: 0 4px 16px -4px oklch(0.20 0.01 60 / 0.14), 0 1px 0 var(--rule);
+    --shadow-hover:0 8px 28px -8px oklch(0.20 0.01 60 / 0.20), 0 1px 0 var(--rule);
   }
 
   *{box-sizing:border-box}
@@ -79,17 +91,21 @@
   }
   .brand-word{font-family:var(--serif);font-size:22px;letter-spacing:0.04em}
   .nav{display:flex;gap:28px;align-items:center}
-  .nav a{color:var(--ink-2);text-decoration:none;font-size:14px}
+  .nav a{color:var(--ink-2);text-decoration:none;font-size:14px;transition:color var(--dur-fast) var(--ease-smooth);position:relative}
+  .nav a::after{content:"";position:absolute;bottom:-2px;left:0;right:0;height:1px;background:var(--ink);transform:scaleX(0);transform-origin:left;transition:transform var(--dur-base) var(--ease-out)}
   .nav a:hover{color:var(--ink)}
+  .nav a:hover::after{transform:scaleX(1)}
   .topbar-cta{display:flex;align-items:center;gap:14px}
   .link-quiet{color:var(--ink-2);font-size:14px;text-decoration:none}
   .btn{
     appearance:none;border:1px solid var(--ink);background:var(--ink);color:var(--paper);
     padding:9px 16px;border-radius:999px;font:inherit;font-size:14px;
     text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer;
-    transition:transform .15s ease, background .15s ease;
+    transition:transform var(--dur-base) var(--ease-out),box-shadow var(--dur-base) var(--ease-out),background var(--dur-fast) var(--ease-smooth);
+    will-change:transform;
   }
-  .btn:hover{transform:translateY(-1px)}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px -8px oklch(0.20 0.01 60 / 0.28)}
+  .btn:active{transform:translateY(0) scale(0.975);box-shadow:none;transition-duration:var(--dur-fast)}
   .btn-ghost{background:transparent;color:var(--ink)}
   .btn-accent{background:var(--accent);border-color:var(--accent);color:var(--paper)}
   .btn-lg{padding:14px 22px;font-size:15px}
@@ -173,7 +189,9 @@
     overflow:hidden;
     position:relative;
     transform:translateY(0);
+    transition:box-shadow var(--dur-slow) var(--ease-out),transform var(--dur-slow) var(--ease-out);
   }
+  .live-doc:hover{box-shadow:0 1px 0 var(--rule),0 60px 100px -50px oklch(0.20 0.01 60 / 0.34);transform:translateY(-3px)}
   .live-doc::before{
     content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
     background:linear-gradient(180deg, var(--accent), transparent);
@@ -265,10 +283,10 @@
     font-family:var(--mono);font-size:11px;letter-spacing:0.04em;
     box-shadow:0 20px 40px -20px oklch(0.20 0.01 60 / 0.2);
     display:flex;align-items:center;gap:10px;
-    opacity:0;transition:opacity .4s ease, transform .4s ease;
-    transform:translateY(8px);
+    opacity:0;transition:opacity var(--dur-slow) var(--ease-out),transform var(--dur-slow) var(--ease-out);
+    transform:translateY(12px) scale(0.96);
   }
-  .float-chip.shown{opacity:1;transform:translateY(0)}
+  .float-chip.shown{opacity:1;transform:translateY(0) scale(1)}
   .float-chip .ic{
     width:22px;height:22px;border-radius:6px;background:var(--bg);
     display:grid;place-items:center;font-family:var(--serif);font-size:13px;color:var(--accent-ink);
@@ -548,7 +566,9 @@
   .testim{
     padding:36px 32px;border-right:1px solid var(--rule);
     display:flex;flex-direction:column;gap:20px;
+    transition:background var(--dur-base) var(--ease-smooth);
   }
+  .testim:hover{background:var(--bg-2)}
   .testim:last-child{border-right:0}
   .testim-mark{
     font-family:var(--serif);font-style:italic;
@@ -607,7 +627,9 @@
     padding:36px 32px;border-right:1px solid var(--rule);
     display:flex;flex-direction:column;gap:18px;
     position:relative;
+    transition:background var(--dur-base) var(--ease-smooth);
   }
+  .price:not(.featured):hover{background:var(--bg-2)}
   .price:last-child{border-right:0}
   .price.featured{background:var(--ink);color:var(--paper)}
   .price.featured .price-name,
