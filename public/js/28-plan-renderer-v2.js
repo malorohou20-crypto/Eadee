@@ -618,41 +618,40 @@ function bloc11(plan) {
     });
   }
   var years = [];
-  if (hasContent(bp.annee_1)) years.push({label:'Année 1', data: bp.annee_1});
-  if (hasContent(bp.annee_2)) years.push({label:'Année 2', data: bp.annee_2});
-  if (hasContent(bp.annee_3)) years.push({label:'Année 3', data: bp.annee_3});
+  if (hasContent(bp.annee_1)) years.push({label:'An 1', data: bp.annee_1});
+  if (hasContent(bp.annee_2)) years.push({label:'An 2', data: bp.annee_2});
+  if (hasContent(bp.annee_3)) years.push({label:'An 3', data: bp.annee_3});
   if (!years.length) return '';
 
   var tabBase = uid();
 
-  function tabOnclick(idx) {
+  // onclick : border-bottom sur le btn actif, pas de bg coloré
+  function btnCode(i) {
     var code = '';
     years.forEach(function(_, j) {
-      code += 'document.getElementById(\'' + tabBase + '_p' + j + '\').style.display=\'' + (j===idx?'block':'none') + '\';';
+      code += 'document.getElementById(\'' + tabBase + '_p' + j + '\').style.display=\'' + (j===i?'block':'none') + '\';';
     });
-    code += 'var bs=this.parentNode.children;for(var k=0;k<bs.length;k++){bs[k].style.background=\'transparent\';bs[k].style.color=\'var(--ink-3)\';}this.style.background=\'var(--paper)\';this.style.color=\'var(--ink)\';';
+    code += 'var bs=this.parentNode.children;for(var k=0;k<bs.length;k++){bs[k].style.borderBottom=\'2px solid transparent\';bs[k].style.color=\'var(--ink-3)\';}';
+    code += 'this.style.borderBottom=\'2px solid var(--accent)\';this.style.color=\'var(--ink)\';';
     return code;
   }
 
   var actifMap  = {immobilisations_nettes:'Immobilisations nettes',stocks:'Stocks',creances_clients:'Créances clients',disponibilites:'Disponibilités',total_actif:'TOTAL ACTIF'};
-  var passifMap = {capital_social:'Capital social',reserves:'Réserves',resultat:'Résultat',dettes_financieres:'Dettes financières',dettes_fournisseurs:'Dettes fournisseurs',dettes_fiscales_sociales:'Dettes fiscales & sociales',total_passif:'TOTAL PASSIF'};
+  var passifMap = {capital_social:'Capital social',reserves:'Réserves',resultat:'Résultat net',dettes_financieres:'Dettes financières',dettes_fournisseurs:'Dettes fournisseurs',dettes_fiscales_sociales:'Dettes fiscales & sociales',total_passif:'TOTAL PASSIF'};
 
   var h = '<div style="background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:24px 28px;margin-bottom:20px">';
-  h += '<div style="font-family:var(--serif);font-size:17px;color:var(--ink);border-bottom:1px solid var(--rule);padding-bottom:10px;margin-bottom:16px">Bilan prévisionnel</div>';
+  h += '<div style="font-family:var(--serif);font-size:17px;color:var(--ink);border-bottom:1px solid var(--rule);padding-bottom:10px;margin-bottom:0">Bilan prévisionnel</div>';
 
-  // Onglets années
-  if (years.length > 1) {
-    h += '<div style="display:flex;gap:2px;background:var(--bg);border-radius:6px;padding:3px;margin-bottom:18px;width:fit-content">';
-    years.forEach(function(yr, i) {
-      h += '<button onclick="' + tabOnclick(i) + '" style="padding:7px 20px;border:none;border-radius:4px;cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:0.06em;font-weight:600;' +
-        (i===0?'background:var(--paper);color:var(--ink)':'background:transparent;color:var(--ink-3)') + '">' + esc(yr.label) + '</button>';
-    });
-    h += '</div>';
-  }
-
-  // Panneaux par année
+  // ── Onglets An 1 | An 2 | An 3 ──
+  h += '<div style="display:flex;gap:24px;border-bottom:1px solid var(--rule);margin-bottom:20px">';
   years.forEach(function(yr, i) {
-    var d = yr.data;
+    h += '<button onclick="' + btnCode(i) + '" style="background:none;border:none;border-bottom:2px solid ' + (i===0?'var(--accent)':'transparent') + ';color:' + (i===0?'var(--ink)':'var(--ink-3)') + ';padding:12px 0 10px;font-family:var(--mono);font-size:11.5px;font-weight:600;letter-spacing:0.1em;cursor:pointer;text-transform:uppercase">' + esc(yr.label) + '</button>';
+  });
+  h += '</div>';
+
+  // ── Panneau de chaque année ──
+  years.forEach(function(yr, i) {
+    var d      = yr.data;
     var actif  = d.actif  || {};
     var passif = d.passif || {};
     var ratios = d.ratios || {};
@@ -661,71 +660,93 @@ function bloc11(plan) {
     h += '<div id="' + tabBase + '_p' + i + '" style="display:' + (i===0?'block':'none') + '">';
 
     // Actif / Passif côte à côte
-    h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:16px">';
+    h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:18px">';
 
-    // Actif
     h += '<div>';
     h += lbl('Actif');
     Object.keys(actifMap).forEach(function(k) {
       if (!actif[k] || clean(actif[k]) === 'null') return;
-      var isTotal = k === 'total_actif';
-      h += '<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--rule);font-size:13.5px' + (isTotal?';font-weight:700;border-top:2px solid var(--rule-2,var(--rule));border-bottom:none;margin-top:6px;padding-top:10px':'') + '">' +
+      var isT = k === 'total_actif';
+      h += '<div style="display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-bottom:1px solid var(--rule);font-size:13.5px' + (isT?';font-weight:700;border-top:2px solid var(--rule);border-bottom:none;margin-top:6px;padding-top:10px':'') + '">' +
         '<span style="color:var(--ink-2)">' + actifMap[k] + '</span>' +
-        '<span style="font-family:var(--mono);color:' + (isTotal?'var(--accent)':'var(--ink)') + '">' + esc(clean(actif[k])) + '</span></div>';
+        '<span style="font-family:var(--mono);font-variant-numeric:tabular-nums;color:' + (isT?'var(--accent)':'var(--ink)') + '">' + esc(clean(actif[k])) + '</span></div>';
     });
     h += '</div>';
 
-    // Passif
     h += '<div>';
     h += lbl('Passif');
     Object.keys(passifMap).forEach(function(k) {
       if (!passif[k] || clean(passif[k]) === 'null') return;
-      var isTotal = k === 'total_passif';
-      h += '<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--rule);font-size:13.5px' + (isTotal?';font-weight:700;border-top:2px solid var(--rule-2,var(--rule));border-bottom:none;margin-top:6px;padding-top:10px':'') + '">' +
+      var isT = k === 'total_passif';
+      h += '<div style="display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-bottom:1px solid var(--rule);font-size:13.5px' + (isT?';font-weight:700;border-top:2px solid var(--rule);border-bottom:none;margin-top:6px;padding-top:10px':'') + '">' +
         '<span style="color:var(--ink-2)">' + passifMap[k] + '</span>' +
-        '<span style="font-family:var(--mono);color:' + (isTotal?'var(--green)':'var(--ink)') + '">' + esc(clean(passif[k])) + '</span></div>';
+        '<span style="font-family:var(--mono);font-variant-numeric:tabular-nums;color:' + (isT?'var(--green)':'var(--ink)') + '">' + esc(clean(passif[k])) + '</span></div>';
     });
     h += '</div>';
 
     h += '</div>'; // fin grid actif/passif
 
-    // Ratios
+    // ── Ratios avec badges colorés ──
     if (ratios.autonomie_financiere || ratios.ratio_endettement) {
-      h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">';
-      if (ratios.autonomie_financiere) h += statCell('Autonomie financière', ratios.autonomie_financiere, null);
-      if (ratios.ratio_endettement)    h += statCell('Ratio endettement',    ratios.ratio_endettement, null);
+      h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">';
+
+      function ratioBadge(valStr, isAutonomie) {
+        var n = numVal(valStr);
+        var color, label;
+        if (isAutonomie) {
+          color = n > 40 ? 'var(--green)' : n >= 20 ? 'var(--accent)' : 'var(--red)';
+          label = n > 40 ? 'Solide' : n >= 20 ? 'Correct' : 'Faible';
+        } else {
+          color = n < 100 ? 'var(--green)' : n < 200 ? 'var(--accent)' : 'var(--red)';
+          label = n < 100 ? 'Maîtrisé' : n < 200 ? 'Élevé' : 'Critique';
+        }
+        return '<span style="display:inline-block;margin-top:5px;padding:2px 7px;border-radius:3px;font-family:var(--mono);font-size:9.5px;letter-spacing:0.06em;text-transform:uppercase;font-weight:600;background:transparent;border:1px solid ' + color + ';color:' + color + '">' + label + '</span>';
+      }
+
+      if (ratios.autonomie_financiere) {
+        h += '<div style="padding:14px;border:1px solid var(--rule);border-radius:6px">' +
+          '<div style="font-family:var(--mono);font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:4px">Autonomie financière</div>' +
+          '<div style="font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:15px;color:var(--ink)">' + esc(clean(ratios.autonomie_financiere)) + '</div>' +
+          ratioBadge(ratios.autonomie_financiere, true) + '</div>';
+      }
+      if (ratios.ratio_endettement) {
+        h += '<div style="padding:14px;border:1px solid var(--rule);border-radius:6px">' +
+          '<div style="font-family:var(--mono);font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:4px">Ratio endettement</div>' +
+          '<div style="font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:15px;color:var(--ink)">' + esc(clean(ratios.ratio_endettement)) + '</div>' +
+          ratioBadge(ratios.ratio_endettement, false) + '</div>';
+      }
       h += '</div>';
+
       if (ratios.interpretation) {
-        h += '<div style="border-left:2px solid var(--rule);padding-left:12px;margin-bottom:14px">' +
-          '<p style="font-size:13px;color:var(--ink-3);font-style:italic;margin:0;line-height:1.5">' + esc(ratios.interpretation) + '</p></div>';
+        h += '<p style="font-size:13px;color:var(--ink-3);font-style:italic;margin:0 0 16px;line-height:1.5;border-left:2px solid var(--rule);padding-left:12px">' + esc(ratios.interpretation) + '</p>';
       }
     }
 
-    // Compte de résultat
+    // ── Compte de résultat ──
     if (cr) {
-      h += '<div style="border-top:1px solid var(--rule);padding-top:14px">';
+      h += '<div style="border-top:1px solid var(--rule);padding-top:16px">';
       h += lbl('Compte de résultat');
       h += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">';
       var crItems = [
-        ['CA HT', cr.ca_ht, false],
-        ['Marge brute', cr.marge_brute, false],
-        ['Charges fixes', cr.charges_fixes, false],
-        ['Charges variables', cr.charges_variables, false],
+        ['CA HT',               cr.ca_ht,                 false],
+        ['Charges fixes',       cr.charges_fixes,          false],
+        ['Charges variables',   cr.charges_variables,      false],
+        ['Marge brute',         cr.marge_brute,            false],
         ['Résultat exploitation', cr.resultat_exploitation, false],
-        ['Résultat net', cr.resultat_net, true]
+        ['Résultat net',        cr.resultat_net,           true]
       ];
       crItems.forEach(function(it) {
         if (!it[1] || clean(it[1]) === 'null') return;
-        var isRes = it[2];
-        var resNum = isRes ? numVal(it[1]) : 0;
-        var col = isRes ? (resNum >= 0 ? 'var(--green)' : 'var(--red)') : 'var(--ink)';
+        var isRes  = it[2];
+        var rNum   = isRes ? numVal(it[1]) : 0;
+        var col    = isRes ? (rNum >= 0 ? 'var(--green)' : 'var(--red)') : 'var(--ink)';
         h += '<div style="padding:12px;background:var(--bg);border-radius:6px;border:1px solid var(--rule)">' +
-          '<div style="font-family:var(--mono);font-size:10px;color:var(--ink-3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px">' + esc(it[0]) + '</div>' +
-          '<div style="font-family:var(--mono);font-size:14px;color:' + col + ';font-weight:' + (isRes?'600':'400') + '">' + esc(clean(it[1])) + '</div></div>';
+          '<div style="font-family:var(--mono);font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:4px">' + esc(it[0]) + '</div>' +
+          '<div style="font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:14px;color:' + col + ';font-weight:' + (isRes?'600':'400') + '">' + esc(clean(it[1])) + '</div></div>';
       });
       h += '</div>';
-      if (cr.taux_marge_nette) {
-        h += '<div style="margin-top:10px;font-family:var(--mono);font-size:12px;color:var(--ink-3)">Taux marge nette : <span style="color:var(--ink);font-weight:600">' + esc(clean(cr.taux_marge_nette)) + '</span></div>';
+      if (cr.taux_marge_nette && clean(cr.taux_marge_nette) !== 'null') {
+        h += '<div style="margin-top:10px;font-family:var(--mono);font-size:11.5px;color:var(--ink-3)">Taux marge nette : <span style="color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums">' + esc(clean(cr.taux_marge_nette)) + '</span></div>';
       }
       h += '</div>';
     }
@@ -736,135 +757,183 @@ function bloc11(plan) {
   return h + '</div>';
 }
 
-// ── BLOC 13 — Projections An2 / An3 ──────────────────────
+// ── BLOC 13 — Projections An 2 — An 3 ────────────────────
 function bloc13(plan) {
   var pa = plan.projections_an2_an3;
   if (!pa) return '';
 
-  var years = [];
-  if (pa.annee_2 && pa.annee_2.tableau_trimestriel && pa.annee_2.tableau_trimestriel.length) {
-    years.push({label:'Année 2', data: pa.annee_2, croissKey:'taux_croissance_vs_an1', croissLabel:'Croissance vs An1'});
-  }
-  if (pa.annee_3 && pa.annee_3.tableau_trimestriel && pa.annee_3.tableau_trimestriel.length) {
-    years.push({label:'Année 3', data: pa.annee_3, croissKey:'taux_croissance_vs_an2', croissLabel:'Croissance vs An2'});
-  }
-  if (!years.length && !pa.synthese_3_ans) return '';
+  var an2 = pa.annee_2 || {};
+  var an3 = pa.annee_3 || {};
+  var tbl2 = (an2.tableau_trimestriel || []);
+  var tbl3 = (an3.tableau_trimestriel || []);
+  var syn  = pa.synthese_3_ans || null;
+  if (!tbl2.length && !tbl3.length && !syn) return '';
 
-  var tabBase = uid();
-  var chartId  = uid();
+  var cid = uid();
 
-  function tabOnclick(idx) {
-    var code = '';
-    years.forEach(function(_, j) {
-      code += 'document.getElementById(\'' + tabBase + '_p' + j + '\').style.display=\'' + (j===idx?'block':'none') + '\';';
-    });
-    code += 'var bs=this.parentNode.children;for(var k=0;k<bs.length;k++){bs[k].style.background=\'transparent\';bs[k].style.color=\'var(--ink-3)\';}this.style.background=\'var(--paper)\';this.style.color=\'var(--ink)\';';
-    return code;
-  }
+  // ── Données chart : An1 mensuel + An2 trimestriel + An3 trimestriel ──
+  var prRev = plan.projections_revenus || {};
+  var an1m  = prRev.tableau_mensuel_an1
+    ? prRev.tableau_mensuel_an1.map(function(m){ return numVal(m.ca_ht); })
+    : (plan.rev_mensuel || []);
+  var an2q  = tbl2.map(function(t){ return numVal(t.ca_ht); });
+  var an3q  = tbl3.map(function(t){ return numVal(t.ca_ht); });
+  var mnoms = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+  var allData   = an1m.concat(an2q).concat(an3q);
+  var allLabels = mnoms.slice(0, an1m.length)
+    .concat(an2q.map(function(_, i){ return 'T'+(i+1); }))
+    .concat(an3q.map(function(_, i){ return 'T'+(i+1); }));
+  var sep1 = an1m.length;        // index 1er point An2
+  var sep2 = an1m.length + an2q.length; // index 1er point An3
 
   var h = '<div style="background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:24px 28px;margin-bottom:20px">';
-  h += '<div style="font-family:var(--serif);font-size:17px;color:var(--ink);border-bottom:1px solid var(--rule);padding-bottom:10px;margin-bottom:16px">Projections An2 / An3</div>';
+  h += '<div style="font-family:var(--serif);font-size:17px;color:var(--ink);border-bottom:1px solid var(--rule);padding-bottom:10px;margin-bottom:20px">Projections An 2 — An 3</div>';
 
-  // Graphique comparatif An2 vs An3 (barres trimestrielles)
-  if (years.length === 2) {
-    var an2ca = years[0].data.tableau_trimestriel.map(function(t){ return numVal(t.ca_ht); });
-    var an3ca = years[1].data.tableau_trimestriel.map(function(t){ return numVal(t.ca_ht); });
-    if (an2ca.some(function(v){ return v>0; }) || an3ca.some(function(v){ return v>0; })) {
-      h += cvs(chartId, 220);
-      h += legend([{c:CC.accent,l:'CA An2'},{c:CC.green,l:'CA An3'}]);
-      queue(chartId, { type:'bar',
-        data:{ labels:['T1','T2','T3','T4'],
-          datasets:[
-            {label:'CA An2', data:an2ca, backgroundColor:CC.accent, borderRadius:3, borderSkipped:false},
-            {label:'CA An3', data:an3ca, backgroundColor:CC.green,  borderRadius:3, borderSkipped:false}
-          ]
+  // ── Graphique combiné (An1 mensuel + An2/An3 trimestriel) ──
+  if (allData.some(function(v){ return v > 0; })) {
+    h += cvs(cid, 200);
+    queue(cid, {
+      type: 'line',
+      data: {
+        labels: allLabels,
+        datasets: [{
+          data: allData,
+          borderColor: '#c84b2f',
+          borderWidth: 2,
+          fill: true,
+          backgroundColor: 'rgba(200,75,47,0.08)',
+          tension: 0.3,
+          pointRadius: 3,
+          pointBackgroundColor: '#c84b2f',
+          pointBorderWidth: 0
+        }]
+      },
+      options: {
+        animation: false,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: 'var(--paper,#fff)',
+            titleColor: CC.text,
+            bodyColor: CC.text,
+            borderColor: CC.grid,
+            borderWidth: 1,
+            padding: 10,
+            callbacks: {
+              label: function(ctx) {
+                return 'CA : ' + ctx.parsed.y.toLocaleString('fr-FR') + ' €';
+              }
+            }
+          }
         },
-        options:{ animation:false, maintainAspectRatio:false, plugins:{legend:{display:false}},
-          scales:{ x:{grid:{color:CC.grid},ticks:{color:CC.text}},
-            y:{grid:{color:CC.grid},ticks:{color:CC.text,callback:function(v){return v.toLocaleString('fr')+'€';}},min:0} } }
-      });
-    }
-  }
-
-  // Onglets An2 / An3
-  if (years.length > 1) {
-    h += '<div style="display:flex;gap:2px;background:var(--bg);border-radius:6px;padding:3px;margin:16px 0;width:fit-content">';
-    years.forEach(function(yr, i) {
-      h += '<button onclick="' + tabOnclick(i) + '" style="padding:7px 20px;border:none;border-radius:4px;cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:0.06em;font-weight:600;' +
-        (i===0?'background:var(--paper);color:var(--ink)':'background:transparent;color:var(--ink-3)') + '">' + esc(yr.label) + '</button>';
+        scales: {
+          x: { grid: { color: CC.grid }, ticks: { color: CC.text, maxRotation: 0, font: { size: 10 } } },
+          y: { grid: { color: CC.grid }, ticks: { color: CC.text, callback: function(v){ return v.toLocaleString('fr-FR') + ' €'; } }, min: 0 }
+        }
+      },
+      plugins: [{
+        id: 'vlines_' + cid,
+        beforeDraw: function(chart) {
+          var ctx2  = chart.ctx;
+          var xAxis = chart.scales.x;
+          var yAxis = chart.scales.y;
+          [sep1, sep2].forEach(function(sIdx) {
+            if (sIdx <= 0 || sIdx >= allLabels.length) return;
+            var px1 = xAxis.getPixelForValue(sIdx - 1);
+            var px2 = xAxis.getPixelForValue(sIdx);
+            if (!px1 || !px2) return;
+            var x = (px1 + px2) / 2;
+            ctx2.save();
+            ctx2.beginPath();
+            ctx2.setLineDash([4, 4]);
+            ctx2.moveTo(x, yAxis.top);
+            ctx2.lineTo(x, yAxis.bottom);
+            ctx2.strokeStyle = '#c4b8a8';
+            ctx2.lineWidth = 1;
+            ctx2.stroke();
+            ctx2.restore();
+          });
+        }
+      }]
     });
-    h += '</div>';
   }
 
-  // Panneau de chaque année
-  years.forEach(function(yr, i) {
-    var d   = yr.data;
-    var tbl = d.tableau_trimestriel || [];
+  // ── Helper tableau trimestriel ──
+  function trimestrielTable(tbl) {
+    if (!tbl.length) return '';
+    var out = '<div style="overflow-x:auto;margin-top:14px"><table style="width:100%;border-collapse:collapse">';
+    out += '<thead><tr>';
+    ['Trimestre','CA','Charges','Résultat'].forEach(function(hd, hi) {
+      out += '<th style="padding:7px 10px;font-family:var(--mono);font-size:10px;color:var(--ink-3);letter-spacing:0.1em;text-transform:uppercase;border-bottom:1px solid var(--rule);text-align:' + (hi===0?'left':'right') + ';white-space:nowrap">' + hd + '</th>';
+    });
+    out += '</tr></thead><tbody>';
+    tbl.forEach(function(row, ri) {
+      var res = numVal(row.resultat_net);
+      var charges = numVal(row.charges_fixes) + numVal(row.charges_variables);
+      out += '<tr style="background:' + (ri%2===0?'var(--paper)':'var(--bg-2,var(--bg))') + '">' +
+        '<td style="padding:8px 10px;border-bottom:1px solid var(--rule);font-family:var(--mono);font-size:10.5px;color:var(--ink-3)">' + esc(row.trimestre||'') + '</td>' +
+        '<td style="padding:8px 10px;border-bottom:1px solid var(--rule);text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--accent)">' + esc(clean(row.ca_ht||'—')) + '</td>' +
+        '<td style="padding:8px 10px;border-bottom:1px solid var(--rule);text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--ink-2)">' + (charges > 0 ? charges.toLocaleString('fr-FR') + ' €' : esc(clean(row.charges_fixes||'—'))) + '</td>' +
+        '<td style="padding:8px 10px;border-bottom:1px solid var(--rule);text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:600;color:' + (res>=0?'var(--green)':'var(--red)') + '">' + esc(clean(row.resultat_net||'—')) + '</td></tr>';
+    });
+    out += '</tbody></table></div>';
+    return out;
+  }
 
-    h += '<div id="' + tabBase + '_p' + i + '" style="display:' + (i===0?'block':'none') + '">';
+  // ── Grid 2 colonnes : An 2 | An 3 ──
+  h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px">';
 
-    // Stat cards
-    h += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">';
-    if (d.ca_annuel) {
-      h += statCell('CA annuel', d.ca_annuel, null);
+  [[an2, tbl2, 'An 2', 'taux_croissance_vs_an1', '↑ vs An 1'],
+   [an3, tbl3, 'An 3', 'taux_croissance_vs_an2', '↑ vs An 2']
+  ].forEach(function(col) {
+    var data = col[0], tbl = col[1], label = col[2], crKey = col[3], crLabel = col[4];
+    h += '<div style="border:1px solid var(--rule);border-radius:6px;padding:16px 18px">';
+    h += '<div style="font-family:var(--mono);font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:12px">' + esc(label) + '</div>';
+
+    // CA annuel
+    if (data.ca_annuel) {
+      h += '<div style="font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:24px;color:var(--ink);margin-bottom:8px;line-height:1">' + esc(clean(data.ca_annuel)) + '</div>';
     }
-    if (d.resultat_annuel) {
-      var rn = numVal(d.resultat_annuel);
-      h += '<div style="padding:14px;background:var(--bg);border-radius:6px;border:1px solid var(--rule)">' +
-        '<div style="font-family:var(--mono);font-size:10px;color:var(--ink-3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px">Résultat annuel</div>' +
-        '<div style="font-family:var(--mono);font-size:15px;font-weight:600;color:' + (rn>=0?'var(--green)':'var(--red)') + '">' + esc(clean(d.resultat_annuel)) + '</div></div>';
+
+    // Résultat avec badge coloré
+    if (data.resultat_annuel) {
+      var rn  = numVal(data.resultat_annuel);
+      var col2 = rn >= 0 ? 'var(--green)' : 'var(--red)';
+      h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">' +
+        '<span style="font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:13px;color:var(--ink-2)">Résultat :</span>' +
+        '<span style="font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:13px;font-weight:600;color:' + col2 + '">' + esc(clean(data.resultat_annuel)) + '</span>' +
+        '<span style="display:inline-block;padding:1px 7px;border:1px solid ' + col2 + ';border-radius:3px;font-family:var(--mono);font-size:9.5px;font-weight:600;color:' + col2 + ';text-transform:uppercase;letter-spacing:0.06em">' + (rn>=0?'Positif':'Négatif') + '</span></div>';
     }
-    if (d[yr.croissKey]) {
-      h += statCell(yr.croissLabel, d[yr.croissKey], null);
+
+    // Taux de croissance avec flèche
+    if (data[crKey]) {
+      var taux = clean(data[crKey]);
+      var tnVal = numVal(data[crKey]);
+      var arrow = tnVal >= 0 ? '↑' : '↓';
+      var arrowCol = tnVal >= 0 ? 'var(--green)' : 'var(--red)';
+      h += '<div style="font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:12px;color:var(--ink-3);margin-bottom:2px">' +
+        '<span style="color:' + arrowCol + ';font-size:14px">' + arrow + '</span> ' + esc(taux) + ' ' + esc(crLabel) + '</div>';
     }
+
+    h += trimestrielTable(tbl);
     h += '</div>';
-
-    // Tableau trimestriel
-    if (tbl.length) {
-      h += '<div style="overflow-x:auto;margin-bottom:4px"><table style="width:100%;border-collapse:collapse;font-size:12.5px">';
-      h += '<thead><tr style="background:var(--bg)">';
-      ['Trimestre','CA HT','Charges fixes','Charges var.','Résultat net'].forEach(function(hd, hi) {
-        h += '<th style="padding:9px 12px;font-family:var(--mono);font-size:10px;color:var(--ink-3);letter-spacing:0.08em;text-transform:uppercase;border-bottom:1px solid var(--rule);text-align:' + (hi===0?'left':'right') + ';white-space:nowrap">' + esc(hd) + '</th>';
-      });
-      h += '</tr></thead><tbody>';
-      tbl.forEach(function(row, ri) {
-        var res = numVal(row.resultat_net);
-        h += '<tr style="background:' + (ri%2===0?'var(--paper)':'var(--bg)') + '">' +
-          '<td style="padding:9px 12px;border-bottom:1px solid var(--rule);font-family:var(--mono);font-size:11px;color:var(--ink-3)">' + esc(row.trimestre||'') + '</td>' +
-          '<td style="padding:9px 12px;border-bottom:1px solid var(--rule);text-align:right;font-family:var(--mono);color:var(--accent)">' + esc(clean(row.ca_ht||'—')) + '</td>' +
-          '<td style="padding:9px 12px;border-bottom:1px solid var(--rule);text-align:right;font-family:var(--mono);color:var(--ink-2)">' + esc(clean(row.charges_fixes||'—')) + '</td>' +
-          '<td style="padding:9px 12px;border-bottom:1px solid var(--rule);text-align:right;font-family:var(--mono);color:var(--ink-2)">' + esc(clean(row.charges_variables||'—')) + '</td>' +
-          '<td style="padding:9px 12px;border-bottom:1px solid var(--rule);text-align:right;font-family:var(--mono);font-weight:600;color:' + (res>=0?'var(--green)':'var(--red)') + '">' + esc(clean(row.resultat_net||'—')) + '</td></tr>';
-      });
-      h += '</tbody></table></div>';
-    }
-
-    h += '</div>'; // fin panneau
   });
 
-  // Synthèse 3 ans
-  var syn = pa.synthese_3_ans;
+  h += '</div>'; // fin grid
+
+  // ── Synthèse 3 ans ──
   if (syn && (syn.evolution_ca || syn.evolution_rentabilite || syn.message_banquier)) {
-    h += '<div style="border-top:1px solid var(--rule);padding-top:16px;margin-top:4px">';
-    h += lbl('Synthèse 3 ans');
-    if (syn.evolution_ca || syn.evolution_rentabilite) {
-      h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">';
-      if (syn.evolution_ca) {
-        h += '<div style="padding:14px;background:var(--bg);border-radius:6px;border:1px solid var(--rule)">' +
-          '<div style="font-family:var(--mono);font-size:10px;color:var(--ink-3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px">Évolution CA</div>' +
-          '<p style="font-size:13px;color:var(--ink-2);margin:0;line-height:1.5">' + esc(syn.evolution_ca) + '</p></div>';
-      }
-      if (syn.evolution_rentabilite) {
-        h += '<div style="padding:14px;background:var(--bg);border-radius:6px;border:1px solid var(--rule)">' +
-          '<div style="font-family:var(--mono);font-size:10px;color:var(--ink-3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px">Rentabilité</div>' +
-          '<p style="font-size:13px;color:var(--ink-2);margin:0;line-height:1.5">' + esc(syn.evolution_rentabilite) + '</p></div>';
-      }
-      h += '</div>';
+    h += '<div style="margin-top:20px;border-left:2px solid var(--accent);background:var(--accent-bg);padding:14px 16px;border-radius:0 6px 6px 0">';
+    h += '<div style="font-family:var(--mono);font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent-ink);opacity:0.7;margin-bottom:10px">Synthèse 3 ans</div>';
+    if (syn.evolution_ca) {
+      h += '<p style="font-size:13px;color:var(--accent-ink);margin:0 0 6px;line-height:1.55"><strong>CA :</strong> ' + esc(syn.evolution_ca) + '</p>';
+    }
+    if (syn.evolution_rentabilite) {
+      h += '<p style="font-size:13px;color:var(--accent-ink);margin:0 0 10px;line-height:1.55"><strong>Rentabilité :</strong> ' + esc(syn.evolution_rentabilite) + '</p>';
     }
     if (syn.message_banquier) {
-      h += '<div style="background:var(--accent-bg);border-left:2px solid var(--accent);padding:12px 16px;border-radius:0 6px 6px 0">' +
-        '<div style="font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent-ink);margin-bottom:6px;opacity:0.7">Message banquier</div>' +
-        '<p style="font-family:var(--serif);font-style:italic;color:var(--accent-ink);font-size:13px;margin:0;line-height:1.55">' + esc(syn.message_banquier) + '</p></div>';
+      h += '<p style="font-family:var(--serif);font-style:italic;color:var(--accent-ink);font-size:13.5px;margin:0;line-height:1.6">' + esc(syn.message_banquier) + '</p>';
     }
     h += '</div>';
   }
