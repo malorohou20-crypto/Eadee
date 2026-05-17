@@ -542,6 +542,84 @@ Retourne UNIQUEMENT le JSON, sans markdown, sans backtick.
     }
   },
 
+  "projections_an2_an3": {
+    "annee_2": {
+      "tableau_trimestriel": [
+        {
+          "trimestre": "T1 An2",
+          "ca_ht": "{{H:montant€|cohérent avec jalons.mois_24 / 4}}",
+          "charges_fixes": "{{E:montant€|...}}",
+          "charges_variables": "{{E:montant€|...}}",
+          "resultat_net": "{{E:montant€|...}}"
+        },
+        {
+          "trimestre": "T2 An2",
+          "ca_ht": "{{H:montant€|...}}",
+          "charges_fixes": "{{E:montant€|...}}",
+          "charges_variables": "{{E:montant€|...}}",
+          "resultat_net": "{{E:montant€|...}}"
+        },
+        {
+          "trimestre": "T3 An2",
+          "ca_ht": "{{H:montant€|...}}",
+          "charges_fixes": "{{E:montant€|...}}",
+          "charges_variables": "{{E:montant€|...}}",
+          "resultat_net": "{{E:montant€|...}}"
+        },
+        {
+          "trimestre": "T4 An2",
+          "ca_ht": "{{H:montant€|...}}",
+          "charges_fixes": "{{E:montant€|...}}",
+          "charges_variables": "{{E:montant€|...}}",
+          "resultat_net": "{{E:montant€|...}}"
+        }
+      ],
+      "ca_annuel": "{{H:montant€|somme des 4 trimestres — cohérent avec scenarios.realiste.ca_an1 x croissance}}",
+      "resultat_annuel": "{{E:montant€|somme des 4 trimestres}}",
+      "taux_croissance_vs_an1": "{{E:XX%|(CA an2 - CA an1) / CA an1}}"
+    },
+    "annee_3": {
+      "tableau_trimestriel": [
+        {
+          "trimestre": "T1 An3",
+          "ca_ht": "{{H:montant€|cohérent avec jalons.mois_36 / 4}}",
+          "charges_fixes": "{{E:montant€|...}}",
+          "charges_variables": "{{E:montant€|...}}",
+          "resultat_net": "{{E:montant€|...}}"
+        },
+        {
+          "trimestre": "T2 An3",
+          "ca_ht": "{{H:montant€|...}}",
+          "charges_fixes": "{{E:montant€|...}}",
+          "charges_variables": "{{E:montant€|...}}",
+          "resultat_net": "{{E:montant€|...}}"
+        },
+        {
+          "trimestre": "T3 An3",
+          "ca_ht": "{{H:montant€|...}}",
+          "charges_fixes": "{{E:montant€|...}}",
+          "charges_variables": "{{E:montant€|...}}",
+          "resultat_net": "{{E:montant€|...}}"
+        },
+        {
+          "trimestre": "T4 An3",
+          "ca_ht": "{{H:montant€|...}}",
+          "charges_fixes": "{{E:montant€|...}}",
+          "charges_variables": "{{E:montant€|...}}",
+          "resultat_net": "{{E:montant€|...}}"
+        }
+      ],
+      "ca_annuel": "{{H:montant€|somme des 4 trimestres — cohérent avec jalons.mois_36}}",
+      "resultat_annuel": "{{E:montant€|somme des 4 trimestres}}",
+      "taux_croissance_vs_an2": "{{E:XX%|(CA an3 - CA an2) / CA an2}}"
+    },
+    "synthese_3_ans": {
+      "evolution_ca": "string — narrative de la progression du CA sur 3 ans",
+      "evolution_rentabilite": "string — quand l'entreprise devient vraiment rentable et durablement",
+      "message_banquier": "string — ce que ces 3 ans de projections inspirent à un banquier"
+    }
+  },
+
   "tresorerie": {
     "tableau_12_mois": [
       { "mois": "Janvier",   "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null },
@@ -588,8 +666,70 @@ Retourne UNIQUEMENT le JSON, sans markdown, sans backtick.
         "interpretation": "string"
       }
     },
-    "annee_2": { "actif": {}, "passif": {}, "ratios": {} },
-    "annee_3": { "actif": {}, "passif": {}, "ratios": {} }
+    "annee_2": {
+      "actif": {
+        "immobilisations_nettes": "{{E:montant€|immobilisations an1 - amortissements an2}}",
+        "stocks": "{{E:montant€|...}} | null",
+        "creances_clients": "{{E:montant€|CA an2 x délai encaissement}}",
+        "disponibilites": "{{E:montant€|trésorerie fin an2}}",
+        "total_actif": "{{E:montant€|somme}}"
+      },
+      "passif": {
+        "capital_social": "{{V:montant€|identique an1}}",
+        "reserves": "{{E:montant€|résultat an1 mis en réserve}}",
+        "resultat": "{{E:montant€|résultat net an2}}",
+        "dettes_financieres": "{{E:montant€|capital restant dû fin an2}}",
+        "dettes_fournisseurs": "{{E:montant€|...}}",
+        "dettes_fiscales_sociales": "{{E:montant€|...}}",
+        "total_passif": "{{E:montant€|somme — doit égaler total_actif}}"
+      },
+      "ratios": {
+        "autonomie_financiere": "{{E:XX%|fonds propres / total bilan}}",
+        "ratio_endettement": "{{E:XX%|dettes financières / fonds propres}}",
+        "interpretation": "string — évolution vs an1"
+      },
+      "compte_resultat": {
+        "ca_ht": "{{H:montant€|projection an2 — cohérent avec projections_revenus.jalons.mois_24}}",
+        "charges_fixes": "{{E:montant€|...}}",
+        "charges_variables": "{{E:montant€|...}}",
+        "marge_brute": "{{E:montant€|CA - charges variables}}",
+        "resultat_exploitation": "{{E:montant€|marge brute - charges fixes}}",
+        "resultat_net": "{{E:montant€|après IS}}",
+        "taux_marge_nette": "{{E:XX%|résultat net / CA}}"
+      }
+    },
+    "annee_3": {
+      "actif": {
+        "immobilisations_nettes": "{{E:montant€|immobilisations an2 - amortissements an3}}",
+        "stocks": "{{E:montant€|...}} | null",
+        "creances_clients": "{{E:montant€|CA an3 x délai encaissement}}",
+        "disponibilites": "{{E:montant€|trésorerie fin an3}}",
+        "total_actif": "{{E:montant€|somme}}"
+      },
+      "passif": {
+        "capital_social": "{{V:montant€|identique an1}}",
+        "reserves": "{{E:montant€|résultats an1+an2 mis en réserve}}",
+        "resultat": "{{E:montant€|résultat net an3 — cohérent avec projections_revenus.jalons.mois_36}}",
+        "dettes_financieres": "{{E:montant€|capital restant dû fin an3}}",
+        "dettes_fournisseurs": "{{E:montant€|...}}",
+        "dettes_fiscales_sociales": "{{E:montant€|...}}",
+        "total_passif": "{{E:montant€|somme — doit égaler total_actif}}"
+      },
+      "ratios": {
+        "autonomie_financiere": "{{E:XX%|fonds propres / total bilan}}",
+        "ratio_endettement": "{{E:XX%|dettes financières / fonds propres}}",
+        "interpretation": "string — évolution vs an2"
+      },
+      "compte_resultat": {
+        "ca_ht": "{{H:montant€|projection an3 — cohérent avec projections_revenus.jalons.mois_36}}",
+        "charges_fixes": "{{E:montant€|...}}",
+        "charges_variables": "{{E:montant€|...}}",
+        "marge_brute": "{{E:montant€|CA - charges variables}}",
+        "resultat_exploitation": "{{E:montant€|marge brute - charges fixes}}",
+        "resultat_net": "{{E:montant€|après IS}}",
+        "taux_marge_nette": "{{E:XX%|résultat net / CA}}"
+      }
+    }
   },
 
   "risques": [
