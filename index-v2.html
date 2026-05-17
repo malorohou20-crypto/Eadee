@@ -1,0 +1,1723 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>EADEE — Un business plan complet et sérieux. En 60 secondes. v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:        oklch(0.965 0.012 85);
+    --bg-2:      oklch(0.945 0.014 82);
+    --paper:     oklch(0.99 0.008 90);
+    --ink:       oklch(0.20 0.012 60);
+    --ink-2:     oklch(0.34 0.012 60);
+    --ink-3:     oklch(0.52 0.012 60);
+    --ink-4:     oklch(0.74 0.010 70);
+    --rule:      oklch(0.86 0.012 75);
+    --rule-2:    oklch(0.78 0.012 70);
+    --accent:    oklch(0.58 0.14 35);
+    --accent-ink:oklch(0.42 0.12 32);
+    --green:     oklch(0.48 0.08 145);
+    --green-bg:  oklch(0.94 0.04 145);
+    --shadow-1:  0 1px 0 oklch(0.86 0.012 75);
+    --serif: "Instrument Serif", "Iowan Old Style", "Apple Garamond", Georgia, serif;
+    --sans: "Geist", "Söhne", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+    /* ─── v2 Design Layer: easing + spacing tokens ─── */
+    --ease-out:   cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-in:    cubic-bezier(0.55, 0, 1, 0.45);
+    --ease-spring:cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease-smooth:cubic-bezier(0.4, 0, 0.2, 1);
+
+    --dur-fast:  120ms;
+    --dur-base:  200ms;
+    --dur-slow:  340ms;
+
+    --sp-1: 8px;  --sp-2: 16px; --sp-3: 24px;
+    --sp-4: 32px; --sp-5: 40px; --sp-6: 48px;
+
+    --shadow-lift: 0 4px 16px -4px oklch(0.20 0.01 60 / 0.14), 0 1px 0 var(--rule);
+    --shadow-hover: 0 8px 28px -8px oklch(0.20 0.01 60 / 0.20), 0 1px 0 var(--rule);
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);}
+  body{
+    font-family:var(--sans);
+    font-size:16px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    font-feature-settings:"ss01","cv11";
+    letter-spacing:-0.005em;
+  }
+  ::selection{background:var(--accent);color:var(--paper)}
+
+  /* ---------- Editorial primitives ---------- */
+  .wrap{max-width:1280px;margin:0 auto;padding:0 32px}
+  .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:24px}
+  .rule{border:0;border-top:1px solid var(--rule);margin:0}
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--ink-3);
+    font-weight:500;
+  }
+  .num{font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-0.02em}
+  .serif{font-family:var(--serif);font-weight:400;letter-spacing:-0.015em;line-height:1.02}
+  .italic{font-family:var(--serif);font-style:italic;font-weight:400}
+
+  h1,h2,h3,h4{margin:0;font-weight:500;letter-spacing:-0.015em}
+
+  /* ---------- Top bar ---------- */
+  .topbar{
+    border-bottom:1px solid var(--rule);
+    background:var(--bg);
+    position:sticky;top:0;z-index:50;
+    backdrop-filter:saturate(140%) blur(8px);
+  }
+  .topbar-inner{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 32px;max-width:1280px;margin:0 auto;
+  }
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink)}
+  .brand-mark{
+    width:30px;height:30px;border-radius:6px;
+    background:var(--ink);color:var(--paper);
+    display:grid;place-items:center;
+    font-family:var(--serif);font-size:20px;line-height:1;
+    font-style:italic;
+  }
+  .brand-word{font-family:var(--serif);font-size:22px;letter-spacing:0.04em}
+  .nav{display:flex;gap:28px;align-items:center}
+  .nav a{
+    color:var(--ink-2);text-decoration:none;font-size:14px;
+    transition:color var(--dur-fast) var(--ease-smooth);
+    position:relative;
+  }
+  .nav a::after{
+    content:"";position:absolute;bottom:-2px;left:0;right:0;height:1px;
+    background:var(--ink);transform:scaleX(0);transform-origin:left;
+    transition:transform var(--dur-base) var(--ease-out);
+  }
+  .nav a:hover{color:var(--ink)}
+  .nav a:hover::after{transform:scaleX(1)}
+  .topbar-cta{display:flex;align-items:center;gap:14px}
+  .link-quiet{color:var(--ink-2);font-size:14px;text-decoration:none}
+  .btn{
+    appearance:none;border:1px solid var(--ink);background:var(--ink);color:var(--paper);
+    padding:9px 16px;border-radius:999px;font:inherit;font-size:14px;
+    text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer;
+    transition:transform var(--dur-base) var(--ease-out),
+               box-shadow var(--dur-base) var(--ease-out),
+               background var(--dur-fast) var(--ease-smooth);
+    will-change:transform;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px -8px oklch(0.20 0.01 60 / 0.28)}
+  .btn:active{transform:translateY(0) scale(0.975);box-shadow:none;transition-duration:var(--dur-fast)}
+  .btn-ghost{background:transparent;color:var(--ink)}
+  .btn-accent{background:var(--accent);border-color:var(--accent);color:var(--paper)}
+  .btn-lg{padding:14px 22px;font-size:15px}
+
+  /* ---------- Hero (v2 — live document) ---------- */
+  .hero{padding:28px 0 48px;position:relative;overflow:hidden}
+  .hero-rail{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:10px 0 22px;
+    font-family:var(--mono);font-size:10.5px;letter-spacing:0.18em;
+    text-transform:uppercase;color:var(--ink-3);
+    border-bottom:1px solid var(--rule);margin-bottom:36px;
+  }
+  .hero-rail .rail-mid{display:flex;gap:18px;align-items:center}
+  .hero-rail .rail-mid span::after{content:"·";color:var(--rule-2);margin-left:18px}
+  .hero-rail .rail-mid span:last-child::after{content:""}
+  .hero-rail .rail-live{display:inline-flex;align-items:center;gap:8px;color:var(--green)}
+  .hero-rail .rail-live::before{
+    content:"";width:7px;height:7px;border-radius:999px;background:var(--green);
+    box-shadow:0 0 0 0 oklch(0.48 0.08 145 / 0.6);
+    animation:rail-pulse 1.6s ease-out infinite;
+  }
+  @keyframes rail-pulse{
+    0%{box-shadow:0 0 0 0 oklch(0.48 0.08 145 / 0.55)}
+    100%{box-shadow:0 0 0 10px oklch(0.48 0.08 145 / 0)}
+  }
+
+  .hero-grid{display:grid;grid-template-columns:1.05fr 1fr;gap:72px;align-items:start}
+  .hero-text{padding-top:6px;position:relative}
+
+  .hero-tag{
+    display:inline-flex;align-items:center;gap:10px;
+    border:1px solid var(--rule);border-radius:999px;
+    padding:6px 12px 6px 8px;background:var(--paper);
+    font-size:12px;color:var(--ink-2);
+  }
+  .hero-tag .pill{
+    font-family:var(--mono);font-size:10px;letter-spacing:0.1em;
+    background:var(--ink);color:var(--paper);padding:3px 8px;border-radius:999px;
+  }
+  .hero h1{
+    font-family:var(--serif);font-weight:400;
+    font-size:clamp(48px, 6.2vw, 96px);
+    line-height:0.98;letter-spacing:-0.022em;
+    margin:24px 0 28px;
+    max-width:760px;
+  }
+  .hero h1 em{font-style:italic;color:var(--accent-ink)}
+  .hero h1 .h1-line{display:block}
+  .hero h1 .kinetic{
+    display:inline-block;font-variant-numeric:tabular-nums;
+    min-width:1.2em;text-align:right;
+    color:var(--accent);font-style:italic;
+    transition:color .3s ease;
+  }
+  .hero h1 .kinetic.done{color:var(--accent-ink)}
+  .hero h1 .kinetic-unit{font-family:var(--sans);font-size:0.42em;color:var(--ink-3);font-style:normal;letter-spacing:0.12em;text-transform:uppercase;vertical-align:0.45em;margin-left:6px;font-weight:500}
+
+  .hero-sub{
+    font-size:18px;line-height:1.55;color:var(--ink-2);
+    max-width:540px;
+  }
+  .hero-ctas{display:flex;gap:12px;align-items:center;margin-top:32px;flex-wrap:wrap}
+
+  /* Decorative ornament under the headline */
+  .hero-ornament{
+    margin-top:36px;display:flex;align-items:center;gap:14px;
+    font-family:var(--mono);font-size:11px;letter-spacing:0.12em;
+    text-transform:uppercase;color:var(--ink-3);
+  }
+  .hero-ornament .bars{display:flex;gap:3px;flex:1;max-width:240px}
+  .hero-ornament .bars i{flex:1;height:8px;background:var(--rule);border-radius:1px;transition:background .3s}
+  .hero-ornament .bars i.on{background:var(--accent)}
+
+  /* Live document panel */
+  .live-doc{
+    background:var(--paper);
+    border:1px solid var(--rule);
+    border-radius:14px;
+    box-shadow: 0 1px 0 var(--rule), 0 50px 80px -50px oklch(0.20 0.01 60 / 0.28);
+    overflow:hidden;
+    position:relative;
+    transform:translateY(0);
+    transition:box-shadow var(--dur-slow) var(--ease-out),
+               transform var(--dur-slow) var(--ease-out);
+  }
+  .live-doc:hover{
+    box-shadow: 0 1px 0 var(--rule), 0 60px 100px -50px oklch(0.20 0.01 60 / 0.34);
+    transform:translateY(-3px);
+  }
+  .live-doc::before{
+    content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
+    background:linear-gradient(180deg, var(--accent), transparent);
+    opacity:0.6;
+  }
+  .live-head{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:14px 20px;border-bottom:1px solid var(--rule);
+    font-family:var(--mono);font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;
+    background:var(--bg);
+  }
+  .live-head .left-bit{display:flex;align-items:center;gap:10px;color:var(--ink-2)}
+  .live-head .ldot{width:7px;height:7px;border-radius:999px;background:var(--green);position:relative;flex:none}
+  .live-head .ldot::after{
+    content:"";position:absolute;inset:-4px;border-radius:999px;
+    background:var(--green);opacity:0.3;animation:rail-pulse 1.4s ease-out infinite;
+  }
+  .live-timer{color:var(--ink);font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:0.06em}
+
+  .live-progress{height:2px;background:var(--rule);position:relative;overflow:hidden}
+  .live-progress i{display:block;height:100%;width:0%;background:var(--accent);transition:width .2s linear}
+
+  .live-body{padding:18px 22px 4px;position:relative}
+  .live-sections{
+    list-style:none;margin:0;padding:0;
+    display:flex;flex-direction:column;gap:0;
+    font-size:14px;
+  }
+  .live-sections li{
+    display:grid;grid-template-columns:28px 1fr auto;gap:14px;
+    padding:9px 0;align-items:center;
+    border-bottom:1px dashed var(--rule);
+    transition:opacity .3s ease;
+  }
+  .live-sections li:last-child{border-bottom:0}
+  .live-sections .lix{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);letter-spacing:0.06em}
+  .live-sections .lnm{color:var(--ink-3);transition:color .3s ease}
+  .live-sections .lst{
+    font-family:var(--mono);font-size:10.5px;color:var(--ink-4);
+    letter-spacing:0.1em;transition:color .3s ease, transform .3s ease;
+    text-align:right;min-width:42px;
+  }
+  .live-sections li.done .lnm{color:var(--ink)}
+  .live-sections li.done .lst{color:var(--green)}
+  .live-sections li.active .lnm{color:var(--ink);font-weight:500}
+  .live-sections li.active .lst{color:var(--accent)}
+  .live-sections li.active{
+    background:linear-gradient(90deg, oklch(0.95 0.02 35 / 0.5) 0%, transparent 70%);
+    margin:0 -22px;padding-left:22px;padding-right:22px;
+  }
+  .live-more{
+    padding:12px 0 14px;font-family:var(--mono);font-size:10.5px;
+    color:var(--ink-3);letter-spacing:0.1em;text-transform:uppercase;
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .live-more .dots{display:flex;gap:4px}
+  .live-more .dots i{width:4px;height:4px;border-radius:999px;background:var(--ink-4);animation:dots 1.2s infinite}
+  .live-more .dots i:nth-child(2){animation-delay:.2s}
+  .live-more .dots i:nth-child(3){animation-delay:.4s}
+  @keyframes dots{0%,80%,100%{opacity:0.3}40%{opacity:1}}
+
+  .live-result{
+    padding:22px;
+    border-top:1px solid var(--rule);
+    background:var(--ink);color:var(--paper);
+    display:grid;grid-template-columns:auto 1fr auto;gap:20px;align-items:center;
+    opacity:0;transform:translateY(8px);
+    transition:opacity .5s ease, transform .5s ease;
+  }
+  .live-result.shown{opacity:1;transform:translateY(0)}
+  .lr-score{
+    font-family:var(--serif);font-size:52px;line-height:0.9;
+    font-variant-numeric:tabular-nums;letter-spacing:-0.03em;
+  }
+  .lr-score sup{font-size:18px;color:oklch(0.7 0.01 70);font-family:var(--mono);font-weight:400;vertical-align:top;margin-left:4px}
+  .lr-text{font-family:var(--mono);font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:oklch(0.78 0.01 70);line-height:1.5}
+  .lr-text b{color:var(--paper);font-weight:500;display:block;font-size:11.5px}
+  .lr-stamp{
+    font-family:var(--serif);font-style:italic;font-size:13px;
+    border:1px solid oklch(0.45 0.04 35);color:oklch(0.85 0.06 35);
+    padding:6px 10px;border-radius:4px;transform:rotate(-3deg);
+    letter-spacing:0.04em;
+  }
+
+  /* Floating chips around the doc */
+  .float-chip{
+    position:absolute;background:var(--paper);border:1px solid var(--rule);
+    border-radius:10px;padding:10px 14px;
+    font-family:var(--mono);font-size:11px;letter-spacing:0.04em;
+    box-shadow:0 20px 40px -20px oklch(0.20 0.01 60 / 0.2);
+    display:flex;align-items:center;gap:10px;
+    opacity:0;
+    transition:opacity var(--dur-slow) var(--ease-out),
+               transform var(--dur-slow) var(--ease-out);
+    transform:translateY(12px) scale(0.96);
+  }
+  .float-chip.shown{opacity:1;transform:translateY(0) scale(1)}
+  .float-chip .ic{
+    width:22px;height:22px;border-radius:6px;background:var(--bg);
+    display:grid;place-items:center;font-family:var(--serif);font-size:13px;color:var(--accent-ink);
+  }
+  .float-chip .big{font-family:var(--serif);font-size:16px;letter-spacing:-0.01em;color:var(--ink);font-style:normal}
+  .float-chip-1{top:18%;left:-30px}
+  .float-chip-2{top:54%;left:-40px}
+  .float-chip-3{top:78%;right:-30px}
+
+  /* hero-foot bar */
+  .hero-foot{
+    margin-top:64px;
+    display:grid;grid-template-columns:auto 1fr auto;gap:48px;
+    align-items:center;
+    padding-top:28px;border-top:1px solid var(--rule);
+  }
+  .avatars{display:flex;align-items:center;gap:18px}
+  .hero-foot .hero-checks{flex-direction:row;gap:22px;flex-wrap:wrap;justify-content:flex-end}
+  .avatar-stack{display:flex}
+  .avatar-stack span{
+    width:38px;height:38px;border-radius:999px;
+    border:2px solid var(--bg);background:var(--ink-4);
+    margin-left:-10px;display:grid;place-items:center;
+    font-family:var(--serif);font-size:16px;color:var(--paper);
+  }
+  .avatar-stack span:first-child{margin-left:0}
+  .avatar-stack span:nth-child(1){background:oklch(0.55 0.10 30)}
+  .avatar-stack span:nth-child(2){background:oklch(0.42 0.07 160)}
+  .avatar-stack span:nth-child(3){background:oklch(0.38 0.08 250)}
+  .avatar-stack span:nth-child(4){background:oklch(0.50 0.10 60)}
+  .avatar-stack span:nth-child(5){background:var(--ink);font-size:18px}
+  .avatar-cap{font-size:13px;color:var(--ink-2);max-width:240px;line-height:1.4}
+  .avatar-cap b{color:var(--ink);font-weight:500}
+  .hero-checks{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--ink-2)}
+  .check{display:inline-flex;align-items:center;gap:8px}
+  .check::before{
+    content:"";width:14px;height:14px;border-radius:999px;
+    background:var(--green-bg);
+    background-image:
+      linear-gradient(135deg, transparent 40%, var(--green) 40% 50%, transparent 50% 60%, var(--green) 60% 70%, transparent 70%);
+    flex:none;
+  }
+
+  /* ---------- Sector marquee ---------- */
+  .marquee-band{
+    background:var(--ink);color:var(--bg);
+    padding:18px 0;overflow:hidden;
+    border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);
+  }
+  .marquee-band .eyebrow{color:oklch(0.74 0.012 70)}
+  .marquee-band .label{
+    padding:0 32px;max-width:1280px;margin:0 auto 10px;
+  }
+  .marquee{display:flex;gap:36px;animation:scroll 60s linear infinite;white-space:nowrap}
+  .marquee span{
+    font-family:var(--serif);font-style:italic;font-size:28px;
+    display:inline-flex;align-items:center;gap:36px;
+  }
+  .marquee span::after{content:"·";color:var(--accent);font-style:normal}
+  @keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+  /* ---------- Section primitives ---------- */
+  section{padding:104px 0;position:relative}
+  .section-head{display:grid;grid-template-columns:1fr 2fr;gap:48px;margin-bottom:64px;align-items:end}
+  .section-head .left{display:flex;flex-direction:column;gap:14px}
+  .section-head h2{
+    font-family:var(--serif);font-weight:400;
+    font-size:clamp(40px, 5.4vw, 72px);
+    line-height:1.0;letter-spacing:-0.02em;
+  }
+  .section-head h2 em{font-style:italic;color:var(--accent-ink)}
+  .section-lead{color:var(--ink-2);font-size:17px;max-width:520px;line-height:1.5}
+
+  /* ---------- Process (3 steps) ---------- */
+  .process{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--ink)}
+  .step{
+    padding:32px 28px 80px;border-right:1px solid var(--rule);
+    position:relative;min-height:340px;
+    display:flex;flex-direction:column;gap:18px;
+  }
+  .step:last-child{border-right:0}
+  .step-num{
+    font-family:var(--mono);font-size:13px;color:var(--ink-3);
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .step h3{
+    font-family:var(--serif);font-size:34px;line-height:1.05;font-weight:400;
+  }
+  .step p{color:var(--ink-2);font-size:15px;margin:0;max-width:340px}
+  .step-glyph{
+    position:absolute;right:24px;bottom:24px;font-family:var(--serif);
+    font-style:italic;font-size:120px;line-height:1;color:var(--rule);
+  }
+
+  /* ---------- Feature blocks (alternating) ---------- */
+  .feature{
+    display:grid;grid-template-columns:5fr 6fr;gap:96px;align-items:center;
+  }
+  .feature.reverse{grid-template-columns:6fr 5fr}
+  .feature.reverse .feature-text{order:2}
+  .feature.reverse .feature-visual{order:1}
+  .feature h2{
+    font-family:var(--serif);font-weight:400;
+    font-size:clamp(40px, 5vw, 62px);
+    line-height:1.02;letter-spacing:-0.02em;
+    margin:18px 0 22px;
+  }
+  .feature h2 em{font-style:italic;color:var(--accent-ink)}
+  .feature p.lead{font-size:17px;color:var(--ink-2);margin:0 0 28px;line-height:1.55;max-width:520px}
+  .feature ul{list-style:none;padding:0;margin:0;border-top:1px solid var(--rule)}
+  .feature li{
+    padding:18px 0;border-bottom:1px solid var(--rule);
+    display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:start;
+  }
+  .feature li .ix{font-family:var(--mono);font-size:11px;color:var(--ink-3);padding-top:4px;letter-spacing:0.08em}
+  .feature li b{display:block;font-weight:500;color:var(--ink);margin-bottom:4px;font-size:15px;letter-spacing:-0.005em}
+  .feature li span.txt{color:var(--ink-2);font-size:14.5px;line-height:1.5}
+
+  /* ---------- Visuals (cards) ---------- */
+  .card{
+    background:var(--paper);
+    border:1px solid var(--rule);
+    border-radius:14px;
+    padding:28px;
+    box-shadow: 0 1px 0 var(--rule), 0 30px 60px -40px oklch(0.20 0.01 60 / 0.18);
+  }
+  .card-head{
+    display:flex;justify-content:space-between;align-items:center;
+    padding-bottom:14px;margin-bottom:18px;border-bottom:1px solid var(--rule);
+    font-family:var(--mono);font-size:11px;letter-spacing:0.1em;
+    text-transform:uppercase;color:var(--ink-3);
+  }
+  .status-dot{display:inline-flex;align-items:center;gap:6px}
+  .status-dot::before{content:"";width:6px;height:6px;border-radius:999px;background:var(--green)}
+
+  /* Score card */
+  .score-card .score-big{
+    font-family:var(--serif);font-size:128px;line-height:0.9;
+    font-variant-numeric:tabular-nums;letter-spacing:-0.04em;
+    color:var(--ink);
+  }
+  .score-card .score-big sup{font-size:34px;color:var(--ink-3);font-family:var(--mono);font-weight:400;vertical-align:top;margin-left:4px}
+  .verdict{
+    margin-top:8px;color:var(--green);font-size:14px;
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:var(--mono);letter-spacing:0.02em;
+  }
+  .verdict::before{content:"●";font-size:10px}
+  .verdict em{font-style:normal;color:var(--ink-2);margin-left:8px;font-family:var(--sans)}
+  .score-stats{display:grid;grid-template-columns:repeat(3,1fr);margin-top:32px;border-top:1px solid var(--rule)}
+  .score-stat{padding:18px 0;border-right:1px solid var(--rule);padding-right:16px}
+  .score-stat:last-child{border-right:0;padding-left:18px}
+  .score-stat:not(:first-child){padding-left:18px}
+  .score-stat .v{font-family:var(--serif);font-size:30px;line-height:1;display:block;margin-bottom:6px}
+  .score-stat .v em{color:var(--accent-ink);font-style:italic}
+  .score-stat .l{font-family:var(--mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-3)}
+
+  /* Projections card */
+  .proj-card .big-money{
+    font-family:var(--serif);font-size:96px;line-height:0.95;letter-spacing:-0.03em;
+    color:var(--ink);font-variant-numeric:tabular-nums;
+  }
+  .proj-card .big-money sup{font-size:24px;color:var(--ink-3);font-family:var(--mono);vertical-align:top;margin-left:6px;font-weight:400}
+  .proj-label{font-family:var(--mono);font-size:11px;letter-spacing:0.12em;color:var(--ink-3);text-transform:uppercase;margin-top:4px}
+  .chart{
+    margin:28px 0 12px;position:relative;height:120px;
+    display:flex;align-items:end;gap:6px;
+  }
+  .chart .bar{flex:1;background:var(--rule-2);border-radius:3px 3px 0 0;position:relative}
+  .chart .bar.accent{background:var(--accent)}
+  .chart .bar.dim{background:oklch(0.86 0.012 75)}
+  .chart-axis{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--ink-3);letter-spacing:0.08em;text-transform:uppercase}
+  .kpi-row{
+    display:grid;grid-template-columns:repeat(3,1fr);
+    margin-top:24px;border-top:1px solid var(--rule);
+  }
+  .kpi{padding:14px 0;padding-right:14px;border-right:1px solid var(--rule)}
+  .kpi:last-child{border-right:0;padding-right:0;padding-left:14px}
+  .kpi:not(:first-child){padding-left:14px}
+  .kpi .l{font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-3)}
+  .kpi .v{font-family:var(--serif);font-size:26px;line-height:1.1;display:block;margin-top:4px}
+  .kpi .v.accent{color:var(--accent-ink)}
+
+  /* Chat / Expert card */
+  .chat-card{display:flex;flex-direction:column;gap:14px}
+  .chat-row{display:flex;gap:12px;align-items:flex-start}
+  .chat-row.user{flex-direction:row-reverse}
+  .chat-avatar{
+    width:32px;height:32px;border-radius:999px;flex:none;
+    display:grid;place-items:center;font-family:var(--serif);font-size:14px;
+  }
+  .chat-avatar.expert{background:var(--ink);color:var(--paper)}
+  .chat-avatar.user{background:var(--accent);color:var(--paper)}
+  .chat-bubble{
+    background:var(--bg-2);border:1px solid var(--rule);border-radius:14px;
+    padding:14px 16px;max-width:88%;font-size:14.5px;line-height:1.5;
+  }
+  .chat-row.user .chat-bubble{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .chat-bubble b{font-weight:600;color:var(--accent-ink)}
+  .chat-row.user .chat-bubble b{color:var(--accent)}
+  .typing{font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:0.1em;margin-top:4px}
+
+  /* Bancability card */
+  .banca-card{display:flex;flex-direction:column;gap:0}
+  .banca-card .score-big{font-family:var(--serif);font-size:108px;line-height:.9;letter-spacing:-0.03em}
+  .banca-card .score-big sup{font-size:28px;color:var(--ink-3);font-family:var(--mono);font-weight:400;vertical-align:top;margin-left:4px}
+  .banca-list{margin-top:32px;border-top:1px solid var(--rule)}
+  .banca-list .row{
+    display:grid;grid-template-columns:auto 1fr auto;gap:14px;
+    padding:14px 0;border-bottom:1px solid var(--rule);align-items:center;
+    font-size:14px;
+  }
+  .banca-list .row .check-ic{
+    width:18px;height:18px;border-radius:999px;
+    background:var(--green-bg);color:var(--green);
+    display:grid;place-items:center;font-family:var(--mono);font-size:11px;
+  }
+  .banca-list .row .v{font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:0.1em;text-transform:uppercase}
+
+  /* ---------- 23 sections TOC ---------- */
+  .toc-tabs{
+    display:flex;gap:6px;flex-wrap:wrap;
+    padding-bottom:24px;margin-bottom:32px;border-bottom:1px solid var(--rule);
+  }
+  .toc-tab{
+    appearance:none;border:1px solid var(--rule);background:var(--paper);
+    color:var(--ink-2);padding:8px 14px;border-radius:999px;
+    font:inherit;font-size:13px;cursor:pointer;
+    font-family:var(--mono);letter-spacing:0.04em;
+  }
+  .toc-tab.active{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .toc-tab .ct{
+    margin-left:6px;color:var(--ink-3);font-size:11px;
+  }
+  .toc-tab.active .ct{color:oklch(0.7 0.01 70)}
+  .toc-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);
+    border-top:1px solid var(--rule);border-left:1px solid var(--rule);
+  }
+  .toc-item{
+    padding:28px;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);
+    display:flex;flex-direction:column;gap:10px;
+    transition:background .15s ease;
+  }
+  .toc-item:hover{background:var(--paper)}
+  .toc-item-head{display:flex;justify-content:space-between;align-items:baseline}
+  .toc-item .ix{
+    font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:0.08em;
+  }
+  .toc-item .tag{
+    font-family:var(--mono);font-size:10px;color:var(--ink-3);letter-spacing:0.1em;
+    text-transform:uppercase;padding:3px 8px;border:1px solid var(--rule);border-radius:999px;
+  }
+  .toc-item .tag[data-cat="Stratégie"]{color:var(--accent-ink);border-color:oklch(0.78 0.08 35)}
+  .toc-item .tag[data-cat="Marché"]{color:oklch(0.36 0.10 250);border-color:oklch(0.78 0.05 250)}
+  .toc-item .tag[data-cat="Finance"]{color:var(--green);border-color:oklch(0.78 0.08 145)}
+  .toc-item .tag[data-cat="Juridique"]{color:oklch(0.38 0.06 290);border-color:oklch(0.78 0.05 290)}
+  .toc-item .tag[data-cat="Action"]{color:oklch(0.40 0.06 60);border-color:oklch(0.78 0.05 60)}
+  .toc-item h4{
+    font-family:var(--serif);font-size:24px;font-weight:400;line-height:1.1;
+  }
+  .toc-item p{font-size:13.5px;color:var(--ink-2);margin:0;line-height:1.45}
+
+  .toc-cta{
+    margin-top:48px;
+    display:grid;grid-template-columns:2fr 1fr;gap:32px;align-items:center;
+    padding:28px 0 0;border-top:1px solid var(--ink);
+  }
+  .toc-cta p{font-size:18px;color:var(--ink-2);margin:0;line-height:1.5}
+  .toc-cta p b{color:var(--ink);font-weight:500}
+
+  /* ---------- Testimonials ---------- */
+  .testimonials{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:0;
+    border-top:1px solid var(--ink);
+  }
+  .testim{
+    padding:36px 32px;border-right:1px solid var(--rule);
+    display:flex;flex-direction:column;gap:20px;
+    transition:background var(--dur-base) var(--ease-smooth);
+  }
+  .testim:hover{background:var(--bg-2)}
+  .testim:last-child{border-right:0}
+  .testim-mark{
+    font-family:var(--serif);font-style:italic;
+    font-size:80px;line-height:0.6;color:var(--accent);
+    height:30px;
+  }
+  .testim-quote{
+    font-family:var(--serif);font-size:22px;line-height:1.3;font-weight:400;
+    color:var(--ink);
+  }
+  .testim-byline{
+    margin-top:auto;padding-top:20px;border-top:1px solid var(--rule);
+    display:flex;align-items:center;gap:14px;
+  }
+  .testim-byline .ph{
+    width:42px;height:42px;border-radius:999px;flex:none;
+    display:grid;place-items:center;font-family:var(--serif);font-size:18px;color:var(--paper);
+  }
+  .testim-byline .who b{display:block;font-size:14px;font-weight:500}
+  .testim-byline .who span{font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:0.08em}
+  .testim-meta{font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:0.08em;text-transform:uppercase}
+
+  /* ---------- Transparency ---------- */
+  .trans-grid{
+    display:grid;grid-template-columns:1fr 1fr;gap:0;
+    border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);
+  }
+  .trans-col{padding:48px 40px}
+  .trans-col + .trans-col{border-left:1px solid var(--rule)}
+  .trans-col h3{
+    font-family:var(--mono);font-size:11px;letter-spacing:0.14em;
+    text-transform:uppercase;color:var(--ink-3);margin-bottom:24px;
+  }
+  .trans-col ul{list-style:none;padding:0;margin:0}
+  .trans-col li{
+    padding:16px 0;border-bottom:1px solid var(--rule);
+    display:grid;grid-template-columns:auto 1fr;gap:14px;
+    font-size:16px;line-height:1.45;color:var(--ink);
+  }
+  .trans-col li:last-child{border-bottom:0}
+  .trans-col.yes li::before{
+    content:"+";color:var(--green);font-family:var(--mono);font-size:18px;line-height:1;width:18px;
+  }
+  .trans-col.no li::before{
+    content:"−";color:var(--accent);font-family:var(--mono);font-size:18px;line-height:1;width:18px;
+  }
+  .trans-foot{
+    padding:32px 40px;font-family:var(--serif);font-size:24px;line-height:1.35;
+    color:var(--ink);max-width:780px;
+  }
+  .trans-foot em{font-style:italic;color:var(--ink-3)}
+
+  /* ---------- Pricing ---------- */
+  .pricing{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--rule);border-radius:18px;overflow:hidden;background:var(--paper)}
+  .price{
+    padding:36px 32px;border-right:1px solid var(--rule);
+    display:flex;flex-direction:column;gap:18px;
+    position:relative;
+    transition:background var(--dur-base) var(--ease-smooth),
+               transform var(--dur-base) var(--ease-out);
+  }
+  .price:not(.featured):hover{background:var(--bg-2)}
+  .price:last-child{border-right:0}
+  .price.featured{background:var(--ink);color:var(--paper)}
+  .price.featured .price-name,
+  .price.featured .price-sub{color:var(--paper)}
+  .price.featured .strike{color:oklch(0.6 0.01 70)}
+  .price.featured .price-meta{color:oklch(0.7 0.01 70);border-color:oklch(0.30 0.01 60)}
+  .price.featured .price-credit{color:oklch(0.85 0.01 70)}
+  .price.featured .btn{background:var(--accent);border-color:var(--accent);color:var(--paper)}
+  .price-badge{
+    position:absolute;top:18px;right:18px;
+    font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;
+    color:var(--accent);
+  }
+  .price.featured .price-badge{color:oklch(0.85 0.08 50)}
+  .price-name{font-family:var(--serif);font-size:38px;line-height:1;color:var(--ink)}
+  .price-sub{font-size:13.5px;color:var(--ink-3)}
+  .price-row{display:flex;align-items:baseline;gap:14px}
+  .strike{font-family:var(--mono);font-size:14px;color:var(--ink-3);text-decoration:line-through}
+  .price-big{font-family:var(--serif);font-size:56px;line-height:1;letter-spacing:-0.03em}
+  .price-meta{
+    padding:14px 0;border-top:1px dashed var(--rule);border-bottom:1px dashed var(--rule);
+    color:var(--ink-2);font-size:13px;font-family:var(--mono);letter-spacing:0.03em;
+  }
+  .price-meta b{font-weight:500;color:var(--ink);font-family:var(--sans)}
+  .price.featured .price-meta b{color:var(--paper)}
+  .price-credit{font-size:13px;color:var(--ink-2);margin-top:auto}
+  .price .btn{align-self:start}
+
+  .price-foot{
+    margin-top:32px;padding:24px 32px;
+    border:1px solid var(--rule);border-radius:14px;background:var(--paper);
+    display:flex;justify-content:space-between;gap:24px;align-items:center;
+  }
+  .price-foot .l{font-family:var(--mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent-ink)}
+  .price-foot p{margin:0;font-size:14.5px;color:var(--ink-2);max-width:680px;line-height:1.55}
+  .price-foot p b{color:var(--ink);font-weight:500}
+  .price-bullets{
+    margin-top:18px;display:flex;flex-wrap:wrap;gap:8px 16px;
+    font-family:var(--mono);font-size:11.5px;letter-spacing:0.04em;
+    color:var(--ink-2);
+  }
+  .price-bullets span::after{content:"·";color:var(--ink-3);margin-left:16px}
+  .price-bullets span:last-child::after{content:""}
+
+  /* ---------- FAQ ---------- */
+  .faq{border-top:1px solid var(--ink)}
+  details.q{border-bottom:1px solid var(--rule);padding:0}
+  details.q summary{
+    list-style:none;cursor:pointer;
+    padding:28px 0;display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;
+    font-family:var(--serif);font-size:28px;line-height:1.2;
+  }
+  details.q summary::-webkit-details-marker{display:none}
+  details.q summary::after{
+    content:"+";font-family:var(--mono);font-size:24px;color:var(--ink-3);
+    transition:transform .2s ease;
+  }
+  details.q[open] summary::after{content:"−";color:var(--accent)}
+  details.q .a{
+    padding:0 0 28px;color:var(--ink-2);font-size:15.5px;line-height:1.65;
+    max-width:780px;
+  }
+  details.q .a p{margin:0 0 12px}
+
+  /* ---------- Footer ---------- */
+  footer{
+    background:var(--ink);color:oklch(0.85 0.01 70);
+    padding:80px 0 32px;
+  }
+  footer .brand-mark{background:var(--paper);color:var(--ink)}
+  footer .brand-word{color:var(--paper)}
+  .foot-grid{
+    display:grid;grid-template-columns:2fr repeat(4,1fr);gap:48px;
+    padding-bottom:48px;border-bottom:1px solid oklch(0.30 0.01 60);
+  }
+  .foot-intro p{font-size:14.5px;color:oklch(0.78 0.01 70);max-width:340px;line-height:1.55;margin:16px 0 24px}
+  .socials{display:flex;gap:8px}
+  .socials a{
+    width:36px;height:36px;border-radius:999px;border:1px solid oklch(0.30 0.01 60);
+    display:grid;place-items:center;color:oklch(0.85 0.01 70);text-decoration:none;
+    font-family:var(--mono);font-size:14px;
+  }
+  .foot-col h4{
+    font-family:var(--mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;
+    color:oklch(0.65 0.01 70);margin-bottom:18px;font-weight:500;
+  }
+  .foot-col ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
+  .foot-col a{color:oklch(0.85 0.01 70);text-decoration:none;font-size:14px}
+  .foot-col a:hover{color:var(--paper)}
+  .foot-bottom{
+    padding-top:32px;display:flex;justify-content:space-between;align-items:flex-end;gap:32px;flex-wrap:wrap;
+  }
+  .foot-bottom .small{font-size:12.5px;color:oklch(0.65 0.01 70);max-width:780px;line-height:1.6}
+  .foot-bottom a{color:oklch(0.85 0.01 70)}
+  .foot-mark{
+    font-family:var(--serif);font-style:italic;font-size:120px;line-height:0.8;
+    color:oklch(0.30 0.01 60);user-select:none;
+  }
+
+  /* Cookie banner */
+  .cookie{
+    position:fixed;bottom:20px;left:20px;right:auto;max-width:380px;z-index:60;
+    background:var(--paper);border:1px solid var(--rule);border-radius:14px;
+    padding:18px;box-shadow:0 30px 60px -20px oklch(0.20 0.01 60 / 0.25);
+    display:flex;flex-direction:column;gap:12px;
+  }
+  .cookie h5{font-family:var(--serif);font-size:20px;margin:0;font-weight:400}
+  .cookie p{margin:0;font-size:13px;color:var(--ink-2);line-height:1.5}
+  .cookie p a{color:var(--accent-ink)}
+  .cookie-row{display:flex;gap:10px}
+  .cookie .btn{padding:8px 14px;font-size:13px}
+
+  /* Responsive */
+  @media (max-width:1024px){
+    .hero-grid{grid-template-columns:1fr;gap:48px}
+    .float-chip-1,.float-chip-2,.float-chip-3{display:none}
+    .hero-foot{grid-template-columns:1fr;gap:18px}
+    .hero-rail{flex-wrap:wrap;gap:10px}
+    .feature,.feature.reverse{grid-template-columns:1fr;gap:48px}
+    .feature.reverse .feature-text{order:1}
+    .feature.reverse .feature-visual{order:2}
+    .toc-grid{grid-template-columns:repeat(2,1fr)}
+    .testimonials{grid-template-columns:1fr}
+    .testim{border-right:0;border-bottom:1px solid var(--rule)}
+    .pricing{grid-template-columns:1fr}
+    .price{border-right:0;border-bottom:1px solid var(--rule)}
+    .foot-grid{grid-template-columns:1fr 1fr;gap:32px}
+    .section-head{grid-template-columns:1fr}
+    .hero-foot{grid-template-columns:1fr;gap:24px}
+    .process{grid-template-columns:1fr}
+    .step{border-right:0;border-bottom:1px solid var(--rule)}
+  }
+  @media (max-width:680px){
+    .wrap{padding:0 20px}
+    .topbar-inner{padding:12px 20px}
+    .nav{display:none}
+    section{padding:64px 0}
+    .toc-grid{grid-template-columns:1fr}
+    .trans-grid{grid-template-columns:1fr}
+    .trans-col + .trans-col{border-left:0;border-top:1px solid var(--rule)}
+    .foot-grid{grid-template-columns:1fr}
+    .cookie{left:12px;right:12px;max-width:none}
+    .foot-mark{display:none}
+  }
+</style>
+</head>
+<body>
+
+<!-- ========================= TOP BAR ========================= -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="#" aria-label="EADEE">
+      <span class="brand-mark">E</span>
+      <span class="brand-word">EADEE</span>
+    </a>
+    <nav class="nav">
+      <a href="#process">Comment ça marche</a>
+      <a href="#features">Fonctionnalités</a>
+      <a href="#pricing">Tarifs</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <div class="topbar-cta">
+      <a class="link-quiet" href="#" onclick="openAuth('login');return false;">Connexion</a>
+      <a class="btn" href="#" onclick="openAuth('signup');return false;">Commencer →</a>
+    </div>
+  </div>
+</header>
+
+<!-- ========================= HERO ========================= -->
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-rail">
+      <span>EADEE — Dossier N°01</span>
+      <div class="rail-mid">
+        <span>Génération instantanée</span>
+        <span>Conforme banque &amp; BPI France</span>
+        <span>Édition 2026</span>
+      </div>
+      <span class="rail-live">Démo en direct</span>
+    </div>
+
+    <div class="hero-grid">
+      <div class="hero-text">
+        <span class="hero-tag">
+          <span class="pill">NOUVEAU</span>
+          L'IA au service de vos projets <span style="color:var(--accent)">✦</span>
+        </span>
+
+        <h1>
+          <span class="h1-line">Un business plan complet</span>
+          <span class="h1-line">et <em>professionnel.</em></span>
+          <span class="h1-line">En <span class="kinetic" id="kineticNum">00</span><span class="kinetic-unit">sec</span></span>
+        </h1>
+
+        <p class="hero-sub">
+          23 sections. Projections 3 ans. Stratégie, finances, juridique, démarches admin. Tout ce qu'il faut pour passer de l'idée à l'action — sans passer des semaines à tout structurer.
+        </p>
+
+        <div class="hero-ctas">
+          <a class="btn btn-lg btn-accent" href="#" onclick="openAuth('signup');return false;">Créer mon plan</a>
+          <a class="btn btn-lg btn-ghost" href="#pricing">Voir les tarifs →</a>
+        </div>
+
+        <div class="hero-ornament">
+          <span id="ornCount">00 / 23 sections</span>
+          <span class="bars" id="ornBars" aria-hidden="true">
+            <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          </span>
+        </div>
+      </div>
+
+      <div class="hero-live">
+        <div class="live-doc">
+          <div class="live-head">
+            <span class="left-bit"><span class="ldot"></span> EADEE · génération en cours</span>
+            <span class="live-timer" id="liveTimer">00 / 60s</span>
+          </div>
+          <div class="live-progress"><i id="liveProgress"></i></div>
+          <div class="live-body">
+            <ol class="live-sections" id="liveSections">
+              <li><span class="lix">01</span><span class="lnm">Résumé exécutif</span><span class="lst">⋯</span></li>
+              <li><span class="lix">04</span><span class="lnm">Proposition de valeur unique</span><span class="lst">⋯</span></li>
+              <li><span class="lix">07</span><span class="lnm">Étude de marché</span><span class="lst">⋯</span></li>
+              <li><span class="lix">08</span><span class="lnm">Analyse concurrentielle</span><span class="lst">⋯</span></li>
+              <li><span class="lix">09</span><span class="lnm">Plan de financement</span><span class="lst">⋯</span></li>
+              <li><span class="lix">11</span><span class="lnm">Compte de résultat 3 ans</span><span class="lst">⋯</span></li>
+              <li><span class="lix">14</span><span class="lnm">Seuil de rentabilité</span><span class="lst">⋯</span></li>
+              <li><span class="lix">16</span><span class="lnm">Aspects juridiques</span><span class="lst">⋯</span></li>
+              <li><span class="lix">21</span><span class="lnm">Plan d'action 90 jours</span><span class="lst">⋯</span></li>
+            </ol>
+            <div class="live-more">
+              <span id="liveMore">+ 14 autres sections en cours</span>
+              <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+            </div>
+          </div>
+          <div class="live-result" id="liveResult">
+            <div class="lr-score num">87<sup>/100</sup></div>
+            <div class="lr-text"><b>Plan généré</b>Score viabilité · 60s</div>
+            <div class="lr-stamp">BPI ready</div>
+          </div>
+        </div>
+
+        <div class="float-chip float-chip-1" id="chip1">
+          <span class="ic">€</span>
+          <span><span class="big num">185 000€</span><br/><span style="color:var(--ink-3)">CA An 3</span></span>
+        </div>
+        <div class="float-chip float-chip-2" id="chip2">
+          <span class="ic">%</span>
+          <span><span class="big num">71% marge</span><br/><span style="color:var(--ink-3)">brute</span></span>
+        </div>
+        <div class="float-chip float-chip-3" id="chip3">
+          <span class="ic">✓</span>
+          <span><span class="big">SAS</span><br/><span style="color:var(--ink-3)">statut conseillé</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-foot">
+      <div class="avatars">
+        <div class="avatar-stack" aria-hidden="true">
+          <span>M</span><span>S</span><span>L</span><span>K</span><span>+</span>
+        </div>
+        <p class="avatar-cap">Utilisé par des <b>milliers d'entrepreneurs</b> en France</p>
+      </div>
+      <div></div>
+      <div class="hero-checks">
+        <span class="check">Compatible banque &amp; BPI France</span>
+        <span class="check">Export PDF prêt à envoyer</span>
+        <span class="check">Sans abonnement</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= SECTOR MARQUEE ========================= -->
+<div class="marquee-band">
+  <div class="label">
+    <span class="eyebrow">EADEE fonctionne pour tous les secteurs</span>
+  </div>
+  <div class="marquee" aria-hidden="true">
+    <span>Restauration</span><span>Conciergerie Airbnb</span><span>App &amp; SaaS</span><span>Coaching pro</span><span>E-commerce</span><span>Artisanat</span><span>Freelance</span><span>Beauté &amp; bien-être</span><span>Sport &amp; fitness</span><span>Consulting B2B</span><span>Boutique physique</span><span>Formation en ligne</span>
+    <span>Restauration</span><span>Conciergerie Airbnb</span><span>App &amp; SaaS</span><span>Coaching pro</span><span>E-commerce</span><span>Artisanat</span><span>Freelance</span><span>Beauté &amp; bien-être</span><span>Sport &amp; fitness</span><span>Consulting B2B</span><span>Boutique physique</span><span>Formation en ligne</span>
+  </div>
+</div>
+
+<!-- ========================= PROCESS ========================= -->
+<section id="process">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="left">
+        <span class="eyebrow">Le process</span>
+      </div>
+      <h2>De l'idée au plan signé. <em>En 3 étapes.</em></h2>
+    </div>
+
+    <div class="process">
+      <div class="step">
+        <div class="step-num"><span>01</span><span>—</span></div>
+        <h3>Décris ton idée</h3>
+        <p>Une phrase suffit. Ton secteur, ta ville, ton budget. Pas de formulaire interminable.</p>
+        <div class="step-glyph">01</div>
+      </div>
+      <div class="step">
+        <div class="step-num"><span>02</span><span>—</span></div>
+        <h3>EADEE structure tout</h3>
+        <p>Marché, concurrents, stratégie, finances, juridique, démarches. 23 sections générées et personnalisées à ton projet.</p>
+        <div class="step-glyph">02</div>
+      </div>
+      <div class="step">
+        <div class="step-num"><span>03</span><span>—</span></div>
+        <h3>Tu récupères un plan prêt à l'emploi</h3>
+        <p>Projections 3 ans, emails rédigés, checklist des démarches. Compatible banque et BPI France si tu en as besoin.</p>
+        <div class="step-glyph">03</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="rule" />
+
+<!-- ========================= FEATURE 1 — VIABILITY ========================= -->
+<section id="features">
+  <div class="wrap">
+    <div class="feature">
+      <div class="feature-text">
+        <span class="eyebrow">Score de viabilité</span>
+        <h2>Sais-tu vraiment si ton projet est viable&nbsp;? <em>Avant d'investir un seul euro.</em></h2>
+        <p class="lead">EADEE analyse ton idée sur 100 points avant que tu dépenses quoi que ce soit. Marché, concurrents, modèle économique — tout est passé au crible.</p>
+        <ul>
+          <li>
+            <span class="ix">01</span>
+            <div>
+              <b>Analyse de marché chiffrée</b>
+              <span class="txt">Taille, tendances, part de marché cible — adapté à ton secteur en France.</span>
+            </div>
+          </li>
+          <li>
+            <span class="ix">02</span>
+            <div>
+              <b>4 concurrents réels avec leurs prix</b>
+              <span class="txt">Leurs failles identifiées. Ton positionnement différenciant clarifié.</span>
+            </div>
+          </li>
+          <li>
+            <span class="ix">03</span>
+            <div>
+              <b>Un verdict clair et actionnable</b>
+              <span class="txt">Score /100 avec explication directe : ce qui est solide, ce qui doit évoluer.</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="feature-visual">
+        <div class="card score-card">
+          <div class="card-head">
+            <span>Score EADEE · VélôBretagne</span>
+            <span class="status-dot">Live</span>
+          </div>
+          <div class="score-big num">87<sup>/100</sup></div>
+          <div class="verdict">Projet viable <em>— Fort potentiel de marché</em></div>
+          <div class="score-stats">
+            <div class="score-stat">
+              <span class="v num">1,8 <em>Mds€</em></span>
+              <span class="l">Marché</span>
+            </div>
+            <div class="score-stat">
+              <span class="v num">+22<em>%</em></span>
+              <span class="l">Croissance</span>
+            </div>
+            <div class="score-stat">
+              <span class="v num">8 400</span>
+              <span class="l">Clients</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="rule" />
+
+<!-- ========================= FEATURE 2 — PROJECTIONS ========================= -->
+<section>
+  <div class="wrap">
+    <div class="feature reverse">
+      <div class="feature-text">
+        <span class="eyebrow">Projections financières</span>
+        <h2>Des projections financières <em>construites, pas inventées.</em></h2>
+        <p class="lead">Chaque chiffre est étiqueté : vérifié, estimé, ou hypothèse. Tu sais exactement ce qui est solide et ce qui reste à valider avant ton RDV bancaire.</p>
+        <ul>
+          <li>
+            <span class="ix">01</span>
+            <div>
+              <b>CA mois 1, 3, 6, An 1 et projection An 3</b>
+              <span class="txt">Seuil de rentabilité, point mort, BFR et tableau d'amortissement calculés.</span>
+            </div>
+          </li>
+          <li>
+            <span class="ix">02</span>
+            <div>
+              <b>Détail complet des charges</b>
+              <span class="txt">Fixes, variables, investissements — chaque poste justifié. Export PDF structuré et lisible.</span>
+            </div>
+          </li>
+          <li>
+            <span class="ix">03</span>
+            <div>
+              <b>3 scénarios documentés</b>
+              <span class="txt">Pessimiste, réaliste, optimiste — avec les hypothèses expliquées pour chacun.</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="feature-visual">
+        <div class="card proj-card">
+          <div class="card-head">
+            <span>Projections CA · VélôBretagne</span>
+            <span>An 3</span>
+          </div>
+          <div class="big-money num">185 000<sup>€</sup></div>
+          <div class="proj-label">projection an 3</div>
+          <div class="chart" aria-hidden="true">
+            <div class="bar dim" style="height:18%"></div>
+            <div class="bar dim" style="height:26%"></div>
+            <div class="bar dim" style="height:34%"></div>
+            <div class="bar" style="height:44%"></div>
+            <div class="bar" style="height:54%"></div>
+            <div class="bar accent" style="height:62%"></div>
+            <div class="bar accent" style="height:70%"></div>
+            <div class="bar accent" style="height:82%"></div>
+            <div class="bar accent" style="height:94%"></div>
+            <div class="bar accent" style="height:88%"></div>
+            <div class="bar accent" style="height:100%"></div>
+            <div class="bar accent" style="height:96%"></div>
+          </div>
+          <div class="chart-axis">
+            <span>M1</span><span>M3</span><span>M6</span><span>An 1</span><span>An 3</span>
+          </div>
+          <div class="kpi-row">
+            <div class="kpi"><span class="l">CA mensuel</span><span class="v num">Break-even</span></div>
+            <div class="kpi"><span class="l">Marge brute</span><span class="v num accent">71<em style="font-style:normal">%</em></span></div>
+            <div class="kpi"><span class="l">Break-even</span><span class="v num">Mois 4</span></div>
+          </div>
+          <div class="kpi-row" style="margin-top:0;border-top:0">
+            <div class="kpi" style="border-right:0;padding-right:0"><span class="l">ROI initial</span><span class="v num accent">340<em style="font-style:normal">%</em></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="rule" />
+
+<!-- ========================= FEATURE 3 — EXPERT 24/7 ========================= -->
+<section>
+  <div class="wrap">
+    <div class="feature">
+      <div class="feature-text">
+        <span class="eyebrow">Expert Eadee</span>
+        <h2>Conseiller disponible. <em>24 heures sur 24.</em></h2>
+        <p class="lead">Ton Expert EADEE connaît chaque ligne de ton plan. Il répond, affine et te guide — à n'importe quelle heure, sans attente.</p>
+        <ul>
+          <li>
+            <span class="ix">01</span>
+            <div>
+              <b>Connaissance totale de ton plan</b>
+              <span class="txt">Toutes les données de ton projet en mémoire. Pas besoin de tout ré-expliquer à chaque question.</span>
+            </div>
+          </li>
+          <li>
+            <span class="ix">02</span>
+            <div>
+              <b>Business, stratégie, finances</b>
+              <span class="txt">Pose n'importe quelle question : il répond avec du concret adapté à ton secteur, pas des généralités.</span>
+            </div>
+          </li>
+          <li>
+            <span class="ix">03</span>
+            <div>
+              <b>Mise à jour du plan en direct</b>
+              <span class="txt">Il peut modifier, affiner ou régénérer des sections entières selon tes retours immédiats.</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="feature-visual">
+        <div class="card chat-card">
+          <div class="card-head">
+            <span>Expert EADEE · En ligne</span>
+            <span class="status-dot">Actif</span>
+          </div>
+          <div class="chat-row">
+            <div class="chat-avatar expert">✦</div>
+            <div class="chat-bubble">
+              Ta marge de <b>71%</b> est solide. Je recommande les partenariats hôtels avant la pub — ROI 3× plus rapide et aucun coût d'acquisition initial.
+            </div>
+          </div>
+          <div class="chat-row user">
+            <div class="chat-avatar user">T</div>
+            <div class="chat-bubble">
+              Comment signer mes 10 premiers clients&nbsp;?
+            </div>
+          </div>
+          <div class="chat-row">
+            <div class="chat-avatar expert">✦</div>
+            <div class="chat-bubble">
+              Commence par ton réseau proche : identifie <b>20 contacts ciblés</b>, envoie le template de prospection qu'on a préparé. Objectif : 3 rendez-vous cette semaine.
+            </div>
+          </div>
+          <div class="typing">EXPERT EN TRAIN DE RÉFLÉCHIR…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="rule" />
+
+<!-- ========================= FEATURE 4 — BANK / BPI ========================= -->
+<section style="background:var(--bg-2)">
+  <div class="wrap">
+    <div class="feature reverse">
+      <div class="feature-text">
+        <span class="eyebrow">Dossier bancaire &amp; BPI</span>
+        <h2>Tu prépares un dossier bancaire ou BPI&nbsp;? <em>EADEE est structuré pour ça aussi.</em></h2>
+        <p class="lead">EADEE suit la structure standard demandée par les banques françaises et BPI France. Ce qu'on te dit clairement : EADEE te fait gagner plusieurs semaines de structuration. Pour un RDV bancaire, fais valider les chiffres par un expert-comptable ou ta CCI — on t'indique les ressources gratuites directement dans ton plan.</p>
+        <ul>
+          <li>
+            <span class="ix">✓</span>
+            <div>
+              <b>Plan de financement besoins / ressources</b>
+              <span class="txt">Équilibré et justifié — le tableau n°1 que cherche un banquier.</span>
+            </div>
+          </li>
+          <li>
+            <span class="ix">✓</span>
+            <div>
+              <b>Score de bancabilité /100</b>
+              <span class="txt">Sur les 6 critères réels évalués par les banques : apport, point mort, trésorerie, garanties…</span>
+            </div>
+          </li>
+          <li>
+            <span class="ix">✓</span>
+            <div>
+              <b>Checklist documents + ressources gratuites</b>
+              <span class="txt">Documents bloquants vs souhaitables. Contacts CCI, BGE, BPI inclus dans chaque plan.</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="feature-visual">
+        <div class="card banca-card">
+          <div class="card-head">
+            <span>Score bancabilité · VélôBretagne</span>
+            <span>BPI ready</span>
+          </div>
+          <div class="score-big num">78<sup>/100</sup></div>
+          <div class="verdict">Dossier solide <em>— Apport à renforcer</em></div>
+          <div class="banca-list">
+            <div class="row"><span class="check-ic">✓</span><span>Plan financement</span><span class="v">Équilibré</span></div>
+            <div class="row"><span class="check-ic">✓</span><span>Trésorerie 12 mois</span><span class="v">Sans tension</span></div>
+            <div class="row"><span class="check-ic">✓</span><span>Bilan prévisionnel 3 ans</span><span class="v">Cohérent</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= 23 SECTIONS TOC ========================= -->
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <div class="left">
+        <span class="eyebrow">Ce que tu obtiens</span>
+      </div>
+      <h2>23 sections. <em>Rien n'est laissé au hasard.</em></h2>
+    </div>
+    <p class="section-lead" style="max-width:780px;margin-bottom:32px">Chaque plan Eadee contient ces 23 sections, complètes et personnalisées à ton projet. Aucun copier-coller, aucune section vide.</p>
+
+    <div class="toc-tabs" role="tablist">
+      <button class="toc-tab active" data-filter="all">Toutes<span class="ct">23</span></button>
+      <button class="toc-tab" data-filter="Stratégie">Stratégie<span class="ct">6</span></button>
+      <button class="toc-tab" data-filter="Marché">Marché<span class="ct">2</span></button>
+      <button class="toc-tab" data-filter="Finance">Finance<span class="ct">7</span></button>
+      <button class="toc-tab" data-filter="Juridique">Juridique<span class="ct">4</span></button>
+      <button class="toc-tab" data-filter="Action">Action<span class="ct">4</span></button>
+    </div>
+
+    <div class="toc-grid">
+      <div class="toc-item" data-cat="Stratégie"><div class="toc-item-head"><span class="ix">01</span><span class="tag" data-cat="Stratégie">Stratégie</span></div><h4>Résumé exécutif</h4><p>La synthèse de ton projet en 1 paragraphe percutant pour accrocher banquiers et investisseurs.</p></div>
+      <div class="toc-item" data-cat="Stratégie"><div class="toc-item-head"><span class="ix">02</span><span class="tag" data-cat="Stratégie">Stratégie</span></div><h4>Présentation du porteur</h4><p>Template structuré pour présenter ton parcours, tes compétences, ta légitimité.</p></div>
+      <div class="toc-item" data-cat="Stratégie"><div class="toc-item-head"><span class="ix">03</span><span class="tag" data-cat="Stratégie">Stratégie</span></div><h4>Présentation du projet</h4><p>Origine, vision, mission. Le pourquoi de ton entreprise raconté de façon mémorable.</p></div>
+      <div class="toc-item" data-cat="Stratégie"><div class="toc-item-head"><span class="ix">04</span><span class="tag" data-cat="Stratégie">Stratégie</span></div><h4>Proposition de valeur unique</h4><p>Ton USP clairement formulée : pourquoi un client te choisit toi et pas un autre.</p></div>
+      <div class="toc-item" data-cat="Stratégie"><div class="toc-item-head"><span class="ix">05</span><span class="tag" data-cat="Stratégie">Stratégie</span></div><h4>Modèle économique</h4><p>Tes offres, tes prix, comment tu génères de la marge. Avec exemples chiffrés.</p></div>
+      <div class="toc-item" data-cat="Stratégie"><div class="toc-item-head"><span class="ix">06</span><span class="tag" data-cat="Stratégie">Stratégie</span></div><h4>Stratégie commerciale</h4><p>Positionnement marketing, tunnel de vente, promesse de marque et canaux d'acquisition.</p></div>
+      <div class="toc-item" data-cat="Marché"><div class="toc-item-head"><span class="ix">07</span><span class="tag" data-cat="Marché">Marché</span></div><h4>Étude de marché</h4><p>Taille, croissance, tendances. Sources sectorielles citées. Adapté à la France.</p></div>
+      <div class="toc-item" data-cat="Marché"><div class="toc-item-head"><span class="ix">08</span><span class="tag" data-cat="Marché">Marché</span></div><h4>Analyse concurrentielle</h4><p>Tes 4-5 concurrents réels, leurs failles, leurs prix, ton positionnement différenciant.</p></div>
+      <div class="toc-item" data-cat="Finance"><div class="toc-item-head"><span class="ix">09</span><span class="tag" data-cat="Finance">Finance</span></div><h4>Plan de financement</h4><p>Besoins vs ressources équilibrés. Le tableau n°1 regardé par ton banquier avant tout.</p></div>
+      <div class="toc-item" data-cat="Finance"><div class="toc-item-head"><span class="ix">10</span><span class="tag" data-cat="Finance">Finance</span></div><h4>Plan d'investissement</h4><p>Chaque poste justifié par niveau de priorité. Matériel, immatériel, BFR.</p></div>
+      <div class="toc-item" data-cat="Finance"><div class="toc-item-head"><span class="ix">11</span><span class="tag" data-cat="Finance">Finance</span></div><h4>Compte de résultat 3 ans</h4><p>CA, charges, résultat sur 3 années glissantes. An 1 mensuel + années 2–3 annuelles.</p></div>
+      <div class="toc-item" data-cat="Finance"><div class="toc-item-head"><span class="ix">12</span><span class="tag" data-cat="Finance">Finance</span></div><h4>Plan de trésorerie 12 mois</h4><p>Entrées et sorties mensuelles. Alertes si tension de trésorerie détectée.</p></div>
+      <div class="toc-item" data-cat="Finance"><div class="toc-item-head"><span class="ix">13</span><span class="tag" data-cat="Finance">Finance</span></div><h4>Bilan prévisionnel 3 ans</h4><p>Actif et passif simplifié à fin d'an 1, 2 et 3. Vision patrimoniale de l'entreprise.</p></div>
+      <div class="toc-item" data-cat="Finance"><div class="toc-item-head"><span class="ix">14</span><span class="tag" data-cat="Finance">Finance</span></div><h4>Seuil de rentabilité</h4><p>Point mort calculé + délai pour l'atteindre en mois. À partir de quand tu es rentable.</p></div>
+      <div class="toc-item" data-cat="Finance"><div class="toc-item-head"><span class="ix">15</span><span class="tag" data-cat="Finance">Finance</span></div><h4>Tableau d'amortissement</h4><p>Mensualité estimée, capacité de remboursement, option différé conseillée si besoin.</p></div>
+      <div class="toc-item" data-cat="Juridique"><div class="toc-item-head"><span class="ix">16</span><span class="tag" data-cat="Juridique">Juridique</span></div><h4>Aspects juridiques</h4><p>Statut recommandé (SAS, EI, SARL…) avec justification chiffrée. Autorisations sectorielles.</p></div>
+      <div class="toc-item" data-cat="Juridique"><div class="toc-item-head"><span class="ix">17</span><span class="tag" data-cat="Juridique">Juridique</span></div><h4>Aspects organisationnels</h4><p>Équipe, locaux, sous-traitance. Comment ton activité s'organise au quotidien.</p></div>
+      <div class="toc-item" data-cat="Juridique"><div class="toc-item-head"><span class="ix">18</span><span class="tag" data-cat="Juridique">Juridique</span></div><h4>Aides &amp; subventions</h4><p>BPI, ACRE, Pôle Emploi, prêts d'honneur — ce à quoi tu as droit, avec montants et liens.</p></div>
+      <div class="toc-item" data-cat="Juridique"><div class="toc-item-head"><span class="ix">19</span><span class="tag" data-cat="Juridique">Juridique</span></div><h4>Démarches administratives</h4><p>Les 6 étapes dans l'ordre, avec délais et coûts réels. De l'immatriculation à l'ouverture.</p></div>
+      <div class="toc-item" data-cat="Action"><div class="toc-item-head"><span class="ix">20</span><span class="tag" data-cat="Action">Action</span></div><h4>Analyse des risques</h4><p>5 risques concrets avec plan de mitigation pour chacun. Risques marché, financiers, légaux.</p></div>
+      <div class="toc-item" data-cat="Action"><div class="toc-item-head"><span class="ix">21</span><span class="tag" data-cat="Action">Action</span></div><h4>Plan d'action 90 jours</h4><p>Actions prioritaires sur 3 mois. Concret, daté, mesurable. Tes 12 premières décisions.</p></div>
+      <div class="toc-item" data-cat="Action"><div class="toc-item-head"><span class="ix">22</span><span class="tag" data-cat="Action">Action</span></div><h4>Score de viabilité &amp; bancabilité</h4><p>Double score /100 : viabilité du projet + solidité du dossier financier.</p></div>
+      <div class="toc-item" data-cat="Action"><div class="toc-item-head"><span class="ix">23</span><span class="tag" data-cat="Action">Action</span></div><h4>Checklist dossier complet</h4><p>Documents à rassembler classés par priorité. Bloquants vs souhaitables — pour banque et BPI.</p></div>
+    </div>
+
+    <div class="toc-cta">
+      <p><b>23 sections, 1 plan, 60 secondes.</b> Chaque section est générée et personnalisée à partir de ton idée et de tes données. Aucune section n'est un copier-coller.</p>
+      <a class="btn btn-lg btn-accent" href="#" onclick="openAuth('signup');return false;">Générer mon plan →</a>
+    </div>
+  </div>
+</section>
+
+<hr class="rule" />
+
+<!-- ========================= TESTIMONIALS ========================= -->
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <div class="left">
+        <span class="eyebrow">Ils ont lancé avec Eadee</span>
+      </div>
+      <h2>Des projets vrais. <em>Des résultats vrais.</em></h2>
+    </div>
+
+    <div class="testimonials">
+      <article class="testim">
+        <div class="testim-mark">"</div>
+        <p class="testim-quote">J'avais une idée claire mais aucune idée de comment la structurer. EADEE m'a sorti un plan complet en moins d'une minute. J'ai juste eu à compléter les vrais documents par dessus — la BPI a validé mon prêt de 15 000€ sans difficulté.</p>
+        <div class="testim-meta">Conciergerie Airbnb · 58s · Score 91/100</div>
+        <div class="testim-byline">
+          <span class="ph" style="background:oklch(0.55 0.10 30)">M</span>
+          <div class="who"><b>Marie L.</b><span>34 ANS · LYON</span></div>
+        </div>
+      </article>
+      <article class="testim">
+        <div class="testim-mark">"</div>
+        <p class="testim-quote">J'avais abandonné l'idée de me lancer à cause du business plan. EADEE m'a débloqué en 2 minutes. J'avais enfin quelque chose de concret à montrer à ma conseillère Pôle Emploi.</p>
+        <div class="testim-meta">Dark kitchen healthy · 72s · Score 84/100</div>
+        <div class="testim-byline">
+          <span class="ph" style="background:oklch(0.42 0.07 160)">S</span>
+          <div class="who"><b>Sofiane B.</b><span>27 ANS · MARSEILLE</span></div>
+        </div>
+      </article>
+      <article class="testim">
+        <div class="testim-mark">"</div>
+        <p class="testim-quote">Ce qui m'a le plus surpris c'est la qualité des projections financières. C'était structuré, cohérent, et mon expert-comptable n'a eu qu'à valider — au lieu de repartir de zéro.</p>
+        <div class="testim-meta">Cabinet de coaching B2B · 65s · Score 88/100</div>
+        <div class="testim-byline">
+          <span class="ph" style="background:oklch(0.38 0.08 250)">L</span>
+          <div class="who"><b>Léa K.</b><span>41 ANS · NANTES</span></div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= TRANSPARENCY ========================= -->
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <div class="left">
+        <span class="eyebrow">Transparence</span>
+      </div>
+      <h2>Soyons clairs sur ce qu'EADEE <em>fait vraiment.</em></h2>
+    </div>
+
+    <div class="trans-grid">
+      <div class="trans-col yes">
+        <h3>Ce que tu obtiens</h3>
+        <ul>
+          <li>Un business plan complet en 23 sections, personnalisé à ton projet</li>
+          <li>Des projections financières 3 ans cohérentes et justifiées</li>
+          <li>Une stratégie commerciale, des emails rédigés, tes démarches admin</li>
+          <li>Un score de viabilité pour savoir si ton idée tient la route</li>
+          <li>4 à 6 semaines de structuration économisées — en 60 secondes</li>
+        </ul>
+      </div>
+      <div class="trans-col no">
+        <h3>Ce qu'EADEE ne remplace pas</h3>
+        <ul>
+          <li>Les vrais documents physiques (Kbis, devis, avis d'imposition)</li>
+          <li>La validation d'un expert-comptable si tu vas en banque</li>
+          <li>La garantie d'obtenir un financement</li>
+          <li>Le conseil d'un juriste ou d'un conseiller BPI</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="trans-foot">C'est un outil puissant. Pas une baguette magique.<br/><em>Et on préfère te le dire maintenant.</em></p>
+  </div>
+</section>
+
+<!-- ========================= PRICING ========================= -->
+<section id="pricing" style="background:var(--bg-2)">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="left">
+        <span class="eyebrow">Investissement</span>
+      </div>
+      <h2>Simple. Transparent. <em>Sans surprise.</em></h2>
+    </div>
+
+    <div class="pricing">
+      <div class="price">
+        <div class="price-name">Solo</div>
+        <div class="price-sub">1 génération complète</div>
+        <div class="price-row">
+          <span class="strike">18,55€</span>
+          <span class="price-big num">12,99€</span>
+        </div>
+        <div class="price-credit">/ 1 génération</div>
+        <div class="price-meta"><b>1 crédit</b> · 12,99€ / génération</div>
+        <a class="btn btn-lg btn-ghost" href="#" style="border-color:var(--ink)" onclick="openAuth('signup');return false;">Acheter Solo</a>
+      </div>
+      <div class="price featured">
+        <div class="price-badge">✦ Populaire</div>
+        <div class="price-name">Pro</div>
+        <div class="price-sub">Pack 3 générations</div>
+        <div class="price-row">
+          <span class="strike">42,84€</span>
+          <span class="price-big num">29,99€</span>
+        </div>
+        <div class="price-credit">/ pack 3 générations</div>
+        <div class="price-meta"><b>3 crédits</b> · 10,00€ / génération</div>
+        <a class="btn btn-lg btn-accent" href="#" onclick="openAuth('signup');return false;">Acheter Pro</a>
+      </div>
+      <div class="price">
+        <div class="price-badge">✦ Meilleure valeur</div>
+        <div class="price-name">Empire</div>
+        <div class="price-sub">Pack 8 générations</div>
+        <div class="price-row">
+          <span class="strike">85,70€</span>
+          <span class="price-big num">59,99€</span>
+        </div>
+        <div class="price-credit">/ pack 8 générations</div>
+        <div class="price-meta"><b>8 crédits</b> · 7,50€ / génération</div>
+        <a class="btn btn-lg btn-ghost" href="#" style="border-color:var(--ink)" onclick="openAuth('signup');return false;">Acheter Empire</a>
+      </div>
+    </div>
+
+    <div class="price-foot">
+      <div>
+        <div class="l">✦ Les 3 packs payants incluent exactement les mêmes fonctionnalités</div>
+        <p style="margin-top:8px"><b>Seul le nombre de générations change.</b> Plus t'en achètes, moins tu paies par plan.</p>
+      </div>
+    </div>
+
+    <div class="price-bullets">
+      <span>23 sections complètes</span>
+      <span>Score viabilité /100</span>
+      <span>Projections 3 ans</span>
+      <span>Emails rédigés</span>
+      <span>Démarches admin</span>
+      <span>Expert Eadee 24h/24</span>
+      <span>Export PDF</span>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= FAQ ========================= -->
+<section id="faq">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="left">
+        <span class="eyebrow">Questions fréquentes</span>
+      </div>
+      <h2>Tout ce que tu veux savoir. <em>Avant de te lancer.</em></h2>
+    </div>
+
+    <div class="faq">
+      <details class="q" open>
+        <summary>Le plan EADEE est-il vraiment complet&nbsp;?</summary>
+        <div class="a"><p>Oui. 23 sections couvrent l'intégralité d'un business plan professionnel : stratégie, marché, finances, juridique, démarches, risques, plan d'action. Chaque section est générée et personnalisée à ton projet — aucune section générique ou vide.</p></div>
+      </details>
+      <details class="q">
+        <summary>Est-ce que mon plan sera pris au sérieux par une banque ou BPI France&nbsp;?</summary>
+        <div class="a">
+          <p>EADEE suit la structure standard demandée par les banques françaises et BPI France. Des entrepreneurs ont obtenu des financements avec un plan EADEE comme base de travail.</p>
+          <p>Ce qu'on te dit honnêtement : un plan généré par IA est un point de départ solide. Pour un RDV bancaire, fais valider les chiffres par un expert-comptable ou ta CCI — on t'indique les ressources gratuites dans chaque plan.</p>
+        </div>
+      </details>
+      <details class="q">
+        <summary>Quelle différence avec ChatGPT ou un outil gratuit&nbsp;?</summary>
+        <div class="a"><p>ChatGPT génère du texte. EADEE génère un business plan structuré selon les standards français : plan de financement équilibré, projections cohérentes entre elles, score de viabilité, tableau d'amortissement, checklist des démarches. C'est un outil spécialisé, pas un chatbot généraliste.</p></div>
+      </details>
+      <details class="q">
+        <summary>Puis-je modifier le plan après génération&nbsp;?</summary>
+        <div class="a"><p>Oui, entièrement. Chaque section est éditable. Le conseiller EADEE peut aussi réécrire une section sur simple demande.</p></div>
+      </details>
+      <details class="q">
+        <summary>Mes données sont-elles privées&nbsp;?</summary>
+        <div class="a"><p>Absolument. Hébergement en France, conforme RGPD, aucune revente. Tes idées restent les tiennes, nous ne les utilisons jamais pour entraîner nos modèles.</p></div>
+      </details>
+      <details class="q">
+        <summary>Combien de temps prend vraiment la génération&nbsp;?</summary>
+        <div class="a"><p>Entre 45 et 90 secondes pour un plan complet 23 sections. La durée dépend de la profondeur des recherches marché pour ton secteur.</p></div>
+      </details>
+      <details class="q">
+        <summary>Pour quels types de projets Eadee fonctionne&nbsp;?</summary>
+        <div class="a"><p>Tout projet d'entreprise en France : commerce, service, artisanat, app SaaS, restauration, freelance, e-commerce, import/export, conciergerie, coaching… Si tu as une idée, Eadee l'analyse.</p></div>
+      </details>
+      <details class="q">
+        <summary>Que se passe-t-il si le plan ne me convient pas&nbsp;?</summary>
+        <div class="a"><p>Tu peux régénérer en affinant ton idée. Et nous avons une garantie satisfait ou remboursé 14 jours.</p></div>
+      </details>
+      <details class="q">
+        <summary>C'est un abonnement&nbsp;?</summary>
+        <div class="a"><p>Non. Chaque pack est un paiement unique. Tu achètes des crédits, tu les consommes quand tu veux, sans engagement, sans auto-renouvellement.</p></div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= FOOTER ========================= -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-intro">
+        <a class="brand" href="#"><span class="brand-mark">E</span><span class="brand-word">EADEE</span></a>
+        <p>Le business plan intelligent. Pensé pour la France.</p>
+        <div class="socials">
+          <a href="#" aria-label="X">X</a>
+          <a href="#" aria-label="LinkedIn">in</a>
+          <a href="#" aria-label="Instagram">ig</a>
+        </div>
+      </div>
+      <div class="foot-col">
+        <h4>Produit</h4>
+        <ul>
+          <li><a href="#features">Fonctionnalités</a></li>
+          <li><a href="#pricing">Tarifs</a></li>
+          <li><a href="#">Exemples de plans</a></li>
+          <li><a href="#">Comparaison</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h4>Ressources</h4>
+        <ul>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Guides gratuits</a></li>
+          <li><a href="#faq">FAQ</a></li>
+          <li><a href="#">Exemple PDF</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h4>Entreprise</h4>
+        <ul>
+          <li><a href="#">À propos</a></li>
+          <li><a href="mailto:contact@eadee.fr">Nous contacter</a></li>
+          <li><a href="#">Partenariats</a></li>
+          <li><a href="#">Programme affiliation</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h4>Légal</h4>
+        <ul>
+          <li><a href="#">Mentions légales</a></li>
+          <li><a href="#">CGU / CGV</a></li>
+          <li><a href="#">Confidentialité</a></li>
+          <li><a href="#">Cookies</a></li>
+          <li><a href="#">RGPD</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="foot-bottom">
+      <p class="small">
+        EADEE — Tous droits réservés · Données hébergées en Europe · Conforme RGPD · <a href="mailto:contact@eadee.fr">contact@eadee.fr</a> · <a href="https://www.cnil.fr/fr/plaintes">Réclamation CNIL</a><br/><br/>
+        Les plans générés sont produits par intelligence artificielle (Anthropic Claude). À valider par un professionnel avant tout engagement.
+      </p>
+      <div class="foot-mark">eadee.</div>
+    </div>
+  </div>
+</footer>
+
+<!-- ========================= COOKIE BANNER ========================= -->
+<div class="cookie" id="cookie">
+  <h5>🍪 Cookies &amp; données</h5>
+  <p>Nous utilisons des cookies essentiels au fonctionnement du site. Aucun cookie publicitaire tiers n'est utilisé sans votre consentement. <a href="#">En savoir plus</a></p>
+  <div class="cookie-row">
+    <button class="btn btn-ghost" style="border-color:var(--rule)" onclick="document.getElementById('cookie').style.display='none'">Refuser</button>
+    <button class="btn" onclick="document.getElementById('cookie').style.display='none'">Tout accepter</button>
+  </div>
+</div>
+
+<script>
+  // ===== Hero live demo =====
+  (function(){
+    const kinetic   = document.getElementById('kineticNum');
+    const timer     = document.getElementById('liveTimer');
+    const progress  = document.getElementById('liveProgress');
+    const sections  = document.querySelectorAll('#liveSections li');
+    const moreEl    = document.getElementById('liveMore');
+    const result    = document.getElementById('liveResult');
+    const ornCount  = document.getElementById('ornCount');
+    const ornBars   = document.querySelectorAll('#ornBars i');
+    const chips     = [document.getElementById('chip1'),document.getElementById('chip2'),document.getElementById('chip3')];
+
+    const SHOWN_SECTIONS = sections.length; // 9
+    const TOTAL_SECTIONS = 23;
+    const RUN_MS  = 18000;   // 18s to fill
+    const HOLD_MS = 5000;    // 5s hold the result
+
+    function reset(){
+      kinetic.textContent = '00';
+      kinetic.classList.remove('done');
+      timer.textContent = '00 / 60s';
+      progress.style.width = '0%';
+      sections.forEach(li=>{ li.classList.remove('done','active'); li.querySelector('.lst').textContent='⋯'; });
+      moreEl.textContent = '+ '+(TOTAL_SECTIONS-SHOWN_SECTIONS)+' autres sections en cours';
+      result.classList.remove('shown');
+      ornCount.textContent = '00 / 23 sections';
+      ornBars.forEach(b=>b.classList.remove('on'));
+      chips.forEach(c=>c && c.classList.remove('shown'));
+    }
+
+    function run(){
+      reset();
+      const start = performance.now();
+      const chipAt = [0.18, 0.48, 0.74];
+
+      function frame(now){
+        const t = Math.min(1, (now - start) / RUN_MS);
+        const secs = Math.floor(t * 60);
+        const sectionsDone = Math.min(TOTAL_SECTIONS, Math.floor(t * TOTAL_SECTIONS));
+        const shownDone   = Math.min(SHOWN_SECTIONS, Math.round((sectionsDone / TOTAL_SECTIONS) * SHOWN_SECTIONS));
+
+        kinetic.textContent = String(secs).padStart(2,'0');
+        timer.textContent = String(secs).padStart(2,'0') + ' / 60s';
+        progress.style.width = (t*100).toFixed(1) + '%';
+        ornCount.textContent = String(sectionsDone).padStart(2,'0') + ' / 23 sections';
+
+        sections.forEach((li,i)=>{
+          if(i < shownDone){
+            li.classList.add('done'); li.classList.remove('active');
+            li.querySelector('.lst').textContent='✓';
+          } else if(i === shownDone && t < 1){
+            li.classList.add('active'); li.classList.remove('done');
+            li.querySelector('.lst').textContent='···';
+          } else {
+            li.classList.remove('done','active');
+            li.querySelector('.lst').textContent='⋯';
+          }
+        });
+
+        const remaining = TOTAL_SECTIONS - sectionsDone;
+        moreEl.textContent = remaining > 0 ? '+ '+remaining+' autres sections en cours' : 'Toutes les sections sont prêtes';
+
+        ornBars.forEach((b,i)=>{ if(i < sectionsDone) b.classList.add('on'); else b.classList.remove('on'); });
+
+        chips.forEach((c,i)=>{ if(c && t >= chipAt[i]) c.classList.add('shown'); });
+
+        if(t < 1){
+          requestAnimationFrame(frame);
+        } else {
+          kinetic.textContent = '60';
+          kinetic.classList.add('done');
+          timer.textContent = '60 / 60s ✓';
+          sections.forEach(li=>{ li.classList.remove('active'); });
+          result.classList.add('shown');
+          setTimeout(run, HOLD_MS);
+        }
+      }
+      requestAnimationFrame(frame);
+    }
+
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
+    else run();
+  })();
+
+  // TOC filter
+  const tabs = document.querySelectorAll('.toc-tab');
+  const items = document.querySelectorAll('.toc-item');
+  tabs.forEach(t=>{
+    t.addEventListener('click',()=>{
+      tabs.forEach(x=>x.classList.remove('active'));
+      t.classList.add('active');
+      const f = t.dataset.filter;
+      items.forEach(i=>{
+        i.style.display = (f==='all' || i.dataset.cat===f) ? '' : 'none';
+      });
+    });
+  });
+
+  // FAQ: only one open at a time (optional, nicer feel)
+  document.querySelectorAll('details.q').forEach(d=>{
+    d.addEventListener('toggle',()=>{
+      if(d.open){
+        document.querySelectorAll('details.q').forEach(o=>{ if(o!==d) o.open=false; });
+      }
+    });
+  });
+</script>
+
+<!-- ========================= AUTH ========================= -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<div id="authOverlay" style="display:none;position:fixed;inset:0;background:rgba(20,18,14,0.55);z-index:9000;backdrop-filter:blur(6px)" onclick="if(event.target===this)closeAuth()">
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--paper);border:1px solid var(--rule);border-radius:18px;padding:44px 40px;width:min(440px,94vw);box-shadow:0 32px 80px rgba(20,18,14,0.18)">
+    <h2 id="authTitle" style="font-family:'Instrument Serif',serif;font-size:30px;font-weight:400;margin:0 0 6px;color:var(--ink)">Créer un compte</h2>
+    <p id="authSub" style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);margin:0 0 28px">Commencez gratuitement</p>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <input id="authEmail" type="email" placeholder="votre@email.com" style="width:100%;box-sizing:border-box;padding:13px 16px;border:1px solid var(--rule);border-radius:8px;font-family:'Geist',sans-serif;font-size:15px;background:var(--bg);color:var(--ink);outline:none" />
+      <input id="authPassword" type="password" placeholder="Mot de passe" style="width:100%;box-sizing:border-box;padding:13px 16px;border:1px solid var(--rule);border-radius:8px;font-family:'Geist',sans-serif;font-size:15px;background:var(--bg);color:var(--ink);outline:none" />
+      <div id="authError" style="display:none;color:#c0392b;font-size:13px;font-family:'JetBrains Mono',monospace"></div>
+      <button id="authSubmit" onclick="submitAuth()" style="padding:14px;background:var(--ink);color:var(--paper);border:none;border-radius:999px;font-family:'Geist',sans-serif;font-size:15px;font-weight:500;cursor:pointer;transition:opacity .15s">Créer mon compte →</button>
+    </div>
+    <p style="text-align:center;margin:18px 0 0;font-size:13px;color:var(--ink-3);font-family:'Geist',sans-serif">
+      <span id="authToggleTxt">Déjà un compte ? </span><a href="#" id="authToggleLink" onclick="toggleAuthMode();return false;" style="color:var(--accent);text-decoration:none">Se connecter</a>
+    </p>
+  </div>
+</div>
+<script>
+(function(){
+  const SB_URL='https://gyzyvcvphizbbdhaiwne.supabase.co';
+  const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd5enl2Y3ZwaGl6YmJkaGFpd25lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0MDc2MzQsImV4cCI6MjA5Mjk4MzYzNH0.onkLrBBW1BV4Rk2Rj2Er2boqvT3_RI4gbUwaJEtHsvc';
+  const sb = supabase.createClient(SB_URL, SB_KEY);
+  let authMode = 'signup';
+  window.openAuth = function(mode){
+    authMode = mode || 'signup';
+    document.getElementById('authTitle').textContent = authMode==='login' ? 'Connexion' : 'Créer un compte';
+    document.getElementById('authSub').textContent = authMode==='login' ? 'Bon retour !' : 'Commencez gratuitement';
+    document.getElementById('authSubmit').textContent = authMode==='login' ? 'Se connecter →' : 'Créer mon compte →';
+    document.getElementById('authToggleTxt').textContent = authMode==='login' ? 'Pas encore de compte ? ' : 'Déjà un compte ? ';
+    document.getElementById('authToggleLink').textContent = authMode==='login' ? 'Créer un compte' : 'Se connecter';
+    document.getElementById('authError').style.display='none';
+    document.getElementById('authOverlay').style.display='block';
+  };
+  window.closeAuth = function(){ document.getElementById('authOverlay').style.display='none'; };
+  window.toggleAuthMode = function(){ window.openAuth(authMode==='signup'?'login':'signup'); };
+  window.submitAuth = async function(){
+    const email = document.getElementById('authEmail').value.trim();
+    const password = document.getElementById('authPassword').value;
+    const errEl = document.getElementById('authError');
+    const btn = document.getElementById('authSubmit');
+    errEl.style.display='none';
+    btn.textContent='…'; btn.disabled=true;
+    try {
+      const res = authMode==='signup'
+        ? await sb.auth.signUp({email, password})
+        : await sb.auth.signInWithPassword({email, password});
+      if(res.error) throw res.error;
+      window.location.href = '/eadee-app-v2.html';
+    } catch(e){
+      errEl.textContent = e.message || 'Erreur de connexion';
+      errEl.style.display='block';
+      btn.textContent = authMode==='login' ? 'Se connecter →' : 'Créer mon compte →';
+      btn.disabled=false;
+    }
+  };
+})();
+</script>
+
+</body>
+</html>
