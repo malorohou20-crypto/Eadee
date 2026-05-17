@@ -530,6 +530,85 @@
     .page h1{font-size:40px}
   }
 </style>
+<style>
+/* ── Documents annexes ─────────────────────────────── */
+.docs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.doc-btn{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:14px 14px 12px;background:var(--bg);border:1px solid var(--rule);border-radius:8px;cursor:pointer;transition:all .18s;text-align:left;color:var(--ink-2);font-family:inherit;position:relative;overflow:hidden}
+.doc-btn:hover{background:var(--paper);border-color:var(--accent,#c84b2f);color:var(--ink)}
+.doc-btn:active{transform:scale(.98)}
+.doc-btn.loading{opacity:.6;pointer-events:none}
+.doc-btn.loading::after{content:'';position:absolute;bottom:0;left:0;height:2px;background:var(--accent,#c84b2f);animation:doc-progress 1.5s ease-in-out infinite;width:40%}
+@keyframes doc-progress{0%{left:0;width:30%}50%{left:40%;width:50%}100%{left:100%;width:0}}
+.doc-icon{color:var(--ink-4);transition:color .18s;flex-shrink:0}
+.doc-btn:hover .doc-icon{color:var(--accent,#c84b2f)}
+.doc-label{font-size:12px;font-weight:600;line-height:1.4;color:var(--ink)}
+.doc-format{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-4)}
+
+/* ── Bancabilité checklist ─────────────────────────── */
+.banc-score-bar{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.banc-track{flex:1;height:6px;background:var(--rule);border-radius:3px;overflow:hidden}
+.banc-fill{height:100%;border-radius:3px;background:var(--accent,#c84b2f);transition:width .4s ease}
+.banc-pct{font-family:'Instrument Serif',serif;font-size:26px;color:var(--accent,#c84b2f);line-height:1;min-width:56px;text-align:right}
+.banc-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-3);letter-spacing:.08em}
+.banc-items{display:flex;flex-direction:column;gap:6px}
+.banc-item{display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--bg);border:1px solid var(--rule);border-radius:6px;cursor:pointer;transition:background .15s,border-color .15s;user-select:none}
+.banc-item:hover{background:var(--bg-2,var(--bg));border-color:var(--rule-2)}
+.banc-item.checked{background:oklch(0.96 0.015 60);border-color:var(--accent,#c84b2f)}
+.banc-checkbox{width:18px;height:18px;border-radius:4px;border:2px solid var(--rule-2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.banc-item.checked .banc-checkbox{background:var(--accent,#c84b2f);border-color:var(--accent,#c84b2f)}
+.banc-item-text{font-size:13px;color:var(--ink-2);line-height:1.4}
+.banc-item.checked .banc-item-text{color:var(--ink)}
+
+/* ── Dossier modal ─────────────────────────────────── */
+.dossier-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:8000;display:flex;flex-direction:column;overflow:hidden}
+.dossier-header{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;background:var(--paper);border-bottom:1px solid var(--rule);flex-shrink:0}
+.dossier-header-title{font-family:'Instrument Serif',serif;font-size:22px;color:var(--ink);letter-spacing:.02em}
+.dossier-header-sub{font-size:13px;color:var(--ink-3);margin-top:2px}
+.dossier-header-actions{display:flex;gap:10px}
+.dossier-btn{padding:9px 18px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;border:none}
+.dossier-btn.print{background:var(--ink);color:var(--paper)}
+.dossier-btn.close-btn{background:transparent;color:var(--ink-3);border:1px solid var(--rule-2)}
+.dossier-btn.close-btn:hover{background:var(--bg)}
+.dossier-tabs{display:flex;gap:0;background:var(--bg);border-bottom:1px solid var(--rule);flex-shrink:0;overflow-x:auto}
+.dossier-tab{padding:12px 20px;font-size:13px;font-weight:600;color:var(--ink-3);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s;background:transparent;border-left:none;border-right:none;border-top:none}
+.dossier-tab:hover{color:var(--ink-2)}
+.dossier-tab.active{color:var(--ink);border-bottom-color:var(--ink)}
+.dossier-body{flex:1;overflow-y:auto;padding:32px 40px;background:var(--bg)}
+.dossier-section{display:none}
+.dossier-section.active{display:block}
+.dossier-card{background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:24px 28px;margin-bottom:20px}
+.dossier-card-title{font-family:'Instrument Serif',serif;font-size:18px;color:var(--ink);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--rule)}
+.dossier-card p{color:var(--ink-2);font-size:14px;line-height:1.7;margin-bottom:10px}
+.dossier-card p:last-child{margin-bottom:0}
+.dossier-checklist{list-style:none;padding:0;margin:0}
+.dossier-checklist li{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--rule);font-size:14px;color:var(--ink-2)}
+.dossier-checklist li:last-child{border-bottom:none}
+.dossier-checklist .step-num{min-width:28px;height:28px;border-radius:50%;background:var(--bg-2,var(--bg));color:var(--ink);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;border:1px solid var(--rule)}
+.dossier-checklist .step-body{flex:1}
+.dossier-checklist .step-title{font-weight:600;color:var(--ink);margin-bottom:4px}
+.dossier-checklist .step-meta{font-size:12px;color:var(--ink-4);display:flex;gap:16px;margin-top:4px}
+.dossier-doclist{list-style:none;padding:0;margin:0}
+.dossier-doclist li{padding:9px 0;border-bottom:1px solid var(--rule);font-size:14px;color:var(--ink-2);display:flex;align-items:center;gap:8px}
+.dossier-doclist li::before{content:"▸";color:var(--ink-3);font-size:11px;flex-shrink:0}
+.dossier-doclist li:last-child{border-bottom:none}
+.dossier-article{margin-bottom:18px}
+.dossier-article-num{font-size:11px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px}
+.dossier-article-title{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:6px}
+.dossier-article-body{font-size:13px;color:var(--ink-2);line-height:1.7;white-space:pre-wrap}
+.dossier-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.05em;margin-bottom:12px}
+.dossier-badge.physique{background:oklch(0.95 0.05 60);color:oklch(0.45 0.12 55)}
+.dossier-badge.numerique{background:oklch(0.94 0.04 250);color:oklch(0.40 0.12 250)}
+.dossier-badge.hybride{background:oklch(0.94 0.04 200);color:oklch(0.40 0.12 200)}
+.dossier-grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.dossier-bank-card{background:var(--bg);border:1px solid var(--rule);border-radius:6px;padding:16px}
+.dossier-bank-name{font-weight:700;color:var(--ink);font-size:15px;margin-bottom:4px}
+.dossier-bank-offer{font-size:13px;color:var(--ink-2);margin-bottom:6px}
+.dossier-bank-price{font-size:13px;font-weight:600;color:var(--accent,#c84b2f)}
+.dossier-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;height:300px;gap:20px}
+.dossier-spinner{width:48px;height:48px;border:3px solid var(--rule);border-top-color:var(--ink);border-radius:50%;animation:spin .8s linear infinite}
+.dossier-loading-text{font-size:14px;color:var(--ink-3)}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
 </head>
 <body>
 
