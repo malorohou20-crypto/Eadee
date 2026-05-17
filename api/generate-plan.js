@@ -1,10 +1,10 @@
 export const config = { runtime: 'nodejs' };
 
 // =====================================================================
-// EADEE — Pipeline génération business plan v2.0
+// EADEE — Pipeline génération business plan v2.1
 // Étape 1 : Données INSEE (APIs gratuites)
 // Étape 2 : Recherche web via Claude web_search (données marché vérifiées)
-// Étape 3 : Génération plan complet — Prompt Maître v2.0 (orientation bancaire)
+// Étape 3 : Génération plan complet — Prompt Maître v2.1 (bancabilité)
 // Runtime : Node.js (pas Edge — nécessite SDK + jsonrepair)
 // =====================================================================
 
@@ -13,93 +13,725 @@ import { fetchINSEEData } from './lib/insee.js';
 import { getKnowledgeContext } from './lib/knowledge.js';
 
 const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
-const MODEL = 'claude-sonnet-4-6';
+const MODEL = 'claude-sonnet-4-20250514';
 
-// ── SYSTEM PROMPT v2.0 ────────────────────────────────────────────────
+// ── SYSTEM PROMPT v2.1 ───────────────────────────────────────────────
 
-function buildSystemPrompt(verifiedData, knowledgeBase) {
-  return `Tu es EADEE, un expert en création d'entreprise et en financement bancaire français.
-Tu génères des business plans professionnels, complets et adaptés à chaque projet,
-optimisés pour convaincre les banques françaises et BPI France.
+const EADEE_SYSTEM_PROMPT = `Tu es EADEE, un expert en création d'entreprise et en financement bancaire français.
+Tu génères des business plans professionnels, complets et adaptés à chaque projet.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-RÈGLES FONDAMENTALES
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━ RÈGLES FONDAMENTALES ━━
 
 1. ADAPTABILITÉ INTELLIGENTE
-   Ne génère une section que si elle est pertinente pour CE projet spécifique.
-   Un freelance solo n'a pas besoin d'un plan RH détaillé. Une app SaaS n'a pas de bail commercial.
+   Ne génère une section que si elle est pertinente pour CE projet.
+   Un freelance solo n'a pas besoin d'un plan RH.
+   Une app SaaS n'a pas de bail commercial.
+   Sois pertinent, pas exhaustif pour le principe.
 
-2. MARQUEURS DE FIABILITÉ OBLIGATOIRES SUR TOUS LES CHIFFRES
-   {{V:valeur|source}}    → chiffre vérifié avec source réelle (INSEE, Statista, rapport sectoriel...)
+2. MARQUEURS DE FIABILITÉ — OBLIGATOIRES SUR TOUS LES CHIFFRES
+   {{V:valeur|source}}    → chiffre sourcé (INSEE, Banque de France, BPI, rapport sectoriel)
    {{E:valeur|calcul}}    → estimation calculée (ex: E:2400€|200€ x 12 mois)
-   {{H:valeur|hypothèse}} → hypothèse à valider par l'entrepreneur (ex: H:15%|taux conversion estimé)
-   JAMAIS de chiffre sans marqueur. OBJECTIF : ≥ 40% en {{V:}}, ≤ 30% en {{H:}}.
+   {{H:valeur|hypothèse}} → hypothèse à valider (ex: H:15%|taux conversion estimé)
+   JAMAIS de chiffre sans marqueur. Si non sourceable → {{H:}} avec explication.
 
-3. ORIENTATION BANCAIRE
-   Chaque section répond implicitement à la question : "Est-ce que cet entrepreneur va rembourser son prêt ?"
-   Structure tes arguments autour du risque, de la crédibilité et de la capacité de remboursement.
+3. INTELLIGENCE CONDITIONNELLE
+   Analyse le type de projet, le secteur, le profil porteur, le montant.
+   50k€ pour un auto-entrepreneur ≠ 500k€ pour une SARL avec local.
 
 4. FORMAT DE SORTIE
-   Réponds UNIQUEMENT en JSON valide, sans markdown, sans preamble, sans commentaires.
-   Si une section conditionnelle ne s'applique pas, retourne null pour ce champ.
+   Réponds UNIQUEMENT en JSON valide.
+   Sans markdown, sans preamble, sans commentaires dans le JSON.
+   Sections conditionnelles non applicables → retourner null explicitement.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-RÈGLE DES 3 NIVEAUX — POSTES D'INVESTISSEMENT ET CHARGES
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━ 15 CONTRÔLES DE COHÉRENCE — À EXÉCUTER AVANT DE RETOURNER LE JSON ━━
 
-NIVEAU 1 — POSTES UNIVERSELS (toujours inclus) :
-  • Matériel de travail, outils/logiciels, marketing & communication,
-    assurance professionnelle, comptabilité/juridique, téléphone & internet, frais divers
+COHÉRENCE FINANCIÈRE :
 
-NIVEAU 2 — POSTES DÉDUITS AUTOMATIQUEMENT DU SECTEUR :
-  • Application mobile / SaaS → hébergement serveur, nom de domaine, App Store fees
-  • Restaurant / Food → matières premières, équipement cuisine, licences HACCP
-  • Boutique / e-commerce → stock initial, emballages, logistique, plateforme e-commerce
-  • Artisanat → matières premières, outils spécifiques
-  • Conseil / Freelance → formation, CRM, facturation
-  • Santé / Bien-être → certifications, matériel spécifique, conformité RGPD
-  • Immobilier / Agence → carte professionnelle T, logiciel gestion
+□ C1 — ÉQUILIBRE PLAN DE FINANCEMENT
+  plan_financement.total_besoins = plan_financement.total_ressources ?
+  Sinon → ajuster tresorerie_securite ou signaler dans commentaire_equilibre.
 
-NIVEAU 3 — UNIQUEMENT SI L'UTILISATEUR LES MENTIONNE EXPLICITEMENT :
-  • Local commercial / bureau → loyer, charges, dépôt de garantie
-  • Véhicule → achat/leasing, carburant, assurance auto
-  • Employés → salaires bruts, charges sociales (~42-45%)
-  ✅ Standard secteur → inclus automatiquement (N1+N2)
-  ❌ Engagement physique/humain non mentionné → JAMAIS inventé
+□ C2 — COHÉRENCE APPORT VS RATIO
+  score_bancabilite.apport_suffisant cohérent avec
+  apport_personnel / total_besoins ?
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-RÈGLES DE GÉNÉRATION INTELLIGENTE
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+□ C3 — COHÉRENCE TRÉSORERIE VS RÉSULTAT
+  Résultat positif à M6 → trésorerie ne peut pas être négative à M6
+  sans explication BFR. Sinon → expliquer dans tresorerie.mois_critique.
 
-RÈGLE 1 : Secteur réglementé [restauration, santé, BTP, finance, sécurité, transport] →
-  alerte dans score_bancabilite, détail autorisations requises dans aspects_juridiques
+□ C4 — COHÉRENCE POINT MORT VS PROJECTIONS
+  seuil_rentabilite.mois_atteinte_prevu = mois où resultat_net > 0
+  dans tableau_mensuel_an1 ?
 
-RÈGLE 2 : Porteur demandeur d'emploi →
-  prioriser ACRE + ARCE, mentionner maintien ARE
+□ C5 — COHÉRENCE BFR VS PLAN FINANCEMENT
+  finances_detail.bfr.calcul doit être couvert par
+  plan_financement.besoins.bfr_demarrage.
 
-RÈGLE 3 : Apport < 20% de l'investissement →
-  alerte dans score_bancabilite, conseiller co-financement
+□ C6 — COHÉRENCE MENSUALITÉ VS CAPACITÉ
+  tableau_amortissement.mensualite_estimee < 30% marge nette M6 ?
+  Sinon → alerte dans analyse_capacite_remboursement.verdict.
 
-RÈGLE 4 : Projet solo sans employés →
-  simplifier aspects_organisationnels, noter risque solo (maladie, absence)
+□ C7 — BILAN ÉQUILIBRÉ
+  bilan_previsionnel.annee_1.actif.total = passif.total ?
+  Un bilan est toujours équilibré.
 
-RÈGLE 5 : Projet sans local →
-  adapter domiciliation (domicile/coworking), pas de bail dans checklist
+□ C8 — ORDRE DES SCÉNARIOS
+  CA pessimiste < CA réaliste < CA optimiste pour an1 ET an3 ?
 
-RÈGLE 6 : E-commerce / Digital →
-  KPIs adaptés (CAC, LTV, churn, MRR), acquisition digitale (SEA, SEO, social)
+COHÉRENCE CONTENU :
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-DONNÉES RÉELLES DISPONIBLES (INSEE + recherche web)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-${JSON.stringify(verifiedData, null, 2)}
+□ C9  — Chaque chiffre a un marqueur {{V/E/H}} avec source. Zéro chiffre nu.
+□ C10 — Sources {{V:}} sont des organismes réels (INSEE, BdF, BPI, Xerfi...).
+         Si non vérifiable → passer en {{H:}}.
+□ C11 — Les 4 concurrents sont des entreprises réelles existantes en France.
+□ C12 — Les aides correspondent au profil réel du porteur.
+         ACRE → seulement si demandeur d'emploi. JEI → seulement si R&D.
 
-KNOWLEDGE BASE (statuts, banques, aides françaises) :
-${knowledgeBase}
+COHÉRENCE CONDITIONNELLE :
 
-LANGUE : Français, tutoiement, ton professionnel mais accessible.
-SORTIE : JSON strictement valide, une clé par section.`;
+□ C13 — Sections non applicables retournent null (pas omises).
+□ C14 — Si local_necessaire = false → bail absent de la checklist.
+□ C15 — Le bloc disclaimer est toujours présent. Non négociable.
+
+━━ SI UN CONTRÔLE ÉCHOUE ━━
+Corriger avant de retourner.
+Si impossible → ajouter "alertes_coherence": ["description"] dans le JSON.`;
+
+// ── USER PROMPT BUILDER v2.1 ─────────────────────────────────────────
+
+function buildUserPrompt(data) {
+  return `Génère un business plan complet pour le projet suivant.
+
+━━ INFORMATIONS DE BASE ━━
+Nom du projet      : ${data.nom_projet || data.idea || 'Non renseigné'}
+Secteur            : ${data.secteur || data.sector || 'Non renseigné'}
+Type de projet     : ${data.type_projet || 'creation'}
+Forme juridique    : ${data.forme_juridique || 'à recommander'}
+Stade              : ${data.stade || data.time || 'lancement'}
+
+━━ PORTEUR DE PROJET ━━
+Prénom             : ${data.prenom || 'Non renseigné'}
+Expérience secteur : ${data.experience_secteur || '0'} ans
+Expérience gestion : ${data.experience_gestion || 'non'}
+Formation          : ${data.formation || 'Non renseignée'}
+Situation actuelle : ${data.situation || data.profile || 'non renseigné'}
+Apport personnel   : ${data.apport_personnel || data.budget || '0'}€
+Charges perso/mois : ${data.charges_personnelles || 'non renseigné'}€
+Crédits en cours   : ${data.credits_en_cours || 'aucun'}
+
+━━ PROJET ━━
+Description        : ${data.description_projet || data.idea || 'Non renseignée'}
+Zone géographique  : ${data.zone_geo || data.city || 'France'}
+Local nécessaire   : ${data.local_necessaire || 'non'}
+Bail signé         : ${data.bail_signe || 'non'}
+Employés prévus    : ${data.employes_prevus || 0}
+Clientèle cible    : ${data.clientele || 'mixte'}
+
+━━ FINANCIER ━━
+Investissement total : ${data.investissement_total || data.budget || 'à estimer'}€
+Montant prêt visé    : ${data.montant_pret || 'à calculer'}€
+Durée souhaitée      : ${data.duree_pret || 'à recommander'} ans
+Autres financements  : ${data.autres_financements || 'aucun'}
+CA visé année 1      : ${data.ca_an1 || 'à estimer'}€
+CA visé année 3      : ${data.ca_an3 || 'à estimer'}€
+
+━━ CONTEXTE SPÉCIFIQUE ━━
+Secteur réglementé          : ${data.secteur_reglemente || 'non'}
+Autorisations déjà obtenues : ${data.autorisations || 'aucune'}
+Concurrents identifiés      : ${data.concurrents_connus || 'non renseigné'}
+Preuves de marché           : ${data.preuves_marche || 'aucune'}
+
+━━ DONNÉES MARCHÉ VÉRIFIÉES (INSEE + recherche web) ━━
+${JSON.stringify(data._verifiedData || {}, null, 2)}
+
+Génère maintenant le business plan complet en JSON selon la structure EADEE v2.1 ci-dessous.
+Retourne UNIQUEMENT le JSON, sans markdown, sans backtick.
+
+{
+  "meta": {
+    "nom_business": "string",
+    "tagline": "string",
+    "pitch_30s": "string",
+    "date_generation": "${new Date().toISOString()}",
+    "version": "2.1",
+    "type_projet_detecte": "string",
+    "secteur_reglemente": false,
+    "complexite_dossier": "standard"
+  },
+
+  "disclaimer": {
+    "message_entrepreneur": {
+      "titre": "Ce plan est un point de départ solide — pas un document certifié.",
+      "corps": "EADEE a structuré votre projet selon les standards bancaires français. Ce business plan vous fait gagner plusieurs semaines de travail. Mais avant tout engagement financier, faites-le valider par un expert-comptable ou un conseiller CCI.",
+      "recommandation_concrete": "Prévoyez 2 à 4h avec un expert-comptable (~300 à 600€) ou un RDV gratuit à votre CCI avant votre rendez-vous bancaire."
+    },
+    "fiabilite_des_chiffres": {
+      "V_verifie": "Chiffre sourcé — issu d'une source publique identifiée. Vérifiez l'actualité avant de le citer.",
+      "E_estime": "Chiffre estimé — calculé à partir de vos données et d'hypothèses sectorielles standard.",
+      "H_hypothese": "Hypothèse — à valider impérativement avant de présenter à une banque."
+    },
+    "ce_que_ce_plan_fait": [
+      "Structure votre projet selon les standards bancaires français",
+      "Calcule vos projections financières de façon cohérente et justifiée",
+      "Identifie les documents manquants à votre dossier complet",
+      "Vous prépare aux questions d'un banquier ou d'un conseiller BPI",
+      "Vous fait gagner 2 à 4 semaines de travail de structuration"
+    ],
+    "ce_que_ce_plan_ne_fait_pas": [
+      "Ne remplace pas les vrais documents physiques (Kbis, devis, avis d'imposition...)",
+      "Ne garantit pas l'obtention d'un financement bancaire",
+      "Ne remplace pas le conseil d'un expert-comptable ou d'un conseiller juridique",
+      "Ne certifie pas l'exactitude des données de marché en temps réel"
+    ],
+    "ressources_gratuites": [
+      { "organisme": "BPI France Création", "url": "bpifrance-creation.fr", "cout": "Gratuit" },
+      { "organisme": "CCI France", "url": "cci.fr", "cout": "Gratuit à faible coût" },
+      { "organisme": "BGE Boutique de Gestion", "url": "bge.asso.fr", "cout": "Gratuit ou subventionné" },
+      { "organisme": "Réseau Entreprendre", "url": "reseau-entreprendre.fr", "cout": "Gratuit sur dossier" }
+    ]
+  },
+
+  "scores": {
+    "score_viabilite": {
+      "note": 0,
+      "interpretation": "string",
+      "detail": {
+        "taille_marche":      { "points": 0, "commentaire": "string" },
+        "differentiation":    { "points": 0, "commentaire": "string" },
+        "proposition_valeur": { "points": 0, "commentaire": "string" },
+        "preuves_marche":     { "points": 0, "commentaire": "string" },
+        "experience_porteur": { "points": 0, "commentaire": "string" },
+        "clarte_modele_eco":  { "points": 0, "commentaire": "string" }
+      },
+      "points_forts": ["string x3"],
+      "points_vigilance": ["string x3"]
+    },
+    "score_bancabilite": {
+      "note": 0,
+      "interpretation": "string",
+      "detail": {
+        "apport_suffisant":       { "points": 0, "commentaire": "string" },
+        "point_mort_rapide":      { "points": 0, "commentaire": "string" },
+        "tresorerie_positive_m6": { "points": 0, "commentaire": "string" },
+        "garanties_disponibles":  { "points": 0, "commentaire": "string" },
+        "secteur_risque_faible":  { "points": 0, "commentaire": "string" },
+        "experience_porteur":     { "points": 0, "commentaire": "string" }
+      },
+      "message_banquier": "string"
+    }
+  },
+
+  "porteur_projet": {
+    "profil": {
+      "presentation": "string",
+      "competences_cles": ["string x4"],
+      "parcours_synthetique": "string",
+      "points_differenciants": ["string x2"]
+    },
+    "profil_financier_personnel": {
+      "apport_personnel": "{{V:montant€|déclaré}}",
+      "origine_apport": "string",
+      "ratio_apport_projet": "{{E:XX%|apport / investissement total}}",
+      "appreciation_ratio": "string",
+      "charges_mensuelles_perso": "{{H:montant€|déclaré}}",
+      "credits_en_cours": "string",
+      "capacite_remboursement_estimee": "{{E:montant€/mois|revenus projetés - charges perso - crédits}}",
+      "documents_a_fournir": [
+        "Pièce d'identité valide",
+        "CV détaillé",
+        "Avis d'imposition N-1 et N-2",
+        "Relevés de compte personnel 3 derniers mois",
+        "Justificatifs d'apport",
+        "Situation patrimoniale complète"
+      ]
+    }
+  },
+
+  "resume_executif": {
+    "synthese_projet": "string 5-6 phrases",
+    "chiffres_cles": {
+      "investissement_total": "{{V/E:montant€|...}}",
+      "apport_personnel": "{{V:montant€|déclaré}}",
+      "financement_externe": "{{E:montant€|...}}",
+      "ca_annee_1": "{{H:montant€|hypothèse}}",
+      "ca_annee_3": "{{H:montant€|...}}",
+      "point_mort_mois": "{{E:X mois|calcul}}",
+      "premier_benefice_mois": "{{E:X mois|...}}"
+    },
+    "vision_banquier": {
+      "montant_demande": "{{V:montant€|formulaire}}",
+      "duree_souhaitee": "string",
+      "mensualite_estimee": "{{E:montant€/mois|amortissement}}",
+      "capacite_remboursement": "string",
+      "garanties_proposees": ["string"],
+      "point_mort_vs_premiere_echeance": "string",
+      "argument_principal_bancaire": "string"
+    }
+  },
+
+  "presentation_projet": {
+    "origine_idee": "string",
+    "probleme_resolu": "string",
+    "vision_3_ans": "string",
+    "stade_actuel": "string",
+    "preuves_concept": null
+  },
+
+  "persona": {
+    "nom_fictif": "string",
+    "age": 0,
+    "situation": "string",
+    "revenus_mensuels": "{{H:montant€|...}}",
+    "probleme_principal": "string",
+    "motivations": ["string x3"],
+    "freins_achat": ["string x2"],
+    "canal_acquisition_prefere": "string",
+    "citation_typique": "string"
+  },
+
+  "marche": {
+    "taille_marche_france": "{{V:montant€|source + année}}",
+    "taux_croissance_annuel": "{{V:XX%|source + année}}",
+    "tendances_cles": ["string x3"],
+    "zone_chalandise": "string",
+    "part_marche_visee_an1": "{{H:XX%|hypothèse justifiée}}",
+    "analyse_sectorielle": "string"
+  },
+
+  "proposition_valeur": {
+    "usp": "string",
+    "benefices_clients": ["string x3"],
+    "preuves_valeur": "string"
+  },
+
+  "concurrents": [
+    {
+      "nom": "Entreprise réelle 1",
+      "type": "direct",
+      "prix_indicatif": "{{V:fourchette€|source}}",
+      "points_forts": "string",
+      "points_faibles": "string",
+      "niveau_menace": "élevé",
+      "avantage_differentiel": "string"
+    },
+    {
+      "nom": "Entreprise réelle 2",
+      "type": "direct",
+      "prix_indicatif": "{{V:fourchette€|source}}",
+      "points_forts": "string",
+      "points_faibles": "string",
+      "niveau_menace": "moyen",
+      "avantage_differentiel": "string"
+    },
+    {
+      "nom": "Entreprise réelle 3",
+      "type": "indirect",
+      "prix_indicatif": "{{E:fourchette€|observation}}",
+      "points_forts": "string",
+      "points_faibles": "string",
+      "niveau_menace": "moyen",
+      "avantage_differentiel": "string"
+    },
+    {
+      "nom": "Entreprise réelle 4",
+      "type": "substitut",
+      "prix_indicatif": "{{H:fourchette€|estimation}}",
+      "points_forts": "string",
+      "points_faibles": "string",
+      "niveau_menace": "faible",
+      "avantage_differentiel": "string"
+    }
+  ],
+
+  "modele_economique": {
+    "type": "string",
+    "description": "string",
+    "offres": [
+      {
+        "nom": "string",
+        "description": "string",
+        "prix_ht": "{{H:montant€|...}}",
+        "marge_estimee": "{{E:XX%|...}}",
+        "volume_ventes_m1": "{{H:nombre|...}}",
+        "volume_ventes_m12": "{{H:nombre|...}}"
+      }
+    ],
+    "panier_moyen": "{{E:montant€|calcul pondéré}}",
+    "frequence_achat": "string"
+  },
+
+  "strategie_commerciale": {
+    "canaux_distribution": ["string x2-3"],
+    "tunnel_vente": "string",
+    "strategie_prix": "string",
+    "objectif_clients_m3": "{{H:nombre|...}}",
+    "objectif_clients_m12": "{{H:nombre|...}}"
+  },
+
+  "acquisition": {
+    "canaux": [
+      {
+        "canal": "string",
+        "description": "string",
+        "cac_estime": "{{H:montant€|...}}",
+        "priorite": "principale",
+        "delai_premier_client": "string"
+      },
+      {
+        "canal": "string",
+        "description": "string",
+        "cac_estime": "{{H:montant€|...}}",
+        "priorite": "secondaire",
+        "delai_premier_client": "string"
+      },
+      {
+        "canal": "string",
+        "description": "string",
+        "cac_estime": "{{H:montant€|...}}",
+        "priorite": "secondaire",
+        "delai_premier_client": "string"
+      }
+    ]
+  },
+
+  "aspects_juridiques": {
+    "statut_recommande": "string",
+    "justification_statut": "string",
+    "regime_fiscal": "string",
+    "regime_social": "string",
+    "avantages_statut": ["string x3"],
+    "etapes_creation": [
+      { "etape": "string", "delai": "string", "cout": "{{V/E:montant€|...}}", "organisme": "string" }
+    ],
+    "autorisations_sectorielles": null,
+    "garanties_bancaires": {
+      "caution_personnelle": "recommandée",
+      "nantissement_fonds_commerce": "non applicable",
+      "garantie_bpi": "à vérifier",
+      "commentaire_garanties": "string"
+    }
+  },
+
+  "aspects_organisationnels": {
+    "structure_equipe": "string",
+    "postes_cles": null,
+    "locaux": {
+      "necessaire": false,
+      "type": null,
+      "surface": null,
+      "loyer_mensuel": null,
+      "bail_statut": null,
+      "commentaire_bancaire": null
+    },
+    "outils_operationnels": [
+      { "outil": "string", "usage": "string", "cout_mensuel": "{{V:montant€|prix public}}", "indispensable": true }
+    ]
+  },
+
+  "plan_financement": {
+    "besoins": {
+      "investissements_materiels": "{{E:montant€|...}}",
+      "investissements_immateriels": "{{E:montant€|...}}",
+      "frais_etablissement": "{{E:montant€|...}}",
+      "bfr_demarrage": "{{E:montant€|...}}",
+      "tresorerie_securite": "{{E:montant€|2-3 mois charges fixes}}",
+      "total_besoins": "{{E:montant€|somme}}"
+    },
+    "ressources": {
+      "apport_personnel": "{{V:montant€|déclaré}}",
+      "pret_bancaire": "{{E:montant€|à négocier}}",
+      "pret_bpi": null,
+      "pret_honneur": null,
+      "subventions": null,
+      "love_money": null,
+      "total_ressources": "{{E:montant€|somme}}"
+    },
+    "equilibre": true,
+    "commentaire_equilibre": "string",
+    "ratio_apport": "{{E:XX%|apport / total besoins}}",
+    "message_banquier": "string"
+  },
+
+  "investissements": {
+    "postes": [
+      {
+        "poste": "string",
+        "niveau": "indispensable",
+        "montant": "{{V/E:montant€|...}}",
+        "nb_devis_recommandes": 1,
+        "financable_bpi": false,
+        "commentaire": null
+      }
+    ],
+    "total_investissements": "{{E:montant€|somme}}",
+    "conseil_devis": "Obtenez 2 devis comparatifs pour tout poste supérieur à 1 000€."
+  },
+
+  "finances_detail": {
+    "charges_fixes_mensuelles": [
+      { "poste": "string", "montant": "{{E:montant€|...}}" }
+    ],
+    "total_charges_fixes": "{{E:montant€|somme}}",
+    "charges_variables": "string — description + % du CA",
+    "taux_marge_brute": "{{E:XX%|...}}",
+    "taux_marge_nette_an1": "{{E:XX%|...}}",
+    "taux_marge_nette_an3": "{{E:XX%|...}}",
+    "bfr": {
+      "definition_contextuelle": "string",
+      "calcul": "{{E:montant€|...}}",
+      "interpretation": "string",
+      "conseil": "string"
+    }
+  },
+
+  "seuil_rentabilite": {
+    "ca_seuil_mensuel": "{{E:montant€|charges fixes / taux marge}}",
+    "ca_seuil_annuel": "{{E:montant€|x12}}",
+    "nb_ventes_necessaires": "{{E:nombre|CA seuil / panier moyen}}",
+    "mois_atteinte_prevu": "{{E:X mois|montée en puissance}}",
+    "marge_securite_an1": "{{E:XX%|(CA prévu - CA seuil) / CA prévu}}",
+    "interpretation_bancaire": "string"
+  },
+
+  "projections_revenus": {
+    "jalons": [
+      { "mois": 1,  "ca": "{{H:montant€|...}}", "commentaire": "string" },
+      { "mois": 3,  "ca": "{{H:montant€|...}}", "commentaire": "string" },
+      { "mois": 6,  "ca": "{{H:montant€|...}}", "commentaire": "string" },
+      { "mois": 9,  "ca": "{{H:montant€|...}}", "commentaire": "string" },
+      { "mois": 12, "ca": "{{H:montant€|...}}", "commentaire": "string" },
+      { "mois": 24, "ca": "{{H:montant€|...}}", "commentaire": "string" },
+      { "mois": 36, "ca": "{{H:montant€|...}}", "commentaire": "string" }
+    ],
+    "tableau_mensuel_an1": [
+      { "mois": "Janvier",   "ca_ht": "{{H:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" },
+      { "mois": "Février",   "ca_ht": "{{H:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" },
+      { "mois": "Mars",      "ca_ht": "{{H:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" },
+      { "mois": "Avril",     "ca_ht": "{{H:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" },
+      { "mois": "Mai",       "ca_ht": "{{H:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" },
+      { "mois": "Juin",      "ca_ht": "{{H:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" },
+      { "mois": "Juillet",   "ca_ht": "{{H:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" },
+      { "mois": "Août",      "ca_ht": "{{H:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" },
+      { "mois": "Septembre", "ca_ht": "{{H:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" },
+      { "mois": "Octobre",   "ca_ht": "{{H:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" },
+      { "mois": "Novembre",  "ca_ht": "{{H:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" },
+      { "mois": "Décembre",  "ca_ht": "{{H:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" }
+    ],
+    "scenarios": {
+      "pessimiste": {
+        "hypothese": "string",
+        "ca_an1": "{{H:montant€|...}}",
+        "ca_an3": "{{H:montant€|...}}",
+        "point_mort_mois": "{{E:X mois|...}}",
+        "viabilite": "string"
+      },
+      "realiste": {
+        "hypothese": "string",
+        "ca_an1": "{{H:montant€|...}}",
+        "ca_an3": "{{H:montant€|...}}",
+        "point_mort_mois": "{{E:X mois|...}}",
+        "viabilite": "string"
+      },
+      "optimiste": {
+        "hypothese": "string",
+        "ca_an1": "{{H:montant€|...}}",
+        "ca_an3": "{{H:montant€|...}}",
+        "point_mort_mois": "{{E:X mois|...}}",
+        "viabilite": "string"
+      }
+    }
+  },
+
+  "tresorerie": {
+    "tableau_12_mois": [
+      { "mois": "Janvier",   "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null },
+      { "mois": "Février",   "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null },
+      { "mois": "Mars",      "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null },
+      { "mois": "Avril",     "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null },
+      { "mois": "Mai",       "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null },
+      { "mois": "Juin",      "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null },
+      { "mois": "Juillet",   "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null },
+      { "mois": "Août",      "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null },
+      { "mois": "Septembre", "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null },
+      { "mois": "Octobre",   "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null },
+      { "mois": "Novembre",  "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null },
+      { "mois": "Décembre",  "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null }
+    ],
+    "solde_minimum": "{{E:montant€|point bas}}",
+    "mois_critique": null,
+    "recommandations": ["string x2-3"]
+  },
+
+  "tableau_amortissement": null,
+
+  "bilan_previsionnel": {
+    "annee_1": {
+      "actif": {
+        "immobilisations_nettes": "{{E:montant€|...}}",
+        "stocks": null,
+        "creances_clients": "{{E:montant€|...}}",
+        "disponibilites": "{{E:montant€|trésorerie fin an 1}}",
+        "total_actif": "{{E:montant€|somme}}"
+      },
+      "passif": {
+        "capital_social": "{{V:montant€|...}}",
+        "reserves": "{{E:montant€|...}}",
+        "resultat": "{{E:montant€|...}}",
+        "dettes_financieres": "{{E:montant€|capital restant dû}}",
+        "dettes_fournisseurs": "{{E:montant€|...}}",
+        "dettes_fiscales_sociales": "{{E:montant€|...}}",
+        "total_passif": "{{E:montant€|somme}}"
+      },
+      "ratios": {
+        "autonomie_financiere": "{{E:XX%|fonds propres / total bilan}}",
+        "ratio_endettement": "{{E:XX%|dettes / fonds propres}}",
+        "interpretation": "string"
+      }
+    },
+    "annee_2": { "actif": {}, "passif": {}, "ratios": {} },
+    "annee_3": { "actif": {}, "passif": {}, "ratios": {} }
+  },
+
+  "risques": [
+    { "risque": "string", "probabilite": "moyenne", "impact": "moyen", "solution_preventive": "string", "solution_curative": "string", "signal_alarme": "string" },
+    { "risque": "string", "probabilite": "faible",  "impact": "élevé", "solution_preventive": "string", "solution_curative": "string", "signal_alarme": "string" },
+    { "risque": "string", "probabilite": "élevée",  "impact": "moyen", "solution_preventive": "string", "solution_curative": "string", "signal_alarme": "string" },
+    { "risque": "string", "probabilite": "faible",  "impact": "faible","solution_preventive": "string", "solution_curative": "string", "signal_alarme": "string" },
+    { "risque": "string", "probabilite": "moyenne", "impact": "élevé", "solution_preventive": "string", "solution_curative": "string", "signal_alarme": "string" }
+  ],
+
+  "plan_actions_90j": {
+    "phases": [
+      { "semaine": "S1-S2", "titre": "string", "actions": ["string x3"], "livrable": "string", "budget_phase": null },
+      { "semaine": "S3-S4", "titre": "string", "actions": ["string x3"], "livrable": "string", "budget_phase": null },
+      { "semaine": "S5-S6", "titre": "string", "actions": ["string x3"], "livrable": "string", "budget_phase": null },
+      { "semaine": "S7-S8", "titre": "string", "actions": ["string x3"], "livrable": "string", "budget_phase": null },
+      { "semaine": "S9-S10","titre": "string", "actions": ["string x3"], "livrable": "string", "budget_phase": null },
+      { "semaine": "S11-S13","titre": "string","actions": ["string x3"], "livrable": "string", "budget_phase": null }
+    ]
+  },
+
+  "aides_subventions": {
+    "eligibles": [
+      {
+        "aide": "string",
+        "organisme": "string",
+        "montant": "{{V/E:montant€|source}}",
+        "conditions": ["string x2"],
+        "demarche": "string",
+        "delai_reponse": "string",
+        "cumulable": true,
+        "priorite": "haute",
+        "profil_eligible": "string"
+      }
+    ],
+    "total_aides_potentielles": "{{E:montant€|somme}}",
+    "conseil_strategique": "string"
+  },
+
+  "demarches_administratives": [
+    { "etape": "string", "organisme": "string", "delai_reel": "string", "cout": "{{V:montant€|tarif officiel}}", "documents_requis": ["string"], "bloquante": true }
+  ],
+
+  "kpis": {
+    "operationnels": [
+      { "kpi": "string", "cible_m3": "{{H:valeur|...}}", "cible_m12": "{{H:valeur|...}}", "comment_mesurer": "string" }
+    ],
+    "financiers_bancaires": [
+      { "kpi": "string", "valeur_actuelle": "string", "cible": "string", "interpretation_bancaire": "string" }
+    ]
+  },
+
+  "templates_communication": {
+    "email_presentation_banque": { "objet": "string", "corps": "string" },
+    "email_prospection_client":  { "objet": "string", "corps": "string" },
+    "email_relance":             { "objet": "string", "corps": "string" },
+    "email_fournisseur":         { "objet": "string", "corps": "string" }
+  },
+
+  "annexes_checklist": {
+    "categorie_1_documents_personnels": {
+      "titre": "Documents personnels du porteur",
+      "ordre_preparation": 1,
+      "items": [
+        { "document": "Pièce d'identité valide",                     "statut_requis": "bloquant",       "delai_obtention": "immédiat" },
+        { "document": "CV détaillé orienté entrepreneur",             "statut_requis": "bloquant",       "delai_obtention": "1-2 jours" },
+        { "document": "Avis d'imposition N-1 et N-2",                "statut_requis": "bloquant",       "delai_obtention": "immédiat — impots.gouv.fr" },
+        { "document": "Relevés de compte personnel 3 derniers mois", "statut_requis": "bloquant",       "delai_obtention": "immédiat" },
+        { "document": "Justificatifs d'apport personnel",             "statut_requis": "bloquant",       "delai_obtention": "immédiat" },
+        { "document": "Situation patrimoniale complète",              "statut_requis": "tres_important", "delai_obtention": "2-3 jours" }
+      ]
+    },
+    "categorie_2_documents_juridiques": {
+      "titre": "Documents juridiques & réglementaires",
+      "ordre_preparation": 2,
+      "items": [
+        { "document": "Statut juridique choisi et justifié",          "statut_requis": "bloquant",       "delai_obtention": "1 jour" },
+        { "document": "Statuts de la société rédigés",                "statut_requis": "bloquant",       "delai_obtention": "3-10 jours" },
+        { "document": "Extrait Kbis ou récépissé d'immatriculation",  "statut_requis": "bloquant",       "delai_obtention": "3-5 jours après dépôt" },
+        { "document": "Justificatif de domiciliation",                "statut_requis": "bloquant",       "delai_obtention": "immédiat à 1 semaine" },
+        { "document": "Attestation RC Pro ou devis assurance",        "statut_requis": "conditionnel",   "delai_obtention": "1-5 jours" }
+      ]
+    },
+    "categorie_3_autorisations_sectorielles": {
+      "titre": "Autorisations & licences spécifiques",
+      "ordre_preparation": 2,
+      "applicable": false,
+      "items": []
+    },
+    "categorie_4_documents_financiers": {
+      "titre": "Documents financiers prévisionnels",
+      "ordre_preparation": 3,
+      "items": [
+        { "document": "Business plan complet",                             "statut_requis": "bloquant",       "delai_obtention": "généré par EADEE ✅" },
+        { "document": "Plan de financement besoins / ressources",         "statut_requis": "bloquant",       "delai_obtention": "inclus dans ce plan ✅" },
+        { "document": "Compte de résultat prévisionnel 3 ans",            "statut_requis": "bloquant",       "delai_obtention": "inclus dans ce plan ✅" },
+        { "document": "Bilan prévisionnel 3 ans",                         "statut_requis": "bloquant",       "delai_obtention": "inclus dans ce plan ✅" },
+        { "document": "Plan de trésorerie 12 mois",                       "statut_requis": "bloquant",       "delai_obtention": "inclus dans ce plan ✅" },
+        { "document": "Seuil de rentabilité avec délai en mois",          "statut_requis": "bloquant",       "delai_obtention": "inclus dans ce plan ✅" },
+        { "document": "Détail du BFR",                                    "statut_requis": "tres_important", "delai_obtention": "inclus dans ce plan ✅" },
+        { "document": "Scénarios pessimiste / réaliste / optimiste",      "statut_requis": "tres_important", "delai_obtention": "inclus dans ce plan ✅" },
+        { "document": "Tableau d'amortissement du prêt",                  "statut_requis": "tres_important", "delai_obtention": "inclus dans ce plan ✅" },
+        { "document": "Devis investissements (2 devis par poste >1000€)", "statut_requis": "bloquant",       "delai_obtention": "1-3 semaines" }
+      ]
+    },
+    "categorie_5_preuves_marche": {
+      "titre": "Preuves de marché & validation commerciale",
+      "ordre_preparation": 3,
+      "items": [
+        { "document": "Étude de marché avec sources datées",    "statut_requis": "tres_important", "delai_obtention": "inclus dans ce plan ✅" },
+        { "document": "Au moins 1 lettre d'intention client",   "statut_requis": "tres_important", "delai_obtention": "variable — à obtenir avant RDV" },
+        { "document": "Preuve de concept / MVP / test marché",  "statut_requis": "souhaitable",    "delai_obtention": "variable" },
+        { "document": "Benchmark concurrentiel documenté",      "statut_requis": "souhaitable",    "delai_obtention": "inclus dans ce plan ✅" }
+      ]
+    },
+    "categorie_6_aides_et_presentation": {
+      "titre": "Dossiers d'aides & présentation banque",
+      "ordre_preparation": 4,
+      "items": [
+        { "document": "Contact BPI France pris",                  "statut_requis": "conditionnel",   "condition": "Si montant >50k€ ou projet innovant" },
+        { "document": "Subventions régionales / CCI identifiées", "statut_requis": "souhaitable",    "delai_obtention": "1-2 jours de recherche" },
+        { "document": "Executive summary 1-2 pages",              "statut_requis": "tres_important", "delai_obtention": "1 jour" },
+        { "document": "Courrier de présentation banque",          "statut_requis": "tres_important", "delai_obtention": "inclus dans ce plan ✅" }
+      ]
+    },
+    "score_readiness": {
+      "description": "Score de préparation du dossier bancaire",
+      "calcul": "items bloquants cochés / total items bloquants × 100",
+      "seuils": {
+        "rouge":  "< 60% — Dossier incomplet, RDV prématuré",
+        "orange": "60-80% — Dossier partiel, RDV possible avec réserves",
+        "vert":   "> 80% — Dossier solide, RDV recommandé"
+      }
+    }
+  },
+
+  "propriete_intellectuelle": null,
+  "cap_table": null,
+  "franchise_specifique": null,
+  "reprise_specifique": null,
+  "alertes_coherence": null
+}`;
 }
 
 // ── ÉTAPE 2 : WEB SEARCH ─────────────────────────────────────────────
@@ -159,7 +791,6 @@ Si une donnée n'est pas trouvable, mets value: null et fiabilite: "HYPOTHESE".`
       if (!resp.ok) {
         const err = await resp.text();
         console.error('[web_search] API error:', resp.status, err);
-        // En cas de 429/529, on skippe la recherche web sans crasher le pipeline
         if (resp.status === 429 || resp.status === 529) return null;
         return null;
       }
@@ -205,411 +836,7 @@ Si une donnée n'est pas trouvable, mets value: null et fiabilite: "HYPOTHESE".`
   }
 }
 
-// ── ÉTAPE 3 : GÉNÉRATION DU PLAN v2.0 ────────────────────────────────
-
-function buildPlanPrompt(params, verifiedData) {
-  const { idea, sector, city, budget, profile, time } = params;
-
-  // Déduire la situation du porteur depuis le champ "profile"
-  const situationLabel = {
-    'salarie':          'salarié en activité',
-    'chomeur':          'demandeur d\'emploi',
-    'etudiant':         'étudiant',
-    'entrepreneur':     'entrepreneur / indépendant',
-    'reconversion':     'en reconversion professionnelle',
-  }[profile] || (profile || 'non renseigné');
-
-  // Déduire la disponibilité
-  const stadeLabel = {
-    'temps-plein':      'lancement — disponible à temps plein',
-    'temps-partiel':    'idée / validation — mi-temps',
-    'weekend':          'idée — weekends uniquement',
-  }[time] || (time || 'à préciser');
-
-  return `Génère un business plan EXCEPTIONNEL, ultra-complet et 100% orienté financement bancaire.
-
-━━ PROJET ━━
-Description        : ${idea}
-Secteur            : ${sector}
-Zone géographique  : ${city || 'France'}
-Budget disponible  : ${budget}
-Profil porteur     : ${situationLabel}
-Disponibilité      : ${stadeLabel}
-Date               : France, ${new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
-
-━━ DONNÉES MARCHÉ VÉRIFIÉES ━━
-${JSON.stringify(verifiedData, null, 2)}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-STRUCTURE JSON COMPLÈTE — TOUTES LES CLÉS SONT OBLIGATOIRES
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Génère ce JSON complet (sans markdown, sans backtick) :
-
-{
-  "nom_business": "Nom court, percutant, mémorable",
-  "tagline": "Slogan accrocheur en 6-8 mots",
-  "pitch_30s": "Pitch de 30 secondes : problème → solution → marché → modèle → appel à action. 4-5 phrases.",
-
-  "disclaimer": {
-    "message_entrepreneur": {
-      "titre": "Ce plan est un point de départ solide — pas un document certifié.",
-      "corps": "EADEE a structuré votre projet en suivant les standards des banques françaises et de BPI France. Ce business plan vous fait gagner plusieurs semaines de travail et vous prépare sérieusement à votre rendez-vous. Mais avant tout engagement financier, faites-le valider par un expert-comptable ou un conseiller CCI.",
-      "recommandation_concrete": "Prévoyez 2 à 4h avec un expert-comptable (~300 à 600€) ou un rendez-vous gratuit à votre CCI avant votre RDV bancaire. C'est l'investissement le plus rentable de votre parcours."
-    },
-    "fiabilite_des_chiffres": {
-      "legende_marqueurs": {
-        "V_verifie": "Chiffre sourcé — issu d'une source publique identifiée (INSEE, Banque de France, BPI, rapport sectoriel). Vérifiez que la source est toujours d'actualité avant de le citer en RDV.",
-        "E_estime": "Chiffre estimé — calculé à partir de vos données et d'hypothèses standard du secteur. Cohérent mais à affiner avec votre comptable.",
-        "H_hypothese": "Hypothèse — posée par vous ou par EADEE à partir de moyennes sectorielles. À valider impérativement avant de la présenter à une banque."
-      },
-      "avertissement_donnees_marche": "Les données de marché sont des estimations basées sur les informations disponibles au moment de la génération. Vérifiez les chiffres clés sur insee.fr, bpifrance-creation.fr ou auprès de votre CCI avant le rendez-vous."
-    },
-    "ce_que_ce_plan_fait": [
-      "Structure votre projet selon les standards bancaires français",
-      "Calcule vos projections financières de façon cohérente et justifiée",
-      "Identifie les documents manquants à votre dossier complet",
-      "Vous prépare aux questions d'un banquier ou d'un conseiller BPI",
-      "Vous fait gagner 2 à 4 semaines de travail de structuration"
-    ],
-    "ce_que_ce_plan_ne_fait_pas": [
-      "Ne remplace pas les vrais documents physiques (Kbis, devis réels, avis d'imposition...)",
-      "Ne garantit pas l'obtention d'un financement bancaire",
-      "Ne remplace pas le conseil d'un expert-comptable ou d'un conseiller juridique",
-      "Ne certifie pas l'exactitude des données de marché en temps réel"
-    ],
-    "ressources_gratuites_recommandees": [
-      {"organisme": "BPI France Création", "service": "Diagnostic gratuit, guides sectoriels, accompagnement création", "url": "bpifrance-creation.fr", "cout": "Gratuit"},
-      {"organisme": "CCI France", "service": "Conseil pré-création, relecture dossier, mise en relation banques", "url": "cci.fr", "cout": "Gratuit à faible coût"},
-      {"organisme": "BGE (Boutique de Gestion)", "service": "Accompagnement complet création, validation business plan", "url": "bge.asso.fr", "cout": "Gratuit ou subventionné selon région"},
-      {"organisme": "Réseau Entreprendre", "service": "Prêt d'honneur 0% + mentorat entrepreneur expérimenté", "url": "reseau-entreprendre.fr", "cout": "Gratuit (sur dossier)"}
-    ]
-  },
-
-  "scores": {
-    "score_viabilite": {
-      "note": 82,
-      "interpretation": "string — ce que ce score signifie concrètement",
-      "points_forts": ["string x3 — atouts majeurs du projet"],
-      "points_vigilance": ["string x3 — points à renforcer avant dossier banque"]
-    },
-    "score_bancabilite": {
-      "note": 74,
-      "interpretation": "string — ce qu'un banquier penserait de ce dossier",
-      "detail": {
-        "apport_suffisant":       { "points": 18, "commentaire": "string — /25" },
-        "point_mort_rapide":      { "points": 15, "commentaire": "string — /20" },
-        "tresorerie_positive_m6": { "points": 15, "commentaire": "string — /20" },
-        "garanties_disponibles":  { "points": 10, "commentaire": "string — /15" },
-        "secteur_risque_faible":  { "points":  8, "commentaire": "string — /10" },
-        "experience_porteur":     { "points":  8, "commentaire": "string — /10" }
-      },
-      "message_banquier": "string — ce que le banquier dira + ce qu'il faudra défendre en RDV"
-    }
-  },
-
-  "score_viabilite": 82,
-
-  "resume_executif": "5-6 phrases avec marqueurs {{V:}}/{{E:}}/{{H:}} sur les chiffres clés.",
-
-  "resume_vision_banquier": {
-    "montant_demande": "{{E:montant€|à estimer selon investissement}}",
-    "duree_souhaitee": "string — X ans recommandé",
-    "mensualite_estimee": "{{E:montant€/mois|amortissement linéaire}}",
-    "capacite_remboursement": "string — analyse capacité à rembourser",
-    "garanties_proposees": ["string — liste des garanties disponibles"],
-    "argument_principal": "string — l'argument #1 pour convaincre la banque"
-  },
-
-  "porteur_projet": "Présentation narrative : parcours, compétences clés pour ce projet, motivations. 3-4 phrases (à personnaliser avec le prénom réel).",
-
-  "porteur_profil_financier": {
-    "apport_personnel": "{{V:montant€|déclaré par porteur}}",
-    "ratio_apport_projet": "{{E:XX%|apport/investissement total}}",
-    "appreciation_ratio": "string — Excellent (>30%) | Correct (20-30%) | Insuffisant (<20%) + conseil",
-    "documents_a_fournir": [
-      "Pièce d'identité valide",
-      "CV détaillé",
-      "Avis d'imposition N-1 et N-2",
-      "Relevés de compte personnel 3 derniers mois",
-      "Justificatifs d'apport personnel"
-    ]
-  },
-
-  "presentation_projet": "Origine de l'idée, problème identifié, solution apportée, vision à 3 ans. 3-4 phrases.",
-
-  "persona": {
-    "nom": "Prénom fictif représentatif",
-    "age": "30-45 ans",
-    "situation": "Profession, revenus, contexte précis",
-    "douleurs": "3 problèmes principaux",
-    "motivations": "Ce qui le pousse à chercher cette solution",
-    "ou_le_trouver": "Canaux de présence (réseau, plateformes, lieux)"
-  },
-
-  "marche_taille": "{{V:X Mds€|source INSEE ou étude}} ou {{E:X M€|calcul}}",
-  "marche_croissance": "{{V:+X%/an|source}} ou {{E:+X%/an|calcul}}",
-  "marche_part_cible": "{{H:0,0X%|hypothèse conservatrice an 1}}",
-  "marche_clients_potentiels": "{{E:XX 000|population cible × taux pénétration}}",
-  "marche_analyse": "5-6 phrases avec sources et marqueurs fiabilité sur tous les chiffres.",
-  "marche_tendances": ["string x3 — tendances 2025-2026 qui FAVORISENT ce projet"],
-
-  "proposition_valeur": "USP claire et différenciante : pourquoi un client te choisit toi plutôt qu'un concurrent. 2-3 phrases percutantes.",
-  "proposition_valeur_benefices": ["string x3 — bénéfices concrets et mesurables pour le client"],
-
-  "concurrence_intro": "3 phrases : état du marché concurrentiel, opportunité identifiée, positionnement.",
-  "concurrents": [
-    {"nom": "Concurrent réel 1", "description": "Ce qu'ils font + prix réels + points faibles exploitables", "menace": "haute",   "prix_moyen": "{{E:X€|tarification observée}}", "part_marche": "{{H:X%|estimation}}", "avantage_differentiel": "En quoi on est meilleur sur ce point précis"},
-    {"nom": "Concurrent réel 2", "description": "Détails + prix + failles",                                  "menace": "moyenne", "prix_moyen": "{{E:X€|tarification observée}}", "part_marche": "{{H:X%|estimation}}", "avantage_differentiel": "string"},
-    {"nom": "Concurrent réel 3", "description": "Détails + différences",                                     "menace": "faible",  "prix_moyen": "{{E:X€|tarification observée}}", "part_marche": "{{H:X%|estimation}}", "avantage_differentiel": "string"},
-    {"nom": "Concurrent réel 4", "description": "Détails + opportunité",                                      "menace": "moyenne", "prix_moyen": "{{E:X€|tarification observée}}", "part_marche": "{{H:X%|estimation}}", "avantage_differentiel": "string"}
-  ],
-
-  "modele_economique": "4-5 phrases : flux de revenus, pricing justifié, récurrence, upsell, LTV estimée. Marqueurs fiabilité obligatoires.",
-  "offres": [
-    {"nom": "Offre 1", "description": "Contenu précis, à qui, ce qu'elle résout", "prix": "{{H:X€|positionnement marché}}"},
-    {"nom": "Offre 2", "description": "Contenu avec inclus/exclus",               "prix": "{{H:X€/mois|benchmark secteur}}"},
-    {"nom": "Offre 3", "description": "Offre premium tout inclus",                "prix": "{{H:X€|premium justifié}}"}
-  ],
-
-  "strategie_commerciale": "Positionnement marketing, canaux de distribution, messages clés, tunnel de vente, promesse de marque. 3-4 phrases.",
-
-  "aspects_juridiques": "Statut recommandé (SASU/EURL/micro) avec justification chiffrée : CA projeté, fiscalité, cotisations. Obligations sectorielles. 3-4 phrases.",
-
-  "aspects_organisationnels": "Équipe initiale, locaux (achat/location/domiciliation/coworking), sous-traitance, outils de gestion, organisation quotidienne. 2-3 phrases.",
-
-  "acquisition": [
-    {"canal": "Canal principal",   "description": "Stratégie détaillée : volume, message, taux conversion, budget, outils", "cac": "{{E:XX€|estimation CAC}}"},
-    {"canal": "Canal secondaire",  "description": "Actions précises, fréquence, KPI, coût",                                 "cac": "{{E:XX€|estimation CAC}}"},
-    {"canal": "Canal tertiaire",   "description": "Partenariats ou SEO : qui contacter, comment, modèle",                   "cac": "{{E:XX€|estimation CAC}}"}
-  ],
-
-  "rev_m1":  "{{H:X €|hypothèse démarrage prudente}}",
-  "rev_m3":  "{{E:X €|projection mois 3}}",
-  "rev_m6":  "{{E:X €|projection mois 6}}",
-  "rev_m12": "{{E:X €|projection fin an 1}}",
-  "rev_m18": "{{E:X €|projection 18 mois}}",
-  "rev_m24": "{{E:X €|projection fin an 2}}",
-  "rev_m36": "{{E:X €|projection fin an 3}}",
-  "rev_mensuel": [200, 600, 1200, 1800, 2500, 3200, 3800, 4400, 5000, 5700, 6500, 7500],
-
-  "scenarios": {
-    "pessimiste": {
-      "hypothese": "string — ex: -30% sur le CA prévu, acquisition plus lente",
-      "ca_an1": "{{H:montant€|...}}",
-      "ca_an3": "{{H:montant€|...}}",
-      "point_mort_mois": "{{E:X mois|...}}",
-      "viabilite": "string — viable | fragile | risqué"
-    },
-    "realiste": {
-      "hypothese": "string — projections de base retenues",
-      "ca_an1": "{{H:montant€|...}}",
-      "ca_an3": "{{H:montant€|...}}",
-      "point_mort_mois": "{{E:X mois|...}}",
-      "viabilite": "string"
-    },
-    "optimiste": {
-      "hypothese": "string — ex: +30%, bouche-à-oreille fort, contrat clé signé",
-      "ca_an1": "{{H:montant€|...}}",
-      "ca_an3": "{{H:montant€|...}}",
-      "point_mort_mois": "{{E:X mois|...}}",
-      "viabilite": "string"
-    }
-  },
-
-  "finances_detail": [
-    {"label": "CA annuel estimé (an 1)",    "valeur": "{{E:XX XXX€|somme projections mensuelles}}"},
-    {"label": "Charges fixes mensuelles",   "valeur": "{{E:X XXX€|postes N1+N2 + N3 si mentionnés}}"},
-    {"label": "Charges variables (% CA)",   "valeur": "{{H:XX%|estimation sectorielle}}"},
-    {"label": "Marge brute",                "valeur": "{{E:XX%|prix vente - coût variable}}"},
-    {"label": "Point mort mensuel",         "valeur": "{{E:X XXX€/mois|charges fixes ÷ taux marge}}"},
-    {"label": "Break-even atteint",         "valeur": "{{H:Mois X|projection conservatrice}}"},
-    {"label": "ROI investissement initial", "valeur": "{{E:XXX% sur 12 mois|bénéfice net ÷ investissement}}"}
-  ],
-
-  "plan_financement": {
-    "besoins": {
-      "investissements_materiels":  "{{E:montant€|matériel + équipements}}",
-      "investissements_immateriels":"{{E:montant€|logiciels + formation + juridique}}",
-      "bfr_demarrage":              "{{E:montant€|2-3 mois de charges fixes}}",
-      "tresorerie_securite":        "{{E:montant€|2 mois de charges recommandés}}",
-      "total_besoins":              "{{E:montant€|somme}}"
-    },
-    "ressources": {
-      "apport_personnel":  "{{V:montant€|déclaré}}",
-      "pret_bancaire":     "{{E:montant€|à négocier}}",
-      "pret_bpi":          "{{E:montant€|si applicable}} | null",
-      "pret_honneur":      "{{E:montant€|si applicable}} | null",
-      "subventions":       "{{E:montant€|si applicable}} | null",
-      "total_ressources":  "{{E:montant€|somme}}"
-    },
-    "message_banquier": "string — ce que ce plan de financement inspire à un banquier + conseils"
-  },
-
-  "tresorerie_detail": "Analyse de la trésorerie mois par mois sur 12 mois : entrées, sorties, soldes cumulés. Points de vigilance et conseils.",
-  "tresorerie_soldes": [500, 1200, 1800, 2400, 3100, 3900, 4800, 5500, 6300, 7200, 8100, 9000],
-
-  "tresorerie_mensuelle": [
-    {"mois": "Janvier",   "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null},
-    {"mois": "Février",   "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null},
-    {"mois": "Mars",      "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null},
-    {"mois": "Avril",     "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null},
-    {"mois": "Mai",       "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null},
-    {"mois": "Juin",      "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null},
-    {"mois": "Juillet",   "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null},
-    {"mois": "Août",      "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null},
-    {"mois": "Septembre", "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null},
-    {"mois": "Octobre",   "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null},
-    {"mois": "Novembre",  "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null},
-    {"mois": "Décembre",  "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null}
-  ],
-
-  "investissements": [
-    {"label": "Poste N1 universel précis",    "montant": "{{H:XXX€|devis estimatif}}", "categorie": "materiel"},
-    {"label": "Poste N2 secteur-spécifique",  "montant": "{{H:XXX€|devis estimatif}}", "categorie": "communication"},
-    {"label": "Poste N3 si mentionné",        "montant": "{{H:XXX€|devis estimatif}}", "categorie": "bfr"},
-    {"label": "TOTAL investissement",         "montant": "{{E:X XXX€|somme des postes}}", "total": true}
-  ],
-
-  "bilan_previsionnel": "Actif et passif simplifié à fin an 1, an 2, an 3. Capitaux propres, dettes, trésorerie finale. Vision patrimoniale de l'entreprise à 3 ans.",
-
-  "seuil_rentabilite": {
-    "charges_fixes_mensuelles": "{{E:X XXX€|loyer+salaires+abonnements+assurances}}",
-    "taux_marge_sur_cv":        "{{E:XX%|1 - (coûts variables ÷ CA)}}",
-    "point_mort_ca":            "{{E:X XXX€/mois|charges fixes ÷ taux marge}}",
-    "break_even_mois":          "{{H:Mois X|estimation basée sur courbe CA}}",
-    "detail":                   "Explication du calcul : hypothèses retenues, marge de sécurité, distance au point mort à fin an 1.",
-    "interpretation_bancaire":  "string — ce résultat rassure ou inquiète le banquier ?"
-  },
-
-  "tableau_amortissement": "[CONDITIONNEL — générer uniquement si plan_financement.ressources.pret_bancaire > 0] Objet avec : parametres (capital_emprunte, taux_annuel_estime {{H:X%|taux moyen TPE France 2024 : 4.5-6.5%}}, duree_annees {{H:X ans|5-7 ans matériel, 7 ans aménagement, 2-3 ans BFR}}, mensualite_estimee {{E:montant€|K×t/(1-(1+t)^-n)}}, total_interets {{E:montant€}}, cout_total_credit {{E:montant€}}), echeancier_annuel (une ligne par année : annee, mensualite, capital_rembourse_annee, interets_payes_annee, capital_restant_du_fin_annee — tous en {{E:}}), analyse_capacite_remboursement (mensualite_vs_marge_nette_an1 {{E:XX%}}, appreciation 'Confortable si <15% | Correct si 15-25% | Tendu si >25%', verdict string, option_differe avec recommande boolean + type + duree_conseillee + explication), conseils_negociation_banque (5 conseils string), note_importante string. Si pas de prêt → null.",
-
-  "risques": [
-    {"titre": "Risque business précis",   "niveau": "élevé",  "solution": "Plan d'action : indicateurs d'alerte + actions correctives chiffrées", "signal_alarme": "Comment détecter ce risque tôt", "solution_preventive": "Ce qu'on fait AVANT que ça arrive"},
-    {"titre": "Risque marché précis",     "niveau": "moyen",  "solution": "Comment détecter tôt et y répondre",                                   "signal_alarme": "string", "solution_preventive": "string"},
-    {"titre": "Risque opérationnel",      "niveau": "faible", "solution": "Mesures préventives concrètes",                                         "signal_alarme": "string", "solution_preventive": "string"},
-    {"titre": "Risque financier",         "niveau": "moyen",  "solution": "Seuils d'alerte et plan B chiffré",                                      "signal_alarme": "string", "solution_preventive": "string"},
-    {"titre": "Risque réglementaire",     "niveau": "faible", "solution": "Veille réglementaire et actions de conformité",                          "signal_alarme": "string", "solution_preventive": "string"}
-  ],
-
-  "actions": [
-    {"phase": "J1-7",   "titre": "Action concrète", "detail": "Détail précis avec chiffres, outils, objectif mesurable"},
-    {"phase": "J8-14",  "titre": "Action concrète", "detail": "Détail précis"},
-    {"phase": "J15-30", "titre": "Action concrète", "detail": "Détail précis avec KPI"},
-    {"phase": "J31-45", "titre": "Action concrète", "detail": "Détail précis"},
-    {"phase": "J46-60", "titre": "Action concrète", "detail": "Détail précis avec objectif CA"},
-    {"phase": "J61-75", "titre": "Action concrète", "detail": "Détail précis"},
-    {"phase": "J76-90", "titre": "Action concrète", "detail": "Objectif chiffré clair"}
-  ],
-
-  "aides_subventions": [
-    {"nom": "ACRE",                        "montant": "{{V:Exonération charges 1 an|URSSAF 2024}}",      "conditions": "Demandeur d'emploi ou créateur < 26 ans", "lien": "urssaf.fr",            "applicable": true,  "priorite": "haute"},
-    {"nom": "ARCE (Pôle emploi)",          "montant": "{{V:45% des ARE restantes|Pôle Emploi 2024}}",   "conditions": "Inscrit à Pôle emploi avec ARE",          "lien": "pole-emploi.fr",       "applicable": true,  "priorite": "haute"},
-    {"nom": "Prêt d'honneur Initiative",   "montant": "{{V:5 000€ à 50 000€|Initiative France 2024}}", "conditions": "Projet viable, porteur engagé",            "lien": "initiative-france.fr", "applicable": true,  "priorite": "moyenne"},
-    {"nom": "BPI — Prêt création",         "montant": "{{V:10 000€ à 7 Mds€|BPI France 2024}}",        "conditions": "Entreprise < 3 ans, projet innovant",      "lien": "bpifrance.fr",         "applicable": false, "priorite": "faible"}
-  ],
-
-  "annexes_checklist": [
-    "CV du porteur de projet (1-2 pages, axé sur la légitimité pour ce projet)",
-    "Pièce d'identité + justificatif de domicile",
-    "Devis des investissements principaux (2 devis/poste > 1000€)",
-    "Preuves de marché : emails d'intention client, lettres d'intérêt",
-    "Relevés bancaires des 3 derniers mois",
-    "Justificatifs d'apport personnel",
-    "Statuts de la société (une fois immatriculée)",
-    "Extrait Kbis (une fois immatriculée)",
-    "Contrat de bail ou promesse (si local commercial)",
-    "Attestation ACRE si demandée"
-  ],
-
-  "kpis": [
-    {"nom": "CA mensuel",                    "cible": "{{H:X XXX€ dès mois 3|objectif minimum viabilité}}", "frequence": "Mensuel"},
-    {"nom": "Taux de conversion prospects",  "cible": "{{H:X%|benchmark sectoriel}}",                       "frequence": "Hebdomadaire"},
-    {"nom": "Coût d'acquisition client",     "cible": "{{E:XX€|budget marketing ÷ nb clients}}",            "frequence": "Mensuel"},
-    {"nom": "Satisfaction client (NPS)",     "cible": "{{H:> 50|objectif secteur top quartile}}",           "frequence": "Trimestriel"}
-  ],
-
-  "outils": [
-    {"nom": "Outil réel 1", "usage": "Usage précis dans ce projet", "prix": "{{V:X€/mois|site officiel 2024}}"},
-    {"nom": "Outil réel 2", "usage": "Usage précis",                "prix": "{{V:Gratuit|plan freemium}}"},
-    {"nom": "Outil réel 3", "usage": "Usage précis",                "prix": "{{V:X€/mois|site officiel 2024}}"},
-    {"nom": "Outil réel 4", "usage": "Usage précis",                "prix": "{{V:Gratuit|open source}}"},
-    {"nom": "Outil réel 5", "usage": "Usage précis",                "prix": "{{V:X€/mois|site officiel 2024}}"},
-    {"nom": "Outil réel 6", "usage": "Usage précis",                "prix": "{{V:X€/mois|site officiel 2024}}"}
-  ],
-
-  "demarches_admin": [
-    {"etape": "1. Choisir le statut juridique", "detail": "Statut optimal avec justification fiscalité/CA", "delai": "Jour 1-3",      "cout": "0-500€",       "lien": "infogreffe.fr"},
-    {"etape": "2. Immatriculation",             "detail": "Démarche sur guichet-entreprises.fr, SIRET",    "delai": "Semaine 1",     "cout": "0€ à 250€",    "lien": "guichet-entreprises.fr"},
-    {"etape": "3. Ouverture compte pro",        "detail": "Banques recommandées pour ce secteur",          "delai": "Semaine 1-2",   "cout": "0-30€/mois",   "lien": "shine.fr"},
-    {"etape": "4. URSSAF",                      "detail": "Cotisations estimées, DSN si société",          "delai": "Automatique",   "cout": "22-45% du CA", "lien": "urssaf.fr"},
-    {"etape": "5. Assurance RC Pro",            "detail": "Obligatoire ou recommandée pour ce secteur",   "delai": "Avant 1er client","cout": "200-800€/an",  "lien": "hiscox.fr"},
-    {"etape": "6. Obligations sectorielles",    "detail": "Licences, certifications, autorisations",       "delai": "Variable",      "cout": "Variable",     "lien": "service-public.fr"}
-  ],
-
-  "email_fournisseur": {
-    "sujet": "Objet adapté au secteur — demande de tarifs/partenariat",
-    "corps": "Email complet prêt à envoyer : présentation société, projet, volume estimé, demande tarifs. 150-200 mots."
-  },
-  "email_prospection": {
-    "sujet": "Objet accrocheur et personnalisé pour la cible",
-    "corps": "Email de prospection : accroche sur problème prospect, solution en 2 lignes, preuve sociale, appel à action (RDV 15 min). 120-150 mots."
-  },
-  "email_relance": {
-    "sujet": "Objet de relance J+7",
-    "corps": "Relance courte : valeur supplémentaire (conseil, stat, question). 60-80 mots max."
-  }
-}
-
-AVANT DE RETOURNER LE JSON — PASSE CES 15 CONTRÔLES DE COHÉRENCE :
-
-━━ COHÉRENCE FINANCIÈRE ━━
-
-CONTRÔLE 1 — plan_financement.total_besoins === plan_financement.total_ressources ?
-  Si non → ajuster tresorerie_securite ou signaler l'écart dans commentaire_equilibre.
-
-CONTRÔLE 2 — scores.score_bancabilite.detail.apport_suffisant cohérent avec plan_financement.ressources.apport_personnel / total_besoins ?
-
-CONTRÔLE 3 — Si résultat positif à M6, la trésorerie ne peut pas être négative à M6 sans explication BFR.
-  Si incohérence → ajouter explication dans alerte du mois concerné.
-
-CONTRÔLE 4 — seuil_rentabilite.break_even_mois doit correspondre au mois où le CA mensuel dépasse le point mort CA.
-
-CONTRÔLE 5 — Le BFR dans seuil_rentabilite doit être financé dans plan_financement.besoins.bfr_demarrage.
-
-CONTRÔLE 6 — tableau_amortissement.mensualite_estimee doit être < 30% de (taux_marge_brute × CA M6).
-  Si >30% → alerte dans analyse_capacite_remboursement.verdict.
-
-CONTRÔLE 7 — bilan_previsionnel : total actif === total passif. Un bilan doit toujours être équilibré.
-
-CONTRÔLE 8 — scenarios : pessimiste.ca_an1 < realiste.ca_an1 < optimiste.ca_an1. Corriger si non respecté.
-
-━━ COHÉRENCE CONTENU ━━
-
-CONTRÔLE 9 — Chaque valeur numérique a un marqueur {{V: / E: / H:}} avec source. Zéro chiffre nu autorisé.
-
-CONTRÔLE 10 — Les sources citées dans {{V:}} sont des organismes réels (INSEE, Banque de France, BPI, Xerfi...). Si non vérifiable → passer en {{H:}}.
-
-CONTRÔLE 11 — Les 4 concurrents dans le tableau sont des entreprises réellement existantes dans ce secteur en France. Pas de noms génériques.
-
-CONTRÔLE 12 — Les aides dans aides_subventions correspondent au profil du porteur (ACRE → seulement demandeur d'emploi, JEI → seulement R&D...).
-
-━━ COHÉRENCE CONDITIONNELLE ━━
-
-CONTRÔLE 13 — Sections conditionnelles non applicables retournent null (cap_table, franchise_specifique, autorisations_sectorielles si non réglementé).
-
-CONTRÔLE 14 — Si aspects_organisationnels.locaux.necessaire = false → pas de bail dans annexes_checklist.
-
-CONTRÔLE 15 — Le bloc disclaimer est présent et complet. Non négociable.
-
-SI UN CONTRÔLE ÉCHOUE : corriger avant de retourner. Si correction impossible → ajouter "alertes_coherence": ["description"] pour affichage frontend.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-VÉRIFICATION FINALE OBLIGATOIRE : Avant de terminer, confirme que ces clés sont présentes :
-disclaimer, resume_executif, scores, plan_financement, scenarios, tresorerie_mensuelle, porteur_profil_financier,
-resume_vision_banquier, concurrents, investissements, seuil_rentabilite, tableau_amortissement, risques, actions, aides_subventions.
-Si l'une manque, ajoute-la immédiatement.`;
-}
+// ── UTILITAIRES ───────────────────────────────────────────────────────
 
 function extractJSON(text) {
   const start = text.indexOf('{');
@@ -623,23 +850,56 @@ function extractJSON(text) {
   }
 }
 
+// Compat : mappe les anciens champs du formulaire vers la structure v2.1
+function normalizeFormData(body) {
+  return {
+    // Nouveaux champs v2.1
+    nom_projet:           body.nom_projet         || body.idea        || '',
+    secteur:              body.secteur             || body.sector      || '',
+    type_projet:          body.type_projet         || 'creation',
+    forme_juridique:      body.forme_juridique     || '',
+    stade:                body.stade               || body.time        || 'lancement',
+    prenom:               body.prenom              || '',
+    experience_secteur:   body.experience_secteur  || '0',
+    experience_gestion:   body.experience_gestion  || 'non',
+    formation:            body.formation           || '',
+    situation:            body.situation           || body.profile     || '',
+    apport_personnel:     body.apport_personnel    || body.budget      || '0',
+    charges_personnelles: body.charges_personnelles|| '',
+    credits_en_cours:     body.credits_en_cours    || 'aucun',
+    description_projet:   body.description_projet  || body.idea        || '',
+    zone_geo:             body.zone_geo            || body.city        || 'France',
+    local_necessaire:     body.local_necessaire    || 'non',
+    bail_signe:           body.bail_signe          || 'non',
+    employes_prevus:      body.employes_prevus      || 0,
+    clientele:            body.clientele           || 'mixte',
+    investissement_total: body.investissement_total || body.budget      || '',
+    montant_pret:         body.montant_pret         || '',
+    duree_pret:           body.duree_pret           || '',
+    autres_financements:  body.autres_financements  || 'aucun',
+    ca_an1:               body.ca_an1               || '',
+    ca_an3:               body.ca_an3               || '',
+    secteur_reglemente:   body.secteur_reglemente   || 'non',
+    autorisations:        body.autorisations         || 'aucune',
+    concurrents_connus:   body.concurrents_connus    || '',
+    preuves_marche:       body.preuves_marche        || 'aucune',
+    // Champs internes
+    credits:              body.credits,
+  };
+}
+
 // ── HANDLER PRINCIPAL ─────────────────────────────────────────────────
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
-  // Sécurité : pas de cache sur les réponses de génération
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
   res.setHeader('X-Content-Type-Options', 'nosniff');
 
   const startTime = Date.now();
 
   try {
-    const {
-      idea = '', sector = '', city = '', budget = '',
-      profile = '', time = '',
-      model, messages, max_tokens, system, // champs venant du front legacy
-    } = req.body;
+    const { model, messages, max_tokens, system } = req.body;
 
     // ── Compatibilité avec l'ancien appel front (proxy.js) ──────────
     if (messages && Array.isArray(messages)) {
@@ -663,36 +923,45 @@ export default async function handler(req, res) {
       }
     }
 
-    // ── Nouveau pipeline 3 étapes ────────────────────────────────────
-    if (!idea) return res.status(400).json({ error: 'Champ "idea" requis' });
+    // ── Nouveau pipeline 3 étapes v2.1 ───────────────────────────────
+    const formData = normalizeFormData(req.body);
+    if (!formData.description_projet && !formData.nom_projet) {
+      return res.status(400).json({ error: 'Champ "idea" ou "description_projet" requis' });
+    }
 
-    const credits = parseInt(req.body.credits ?? '1', 10);
+    const credits = parseInt(formData.credits ?? '1', 10);
     const isDiscovery = credits === 0;
 
-    console.log(`[generate-plan v2] Début pipeline — ${idea.substring(0, 60)}... [mode: ${isDiscovery ? 'DÉCOUVERTE' : 'COMPLET'}]`);
+    console.log(`[generate-plan v2.1] Début — ${(formData.nom_projet || formData.description_projet).substring(0, 60)}... [${isDiscovery ? 'DÉCOUVERTE' : 'COMPLET'}]`);
 
     // ÉTAPE 1 — Données INSEE + web search (parallèle)
-    const inseePromise = fetchINSEEData(sector, city);
-    const searchPromise = performWebSearch(idea, sector, city, {});
+    const inseePromise = fetchINSEEData(formData.secteur, formData.zone_geo);
+    const searchPromise = performWebSearch(
+      formData.description_projet || formData.nom_projet,
+      formData.secteur,
+      formData.zone_geo,
+      {}
+    );
     const [inseeData, webData] = await Promise.all([inseePromise, searchPromise]);
 
-    console.log(`[generate-plan v2] Données récupérées — INSEE: ${!!inseeData?.city}, Web: ${!!webData} — ${Date.now() - startTime}ms`);
+    console.log(`[generate-plan v2.1] Données — INSEE: ${!!inseeData?.city}, Web: ${!!webData} — ${Date.now() - startTime}ms`);
 
-    const verifiedData = {
+    // Injecter les données vérifiées dans le prompt
+    formData._verifiedData = {
       insee: inseeData,
       web_search: webData,
-      knowledge_base_used: true,
       generated_at: new Date().toISOString(),
     };
 
-    // ÉTAPE 3 — Génération du plan v2.0
+    // ÉTAPE 3 — Génération du plan v2.1
     const knowledgeBase = getKnowledgeContext();
-    const systemPrompt = buildSystemPrompt(verifiedData, knowledgeBase);
+    const systemPrompt = EADEE_SYSTEM_PROMPT + `\n\nKNOWLEDGE BASE (statuts, banques, aides françaises) :\n${knowledgeBase}`;
 
     const discoveryNote = isDiscovery
-      ? '\n\nIMPORTANT MODE DÉCOUVERTE : Génère UNIQUEMENT les sections resume_executif, scores (score_viabilite uniquement), porteur_projet, presentation_projet, marche_analyse et concurrents. Les autres sections ne doivent pas apparaître.'
+      ? '\n\nIMPORTANT MODE DÉCOUVERTE : Génère UNIQUEMENT les sections meta, scores (score_viabilite uniquement), porteur_projet.profil, presentation_projet, marche, proposition_valeur, concurrents et disclaimer. Toutes les autres sections → null.'
       : '';
-    const userPrompt = buildPlanPrompt({ idea, sector, city, budget, profile, time }, verifiedData) + discoveryNote;
+
+    const userPrompt = buildUserPrompt(formData) + discoveryNote;
 
     const planResp = await fetch(ANTHROPIC_API, {
       method: 'POST',
@@ -703,7 +972,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: MODEL,
-        max_tokens: isDiscovery ? 3000 : 12000,
+        max_tokens: isDiscovery ? 3000 : 10000,
         temperature: 0.3,
         system: systemPrompt,
         messages: [{ role: 'user', content: userPrompt }],
@@ -713,7 +982,6 @@ export default async function handler(req, res) {
 
     if (!planResp.ok) {
       const err = await planResp.json().catch(() => ({}));
-      // Gestion explicite du rate limit Anthropic
       if (planResp.status === 429) {
         const retryAfter = planResp.headers.get('retry-after') || '60';
         res.setHeader('Retry-After', retryAfter);
@@ -739,34 +1007,69 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: { message: 'JSON invalide: ' + e.message } });
     }
 
-    // Compatibilité : score_viabilite à la racine depuis scores
-    if (!plan.score_viabilite && plan.scores?.score_viabilite?.note) {
+    // ── Compat descendante : exposer les clés que le renderer attend ─
+    // score_viabilite à la racine
+    if (!plan.score_viabilite && plan.scores?.score_viabilite?.note !== undefined) {
       plan.score_viabilite = plan.scores.score_viabilite.note;
     }
+    // nom_business à la racine
+    if (!plan.nom_business && plan.meta?.nom_business) {
+      plan.nom_business = plan.meta.nom_business;
+    }
+    // porteur_profil_financier à la racine (pour les anciens renderers)
+    if (!plan.porteur_profil_financier && plan.porteur_projet?.profil_financier_personnel) {
+      plan.porteur_profil_financier = plan.porteur_projet.profil_financier_personnel;
+    }
+    // tresorerie_mensuelle à la racine (compat renderer)
+    if (!plan.tresorerie_mensuelle && plan.tresorerie?.tableau_12_mois) {
+      plan.tresorerie_mensuelle = plan.tresorerie.tableau_12_mois;
+    }
+    // acquisition à la racine (compat renderer)
+    if (!plan.acquisition_list && plan.acquisition?.canaux) {
+      plan.acquisition_list = plan.acquisition.canaux;
+    }
+    // rev_mensuel array pour charts
+    if (!plan.rev_mensuel && plan.projections_revenus?.tableau_mensuel_an1) {
+      plan.rev_mensuel = plan.projections_revenus.tableau_mensuel_an1.map(m => {
+        const val = String(m.ca_ht || '0').replace(/[^0-9]/g, '');
+        return parseInt(val, 10) || 0;
+      });
+    }
+    // scenarios à la racine
+    if (!plan.scenarios && plan.projections_revenus?.scenarios) {
+      plan.scenarios = plan.projections_revenus.scenarios;
+    }
 
-    // Compter les sections présentes
+    // ── Méta complétude ──────────────────────────────────────────────
     const REQUIRED_SECTIONS = [
-      'resume_executif', 'porteur_projet', 'presentation_projet', 'marche_analyse',
-      'proposition_valeur', 'concurrents', 'modele_economique', 'strategie_commerciale',
-      'acquisition', 'aspects_juridiques', 'aspects_organisationnels', 'rev_m36',
-      'tresorerie_detail', 'investissements', 'bilan_previsionnel', 'seuil_rentabilite',
-      'risques', 'actions', 'aides_subventions', 'annexes_checklist'
+      'disclaimer', 'scores', 'porteur_projet', 'resume_executif',
+      'presentation_projet', 'marche', 'proposition_valeur', 'concurrents',
+      'modele_economique', 'strategie_commerciale', 'acquisition',
+      'aspects_juridiques', 'aspects_organisationnels', 'plan_financement',
+      'investissements', 'finances_detail', 'seuil_rentabilite',
+      'projections_revenus', 'tresorerie', 'bilan_previsionnel',
+      'risques', 'plan_actions_90j', 'aides_subventions', 'annexes_checklist'
     ];
-    const presentSections = REQUIRED_SECTIONS.filter(k => plan[k] && (typeof plan[k] === 'string' ? plan[k].length > 5 : (Array.isArray(plan[k]) ? plan[k].length > 0 : true)));
-    plan._completeness = { present: presentSections.length, total: 20, sections: presentSections };
-
+    const presentSections = REQUIRED_SECTIONS.filter(k => {
+      const v = plan[k];
+      if (v === null || v === undefined) return false;
+      if (typeof v === 'string') return v.length > 5;
+      if (Array.isArray(v)) return v.length > 0;
+      return true;
+    });
+    plan._completeness = { present: presentSections.length, total: REQUIRED_SECTIONS.length, sections: presentSections };
     plan._meta = {
-      verified_data: verifiedData,
+      verified_data: formData._verifiedData,
       generation_ms: Date.now() - startTime,
-      pipeline_version: 'v2.0-bancaire',
+      pipeline_version: 'v2.1-bancabilite',
     };
 
     if (isDiscovery) {
       plan._discovery = true;
-      plan._watermark = 'Plan incomplet — Passe à Solo pour les 20 sections complètes';
+      plan._watermark = 'Plan incomplet — Passe à Solo pour le plan complet';
     }
 
-    console.log(`[generate-plan v2] Plan généré — complétude: ${presentSections.length}/20 — ${Date.now() - startTime}ms`);
+    console.log(`[generate-plan v2.1] Généré — ${presentSections.length}/${REQUIRED_SECTIONS.length} sections — ${Date.now() - startTime}ms`);
 
     return res.status(200).json({
       ...planData,
@@ -774,7 +1077,7 @@ export default async function handler(req, res) {
     });
 
   } catch (err) {
-    console.error('[generate-plan v2] Error:', err);
+    console.error('[generate-plan v2.1] Error:', err);
     return res.status(500).json({ error: { message: 'Erreur serveur: ' + err.message } });
   }
 }
