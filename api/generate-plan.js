@@ -110,7 +110,14 @@ strategie_commerciale, acquisition, aspects_juridiques,
 aspects_organisationnels, risques, plan_actions_90j,
 templates_communication.
 NE PAS générer les sections financières.
-Concision : 1-2 phrases max par champ texte, 3 items max par liste.`;
+
+6. CONCISION STRICTE — OBLIGATOIRE
+Chaque champ texte : 1 phrase maximum. Pas 2. 1.
+Chaque liste : 2 éléments maximum sauf structure imposée.
+Chaque objet imbriqué : remplis uniquement les champs qui apportent de la valeur réelle.
+Pas de phrases d'introduction, pas de conclusion, pas de reformulation du contexte.
+Chiffres et faits uniquement.
+Objectif output : 6 000 tokens maximum par partie.`;
 
 const PART2_SYSTEM_SUFFIX = `
 
@@ -123,7 +130,14 @@ bilan_previsionnel, aides_subventions, demarches_administratives,
 kpis, annexes_checklist, propriete_intellectuelle, cap_table,
 franchise_specifique, reprise_specifique, alertes_coherence.
 NE PAS générer les sections stratégiques.
-Concision : 1-2 phrases max par champ texte, 3 items max par liste.
+
+6. CONCISION STRICTE — OBLIGATOIRE
+Chaque champ texte : 1 phrase maximum. Pas 2. 1.
+Chaque liste : 2 éléments maximum sauf structure imposée.
+Chaque objet imbriqué : remplis uniquement les champs qui apportent de la valeur réelle.
+Pas de phrases d'introduction, pas de conclusion, pas de reformulation du contexte.
+Chiffres et faits uniquement.
+Objectif output : 6 000 tokens maximum par partie.
 
 COHÉRENCE FINANCIÈRE OBLIGATOIRE :
 plan_financement.total_besoins doit strictement égaler
@@ -870,7 +884,7 @@ ${buildPart1Schema(new Date().toISOString())}`;
     },
     body: JSON.stringify({
       model: MODEL,
-      max_tokens: 8000,
+      max_tokens: 12000,
       temperature: 0.3,
       system: sysPrompt,
       messages: [{ role: 'user', content: userPrompt }],
@@ -887,8 +901,13 @@ ${buildPart1Schema(new Date().toISOString())}`;
 
   const data = await resp.json();
   const text = (data.content || []).map(c => c.text || '').join('');
-  console.log(`[generate-plan v2.2] Part1 done — stop_reason: ${data.stop_reason} — ${text.length} chars`);
-  return extractJSON(text);
+  const stopReason = data.stop_reason;
+  const tokens = data.usage?.output_tokens;
+  console.log(`[EADEE] Part1 stop_reason: ${stopReason} — tokens output: ${tokens} — ${text.length} chars`);
+  if (stopReason === 'max_tokens') {
+    console.warn(`[EADEE] ⚠️ Part1 coupée à max_tokens — JSON potentiellement incomplet`);
+  }
+  return { plan: extractJSON(text), stopReason, tokens };
 }
 
 // ── GÉNÉRATION PARTIE 2 (FINANCIÈRE) ─────────────────────────────────
@@ -912,7 +931,7 @@ ${buildPart2Schema()}`;
     },
     body: JSON.stringify({
       model: MODEL,
-      max_tokens: 8000,
+      max_tokens: 12000,
       temperature: 0.3,
       system: sysPrompt,
       messages: [{ role: 'user', content: userPrompt }],
@@ -929,8 +948,13 @@ ${buildPart2Schema()}`;
 
   const data = await resp.json();
   const text = (data.content || []).map(c => c.text || '').join('');
-  console.log(`[generate-plan v2.2] Part2 done — stop_reason: ${data.stop_reason} — ${text.length} chars`);
-  return extractJSON(text);
+  const stopReason = data.stop_reason;
+  const tokens = data.usage?.output_tokens;
+  console.log(`[EADEE] Part2 stop_reason: ${stopReason} — tokens output: ${tokens} — ${text.length} chars`);
+  if (stopReason === 'max_tokens') {
+    console.warn(`[EADEE] ⚠️ Part2 coupée à max_tokens — JSON potentiellement incomplet`);
+  }
+  return { plan: extractJSON(text), stopReason, tokens };
 }
 
 // ── WEB SEARCH (conservé, désactivé par défaut) ───────────────────────
@@ -1188,8 +1212,12 @@ Retourne UNIQUEMENT le JSON, sans markdown.
       });
     }
 
-    const plan1 = part1Failed ? {} : part1Result.value;
-    const plan2 = part2Failed ? {} : part2Result.value;
+    const plan1 = part1Failed ? {} : part1Result.value.plan;
+    const plan2 = part2Failed ? {} : part2Result.value.plan;
+    const part1StopReason = part1Failed ? 'error' : part1Result.value.stopReason;
+    const part2StopReason = part2Failed ? 'error' : part2Result.value.stopReason;
+    const part1Tokens = part1Failed ? null : part1Result.value.tokens;
+    const part2Tokens = part2Failed ? null : part2Result.value.tokens;
 
     // ── MERGE ────────────────────────────────────────────────────────
     let fullPlan = { ...plan1, ...plan2 };
@@ -1202,18 +1230,6 @@ Retourne UNIQUEMENT le JSON, sans markdown.
       fullPlan._generation_incomplete = true;
       fullPlan._partie_manquante = 'part2';
     }
-
-    // ── NETTOYAGE CLÉS PARASITES ─────────────────────────────────────
-    delete fullPlan.score_viabilite;
-    delete fullPlan.nom_business;
-    delete fullPlan.tresorerie_mensuelle;
-    delete fullPlan.scenarios;
-    delete fullPlan._completeness;
-    delete fullPlan._meta;
-    delete fullPlan.porteur_profil_financier;
-    delete fullPlan.rev_mensuel;
-    delete fullPlan.acquisition_list;
-    delete fullPlan.tresorerie_mensuelle;
 
     // ── COMPAT DESCENDANTE (clés attendues par les renderers) ────────
     if (!fullPlan.score_viabilite && fullPlan.scores?.score_viabilite?.note !== undefined) {
@@ -1259,27 +1275,41 @@ Retourne UNIQUEMENT le JSON, sans markdown.
       return true;
     });
 
-    fullPlan._completeness = {
-      present: presentSections.length,
-      total: REQUIRED_SECTIONS.length,
-      sections: presentSections,
-    };
-    fullPlan._meta = {
-      verified_data: formData._verifiedData,
-      generation_ms: Date.now() - startTime,
+    const durationMs = Date.now() - startTime;
+    console.log(`[generate-plan v2.2] Généré — ${presentSections.length}/${REQUIRED_SECTIONS.length} sections — ${durationMs}ms | Part1: ${part1StopReason}/${part1Tokens}tok | Part2: ${part2StopReason}/${part2Tokens}tok`);
+
+    // ── NETTOYAGE CLÉS PARASITES (TOUJOURS EN DERNIER — après compat layer) ──
+    const PARASITES = [
+      'score_viabilite',
+      'nom_business',
+      'tresorerie_mensuelle',
+      'scenarios',
+      'porteur_profil_financier',
+      'rev_mensuel',
+      'acquisition_list',
+    ];
+    PARASITES.forEach(key => delete fullPlan[key]);
+
+    // ── DEBUG (visible dans window._testResult) ───────────────────────
+    fullPlan._debug = {
+      part1_stop_reason: part1StopReason,
+      part2_stop_reason: part2StopReason,
+      part1_tokens: part1Tokens,
+      part2_tokens: part2Tokens,
+      duration_ms: durationMs,
+      sections_present: presentSections.length,
+      sections_total: REQUIRED_SECTIONS.length,
       pipeline_version: 'v2.2-parallel',
       part1_ok: !part1Failed,
       part2_ok: !part2Failed,
     };
-
-    console.log(`[generate-plan v2.2] Généré — ${presentSections.length}/${REQUIRED_SECTIONS.length} sections — ${Date.now() - startTime}ms`);
 
     return res.status(200).json({
       id: `gen-${Date.now()}`,
       type: 'message',
       role: 'assistant',
       content: [{ type: 'text', text: JSON.stringify(fullPlan) }],
-      stop_reason: 'end_turn',
+      stop_reason: part1StopReason === 'end_turn' && part2StopReason === 'end_turn' ? 'end_turn' : 'max_tokens',
     });
 
   } catch (err) {
