@@ -1,11 +1,12 @@
 export const config = { runtime: 'nodejs' };
 
 // =====================================================================
-// EADEE — Pipeline génération business plan v2.1
+// EADEE — Pipeline génération business plan v2.2
 // Étape 1 : Données INSEE (APIs gratuites)
-// Étape 2 : Recherche web via Claude web_search (données marché vérifiées)
-// Étape 3 : Génération plan complet — Prompt Maître v2.1 (bancabilité)
-// Runtime : Node.js (pas Edge — nécessite SDK + jsonrepair)
+// Étape 2 : Génération PARALLÈLE en 2 appels Anthropic (Promise.all)
+//   - Part 1 : sections stratégiques (8 000 tokens)
+//   - Part 2 : sections financières  (8 000 tokens)
+// Runtime : Node.js (pas Edge — nécessite jsonrepair)
 // =====================================================================
 
 import { jsonrepair } from 'jsonrepair';
@@ -97,20 +98,45 @@ COHÉRENCE CONDITIONNELLE :
 Corriger avant de retourner.
 Si impossible → ajouter "alertes_coherence": ["description"] dans le JSON.`;
 
-// ── USER PROMPT BUILDER v2.1 ─────────────────────────────────────────
+// ── SUFFIXES SYSTÈME PAR PARTIE ──────────────────────────────────────
 
-function buildUserPrompt(data) {
-  return `Génère un business plan complet pour le projet suivant.
+const PART1_SYSTEM_SUFFIX = `
 
-⚠️ CONTRAINTE ABSOLUE DE CONCISION + ORDRE DE PRIORITÉ :
-- Maximum 2 phrases par champ texte (string)
-- Maximum 3-4 éléments par tableau (array)
-- Chiffres : format court (ex: "{{E:12 000€|calcul}}" pas de longue explication)
-- PRIORITÉ 1 (obligatoires, même courtes) : disclaimer, scores, porteur_projet, plan_financement, investissements, finances_detail, seuil_rentabilite, projections_revenus, tresorerie, bilan_previsionnel, tableau_amortissement, aides_subventions, annexes_checklist
-- PRIORITÉ 2 (si tokens restants) : resume_executif, presentation_projet, marche, proposition_valeur, concurrents, modele_economique, strategie_commerciale, acquisition, aspects_juridiques, aspects_organisationnels, risques, plan_actions_90j
-- Génère le JSON en mettant les clés de PRIORITÉ 1 en PREMIER dans l'objet JSON
+Tu génères UNIQUEMENT la partie stratégique du plan.
+Sections à générer : meta, disclaimer, scores, porteur_projet,
+resume_executif, presentation_projet, persona, marche,
+proposition_valeur, concurrents, modele_economique,
+strategie_commerciale, acquisition, aspects_juridiques,
+aspects_organisationnels, risques, plan_actions_90j,
+templates_communication.
+NE PAS générer les sections financières.
+Concision : 1-2 phrases max par champ texte, 3 items max par liste.`;
 
-━━ INFORMATIONS DE BASE ━━
+const PART2_SYSTEM_SUFFIX = `
+
+Tu génères UNIQUEMENT la partie financière du plan.
+Le contexte du projet est fourni dans le user prompt.
+Sections à générer : plan_financement, investissements,
+finances_detail, seuil_rentabilite, projections_revenus,
+projections_an2_an3, tresorerie, tableau_amortissement,
+bilan_previsionnel, aides_subventions, demarches_administratives,
+kpis, annexes_checklist, propriete_intellectuelle, cap_table,
+franchise_specifique, reprise_specifique, alertes_coherence.
+NE PAS générer les sections stratégiques.
+Concision : 1-2 phrases max par champ texte, 3 items max par liste.
+
+COHÉRENCE FINANCIÈRE OBLIGATOIRE :
+plan_financement.total_besoins doit strictement égaler
+plan_financement.total_ressources.
+Si les ressources dépassent les besoins, augmente
+tresorerie_securite pour absorber l'écart.
+bilan_previsionnel.annee_X.actif.total doit égaler
+bilan_previsionnel.annee_X.passif.total pour chaque année.`;
+
+// ── CONTEXTE PROJET (partagé entre part1 et part2) ───────────────────
+
+function buildProjectContext(data) {
+  return `━━ INFORMATIONS DE BASE ━━
 Nom du projet      : ${data.nom_projet || data.idea || 'Non renseigné'}
 Secteur            : ${data.secteur || data.sector || 'Non renseigné'}
 Type de projet     : ${data.type_projet || 'creation'}
@@ -149,19 +175,20 @@ Autorisations déjà obtenues : ${data.autorisations || 'aucune'}
 Concurrents identifiés      : ${data.concurrents_connus || 'non renseigné'}
 Preuves de marché           : ${data.preuves_marche || 'aucune'}
 
-━━ DONNÉES MARCHÉ VÉRIFIÉES (INSEE + recherche web) ━━
-${JSON.stringify(data._verifiedData || {}, null, 2)}
+━━ DONNÉES MARCHÉ VÉRIFIÉES (INSEE) ━━
+${JSON.stringify(data._verifiedData || {}, null, 2)}`;
+}
 
-Génère maintenant le business plan complet en JSON selon la structure EADEE v2.1 ci-dessous.
-Retourne UNIQUEMENT le JSON, sans markdown, sans backtick.
+// ── SCHÉMA PARTIE 1 (stratégique) ────────────────────────────────────
 
-{
+function buildPart1Schema(date) {
+  return `{
   "meta": {
     "nom_business": "string",
     "tagline": "string",
     "pitch_30s": "string",
-    "date_generation": "${new Date().toISOString()}",
-    "version": "2.1",
+    "date_generation": "${date}",
+    "version": "2.2",
     "type_projet_detecte": "string",
     "secteur_reglemente": false,
     "complexite_dossier": "standard"
@@ -174,28 +201,24 @@ Retourne UNIQUEMENT le JSON, sans markdown, sans backtick.
       "recommandation_concrete": "Prévoyez 2 à 4h avec un expert-comptable (~300 à 600€) ou un RDV gratuit à votre CCI avant votre rendez-vous bancaire."
     },
     "fiabilite_des_chiffres": {
-      "V_verifie": "Chiffre sourcé — issu d'une source publique identifiée. Vérifiez l'actualité avant de le citer.",
+      "V_verifie": "Chiffre sourcé — issu d'une source publique identifiée.",
       "E_estime": "Chiffre estimé — calculé à partir de vos données et d'hypothèses sectorielles standard.",
       "H_hypothese": "Hypothèse — à valider impérativement avant de présenter à une banque."
     },
     "ce_que_ce_plan_fait": [
       "Structure votre projet selon les standards bancaires français",
       "Calcule vos projections financières de façon cohérente et justifiée",
-      "Identifie les documents manquants à votre dossier complet",
-      "Vous prépare aux questions d'un banquier ou d'un conseiller BPI",
-      "Vous fait gagner 2 à 4 semaines de travail de structuration"
+      "Vous prépare aux questions d'un banquier ou d'un conseiller BPI"
     ],
     "ce_que_ce_plan_ne_fait_pas": [
       "Ne remplace pas les vrais documents physiques (Kbis, devis, avis d'imposition...)",
       "Ne garantit pas l'obtention d'un financement bancaire",
-      "Ne remplace pas le conseil d'un expert-comptable ou d'un conseiller juridique",
-      "Ne certifie pas l'exactitude des données de marché en temps réel"
+      "Ne remplace pas le conseil d'un expert-comptable ou d'un conseiller juridique"
     ],
     "ressources_gratuites": [
       { "organisme": "BPI France Création", "url": "bpifrance-creation.fr", "cout": "Gratuit" },
       { "organisme": "CCI France", "url": "cci.fr", "cout": "Gratuit à faible coût" },
-      { "organisme": "BGE Boutique de Gestion", "url": "bge.asso.fr", "cout": "Gratuit ou subventionné" },
-      { "organisme": "Réseau Entreprendre", "url": "reseau-entreprendre.fr", "cout": "Gratuit sur dossier" }
+      { "organisme": "BGE Boutique de Gestion", "url": "bge.asso.fr", "cout": "Gratuit ou subventionné" }
     ]
   },
 
@@ -211,8 +234,8 @@ Retourne UNIQUEMENT le JSON, sans markdown, sans backtick.
         "experience_porteur": { "points": 0, "commentaire": "string" },
         "clarte_modele_eco":  { "points": 0, "commentaire": "string" }
       },
-      "points_forts": ["string x3"],
-      "points_vigilance": ["string x3"]
+      "points_forts": ["string", "string", "string"],
+      "points_vigilance": ["string", "string", "string"]
     },
     "score_bancabilite": {
       "note": 0,
@@ -232,9 +255,9 @@ Retourne UNIQUEMENT le JSON, sans markdown, sans backtick.
   "porteur_projet": {
     "profil": {
       "presentation": "string",
-      "competences_cles": ["string x4"],
+      "competences_cles": ["string", "string", "string"],
       "parcours_synthetique": "string",
-      "points_differenciants": ["string x2"]
+      "points_differenciants": ["string", "string"]
     },
     "profil_financier_personnel": {
       "apport_personnel": "{{V:montant€|déclaré}}",
@@ -247,16 +270,13 @@ Retourne UNIQUEMENT le JSON, sans markdown, sans backtick.
       "documents_a_fournir": [
         "Pièce d'identité valide",
         "CV détaillé",
-        "Avis d'imposition N-1 et N-2",
-        "Relevés de compte personnel 3 derniers mois",
-        "Justificatifs d'apport",
-        "Situation patrimoniale complète"
+        "Avis d'imposition N-1 et N-2"
       ]
     }
   },
 
   "resume_executif": {
-    "synthese_projet": "string 5-6 phrases",
+    "synthese_projet": "string",
     "chiffres_cles": {
       "investissement_total": "{{V/E:montant€|...}}",
       "apport_personnel": "{{V:montant€|déclaré}}",
@@ -291,8 +311,8 @@ Retourne UNIQUEMENT le JSON, sans markdown, sans backtick.
     "situation": "string",
     "revenus_mensuels": "{{H:montant€|...}}",
     "probleme_principal": "string",
-    "motivations": ["string x3"],
-    "freins_achat": ["string x2"],
+    "motivations": ["string", "string", "string"],
+    "freins_achat": ["string", "string"],
     "canal_acquisition_prefere": "string",
     "citation_typique": "string"
   },
@@ -300,7 +320,7 @@ Retourne UNIQUEMENT le JSON, sans markdown, sans backtick.
   "marche": {
     "taille_marche_france": "{{V:montant€|source + année}}",
     "taux_croissance_annuel": "{{V:XX%|source + année}}",
-    "tendances_cles": ["string x3"],
+    "tendances_cles": ["string", "string", "string"],
     "zone_chalandise": "string",
     "part_marche_visee_an1": "{{H:XX%|hypothèse justifiée}}",
     "analyse_sectorielle": "string"
@@ -308,7 +328,7 @@ Retourne UNIQUEMENT le JSON, sans markdown, sans backtick.
 
   "proposition_valeur": {
     "usp": "string",
-    "benefices_clients": ["string x3"],
+    "benefices_clients": ["string", "string", "string"],
     "preuves_valeur": "string"
   },
 
@@ -369,7 +389,7 @@ Retourne UNIQUEMENT le JSON, sans markdown, sans backtick.
   },
 
   "strategie_commerciale": {
-    "canaux_distribution": ["string x2-3"],
+    "canaux_distribution": ["string", "string"],
     "tunnel_vente": "string",
     "strategie_prix": "string",
     "objectif_clients_m3": "{{H:nombre|...}}",
@@ -391,13 +411,6 @@ Retourne UNIQUEMENT le JSON, sans markdown, sans backtick.
         "cac_estime": "{{H:montant€|...}}",
         "priorite": "secondaire",
         "delai_premier_client": "string"
-      },
-      {
-        "canal": "string",
-        "description": "string",
-        "cac_estime": "{{H:montant€|...}}",
-        "priorite": "secondaire",
-        "delai_premier_client": "string"
       }
     ]
   },
@@ -407,7 +420,7 @@ Retourne UNIQUEMENT le JSON, sans markdown, sans backtick.
     "justification_statut": "string",
     "regime_fiscal": "string",
     "regime_social": "string",
-    "avantages_statut": ["string x3"],
+    "avantages_statut": ["string", "string", "string"],
     "etapes_creation": [
       { "etape": "string", "delai": "string", "cout": "{{V/E:montant€|...}}", "organisme": "string" }
     ],
@@ -436,6 +449,36 @@ Retourne UNIQUEMENT le JSON, sans markdown, sans backtick.
     ]
   },
 
+  "risques": [
+    { "risque": "string", "probabilite": "moyenne", "impact": "moyen", "solution_preventive": "string", "solution_curative": "string", "signal_alarme": "string" },
+    { "risque": "string", "probabilite": "faible",  "impact": "élevé", "solution_preventive": "string", "solution_curative": "string", "signal_alarme": "string" },
+    { "risque": "string", "probabilite": "élevée",  "impact": "moyen", "solution_preventive": "string", "solution_curative": "string", "signal_alarme": "string" }
+  ],
+
+  "plan_actions_90j": {
+    "phases": [
+      { "semaine": "S1-S2",  "titre": "string", "actions": ["string", "string", "string"], "livrable": "string", "budget_phase": null },
+      { "semaine": "S3-S4",  "titre": "string", "actions": ["string", "string", "string"], "livrable": "string", "budget_phase": null },
+      { "semaine": "S5-S6",  "titre": "string", "actions": ["string", "string", "string"], "livrable": "string", "budget_phase": null },
+      { "semaine": "S7-S8",  "titre": "string", "actions": ["string", "string", "string"], "livrable": "string", "budget_phase": null },
+      { "semaine": "S9-S10", "titre": "string", "actions": ["string", "string", "string"], "livrable": "string", "budget_phase": null },
+      { "semaine": "S11-S13","titre": "string", "actions": ["string", "string", "string"], "livrable": "string", "budget_phase": null }
+    ]
+  },
+
+  "templates_communication": {
+    "email_presentation_banque": { "objet": "string", "corps": "string" },
+    "email_prospection_client":  { "objet": "string", "corps": "string" },
+    "email_relance":             { "objet": "string", "corps": "string" },
+    "email_fournisseur":         { "objet": "string", "corps": "string" }
+  }
+}`;
+}
+
+// ── SCHÉMA PARTIE 2 (financière) ─────────────────────────────────────
+
+function buildPart2Schema() {
+  return `{
   "plan_financement": {
     "besoins": {
       "investissements_materiels": "{{E:montant€|...}}",
@@ -452,7 +495,7 @@ Retourne UNIQUEMENT le JSON, sans markdown, sans backtick.
       "pret_honneur": null,
       "subventions": null,
       "love_money": null,
-      "total_ressources": "{{E:montant€|somme}}"
+      "total_ressources": "{{E:montant€|somme — DOIT ÉGALER total_besoins}}"
     },
     "equilibre": true,
     "commentaire_equilibre": "string",
@@ -526,105 +569,39 @@ Retourne UNIQUEMENT le JSON, sans markdown, sans backtick.
       { "mois": "Décembre",  "ca_ht": "{{H:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" }
     ],
     "scenarios": {
-      "pessimiste": {
-        "hypothese": "string",
-        "ca_an1": "{{H:montant€|...}}",
-        "ca_an3": "{{H:montant€|...}}",
-        "point_mort_mois": "{{E:X mois|...}}",
-        "viabilite": "string"
-      },
-      "realiste": {
-        "hypothese": "string",
-        "ca_an1": "{{H:montant€|...}}",
-        "ca_an3": "{{H:montant€|...}}",
-        "point_mort_mois": "{{E:X mois|...}}",
-        "viabilite": "string"
-      },
-      "optimiste": {
-        "hypothese": "string",
-        "ca_an1": "{{H:montant€|...}}",
-        "ca_an3": "{{H:montant€|...}}",
-        "point_mort_mois": "{{E:X mois|...}}",
-        "viabilite": "string"
-      }
+      "pessimiste": { "hypothese": "string", "ca_an1": "{{H:montant€|...}}", "ca_an3": "{{H:montant€|...}}", "point_mort_mois": "{{E:X mois|...}}", "viabilite": "string" },
+      "realiste":   { "hypothese": "string", "ca_an1": "{{H:montant€|...}}", "ca_an3": "{{H:montant€|...}}", "point_mort_mois": "{{E:X mois|...}}", "viabilite": "string" },
+      "optimiste":  { "hypothese": "string", "ca_an1": "{{H:montant€|...}}", "ca_an3": "{{H:montant€|...}}", "point_mort_mois": "{{E:X mois|...}}", "viabilite": "string" }
     }
   },
 
   "projections_an2_an3": {
     "annee_2": {
       "tableau_trimestriel": [
-        {
-          "trimestre": "T1 An2",
-          "ca_ht": "{{H:montant€|cohérent avec jalons.mois_24 / 4}}",
-          "charges_fixes": "{{E:montant€|...}}",
-          "charges_variables": "{{E:montant€|...}}",
-          "resultat_net": "{{E:montant€|...}}"
-        },
-        {
-          "trimestre": "T2 An2",
-          "ca_ht": "{{H:montant€|...}}",
-          "charges_fixes": "{{E:montant€|...}}",
-          "charges_variables": "{{E:montant€|...}}",
-          "resultat_net": "{{E:montant€|...}}"
-        },
-        {
-          "trimestre": "T3 An2",
-          "ca_ht": "{{H:montant€|...}}",
-          "charges_fixes": "{{E:montant€|...}}",
-          "charges_variables": "{{E:montant€|...}}",
-          "resultat_net": "{{E:montant€|...}}"
-        },
-        {
-          "trimestre": "T4 An2",
-          "ca_ht": "{{H:montant€|...}}",
-          "charges_fixes": "{{E:montant€|...}}",
-          "charges_variables": "{{E:montant€|...}}",
-          "resultat_net": "{{E:montant€|...}}"
-        }
+        { "trimestre": "T1 An2", "ca_ht": "{{H:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" },
+        { "trimestre": "T2 An2", "ca_ht": "{{H:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" },
+        { "trimestre": "T3 An2", "ca_ht": "{{H:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" },
+        { "trimestre": "T4 An2", "ca_ht": "{{H:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" }
       ],
-      "ca_annuel": "{{H:montant€|somme des 4 trimestres — cohérent avec scenarios.realiste.ca_an1 x croissance}}",
+      "ca_annuel": "{{H:montant€|somme des 4 trimestres}}",
       "resultat_annuel": "{{E:montant€|somme des 4 trimestres}}",
       "taux_croissance_vs_an1": "{{E:XX%|(CA an2 - CA an1) / CA an1}}"
     },
     "annee_3": {
       "tableau_trimestriel": [
-        {
-          "trimestre": "T1 An3",
-          "ca_ht": "{{H:montant€|cohérent avec jalons.mois_36 / 4}}",
-          "charges_fixes": "{{E:montant€|...}}",
-          "charges_variables": "{{E:montant€|...}}",
-          "resultat_net": "{{E:montant€|...}}"
-        },
-        {
-          "trimestre": "T2 An3",
-          "ca_ht": "{{H:montant€|...}}",
-          "charges_fixes": "{{E:montant€|...}}",
-          "charges_variables": "{{E:montant€|...}}",
-          "resultat_net": "{{E:montant€|...}}"
-        },
-        {
-          "trimestre": "T3 An3",
-          "ca_ht": "{{H:montant€|...}}",
-          "charges_fixes": "{{E:montant€|...}}",
-          "charges_variables": "{{E:montant€|...}}",
-          "resultat_net": "{{E:montant€|...}}"
-        },
-        {
-          "trimestre": "T4 An3",
-          "ca_ht": "{{H:montant€|...}}",
-          "charges_fixes": "{{E:montant€|...}}",
-          "charges_variables": "{{E:montant€|...}}",
-          "resultat_net": "{{E:montant€|...}}"
-        }
+        { "trimestre": "T1 An3", "ca_ht": "{{H:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" },
+        { "trimestre": "T2 An3", "ca_ht": "{{H:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" },
+        { "trimestre": "T3 An3", "ca_ht": "{{H:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" },
+        { "trimestre": "T4 An3", "ca_ht": "{{H:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" }
       ],
-      "ca_annuel": "{{H:montant€|somme des 4 trimestres — cohérent avec jalons.mois_36}}",
+      "ca_annuel": "{{H:montant€|somme des 4 trimestres}}",
       "resultat_annuel": "{{E:montant€|somme des 4 trimestres}}",
       "taux_croissance_vs_an2": "{{E:XX%|(CA an3 - CA an2) / CA an2}}"
     },
     "synthese_3_ans": {
-      "evolution_ca": "string — narrative de la progression du CA sur 3 ans",
-      "evolution_rentabilite": "string — quand l'entreprise devient vraiment rentable et durablement",
-      "message_banquier": "string — ce que ces 3 ans de projections inspirent à un banquier"
+      "evolution_ca": "string",
+      "evolution_rentabilite": "string",
+      "message_banquier": "string"
     }
   },
 
@@ -645,7 +622,7 @@ Retourne UNIQUEMENT le JSON, sans markdown, sans backtick.
     ],
     "solde_minimum": "{{E:montant€|point bas}}",
     "mois_critique": null,
-    "recommandations": ["string x2-3"]
+    "recommandations": ["string", "string"]
   },
 
   "tableau_amortissement": null,
@@ -666,7 +643,7 @@ Retourne UNIQUEMENT le JSON, sans markdown, sans backtick.
         "dettes_financieres": "{{E:montant€|capital restant dû}}",
         "dettes_fournisseurs": "{{E:montant€|...}}",
         "dettes_fiscales_sociales": "{{E:montant€|...}}",
-        "total_passif": "{{E:montant€|somme}}"
+        "total_passif": "{{E:montant€|somme — DOIT ÉGALER total_actif}}"
       },
       "ratios": {
         "autonomie_financiere": "{{E:XX%|fonds propres / total bilan}}",
@@ -676,9 +653,9 @@ Retourne UNIQUEMENT le JSON, sans markdown, sans backtick.
     },
     "annee_2": {
       "actif": {
-        "immobilisations_nettes": "{{E:montant€|immobilisations an1 - amortissements an2}}",
-        "stocks": "{{E:montant€|...}} | null",
-        "creances_clients": "{{E:montant€|CA an2 x délai encaissement}}",
+        "immobilisations_nettes": "{{E:montant€|...}}",
+        "stocks": null,
+        "creances_clients": "{{E:montant€|...}}",
         "disponibilites": "{{E:montant€|trésorerie fin an2}}",
         "total_actif": "{{E:montant€|somme}}"
       },
@@ -689,15 +666,15 @@ Retourne UNIQUEMENT le JSON, sans markdown, sans backtick.
         "dettes_financieres": "{{E:montant€|capital restant dû fin an2}}",
         "dettes_fournisseurs": "{{E:montant€|...}}",
         "dettes_fiscales_sociales": "{{E:montant€|...}}",
-        "total_passif": "{{E:montant€|somme — doit égaler total_actif}}"
+        "total_passif": "{{E:montant€|somme — DOIT ÉGALER total_actif}}"
       },
       "ratios": {
-        "autonomie_financiere": "{{E:XX%|fonds propres / total bilan}}",
-        "ratio_endettement": "{{E:XX%|dettes financières / fonds propres}}",
-        "interpretation": "string — évolution vs an1"
+        "autonomie_financiere": "{{E:XX%|...}}",
+        "ratio_endettement": "{{E:XX%|...}}",
+        "interpretation": "string"
       },
       "compte_resultat": {
-        "ca_ht": "{{H:montant€|projection an2 — cohérent avec projections_revenus.jalons.mois_24}}",
+        "ca_ht": "{{H:montant€|projection an2}}",
         "charges_fixes": "{{E:montant€|...}}",
         "charges_variables": "{{E:montant€|...}}",
         "marge_brute": "{{E:montant€|CA - charges variables}}",
@@ -708,28 +685,28 @@ Retourne UNIQUEMENT le JSON, sans markdown, sans backtick.
     },
     "annee_3": {
       "actif": {
-        "immobilisations_nettes": "{{E:montant€|immobilisations an2 - amortissements an3}}",
-        "stocks": "{{E:montant€|...}} | null",
-        "creances_clients": "{{E:montant€|CA an3 x délai encaissement}}",
+        "immobilisations_nettes": "{{E:montant€|...}}",
+        "stocks": null,
+        "creances_clients": "{{E:montant€|...}}",
         "disponibilites": "{{E:montant€|trésorerie fin an3}}",
         "total_actif": "{{E:montant€|somme}}"
       },
       "passif": {
         "capital_social": "{{V:montant€|identique an1}}",
         "reserves": "{{E:montant€|résultats an1+an2 mis en réserve}}",
-        "resultat": "{{E:montant€|résultat net an3 — cohérent avec projections_revenus.jalons.mois_36}}",
+        "resultat": "{{E:montant€|résultat net an3}}",
         "dettes_financieres": "{{E:montant€|capital restant dû fin an3}}",
         "dettes_fournisseurs": "{{E:montant€|...}}",
         "dettes_fiscales_sociales": "{{E:montant€|...}}",
-        "total_passif": "{{E:montant€|somme — doit égaler total_actif}}"
+        "total_passif": "{{E:montant€|somme — DOIT ÉGALER total_actif}}"
       },
       "ratios": {
-        "autonomie_financiere": "{{E:XX%|fonds propres / total bilan}}",
-        "ratio_endettement": "{{E:XX%|dettes financières / fonds propres}}",
-        "interpretation": "string — évolution vs an2"
+        "autonomie_financiere": "{{E:XX%|...}}",
+        "ratio_endettement": "{{E:XX%|...}}",
+        "interpretation": "string"
       },
       "compte_resultat": {
-        "ca_ht": "{{H:montant€|projection an3 — cohérent avec projections_revenus.jalons.mois_36}}",
+        "ca_ht": "{{H:montant€|projection an3}}",
         "charges_fixes": "{{E:montant€|...}}",
         "charges_variables": "{{E:montant€|...}}",
         "marge_brute": "{{E:montant€|CA - charges variables}}",
@@ -740,32 +717,13 @@ Retourne UNIQUEMENT le JSON, sans markdown, sans backtick.
     }
   },
 
-  "risques": [
-    { "risque": "string", "probabilite": "moyenne", "impact": "moyen", "solution_preventive": "string", "solution_curative": "string", "signal_alarme": "string" },
-    { "risque": "string", "probabilite": "faible",  "impact": "élevé", "solution_preventive": "string", "solution_curative": "string", "signal_alarme": "string" },
-    { "risque": "string", "probabilite": "élevée",  "impact": "moyen", "solution_preventive": "string", "solution_curative": "string", "signal_alarme": "string" },
-    { "risque": "string", "probabilite": "faible",  "impact": "faible","solution_preventive": "string", "solution_curative": "string", "signal_alarme": "string" },
-    { "risque": "string", "probabilite": "moyenne", "impact": "élevé", "solution_preventive": "string", "solution_curative": "string", "signal_alarme": "string" }
-  ],
-
-  "plan_actions_90j": {
-    "phases": [
-      { "semaine": "S1-S2", "titre": "string", "actions": ["string x3"], "livrable": "string", "budget_phase": null },
-      { "semaine": "S3-S4", "titre": "string", "actions": ["string x3"], "livrable": "string", "budget_phase": null },
-      { "semaine": "S5-S6", "titre": "string", "actions": ["string x3"], "livrable": "string", "budget_phase": null },
-      { "semaine": "S7-S8", "titre": "string", "actions": ["string x3"], "livrable": "string", "budget_phase": null },
-      { "semaine": "S9-S10","titre": "string", "actions": ["string x3"], "livrable": "string", "budget_phase": null },
-      { "semaine": "S11-S13","titre": "string","actions": ["string x3"], "livrable": "string", "budget_phase": null }
-    ]
-  },
-
   "aides_subventions": {
     "eligibles": [
       {
         "aide": "string",
         "organisme": "string",
         "montant": "{{V/E:montant€|source}}",
-        "conditions": ["string x2"],
+        "conditions": ["string", "string"],
         "demarche": "string",
         "delai_reponse": "string",
         "cumulable": true,
@@ -790,13 +748,6 @@ Retourne UNIQUEMENT le JSON, sans markdown, sans backtick.
     ]
   },
 
-  "templates_communication": {
-    "email_presentation_banque": { "objet": "string", "corps": "string" },
-    "email_prospection_client":  { "objet": "string", "corps": "string" },
-    "email_relance":             { "objet": "string", "corps": "string" },
-    "email_fournisseur":         { "objet": "string", "corps": "string" }
-  },
-
   "annexes_checklist": {
     "categorie_1_documents_personnels": {
       "titre": "Documents personnels du porteur",
@@ -806,8 +757,7 @@ Retourne UNIQUEMENT le JSON, sans markdown, sans backtick.
         { "document": "CV détaillé orienté entrepreneur",             "statut_requis": "bloquant",       "delai_obtention": "1-2 jours" },
         { "document": "Avis d'imposition N-1 et N-2",                "statut_requis": "bloquant",       "delai_obtention": "immédiat — impots.gouv.fr" },
         { "document": "Relevés de compte personnel 3 derniers mois", "statut_requis": "bloquant",       "delai_obtention": "immédiat" },
-        { "document": "Justificatifs d'apport personnel",             "statut_requis": "bloquant",       "delai_obtention": "immédiat" },
-        { "document": "Situation patrimoniale complète",              "statut_requis": "tres_important", "delai_obtention": "2-3 jours" }
+        { "document": "Justificatifs d'apport personnel",             "statut_requis": "bloquant",       "delai_obtention": "immédiat" }
       ]
     },
     "categorie_2_documents_juridiques": {
@@ -816,9 +766,7 @@ Retourne UNIQUEMENT le JSON, sans markdown, sans backtick.
       "items": [
         { "document": "Statut juridique choisi et justifié",          "statut_requis": "bloquant",       "delai_obtention": "1 jour" },
         { "document": "Statuts de la société rédigés",                "statut_requis": "bloquant",       "delai_obtention": "3-10 jours" },
-        { "document": "Extrait Kbis ou récépissé d'immatriculation",  "statut_requis": "bloquant",       "delai_obtention": "3-5 jours après dépôt" },
-        { "document": "Justificatif de domiciliation",                "statut_requis": "bloquant",       "delai_obtention": "immédiat à 1 semaine" },
-        { "document": "Attestation RC Pro ou devis assurance",        "statut_requis": "conditionnel",   "delai_obtention": "1-5 jours" }
+        { "document": "Extrait Kbis ou récépissé d'immatriculation",  "statut_requis": "bloquant",       "delai_obtention": "3-5 jours après dépôt" }
       ]
     },
     "categorie_3_autorisations_sectorielles": {
@@ -834,13 +782,7 @@ Retourne UNIQUEMENT le JSON, sans markdown, sans backtick.
         { "document": "Business plan complet",                             "statut_requis": "bloquant",       "delai_obtention": "généré par EADEE ✅" },
         { "document": "Plan de financement besoins / ressources",         "statut_requis": "bloquant",       "delai_obtention": "inclus dans ce plan ✅" },
         { "document": "Compte de résultat prévisionnel 3 ans",            "statut_requis": "bloquant",       "delai_obtention": "inclus dans ce plan ✅" },
-        { "document": "Bilan prévisionnel 3 ans",                         "statut_requis": "bloquant",       "delai_obtention": "inclus dans ce plan ✅" },
-        { "document": "Plan de trésorerie 12 mois",                       "statut_requis": "bloquant",       "delai_obtention": "inclus dans ce plan ✅" },
-        { "document": "Seuil de rentabilité avec délai en mois",          "statut_requis": "bloquant",       "delai_obtention": "inclus dans ce plan ✅" },
-        { "document": "Détail du BFR",                                    "statut_requis": "tres_important", "delai_obtention": "inclus dans ce plan ✅" },
-        { "document": "Scénarios pessimiste / réaliste / optimiste",      "statut_requis": "tres_important", "delai_obtention": "inclus dans ce plan ✅" },
-        { "document": "Tableau d'amortissement du prêt",                  "statut_requis": "tres_important", "delai_obtention": "inclus dans ce plan ✅" },
-        { "document": "Devis investissements (2 devis par poste >1000€)", "statut_requis": "bloquant",       "delai_obtention": "1-3 semaines" }
+        { "document": "Plan de trésorerie 12 mois",                       "statut_requis": "bloquant",       "delai_obtention": "inclus dans ce plan ✅" }
       ]
     },
     "categorie_5_preuves_marche": {
@@ -848,19 +790,15 @@ Retourne UNIQUEMENT le JSON, sans markdown, sans backtick.
       "ordre_preparation": 3,
       "items": [
         { "document": "Étude de marché avec sources datées",    "statut_requis": "tres_important", "delai_obtention": "inclus dans ce plan ✅" },
-        { "document": "Au moins 1 lettre d'intention client",   "statut_requis": "tres_important", "delai_obtention": "variable — à obtenir avant RDV" },
-        { "document": "Preuve de concept / MVP / test marché",  "statut_requis": "souhaitable",    "delai_obtention": "variable" },
-        { "document": "Benchmark concurrentiel documenté",      "statut_requis": "souhaitable",    "delai_obtention": "inclus dans ce plan ✅" }
+        { "document": "Au moins 1 lettre d'intention client",   "statut_requis": "tres_important", "delai_obtention": "variable — à obtenir avant RDV" }
       ]
     },
     "categorie_6_aides_et_presentation": {
       "titre": "Dossiers d'aides & présentation banque",
       "ordre_preparation": 4,
       "items": [
-        { "document": "Contact BPI France pris",                  "statut_requis": "conditionnel",   "condition": "Si montant >50k€ ou projet innovant" },
         { "document": "Subventions régionales / CCI identifiées", "statut_requis": "souhaitable",    "delai_obtention": "1-2 jours de recherche" },
-        { "document": "Executive summary 1-2 pages",              "statut_requis": "tres_important", "delai_obtention": "1 jour" },
-        { "document": "Courrier de présentation banque",          "statut_requis": "tres_important", "delai_obtention": "inclus dans ce plan ✅" }
+        { "document": "Executive summary 1-2 pages",              "statut_requis": "tres_important", "delai_obtention": "1 jour" }
       ]
     },
     "score_readiness": {
@@ -882,7 +820,120 @@ Retourne UNIQUEMENT le JSON, sans markdown, sans backtick.
 }`;
 }
 
-// ── ÉTAPE 2 : WEB SEARCH ─────────────────────────────────────────────
+// ── UTILITAIRES ───────────────────────────────────────────────────────
+
+function extractJSON(text) {
+  const start = text.indexOf('{');
+  const end = text.lastIndexOf('}');
+  if (start === -1 || end === -1) throw new Error('Pas de JSON dans la réponse');
+  let raw = text.slice(start, end + 1);
+
+  // Fix marqueurs {{V/E/H:...}} non quotés
+  raw = raw.replace(/(?<!"):(\s*)(\{\{[VEH]:[^\n"]*?\}\})(?!")/g, ':$1"$2"');
+  // Fix marqueurs tronqués en fin (max_tokens coupé dans un marqueur)
+  raw = raw.replace(/(?<!"):(\s*)(\{\{[VEH]:[^\n"]*)$/g, ':$1"$2}}"');
+
+  try {
+    return JSON.parse(raw);
+  } catch(e1) {
+    try {
+      return JSON.parse(jsonrepair(raw));
+    } catch(e2) {
+      const posMatch = e2.message.match(/position (\d+)/);
+      if (posMatch) {
+        const errPos = parseInt(posMatch[1]);
+        const truncated = raw.substring(0, Math.max(0, errPos - 1));
+        try { return JSON.parse(jsonrepair(truncated)); } catch {}
+      }
+      throw new Error(e2.message);
+    }
+  }
+}
+
+// ── GÉNÉRATION PARTIE 1 (STRATÉGIQUE) ────────────────────────────────
+
+async function generatePart1(formData, sysPrompt) {
+  const userPrompt = `Génère la partie STRATÉGIQUE du business plan pour ce projet.
+⚠️ CONCISION : 1-2 phrases max par champ texte, 3 items max par liste.
+Retourne UNIQUEMENT le JSON ci-dessous rempli, sans markdown, sans backtick.
+
+${buildProjectContext(formData)}
+
+${buildPart1Schema(new Date().toISOString())}`;
+
+  const resp = await fetch(ANTHROPIC_API, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': process.env.ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model: MODEL,
+      max_tokens: 8000,
+      temperature: 0.3,
+      system: sysPrompt,
+      messages: [{ role: 'user', content: userPrompt }],
+    }),
+    signal: AbortSignal.timeout(250000),
+  });
+
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    const e = new Error(`Part1 API error ${resp.status}`);
+    e.apiError = err;
+    throw e;
+  }
+
+  const data = await resp.json();
+  const text = (data.content || []).map(c => c.text || '').join('');
+  console.log(`[generate-plan v2.2] Part1 done — stop_reason: ${data.stop_reason} — ${text.length} chars`);
+  return extractJSON(text);
+}
+
+// ── GÉNÉRATION PARTIE 2 (FINANCIÈRE) ─────────────────────────────────
+
+async function generatePart2(formData, sysPrompt) {
+  const userPrompt = `Génère la partie FINANCIÈRE du business plan pour ce projet.
+⚠️ CONCISION : 1-2 phrases max par champ texte, 3 items max par liste.
+⚠️ COHÉRENCE OBLIGATOIRE : plan_financement.besoins.total_besoins DOIT strictement égaler plan_financement.ressources.total_ressources (ajuste tresorerie_securite si nécessaire).
+Retourne UNIQUEMENT le JSON ci-dessous rempli, sans markdown, sans backtick.
+
+${buildProjectContext(formData)}
+
+${buildPart2Schema()}`;
+
+  const resp = await fetch(ANTHROPIC_API, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': process.env.ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model: MODEL,
+      max_tokens: 8000,
+      temperature: 0.3,
+      system: sysPrompt,
+      messages: [{ role: 'user', content: userPrompt }],
+    }),
+    signal: AbortSignal.timeout(250000),
+  });
+
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    const e = new Error(`Part2 API error ${resp.status}`);
+    e.apiError = err;
+    throw e;
+  }
+
+  const data = await resp.json();
+  const text = (data.content || []).map(c => c.text || '').join('');
+  console.log(`[generate-plan v2.2] Part2 done — stop_reason: ${data.stop_reason} — ${text.length} chars`);
+  return extractJSON(text);
+}
+
+// ── WEB SEARCH (conservé, désactivé par défaut) ───────────────────────
 
 async function performWebSearch(idea, sector, city, inseeData) {
   const searchPrompt = `Pour le projet suivant, recherche en ligne les données marché les plus récentes et fiables (sources françaises de préférence) :
@@ -984,42 +1035,10 @@ Si une donnée n'est pas trouvable, mets value: null et fiabilite: "HYPOTHESE".`
   }
 }
 
-// ── UTILITAIRES ───────────────────────────────────────────────────────
+// ── NORMALISATION DES DONNÉES FORMULAIRE ─────────────────────────────
 
-function extractJSON(text) {
-  const start = text.indexOf('{');
-  const end = text.lastIndexOf('}');
-  if (start === -1 || end === -1) throw new Error('Pas de JSON dans la réponse');
-  let raw = text.slice(start, end + 1);
-
-  // Fix marqueurs {{V/E/H:...}} non quotés — pattern permissif (contenu peut avoir des { imbriqués)
-  // Cible : ": {{X:...}}" non précédé d'un guillemet
-  raw = raw.replace(/(?<!"):(\s*)(\{\{[VEH]:[^\n"]*?\}\})(?!")/g, ':$1"$2"');
-  // Fix marqueurs tronqués en fin (max_tokens coupé dans un marqueur)
-  raw = raw.replace(/(?<!"):(\s*)(\{\{[VEH]:[^\n"]*)$/g, ':$1"$2}}"');
-
-  try {
-    return JSON.parse(raw);
-  } catch(e1) {
-    try {
-      return JSON.parse(jsonrepair(raw));
-    } catch(e2) {
-      // Dernier recours : tronquer au dernier objet JSON complet avant la position d'erreur
-      const posMatch = e2.message.match(/position (\d+)/);
-      if (posMatch) {
-        const errPos = parseInt(posMatch[1]);
-        const truncated = raw.substring(0, Math.max(0, errPos - 1));
-        try { return JSON.parse(jsonrepair(truncated)); } catch {}
-      }
-      throw new Error(e2.message);
-    }
-  }
-}
-
-// Compat : mappe les anciens champs du formulaire vers la structure v2.1
 function normalizeFormData(body) {
   return {
-    // Nouveaux champs v2.1
     nom_projet:           body.nom_projet         || body.idea        || '',
     secteur:              body.secteur             || body.sector      || '',
     type_projet:          body.type_projet         || 'creation',
@@ -1049,7 +1068,6 @@ function normalizeFormData(body) {
     autorisations:        body.autorisations         || 'aucune',
     concurrents_connus:   body.concurrents_connus    || '',
     preuves_marche:       body.preuves_marche        || 'aucune',
-    // Champs internes
     credits:              body.credits,
   };
 }
@@ -1065,7 +1083,7 @@ export default async function handler(req, res) {
   const startTime = Date.now();
 
   try {
-    const { model, messages, max_tokens, system } = req.body;
+    const { messages } = req.body;
 
     // ── Compatibilité avec l'ancien appel front (proxy.js) ──────────
     if (messages && Array.isArray(messages)) {
@@ -1089,7 +1107,7 @@ export default async function handler(req, res) {
       }
     }
 
-    // ── Nouveau pipeline 3 étapes v2.1 ───────────────────────────────
+    // ── Nouveau pipeline v2.2 (génération parallèle) ─────────────────
     const formData = normalizeFormData(req.body);
     if (!formData.description_projet && !formData.nom_projet) {
       return res.status(400).json({ error: 'Champ "idea" ou "description_projet" requis' });
@@ -1098,109 +1116,132 @@ export default async function handler(req, res) {
     const credits = parseInt(formData.credits ?? '1', 10);
     const isDiscovery = credits === 0;
 
-    console.log(`[generate-plan v2.1] Début — ${(formData.nom_projet || formData.description_projet).substring(0, 60)}... [${isDiscovery ? 'DÉCOUVERTE' : 'COMPLET'}]`);
+    console.log(`[generate-plan v2.2] Début — ${(formData.nom_projet || formData.description_projet).substring(0, 60)} [${isDiscovery ? 'DÉCOUVERTE' : 'COMPLET'}]`);
 
-    // ÉTAPE 1 — Données INSEE uniquement (web search désactivé pour tenir dans maxDuration)
+    // ÉTAPE 1 — Données INSEE
     const inseeData = await fetchINSEEData(formData.secteur, formData.zone_geo);
-    const webData = null;
+    const webData = null; // web search désactivé pour tenir dans maxDuration
 
-    console.log(`[generate-plan v2.1] Données — INSEE: ${!!inseeData?.city} — ${Date.now() - startTime}ms`);
+    console.log(`[generate-plan v2.2] INSEE: ${!!inseeData?.city} — ${Date.now() - startTime}ms`);
 
-    // Injecter les données vérifiées dans le prompt
     formData._verifiedData = {
       insee: inseeData,
       web_search: webData,
       generated_at: new Date().toISOString(),
     };
 
-    // ÉTAPE 3 — Génération du plan v2.1
+    // ── MODE DÉCOUVERTE (appel unique léger) ─────────────────────────
+    if (isDiscovery) {
+      const knowledgeBase = getKnowledgeContext();
+      const sysPrompt = EADEE_SYSTEM_PROMPT + `\n\nKNOWLEDGE BASE :\n${knowledgeBase}`;
+      const discoveryPrompt = `${buildProjectContext(formData)}
+
+Génère UNIQUEMENT : meta, scores.score_viabilite, porteur_projet.profil, presentation_projet, marche, proposition_valeur, concurrents, disclaimer.
+Toutes les autres sections → null.
+Retourne UNIQUEMENT le JSON, sans markdown.
+{ "meta": {...}, "disclaimer": {...}, "scores": {...}, "porteur_projet": {...}, "presentation_projet": {...}, "marche": {...}, "proposition_valeur": {...}, "concurrents": [...] }`;
+
+      const discResp = await fetch(ANTHROPIC_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
+        body: JSON.stringify({ model: MODEL, max_tokens: 2000, temperature: 0.3, system: sysPrompt, messages: [{ role: 'user', content: discoveryPrompt }] }),
+        signal: AbortSignal.timeout(60000),
+      });
+      if (!discResp.ok) {
+        const err = await discResp.json().catch(() => ({}));
+        return res.status(discResp.status).json(err);
+      }
+      const discData = await discResp.json();
+      const discText = (discData.content || []).map(c => c.text || '').join('');
+      let discPlan;
+      try { discPlan = extractJSON(discText); } catch (e) {
+        return res.status(500).json({ error: { message: 'JSON invalide: ' + e.message } });
+      }
+      discPlan._discovery = true;
+      discPlan._watermark = 'Plan incomplet — Passe à Solo pour le plan complet';
+      discPlan._meta = { generation_ms: Date.now() - startTime, pipeline_version: 'v2.2-discovery' };
+      return res.status(200).json({ ...discData, content: [{ type: 'text', text: JSON.stringify(discPlan) }] });
+    }
+
+    // ── GÉNÉRATION COMPLÈTE — 2 APPELS PARALLÈLES ───────────────────
     const knowledgeBase = getKnowledgeContext();
-    const systemPrompt = EADEE_SYSTEM_PROMPT + `\n\nKNOWLEDGE BASE (statuts, banques, aides françaises) :\n${knowledgeBase}`;
+    const sysPrompt1 = EADEE_SYSTEM_PROMPT + `\n\nKNOWLEDGE BASE :\n${knowledgeBase}` + PART1_SYSTEM_SUFFIX;
+    const sysPrompt2 = EADEE_SYSTEM_PROMPT + `\n\nKNOWLEDGE BASE :\n${knowledgeBase}` + PART2_SYSTEM_SUFFIX;
 
-    const discoveryNote = isDiscovery
-      ? '\n\nIMPORTANT MODE DÉCOUVERTE : Génère UNIQUEMENT les sections meta, scores (score_viabilite uniquement), porteur_projet.profil, presentation_projet, marche, proposition_valeur, concurrents et disclaimer. Toutes les autres sections → null.'
-      : '';
+    console.log(`[generate-plan v2.2] Lancement Promise.all Part1 + Part2...`);
 
-    const userPrompt = buildUserPrompt(formData) + discoveryNote;
+    const [part1Result, part2Result] = await Promise.allSettled([
+      generatePart1(formData, sysPrompt1),
+      generatePart2(formData, sysPrompt2),
+    ]);
 
-    const planResp = await fetch(ANTHROPIC_API, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        max_tokens: isDiscovery ? 2000 : 12000,
-        temperature: 0.3,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: userPrompt }],
-      }),
-      signal: AbortSignal.timeout(240000),
-    });
+    const part1Failed = part1Result.status === 'rejected';
+    const part2Failed = part2Result.status === 'rejected';
 
-    if (!planResp.ok) {
-      const err = await planResp.json().catch(() => ({}));
-      if (planResp.status === 429) {
-        const retryAfter = planResp.headers.get('retry-after') || '60';
-        res.setHeader('Retry-After', retryAfter);
-        return res.status(429).json({
-          error: { message: `Limite de requêtes atteinte. Réessaie dans ${retryAfter} secondes.` }
-        });
-      }
-      if (planResp.status === 529) {
-        return res.status(503).json({
-          error: { message: 'API Claude surchargée. Réessaie dans quelques secondes.' }
-        });
-      }
-      return res.status(planResp.status).json(err);
+    if (part1Failed) console.error('[generate-plan v2.2] Part1 FAILED:', part1Result.reason?.message);
+    if (part2Failed) console.error('[generate-plan v2.2] Part2 FAILED:', part2Result.reason?.message);
+
+    // Si les deux échouent → erreur totale
+    if (part1Failed && part2Failed) {
+      return res.status(500).json({
+        error: { message: `Erreur génération Part1: ${part1Result.reason?.message} | Part2: ${part2Result.reason?.message}` }
+      });
     }
 
-    const planData = await planResp.json();
-    const planText = (planData.content || []).map(c => c.text || '').join('');
+    const plan1 = part1Failed ? {} : part1Result.value;
+    const plan2 = part2Failed ? {} : part2Result.value;
 
-    let plan;
-    try {
-      plan = extractJSON(planText);
-    } catch (e) {
-      return res.status(500).json({ error: { message: 'JSON invalide: ' + e.message } });
+    // ── MERGE ────────────────────────────────────────────────────────
+    let fullPlan = { ...plan1, ...plan2 };
+
+    // Flag si génération incomplète
+    if (part1Failed) {
+      fullPlan._generation_incomplete = true;
+      fullPlan._partie_manquante = 'part1';
+    } else if (part2Failed) {
+      fullPlan._generation_incomplete = true;
+      fullPlan._partie_manquante = 'part2';
     }
 
-    // ── Compat descendante : exposer les clés que le renderer attend ─
-    // score_viabilite à la racine
-    if (!plan.score_viabilite && plan.scores?.score_viabilite?.note !== undefined) {
-      plan.score_viabilite = plan.scores.score_viabilite.note;
+    // ── NETTOYAGE CLÉS PARASITES ─────────────────────────────────────
+    delete fullPlan.score_viabilite;
+    delete fullPlan.nom_business;
+    delete fullPlan.tresorerie_mensuelle;
+    delete fullPlan.scenarios;
+    delete fullPlan._completeness;
+    delete fullPlan._meta;
+    delete fullPlan.porteur_profil_financier;
+    delete fullPlan.rev_mensuel;
+    delete fullPlan.acquisition_list;
+    delete fullPlan.tresorerie_mensuelle;
+
+    // ── COMPAT DESCENDANTE (clés attendues par les renderers) ────────
+    if (!fullPlan.score_viabilite && fullPlan.scores?.score_viabilite?.note !== undefined) {
+      fullPlan.score_viabilite = fullPlan.scores.score_viabilite.note;
     }
-    // nom_business à la racine
-    if (!plan.nom_business && plan.meta?.nom_business) {
-      plan.nom_business = plan.meta.nom_business;
+    if (!fullPlan.nom_business && fullPlan.meta?.nom_business) {
+      fullPlan.nom_business = fullPlan.meta.nom_business;
     }
-    // porteur_profil_financier à la racine (pour les anciens renderers)
-    if (!plan.porteur_profil_financier && plan.porteur_projet?.profil_financier_personnel) {
-      plan.porteur_profil_financier = plan.porteur_projet.profil_financier_personnel;
+    if (!fullPlan.porteur_profil_financier && fullPlan.porteur_projet?.profil_financier_personnel) {
+      fullPlan.porteur_profil_financier = fullPlan.porteur_projet.profil_financier_personnel;
     }
-    // tresorerie_mensuelle à la racine (compat renderer)
-    if (!plan.tresorerie_mensuelle && plan.tresorerie?.tableau_12_mois) {
-      plan.tresorerie_mensuelle = plan.tresorerie.tableau_12_mois;
+    if (!fullPlan.tresorerie_mensuelle && fullPlan.tresorerie?.tableau_12_mois) {
+      fullPlan.tresorerie_mensuelle = fullPlan.tresorerie.tableau_12_mois;
     }
-    // acquisition à la racine (compat renderer)
-    if (!plan.acquisition_list && plan.acquisition?.canaux) {
-      plan.acquisition_list = plan.acquisition.canaux;
+    if (!fullPlan.acquisition_list && fullPlan.acquisition?.canaux) {
+      fullPlan.acquisition_list = fullPlan.acquisition.canaux;
     }
-    // rev_mensuel array pour charts
-    if (!plan.rev_mensuel && plan.projections_revenus?.tableau_mensuel_an1) {
-      plan.rev_mensuel = plan.projections_revenus.tableau_mensuel_an1.map(m => {
+    if (!fullPlan.rev_mensuel && fullPlan.projections_revenus?.tableau_mensuel_an1) {
+      fullPlan.rev_mensuel = fullPlan.projections_revenus.tableau_mensuel_an1.map(m => {
         const val = String(m.ca_ht || '0').replace(/[^0-9]/g, '');
         return parseInt(val, 10) || 0;
       });
     }
-    // scenarios à la racine
-    if (!plan.scenarios && plan.projections_revenus?.scenarios) {
-      plan.scenarios = plan.projections_revenus.scenarios;
+    if (!fullPlan.scenarios && fullPlan.projections_revenus?.scenarios) {
+      fullPlan.scenarios = fullPlan.projections_revenus.scenarios;
     }
 
-    // ── Méta complétude ──────────────────────────────────────────────
+    // ── MÉTA COMPLÉTUDE ──────────────────────────────────────────────
     const REQUIRED_SECTIONS = [
       'disclaimer', 'scores', 'porteur_projet', 'resume_executif',
       'presentation_projet', 'marche', 'proposition_valeur', 'concurrents',
@@ -1211,33 +1252,38 @@ export default async function handler(req, res) {
       'risques', 'plan_actions_90j', 'aides_subventions', 'annexes_checklist'
     ];
     const presentSections = REQUIRED_SECTIONS.filter(k => {
-      const v = plan[k];
+      const v = fullPlan[k];
       if (v === null || v === undefined) return false;
       if (typeof v === 'string') return v.length > 5;
       if (Array.isArray(v)) return v.length > 0;
       return true;
     });
-    plan._completeness = { present: presentSections.length, total: REQUIRED_SECTIONS.length, sections: presentSections };
-    plan._meta = {
+
+    fullPlan._completeness = {
+      present: presentSections.length,
+      total: REQUIRED_SECTIONS.length,
+      sections: presentSections,
+    };
+    fullPlan._meta = {
       verified_data: formData._verifiedData,
       generation_ms: Date.now() - startTime,
-      pipeline_version: 'v2.1-bancabilite',
+      pipeline_version: 'v2.2-parallel',
+      part1_ok: !part1Failed,
+      part2_ok: !part2Failed,
     };
 
-    if (isDiscovery) {
-      plan._discovery = true;
-      plan._watermark = 'Plan incomplet — Passe à Solo pour le plan complet';
-    }
-
-    console.log(`[generate-plan v2.1] Généré — ${presentSections.length}/${REQUIRED_SECTIONS.length} sections — ${Date.now() - startTime}ms`);
+    console.log(`[generate-plan v2.2] Généré — ${presentSections.length}/${REQUIRED_SECTIONS.length} sections — ${Date.now() - startTime}ms`);
 
     return res.status(200).json({
-      ...planData,
-      content: [{ type: 'text', text: JSON.stringify(plan) }],
+      id: `gen-${Date.now()}`,
+      type: 'message',
+      role: 'assistant',
+      content: [{ type: 'text', text: JSON.stringify(fullPlan) }],
+      stop_reason: 'end_turn',
     });
 
   } catch (err) {
-    console.error('[generate-plan v2.1] Error:', err);
+    console.error('[generate-plan v2.2] Error:', err);
     return res.status(500).json({ error: { message: 'Erreur serveur: ' + err.message } });
   }
 }
