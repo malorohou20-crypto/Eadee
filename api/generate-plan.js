@@ -992,15 +992,27 @@ function extractJSON(text) {
   if (start === -1 || end === -1) throw new Error('Pas de JSON dans la réponse');
   let raw = text.slice(start, end + 1);
 
-  // Fix marqueurs {{V/E/H:...}} non quotés : "key": {{X:val|src}} → "key": "{{X:val|src}}"
-  raw = raw.replace(/:\s*(\{\{[VEH]:[^"}\n]{0,200}\}\})/g, ': "$1"');
-  // Fix marqueurs tronqués en fin de fichier (max_tokens coupé au milieu d'un marqueur)
-  raw = raw.replace(/:\s*(\{\{[VEH]:[^"}\n]{0,200})$/g, ': "$1}}"');
+  // Fix marqueurs {{V/E/H:...}} non quotés — pattern permissif (contenu peut avoir des { imbriqués)
+  // Cible : ": {{X:...}}" non précédé d'un guillemet
+  raw = raw.replace(/(?<!"):(\s*)(\{\{[VEH]:[^\n"]*?\}\})(?!")/g, ':$1"$2"');
+  // Fix marqueurs tronqués en fin (max_tokens coupé dans un marqueur)
+  raw = raw.replace(/(?<!"):(\s*)(\{\{[VEH]:[^\n"]*)$/g, ':$1"$2}}"');
 
   try {
     return JSON.parse(raw);
-  } catch {
-    return JSON.parse(jsonrepair(raw));
+  } catch(e1) {
+    try {
+      return JSON.parse(jsonrepair(raw));
+    } catch(e2) {
+      // Dernier recours : tronquer au dernier objet JSON complet avant la position d'erreur
+      const posMatch = e2.message.match(/position (\d+)/);
+      if (posMatch) {
+        const errPos = parseInt(posMatch[1]);
+        const truncated = raw.substring(0, Math.max(0, errPos - 1));
+        try { return JSON.parse(jsonrepair(truncated)); } catch {}
+      }
+      throw new Error(e2.message);
+    }
   }
 }
 
