@@ -990,7 +990,13 @@ function extractJSON(text) {
   const start = text.indexOf('{');
   const end = text.lastIndexOf('}');
   if (start === -1 || end === -1) throw new Error('Pas de JSON dans la réponse');
-  const raw = text.slice(start, end + 1);
+  let raw = text.slice(start, end + 1);
+
+  // Fix marqueurs {{V/E/H:...}} non quotés : "key": {{X:val|src}} → "key": "{{X:val|src}}"
+  raw = raw.replace(/:\s*(\{\{[VEH]:[^"}\n]{0,200}\}\})/g, ': "$1"');
+  // Fix marqueurs tronqués en fin de fichier (max_tokens coupé au milieu d'un marqueur)
+  raw = raw.replace(/:\s*(\{\{[VEH]:[^"}\n]{0,200})$/g, ': "$1}}"');
+
   try {
     return JSON.parse(raw);
   } catch {
