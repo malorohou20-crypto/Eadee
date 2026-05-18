@@ -102,12 +102,13 @@ Si impossible → ajouter "alertes_coherence": ["description"] dans le JSON.`;
 function buildUserPrompt(data) {
   return `Génère un business plan complet pour le projet suivant.
 
-⚠️ CONTRAINTE ABSOLUE DE CONCISION — à respecter impérativement :
+⚠️ CONTRAINTE ABSOLUE DE CONCISION + ORDRE DE PRIORITÉ :
 - Maximum 2 phrases par champ texte (string)
 - Maximum 3-4 éléments par tableau (array)
 - Chiffres : format court (ex: "{{E:12 000€|calcul}}" pas de longue explication)
-- Objectif : couvrir TOUTES les 24 sections du JSON plutôt que détailler 12
-- Sections financières (plan_financement, tresorerie, bilan, amortissement, aides, checklist) : OBLIGATOIRES même courtes
+- PRIORITÉ 1 (obligatoires, même courtes) : disclaimer, scores, porteur_projet, plan_financement, investissements, finances_detail, seuil_rentabilite, projections_revenus, tresorerie, bilan_previsionnel, tableau_amortissement, aides_subventions, annexes_checklist
+- PRIORITÉ 2 (si tokens restants) : resume_executif, presentation_projet, marche, proposition_valeur, concurrents, modele_economique, strategie_commerciale, acquisition, aspects_juridiques, aspects_organisationnels, risques, plan_actions_90j
+- Génère le JSON en mettant les clés de PRIORITÉ 1 en PREMIER dans l'objet JSON
 
 ━━ INFORMATIONS DE BASE ━━
 Nom du projet      : ${data.nom_projet || data.idea || 'Non renseigné'}
@@ -1113,7 +1114,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: MODEL,
-        max_tokens: isDiscovery ? 2000 : 10000,
+        max_tokens: isDiscovery ? 2000 : 12000,
         temperature: 0.3,
         system: systemPrompt,
         messages: [{ role: 'user', content: userPrompt }],
