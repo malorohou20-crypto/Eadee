@@ -1112,12 +1112,12 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: MODEL,
-        max_tokens: isDiscovery ? 3000 : 8000,
+        max_tokens: isDiscovery ? 2000 : 5000,
         temperature: 0.3,
         system: systemPrompt,
         messages: [{ role: 'user', content: userPrompt }],
       }),
-      signal: AbortSignal.timeout(120000),
+      signal: AbortSignal.timeout(200000),
     });
 
     if (!planResp.ok) {
