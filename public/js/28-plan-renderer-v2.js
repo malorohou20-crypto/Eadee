@@ -25,12 +25,14 @@ function initCharts() {
   Chart.defaults.font.family = "'JetBrains Mono', monospace";
   Chart.defaults.font.size = 11;
   Chart.defaults.color = CC.text;
+  Chart.defaults.animation = false;
+  if (!window.eadeeCharts) window.eadeeCharts = {};
   _pending.forEach(function(c) {
     var el = document.getElementById(c.id);
     if (!el) return;
     var ex = Chart.getChart(el);
     if (ex) ex.destroy();
-    try { new Chart(el, c.cfg); } catch(e) { console.warn('chart err', c.id, e); }
+    try { window.eadeeCharts[c.id] = new Chart(el, c.cfg); } catch(e) { console.warn('chart err', c.id, e); }
   });
   _pending = [];
 }
@@ -442,10 +444,33 @@ function bloc7(plan) {
       fill:{ target:{value:0}, above:'rgba(200,75,47,0.08)', below:'rgba(217,79,58,0.10)' },
       tension:0.4, pointRadius:tm.map(function(r){return r.alerte?5:2;}),
       pointBackgroundColor:tm.map(function(r){return r.alerte?CC.red:CC.accent;}), yAxisID:'y' },
-    { type:'bar', data:mois, backgroundColor:'rgba(184,176,160,0.3)', borderRadius:2, yAxisID:'y' }
-  ]}, options:{ animation:false, maintainAspectRatio:false, plugins:{legend:{display:false}},
+    { type:'bar', data:mois, backgroundColor:'rgba(184,176,160,0.3)', borderRadius:2, yAxisID:'y' },
+    { type:'line', data:mlbls.map(function(){return 0;}), borderColor:CC.grid, borderWidth:1, borderDash:[4,4], pointRadius:0, fill:false, yAxisID:'y' }
+  ]}, options:{ animation:false, maintainAspectRatio:false, plugins:{legend:{display:false},
+    tooltip:{
+      callbacks:{
+        title:function(items){
+          var i=items[0]&&items[0].dataIndex;
+          return (i!==undefined&&tm[i])?(tm[i].mois||''):'';
+        },
+        label:function(){return '';},
+        afterBody:function(items){
+          var i=items[0]&&items[0].dataIndex;
+          if(i===undefined||!tm[i])return[];
+          var r=tm[i];
+          function cv(s){return String(s||'').replace(/\{\{[VEH]:(.*?)\|.*?\}\}/g,'$1').trim();}
+          var lines=[];
+          if(r.encaissements)lines.push('Enc : '+cv(r.encaissements));
+          if(r.decaissements)lines.push('Déc : '+cv(r.decaissements));
+          if(r.solde_mois)lines.push('Mois : '+cv(r.solde_mois));
+          if(r.solde_cumule)lines.push('Cumulé : '+cv(r.solde_cumule));
+          return lines;
+        }
+      }
+    }
+  },
     scales:{ x:{grid:{color:CC.grid},ticks:{color:CC.text}},
-      y:{grid:{color:CC.grid},ticks:{color:CC.text,callback:function(v){return v.toLocaleString('fr')+'€';}}} } } });
+      y:{grid:{color:CC.grid},ticks:{color:CC.text,callback:function(v){return v.toLocaleString('fr-FR')+'€';}}} } } });
 
   if (alertes.length) {
     h += '<div style="margin-top:12px;display:flex;flex-direction:column;gap:5px">';
@@ -469,14 +494,55 @@ function bloc8(plan) {
     {l:'An1',v:numVal(plan.rev_m12)},{l:'An2',v:numVal(plan.rev_m24)},{l:'An3',v:numVal(plan.rev_m36)}
   ].filter(function(j){ return j.v > 0; });
 
+  var prRev = plan.projections_revenus || {};
+  var resData = (prRev && prRev.tableau_mensuel_an1)
+    ? prRev.tableau_mensuel_an1.map(function(m){ return numVal(m.resultat_net); })
+    : [];
+
   var h = '<div style="background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:24px 28px;margin-bottom:20px">';
   h += '<div style="font-family:var(--serif);font-size:17px;color:var(--ink);border-bottom:1px solid var(--rule);padding-bottom:10px;margin-bottom:16px">Projections de revenus</div>';
   h += cvs(cid, 240);
-  h += legend([{c:CC.accent,l:'CA mensuel An1'}]);
+  h += legend([{c:CC.accent,l:'CA mensuel An1'},{c:CC.green,l:'Résultat net'}]);
 
-  queue(cid, { type:'line', data:{ labels:lbls, datasets:[{
-    data:rm, borderColor:CC.accent, borderWidth:2, fill:true, backgroundColor:'rgba(200,75,47,0.08)', tension:0.4, pointRadius:3
-  }]}, options:{ animation:false, maintainAspectRatio:false, plugins:{legend:{display:false}},
+  queue(cid, { type:'line', data:{ labels:lbls, datasets:[
+    {
+      label:'CA mensuel',
+      data:rm, borderColor:CC.accent, borderWidth:2, fill:true, backgroundColor:'rgba(200,75,47,0.08)', tension:0.4,
+      pointRadius:lbls.map(function(_,i){return [0,2,5,5,8,5,5,5,8,5,5,11].includes(i)?5:2;})
+    },
+    {
+      label:'Résultat net',
+      data:resData,
+      borderColor:CC.green,
+      borderWidth:1.5,
+      borderDash:[4,4],
+      fill:false,
+      tension:0.3,
+      pointRadius:2
+    },
+    {
+      data:lbls.map(function(){return 0;}),
+      borderColor:CC.grid,
+      borderWidth:1,
+      borderDash:[4,4],
+      pointRadius:0,
+      fill:false
+    }
+  ]}, options:{ animation:false, maintainAspectRatio:false, plugins:{legend:{display:false},
+    tooltip:{
+      callbacks:{
+        afterBody:function(items){
+          var i=items[0]&&items[0].dataIndex;
+          if(i===undefined)return[];
+          var jalonsData=(prRev&&prRev.jalons)?prRev.jalons:[];
+          var moisVals=[1,3,6,9,12];
+          var foundJalon=null;
+          jalonsData.forEach(function(j){if(moisVals.indexOf(j.mois)!==-1&&moisVals.indexOf(j.mois)===moisVals.indexOf(i+1))foundJalon=j;});
+          return foundJalon&&foundJalon.commentaire?[foundJalon.commentaire]:[];
+        }
+      }
+    }
+  },
     scales:{ x:{grid:{color:CC.grid},ticks:{color:CC.text}},
       y:{grid:{color:CC.grid},ticks:{color:CC.text,callback:function(v){return v.toLocaleString('fr')+'€';}},min:0} } } });
 
@@ -555,6 +621,7 @@ function bloc10(plan) {
   h += '</div>';
 
   if (rm.length && seuil > 0) {
+    var pmIdx = (parseInt(clean(sr.mois_atteinte_prevu||'0'))||0) - 1;
     h += cvs(cid, 220);
     h += legend([{c:CC.accent,l:'CA réel'},{c:CC.red,l:'Seuil de rentabilité'}]);
     queue(cid, { type:'line', data:{ labels:lbls, datasets:[
@@ -562,7 +629,28 @@ function bloc10(plan) {
       {data:lbls.map(function(){return seuil;}), borderColor:CC.red, borderDash:[5,4], borderWidth:1.5, fill:false, pointRadius:0}
     ]}, options:{ animation:false, maintainAspectRatio:false, plugins:{legend:{display:false}},
       scales:{ x:{grid:{color:CC.grid},ticks:{color:CC.text}},
-        y:{grid:{color:CC.grid},ticks:{color:CC.text,callback:function(v){return v.toLocaleString('fr')+'€';}},min:0} } } });
+        y:{grid:{color:CC.grid},ticks:{color:CC.text,callback:function(v){return v.toLocaleString('fr')+'€';}},min:0} } },
+    plugins:[{
+      id:'pmLabel_'+cid,
+      afterDatasetsDraw:function(chart){
+        if(pmIdx<0||pmIdx>=rm.length)return;
+        var ctx2=chart.ctx;
+        var xAxis=chart.scales.x;
+        var yAxis=chart.scales.y;
+        var x=xAxis.getPixelForValue(pmIdx);
+        var y=yAxis.getPixelForValue(rm[pmIdx]||seuil);
+        ctx2.save();
+        ctx2.fillStyle='#c84b2f';
+        ctx2.beginPath();
+        ctx2.arc(x,y,6,0,Math.PI*2);
+        ctx2.fill();
+        ctx2.font="600 11px 'JetBrains Mono', monospace";
+        ctx2.fillStyle='#c84b2f';
+        ctx2.textAlign='center';
+        ctx2.fillText('Point mort',x,y-12);
+        ctx2.restore();
+      }
+    }]});
   }
   if (sr.interpretation_bancaire||sr.detail) {
     h += '<div style="margin-top:12px;border-left:2px solid var(--rule);padding-left:12px">' +
@@ -641,6 +729,57 @@ function bloc11(plan) {
 
   var h = '<div style="background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:24px 28px;margin-bottom:20px">';
   h += '<div style="font-family:var(--serif);font-size:17px;color:var(--ink);border-bottom:1px solid var(--rule);padding-bottom:10px;margin-bottom:0">Bilan prévisionnel</div>';
+
+  // ── Graphique barres empilées An1/An2/An3 ──
+  var bilCid = uid();
+  var bilLabels = years.map(function(yr){ return yr.label; });
+  var bilActifKeys = ['immobilisations_nettes','stocks','creances_clients','disponibilites'];
+  var bilActifColors = ['#c84b2f','#e8a87c','#b8b0a0','#3a7d44'];
+  var bilActifLabels = ['Immobilisations','Stocks','Créances','Disponibilités'];
+  var bilPassifKeys = ['capital_social','dettes_financieres','dettes_fournisseurs'];
+  var bilPassifColors = ['#c84b2f','#b8b0a0','#e8a87c'];
+  var bilPassifLabels = ['Capitaux propres','Dettes fin.','Autres dettes'];
+
+  var bilDatasets = [];
+  bilActifKeys.forEach(function(k,ki){
+    bilDatasets.push({
+      label:bilActifLabels[ki],
+      data:years.map(function(yr){ return numVal((yr.data.actif||{})[k]); }),
+      backgroundColor:bilActifColors[ki],
+      stack:'actif',
+      borderRadius:2
+    });
+  });
+  bilPassifKeys.forEach(function(k,ki){
+    bilDatasets.push({
+      label:bilPassifLabels[ki],
+      data:years.map(function(yr){ return numVal((yr.data.passif||{})[k]); }),
+      backgroundColor:bilPassifColors[ki],
+      stack:'passif',
+      borderRadius:2
+    });
+  });
+
+  var hasBilData = bilDatasets.some(function(ds){ return ds.data.some(function(v){return v>0;}); });
+  if (hasBilData) {
+    h += cvs(bilCid, 220);
+    var bilLegItems = bilActifLabels.map(function(l,i){ return {c:bilActifColors[i],l:l}; })
+      .concat(bilPassifLabels.map(function(l,i){ return {c:bilPassifColors[i],l:l}; }));
+    h += legend(bilLegItems);
+    queue(bilCid, {
+      type:'bar',
+      data:{ labels:bilLabels, datasets:bilDatasets },
+      options:{
+        animation:false,
+        maintainAspectRatio:false,
+        plugins:{ legend:{ display:false } },
+        scales:{
+          x:{ stacked:true, grid:{ color:CC.grid }, ticks:{ color:CC.text } },
+          y:{ stacked:true, grid:{ color:CC.grid }, ticks:{ color:CC.text, callback:function(v){ return v.toLocaleString('fr-FR')+'€'; } } }
+        }
+      }
+    });
+  }
 
   // ── Onglets An 1 | An 2 | An 3 ──
   h += '<div style="display:flex;gap:24px;border-bottom:1px solid var(--rule);margin-bottom:20px">';
@@ -958,7 +1097,16 @@ function bloc12(plan) {
   if (cacs.some(function(v){ return v>0; })) {
     h += cvs(cid, 140);
     queue(cid, { type:'bar', data:{ labels:names, datasets:[{ data:cacs, backgroundColor:barColors, borderRadius:3, borderSkipped:false }] },
-      options:{ animation:false, maintainAspectRatio:false, indexAxis:'y', plugins:{legend:{display:false}},
+      options:{ animation:false, maintainAspectRatio:false, indexAxis:'y', plugins:{legend:{display:false},
+        tooltip:{
+          callbacks:{
+            afterLabel:function(item){
+              var c=canaux[item.dataIndex];
+              return c&&c.delai_premier_client?('Délai : '+c.delai_premier_client):'';
+            }
+          }
+        }
+      },
         scales:{ x:{grid:{color:CC.grid},ticks:{color:CC.text,callback:function(v){return v+'€';}}},
           y:{grid:{display:false},ticks:{color:CC.text}} } } });
   }
