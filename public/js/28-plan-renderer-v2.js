@@ -125,9 +125,9 @@ function bloc1(plan) {
         var item = det[cr[0]]; if (!item) return;
         var pts = item.points || 0;
         h += '<div style="display:flex;align-items:center;gap:8px">' +
-          '<span style="font-family:var(--mono);font-size:9.5px;color:var(--ink-3);width:90px;flex-shrink:0">' + esc(cr[1]) + '</span>' +
+          '<span style="font-family:var(--mono);font-size:10px;color:var(--ink-3);width:90px;flex-shrink:0">' + esc(cr[1]) + '</span>' +
           miniBar(pts, cr[2]) +
-          '<span style="font-family:var(--mono);font-size:9.5px;color:var(--ink-3);width:28px;text-align:right">' + pts + '/' + cr[2] + '</span></div>';
+          '<span style="font-family:var(--mono);font-size:10px;color:var(--ink-3);width:28px;text-align:right">' + pts + '/' + cr[2] + '</span></div>';
       });
       h += '</div>';
     }
@@ -236,7 +236,7 @@ function bloc4(plan) {
   var cid = uid();
   var h = '<div style="background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:24px 28px;margin-bottom:20px">';
   h += '<div style="font-family:var(--serif);font-size:17px;color:var(--ink);border-bottom:1px solid var(--rule);padding-bottom:10px;margin-bottom:16px">Plan de financement</div>';
-  h += '<div style="display:grid;grid-template-columns:1fr 1fr ' + (donutItems.length ? '180px' : '') + ';gap:24px">';
+  h += '<div style="display:grid;grid-template-columns:1fr 1fr ' + (donutItems.length ? 'auto' : '') + ';gap:24px">';
 
   // Besoins
   if (pf.besoins) {
@@ -261,16 +261,27 @@ function bloc4(plan) {
   // Donut
   if (donutItems.length) {
     var totalRes = donutItems.reduce(function(s,d){ return s+d.v; }, 0);
-    h += '<div>';
-    h += '<div style="position:relative;height:140px">' +
+    var totalFmt = totalRes >= 1000 ? (totalRes/1000).toFixed(0)+'k€' : totalRes.toLocaleString('fr-FR')+'€';
+    h += '<div style="display:flex;align-items:center;gap:16px">';
+    // Donut 200x200 with center label
+    h += '<div style="position:relative;width:200px;height:200px;flex-shrink:0">' +
       '<canvas id="' + cid + '"></canvas>' +
       '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none">' +
-      '<div style="font-family:var(--mono);font-size:10px;font-weight:600;color:var(--ink)">' + (totalRes/1000).toFixed(0) + 'k€</div>' +
-      '<div style="font-family:var(--mono);font-size:9px;color:var(--ink-3)">Total</div></div></div>';
-    h += legend(donutItems.map(function(d){ return {c:d.c, l:d.l}; }));
+      '<div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--ink)">' + totalFmt + '</div>' +
+      '<div style="font-family:var(--mono);font-size:9px;color:var(--ink-3)">ressources</div></div></div>';
+    // Legend RIGHT with label + amount
+    h += '<div style="display:flex;flex-direction:column;gap:8px">';
+    donutItems.forEach(function(d) {
+      var amtFmt = d.v >= 1000 ? (d.v/1000).toFixed(0)+'k€' : d.v.toLocaleString('fr-FR')+'€';
+      h += '<div style="display:flex;align-items:center;gap:7px">' +
+        '<div style="width:10px;height:10px;border-radius:2px;background:' + d.c + ';flex-shrink:0"></div>' +
+        '<span style="font-family:var(--mono);font-size:11px;color:var(--ink-2);white-space:nowrap">' + esc(d.l) + '</span>' +
+        '<span style="font-family:var(--mono);font-size:11px;color:var(--ink);font-variant-numeric:tabular-nums;margin-left:4px">' + amtFmt + '</span></div>';
+    });
+    h += '</div>';
     h += '</div>';
     queue(cid, { type:'doughnut', data:{ datasets:[{ data:donutItems.map(function(d){return d.v;}), backgroundColor:donutItems.map(function(d){return d.c;}), borderWidth:0 }] },
-      options:{ animation:false, maintainAspectRatio:false, cutout:'68%', plugins:{legend:{display:false},tooltip:{enabled:false}} } });
+      options:{ animation:false, maintainAspectRatio:false, cutout:'65%', plugins:{legend:{display:false},tooltip:{enabled:false}} } });
   }
 
   h += '</div>';
@@ -311,10 +322,16 @@ function bloc5(plan) {
     h += cvs(cid, 180);
     h += legend([{c:CC.accent,l:'Capital restant dû'},{c:CC.green,l:'Intérêts cumulés'}]);
     queue(cid, { type:'line', data:{ labels:labels, datasets:[
-      {label:'Capital',data:capData,borderColor:CC.accent,borderWidth:2,fill:true,backgroundColor:'rgba(200,75,47,0.08)',tension:0.3,pointRadius:3},
-      {label:'Intérêts cumulés',data:intData,borderColor:CC.green,borderWidth:1.5,borderDash:[4,3],fill:false,tension:0.3,pointRadius:2}
-    ]}, options:{animation:false,maintainAspectRatio:false,plugins:{legend:{display:false}},
-      scales:{x:{grid:{color:CC.grid},ticks:{color:CC.text}},y:{grid:{color:CC.grid},ticks:{color:CC.text,callback:function(v){return v.toLocaleString('fr')+'€';}}}}} });
+      {label:'Capital restant dû',data:capData,borderColor:CC.accent,borderWidth:2,fill:true,backgroundColor:'rgba(200,75,47,0.08)',tension:0.3,pointRadius:3},
+      {label:'Intérêts cumulés',data:intData,borderColor:CC.green,borderWidth:1.5,borderDash:[4,4],fill:false,tension:0.3,pointRadius:2}
+    ]}, options:{animation:false,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{
+      title:function(items){ return items[0].label; },
+      label:function(item){
+        var ds = item.dataset.label;
+        return ds + ' : ' + Math.round(item.parsed.y).toLocaleString('fr-FR') + '€';
+      }
+    }}},
+      scales:{x:{grid:{color:CC.grid},ticks:{color:CC.text}},y:{grid:{color:CC.grid},ticks:{color:CC.text,callback:function(v){return v.toLocaleString('fr-FR')+'€';}}}}} });
   }
 
   if (ta.echeancier_annuel && ta.echeancier_annuel.length) {
@@ -364,14 +381,40 @@ function bloc6(plan, pid) {
   var lsBase = 'eadee_banc_' + pid + '_';
   var totalItems = isNewFmt ? cl.reduce(function(acc,c){ return acc+(c.items||[]).length; }, 0) : cl.length;
 
+  // Collect bloquant IDs for dynamic ring (new format only)
+  var bloquantIds = [];
+  if (isNewFmt) {
+    cl.forEach(function(cat, ci) {
+      (cat.items || []).forEach(function(item, ii) {
+        var st = typeof item === 'string' ? '' : (item.statut||'');
+        if (st === 'bloquant') bloquantIds.push(lsBase + ci + '_' + ii);
+      });
+    });
+  }
+  var initChecked = bloquantIds.filter(function(id){ return localStorage.getItem(id) === '1'; }).length;
+  var bloquantTotal = bloquantIds.length;
+  var initPct = bloquantTotal ? Math.round(initChecked/bloquantTotal*100) : 0;
+
+  // Inline JS for onchange ring update (escaped for HTML attribute)
+  var ringUpdateFn = '(function(rId){' +
+    'var w=document.getElementById("bancRing_"+rId);if(!w)return;' +
+    'var ids=JSON.parse(w.getAttribute("data-ids")||"[]");' +
+    'var n=ids.filter(function(i){return localStorage.getItem(i)==="1";}).length;' +
+    'var ch=window.eadeeCharts&&window.eadeeCharts[rId];' +
+    'if(ch){ch.data.datasets[0].data=[n,Math.max(0,ids.length-n)];ch.update("none");}' +
+    'var p=document.getElementById("bancPct_"+rId);' +
+    'if(p)p.textContent=Math.round(ids.length?n/ids.length*100:0)+"%";' +
+    '})("' + ringId + '")';
+
   var h = '<div style="background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:24px 28px;margin-bottom:20px">';
   h += '<div style="font-family:var(--serif);font-size:17px;color:var(--ink);border-bottom:1px solid var(--rule);padding-bottom:10px;margin-bottom:16px">Checklist bancabilité</div>';
 
   // Progress ring
   h += '<div style="display:flex;align-items:center;gap:20px;margin-bottom:18px">';
-  h += '<div style="position:relative;width:90px;height:90px;flex-shrink:0"><canvas id="' + ringId + '"></canvas>' +
-    '<div id="bancPct_' + ringId + '" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:var(--mono);font-size:16px;font-weight:600;color:var(--ink);text-align:center">0%</div></div>';
-  h += '<div style="font-family:var(--mono);font-size:12px;color:var(--ink-2)">' + totalItems + ' documents à préparer</div>';
+  h += '<div id="bancRing_' + ringId + '" data-ids=\'' + JSON.stringify(bloquantIds) + '\' style="position:relative;width:100px;height:100px;flex-shrink:0"><canvas id="' + ringId + '"></canvas>' +
+    '<div id="bancPct_' + ringId + '" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:var(--mono);font-size:16px;font-weight:600;color:var(--ink);text-align:center">' + initPct + '%</div></div>';
+  h += '<div><div style="font-family:var(--mono);font-size:12px;color:var(--ink-2)">' + totalItems + ' documents à préparer</div>' +
+    (bloquantTotal ? '<div style="font-family:var(--mono);font-size:11px;color:var(--red);margin-top:4px">' + bloquantTotal + ' bloquants</div>' : '') + '</div>';
   h += '</div>';
 
   if (!isNewFmt) {
@@ -380,7 +423,7 @@ function bloc6(plan, pid) {
       var cbId = lsBase + i;
       var chk = localStorage.getItem(cbId) === '1' ? 'checked' : '';
       h += '<label style="display:flex;align-items:flex-start;gap:10px;padding:9px 12px;background:var(--bg);border:1px solid var(--rule);border-radius:5px;cursor:pointer">' +
-        '<input type="checkbox" ' + chk + ' onchange="localStorage.setItem(\'' + cbId + '\',this.checked?\'1\':\'0\')" style="margin-top:2px;accent-color:var(--accent);flex-shrink:0">' +
+        '<input type="checkbox" ' + chk + ' onchange="localStorage.setItem(\'' + cbId + '\',this.checked?\'1\':\'0\');" style="margin-top:2px;accent-color:var(--accent);flex-shrink:0">' +
         '<span style="font-size:13px;color:var(--ink-2)">' + esc(item) + '</span></label>';
     });
     h += '</div>';
@@ -401,7 +444,7 @@ function bloc6(plan, pid) {
         var bT = st==='bloquant'?'red':st==='très_important'?'accent':'muted';
         var txt = typeof item === 'string' ? item : (item.document||String(item));
         h += '<label style="display:flex;align-items:flex-start;gap:10px;padding:7px 0;border-bottom:1px solid var(--rule);cursor:pointer">' +
-          '<input type="checkbox" ' + chk + ' onchange="localStorage.setItem(\'' + cbId + '\',this.checked?\'1\':\'0\')" style="margin-top:2px;accent-color:var(--accent)">' +
+          '<input type="checkbox" ' + chk + ' onchange="localStorage.setItem(\'' + cbId + '\',this.checked?\'1\':\'0\');' + ringUpdateFn + '" style="margin-top:2px;accent-color:var(--accent)">' +
           '<span style="flex:1;font-size:13px;color:var(--ink-2)">' + esc(txt) + '</span>' +
           (st ? badge(st,bT) : '') + '</label>';
       });
@@ -410,8 +453,8 @@ function bloc6(plan, pid) {
   }
   h += '</div>';
 
-  queue(ringId, { type:'doughnut', data:{ datasets:[{ data:[0,100], backgroundColor:[CC.accent,CC.grid], borderWidth:0 }] },
-    options:{ animation:false, maintainAspectRatio:false, cutout:'72%', plugins:{legend:{display:false},tooltip:{enabled:false}} } });
+  queue(ringId, { type:'doughnut', data:{ datasets:[{ data:[initChecked, Math.max(0, bloquantTotal - initChecked)], backgroundColor:[CC.accent, CC.grid], borderWidth:0 }] },
+    options:{ animation:false, maintainAspectRatio:false, cutout:'70%', plugins:{legend:{display:false},tooltip:{enabled:false}} } });
   return h;
 }
 
