@@ -908,7 +908,7 @@ Si une donnée n'est pas trouvable, mets value: null et fiabilite: "HYPOTHESE".`
   try {
     const messages = [{ role: 'user', content: searchPrompt }];
     let finalText = null;
-    let maxTurns = 8;
+    let maxTurns = 4;
 
     while (maxTurns-- > 0) {
       const resp = await fetch(ANTHROPIC_API, {
@@ -922,10 +922,10 @@ Si une donnée n'est pas trouvable, mets value: null et fiabilite: "HYPOTHESE".`
         body: JSON.stringify({
           model: MODEL,
           max_tokens: 3000,
-          tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 5 }],
+          tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 3 }],
           messages,
         }),
-        signal: AbortSignal.timeout(45000),
+        signal: AbortSignal.timeout(25000),
       });
 
       if (!resp.ok) {
@@ -1112,12 +1112,12 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: MODEL,
-        max_tokens: isDiscovery ? 3000 : 10000,
+        max_tokens: isDiscovery ? 3000 : 8000,
         temperature: 0.3,
         system: systemPrompt,
         messages: [{ role: 'user', content: userPrompt }],
       }),
-      signal: AbortSignal.timeout(180000),
+      signal: AbortSignal.timeout(120000),
     });
 
     if (!planResp.ok) {
