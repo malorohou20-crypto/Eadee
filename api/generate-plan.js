@@ -102,6 +102,13 @@ Si impossible → ajouter "alertes_coherence": ["description"] dans le JSON.`;
 function buildUserPrompt(data) {
   return `Génère un business plan complet pour le projet suivant.
 
+⚠️ CONTRAINTE ABSOLUE DE CONCISION — à respecter impérativement :
+- Maximum 2 phrases par champ texte (string)
+- Maximum 3-4 éléments par tableau (array)
+- Chiffres : format court (ex: "{{E:12 000€|calcul}}" pas de longue explication)
+- Objectif : couvrir TOUTES les 24 sections du JSON plutôt que détailler 12
+- Sections financières (plan_financement, tresorerie, bilan, amortissement, aides, checklist) : OBLIGATOIRES même courtes
+
 ━━ INFORMATIONS DE BASE ━━
 Nom du projet      : ${data.nom_projet || data.idea || 'Non renseigné'}
 Secteur            : ${data.secteur || data.sector || 'Non renseigné'}
