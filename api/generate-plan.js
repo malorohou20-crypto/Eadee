@@ -1074,17 +1074,11 @@ export default async function handler(req, res) {
 
     console.log(`[generate-plan v2.1] Début — ${(formData.nom_projet || formData.description_projet).substring(0, 60)}... [${isDiscovery ? 'DÉCOUVERTE' : 'COMPLET'}]`);
 
-    // ÉTAPE 1 — Données INSEE + web search (parallèle)
-    const inseePromise = fetchINSEEData(formData.secteur, formData.zone_geo);
-    const searchPromise = performWebSearch(
-      formData.description_projet || formData.nom_projet,
-      formData.secteur,
-      formData.zone_geo,
-      {}
-    );
-    const [inseeData, webData] = await Promise.all([inseePromise, searchPromise]);
+    // ÉTAPE 1 — Données INSEE uniquement (web search désactivé pour tenir dans maxDuration)
+    const inseeData = await fetchINSEEData(formData.secteur, formData.zone_geo);
+    const webData = null;
 
-    console.log(`[generate-plan v2.1] Données — INSEE: ${!!inseeData?.city}, Web: ${!!webData} — ${Date.now() - startTime}ms`);
+    console.log(`[generate-plan v2.1] Données — INSEE: ${!!inseeData?.city} — ${Date.now() - startTime}ms`);
 
     // Injecter les données vérifiées dans le prompt
     formData._verifiedData = {
@@ -1112,12 +1106,12 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: MODEL,
-        max_tokens: isDiscovery ? 2000 : 16000,
+        max_tokens: isDiscovery ? 2000 : 10000,
         temperature: 0.3,
         system: systemPrompt,
         messages: [{ role: 'user', content: userPrompt }],
       }),
-      signal: AbortSignal.timeout(260000),
+      signal: AbortSignal.timeout(240000),
     });
 
     if (!planResp.ok) {
