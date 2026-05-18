@@ -150,47 +150,60 @@ bilan_previsionnel.annee_X.passif.total pour chaque année.`;
 // ── CONTEXTE PROJET (partagé entre part1 et part2) ───────────────────
 
 function buildProjectContext(data) {
-  return `━━ INFORMATIONS DE BASE ━━
-Nom du projet      : ${data.nom_projet || data.idea || 'Non renseigné'}
-Secteur            : ${data.secteur || data.sector || 'Non renseigné'}
-Type de projet     : ${data.type_projet || 'creation'}
-Forme juridique    : ${data.forme_juridique || 'à recommander'}
-Stade              : ${data.stade || data.time || 'lancement'}
-
-━━ PORTEUR DE PROJET ━━
-Prénom             : ${data.prenom || 'Non renseigné'}
-Expérience secteur : ${data.experience_secteur || '0'} ans
-Expérience gestion : ${data.experience_gestion || 'non'}
-Formation          : ${data.formation || 'Non renseignée'}
-Situation actuelle : ${data.situation || data.profile || 'non renseigné'}
-Apport personnel   : ${data.apport_personnel || data.budget || '0'}€
-Charges perso/mois : ${data.charges_personnelles || 'non renseigné'}€
-Crédits en cours   : ${data.credits_en_cours || 'aucun'}
-
-━━ PROJET ━━
-Description        : ${data.description_projet || data.idea || 'Non renseignée'}
-Zone géographique  : ${data.zone_geo || data.city || 'France'}
-Local nécessaire   : ${data.local_necessaire || 'non'}
-Bail signé         : ${data.bail_signe || 'non'}
-Employés prévus    : ${data.employes_prevus || 0}
-Clientèle cible    : ${data.clientele || 'mixte'}
-
-━━ FINANCIER ━━
-Investissement total : ${data.investissement_total || data.budget || 'à estimer'}€
-Montant prêt visé    : ${data.montant_pret || 'à calculer'}€
-Durée souhaitée      : ${data.duree_pret || 'à recommander'} ans
-Autres financements  : ${data.autres_financements || 'aucun'}
-CA visé année 1      : ${data.ca_an1 || 'à estimer'}€
-CA visé année 3      : ${data.ca_an3 || 'à estimer'}€
-
-━━ CONTEXTE SPÉCIFIQUE ━━
-Secteur réglementé          : ${data.secteur_reglemente || 'non'}
-Autorisations déjà obtenues : ${data.autorisations || 'aucune'}
-Concurrents identifiés      : ${data.concurrents_connus || 'non renseigné'}
-Preuves de marché           : ${data.preuves_marche || 'aucune'}
-
-━━ DONNÉES MARCHÉ VÉRIFIÉES (INSEE) ━━
-${JSON.stringify(data._verifiedData || {}, null, 2)}`;
+  const lines = [];
+  lines.push(`━━ INFORMATIONS DE BASE ━━`);
+  lines.push(`Nom du projet      : ${data.nom_projet || 'Non renseigné'}`);
+  lines.push(`Secteur            : ${data.secteur || 'Non renseigné'}${data.sous_secteur ? ` / ${data.sous_secteur}` : ''}`);
+  lines.push(`Type de projet     : ${data.type_projet || 'creation'}`);
+  lines.push(`Forme juridique    : ${data.forme_juridique || 'à recommander'}`);
+  lines.push(`Stade              : ${data.stade || 'lancement'}`);
+  lines.push(``);
+  lines.push(`━━ PORTEUR DE PROJET ━━`);
+  lines.push(`Prénom             : ${data.prenom || 'Non renseigné'}${data.nom_porteur ? ` ${data.nom_porteur}` : ''}`);
+  lines.push(`Expérience secteur : ${data.experience_secteur || '0'} ans`);
+  lines.push(`Expérience gestion : ${data.experience_gestion || 'non'}`);
+  lines.push(`Formation          : ${data.formation || 'Non renseignée'}`);
+  lines.push(`Situation actuelle : ${data.situation || 'non renseigné'}`);
+  lines.push(`Apport personnel   : ${data.apport_personnel || '0'}€`);
+  lines.push(`Charges perso/mois : ${data.charges_personnelles || 'non renseigné'}€`);
+  lines.push(`Crédits en cours   : ${data.credits_en_cours || 'aucun'}`);
+  lines.push(``);
+  lines.push(`━━ PROJET ━━`);
+  lines.push(`Description        : ${data.description_projet || 'Non renseignée'}`);
+  lines.push(`Zone géographique  : ${data.zone_geo || 'France'}${data.region ? ` (${data.region})` : ''}`);
+  lines.push(`Local nécessaire   : ${data.local_necessaire || 'non'}`);
+  lines.push(`Bail signé         : ${data.bail_signe || 'non'}`);
+  lines.push(`Employés prévus    : ${data.employes_prevus || 0}`);
+  lines.push(`Clientèle cible    : ${data.clientele || 'mixte'}`);
+  lines.push(``);
+  lines.push(`━━ FINANCIER ━━`);
+  lines.push(`Investissement total : ${data.investissement_total || 'à estimer'}€`);
+  lines.push(`Apport personnel     : ${data.apport_personnel || '0'}€`);
+  lines.push(`Montant prêt visé    : ${data.montant_pret || 'à calculer'}€`);
+  lines.push(`Durée souhaitée      : ${data.duree_pret || 'à recommander'} ans`);
+  lines.push(`Autres financements  : ${data.autres_financements || 'aucun'}`);
+  lines.push(`CA visé année 1      : ${data.ca_an1 || 'à estimer'}€`);
+  lines.push(`CA visé année 3      : ${data.ca_an3 || 'à estimer'}€`);
+  lines.push(``);
+  lines.push(`━━ CONTEXTE SPÉCIFIQUE ━━`);
+  lines.push(`Secteur réglementé          : ${data.secteur_reglemente || 'non'}`);
+  lines.push(`Autorisations déjà obtenues : ${data.autorisations || 'aucune'}`);
+  lines.push(`Concurrents identifiés      : ${data.concurrents_connus || 'non renseigné'}`);
+  lines.push(`Preuves de marché           : ${data.preuves_marche || 'aucune'}`);
+  // Champs sectoriels optionnels
+  if (data.licence_iv)       lines.push(`Licence IV                  : oui`);
+  if (data.type_restauration) lines.push(`Type restauration           : ${data.type_restauration}`);
+  if (data.haccp)            lines.push(`HACCP                       : oui`);
+  if (data.loyer_mensuel)    lines.push(`Loyer mensuel               : ${data.loyer_mensuel}€`);
+  if (data.masse_salariale)  lines.push(`Masse salariale/mois        : ${data.masse_salariale}€`);
+  if (data.ticket_moyen)     lines.push(`Ticket moyen                : ${data.ticket_moyen}€`);
+  if (data.capacite_accueil) lines.push(`Capacité accueil            : ${data.capacite_accueil} couverts`);
+  if (data.jours_ouverture)  lines.push(`Jours ouverture/semaine     : ${data.jours_ouverture}`);
+  if (data.aides_visees?.length) lines.push(`Aides visées                : ${data.aides_visees.join(', ')}`);
+  lines.push(``);
+  lines.push(`━━ DONNÉES MARCHÉ VÉRIFIÉES (INSEE) ━━`);
+  lines.push(JSON.stringify(data._verifiedData || {}, null, 2));
+  return lines.join('\n');
 }
 
 // ── SCHÉMA PARTIE 1 (stratégique) ────────────────────────────────────
@@ -569,18 +582,10 @@ function buildPart2Schema() {
       { "mois": 36, "ca": "{{H:montant€|...}}", "commentaire": "string" }
     ],
     "tableau_mensuel_an1": [
-      { "mois": "Janvier",   "ca_ht": "{{H:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" },
-      { "mois": "Février",   "ca_ht": "{{H:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" },
-      { "mois": "Mars",      "ca_ht": "{{H:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" },
-      { "mois": "Avril",     "ca_ht": "{{H:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" },
-      { "mois": "Mai",       "ca_ht": "{{H:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" },
-      { "mois": "Juin",      "ca_ht": "{{H:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" },
-      { "mois": "Juillet",   "ca_ht": "{{H:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" },
-      { "mois": "Août",      "ca_ht": "{{H:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" },
-      { "mois": "Septembre", "ca_ht": "{{H:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" },
-      { "mois": "Octobre",   "ca_ht": "{{H:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" },
-      { "mois": "Novembre",  "ca_ht": "{{H:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" },
-      { "mois": "Décembre",  "ca_ht": "{{H:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" }
+      { "mois": "M1 (lancement)", "ca_ht": "{{H:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" },
+      { "mois": "M3",             "ca_ht": "{{H:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" },
+      { "mois": "M6",             "ca_ht": "{{H:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" },
+      { "mois": "M12 (fin an1)",  "ca_ht": "{{H:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" }
     ],
     "scenarios": {
       "pessimiste": { "hypothese": "string", "ca_an1": "{{H:montant€|...}}", "ca_an3": "{{H:montant€|...}}", "point_mort_mois": "{{E:X mois|...}}", "viabilite": "string" },
@@ -591,26 +596,18 @@ function buildPart2Schema() {
 
   "projections_an2_an3": {
     "annee_2": {
-      "tableau_trimestriel": [
-        { "trimestre": "T1 An2", "ca_ht": "{{H:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" },
-        { "trimestre": "T2 An2", "ca_ht": "{{H:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" },
-        { "trimestre": "T3 An2", "ca_ht": "{{H:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" },
-        { "trimestre": "T4 An2", "ca_ht": "{{H:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" }
-      ],
-      "ca_annuel": "{{H:montant€|somme des 4 trimestres}}",
-      "resultat_annuel": "{{E:montant€|somme des 4 trimestres}}",
-      "taux_croissance_vs_an1": "{{E:XX%|(CA an2 - CA an1) / CA an1}}"
+      "ca_annuel": "{{H:montant€|...}}",
+      "charges_fixes_annuelles": "{{E:montant€|...}}",
+      "charges_variables_annuelles": "{{E:montant€|...}}",
+      "resultat_annuel": "{{E:montant€|...}}",
+      "taux_croissance_vs_an1": "{{E:XX%|...}}"
     },
     "annee_3": {
-      "tableau_trimestriel": [
-        { "trimestre": "T1 An3", "ca_ht": "{{H:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" },
-        { "trimestre": "T2 An3", "ca_ht": "{{H:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" },
-        { "trimestre": "T3 An3", "ca_ht": "{{H:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" },
-        { "trimestre": "T4 An3", "ca_ht": "{{H:montant€|...}}", "charges_fixes": "{{E:montant€|...}}", "charges_variables": "{{E:montant€|...}}", "resultat_net": "{{E:montant€|...}}" }
-      ],
-      "ca_annuel": "{{H:montant€|somme des 4 trimestres}}",
-      "resultat_annuel": "{{E:montant€|somme des 4 trimestres}}",
-      "taux_croissance_vs_an2": "{{E:XX%|(CA an3 - CA an2) / CA an2}}"
+      "ca_annuel": "{{H:montant€|...}}",
+      "charges_fixes_annuelles": "{{E:montant€|...}}",
+      "charges_variables_annuelles": "{{E:montant€|...}}",
+      "resultat_annuel": "{{E:montant€|...}}",
+      "taux_croissance_vs_an2": "{{E:XX%|...}}"
     },
     "synthese_3_ans": {
       "evolution_ca": "string",
@@ -621,18 +618,10 @@ function buildPart2Schema() {
 
   "tresorerie": {
     "tableau_12_mois": [
-      { "mois": "Janvier",   "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null },
-      { "mois": "Février",   "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null },
-      { "mois": "Mars",      "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null },
-      { "mois": "Avril",     "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null },
-      { "mois": "Mai",       "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null },
-      { "mois": "Juin",      "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null },
-      { "mois": "Juillet",   "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null },
-      { "mois": "Août",      "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null },
-      { "mois": "Septembre", "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null },
-      { "mois": "Octobre",   "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null },
-      { "mois": "Novembre",  "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null },
-      { "mois": "Décembre",  "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_mois": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null }
+      { "mois": "M1",  "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null },
+      { "mois": "M3",  "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null },
+      { "mois": "M6",  "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null },
+      { "mois": "M12", "encaissements": "{{H:montant€|...}}", "decaissements": "{{E:montant€|...}}", "solde_cumule": "{{E:montant€|...}}", "alerte": null }
     ],
     "solde_minimum": "{{E:montant€|point bas}}",
     "mois_critique": null,
@@ -668,8 +657,6 @@ function buildPart2Schema() {
     "annee_2": {
       "actif": {
         "immobilisations_nettes": "{{E:montant€|...}}",
-        "stocks": null,
-        "creances_clients": "{{E:montant€|...}}",
         "disponibilites": "{{E:montant€|trésorerie fin an2}}",
         "total_actif": "{{E:montant€|somme}}"
       },
@@ -678,30 +665,16 @@ function buildPart2Schema() {
         "reserves": "{{E:montant€|résultat an1 mis en réserve}}",
         "resultat": "{{E:montant€|résultat net an2}}",
         "dettes_financieres": "{{E:montant€|capital restant dû fin an2}}",
-        "dettes_fournisseurs": "{{E:montant€|...}}",
-        "dettes_fiscales_sociales": "{{E:montant€|...}}",
         "total_passif": "{{E:montant€|somme — DOIT ÉGALER total_actif}}"
       },
       "ratios": {
         "autonomie_financiere": "{{E:XX%|...}}",
-        "ratio_endettement": "{{E:XX%|...}}",
         "interpretation": "string"
-      },
-      "compte_resultat": {
-        "ca_ht": "{{H:montant€|projection an2}}",
-        "charges_fixes": "{{E:montant€|...}}",
-        "charges_variables": "{{E:montant€|...}}",
-        "marge_brute": "{{E:montant€|CA - charges variables}}",
-        "resultat_exploitation": "{{E:montant€|marge brute - charges fixes}}",
-        "resultat_net": "{{E:montant€|après IS}}",
-        "taux_marge_nette": "{{E:XX%|résultat net / CA}}"
       }
     },
     "annee_3": {
       "actif": {
         "immobilisations_nettes": "{{E:montant€|...}}",
-        "stocks": null,
-        "creances_clients": "{{E:montant€|...}}",
         "disponibilites": "{{E:montant€|trésorerie fin an3}}",
         "total_actif": "{{E:montant€|somme}}"
       },
@@ -710,23 +683,11 @@ function buildPart2Schema() {
         "reserves": "{{E:montant€|résultats an1+an2 mis en réserve}}",
         "resultat": "{{E:montant€|résultat net an3}}",
         "dettes_financieres": "{{E:montant€|capital restant dû fin an3}}",
-        "dettes_fournisseurs": "{{E:montant€|...}}",
-        "dettes_fiscales_sociales": "{{E:montant€|...}}",
         "total_passif": "{{E:montant€|somme — DOIT ÉGALER total_actif}}"
       },
       "ratios": {
         "autonomie_financiere": "{{E:XX%|...}}",
-        "ratio_endettement": "{{E:XX%|...}}",
         "interpretation": "string"
-      },
-      "compte_resultat": {
-        "ca_ht": "{{H:montant€|projection an3}}",
-        "charges_fixes": "{{E:montant€|...}}",
-        "charges_variables": "{{E:montant€|...}}",
-        "marge_brute": "{{E:montant€|CA - charges variables}}",
-        "resultat_exploitation": "{{E:montant€|marge brute - charges fixes}}",
-        "resultat_net": "{{E:montant€|après IS}}",
-        "taux_marge_nette": "{{E:XX%|résultat net / CA}}"
       }
     }
   },
@@ -763,67 +724,18 @@ function buildPart2Schema() {
   },
 
   "annexes_checklist": {
-    "categorie_1_documents_personnels": {
-      "titre": "Documents personnels du porteur",
-      "ordre_preparation": 1,
-      "items": [
-        { "document": "Pièce d'identité valide",                     "statut_requis": "bloquant",       "delai_obtention": "immédiat" },
-        { "document": "CV détaillé orienté entrepreneur",             "statut_requis": "bloquant",       "delai_obtention": "1-2 jours" },
-        { "document": "Avis d'imposition N-1 et N-2",                "statut_requis": "bloquant",       "delai_obtention": "immédiat — impots.gouv.fr" },
-        { "document": "Relevés de compte personnel 3 derniers mois", "statut_requis": "bloquant",       "delai_obtention": "immédiat" },
-        { "document": "Justificatifs d'apport personnel",             "statut_requis": "bloquant",       "delai_obtention": "immédiat" }
-      ]
-    },
-    "categorie_2_documents_juridiques": {
-      "titre": "Documents juridiques & réglementaires",
-      "ordre_preparation": 2,
-      "items": [
-        { "document": "Statut juridique choisi et justifié",          "statut_requis": "bloquant",       "delai_obtention": "1 jour" },
-        { "document": "Statuts de la société rédigés",                "statut_requis": "bloquant",       "delai_obtention": "3-10 jours" },
-        { "document": "Extrait Kbis ou récépissé d'immatriculation",  "statut_requis": "bloquant",       "delai_obtention": "3-5 jours après dépôt" }
-      ]
-    },
-    "categorie_3_autorisations_sectorielles": {
-      "titre": "Autorisations & licences spécifiques",
-      "ordre_preparation": 2,
-      "applicable": false,
-      "items": []
-    },
-    "categorie_4_documents_financiers": {
-      "titre": "Documents financiers prévisionnels",
-      "ordre_preparation": 3,
-      "items": [
-        { "document": "Business plan complet",                             "statut_requis": "bloquant",       "delai_obtention": "généré par EADEE ✅" },
-        { "document": "Plan de financement besoins / ressources",         "statut_requis": "bloquant",       "delai_obtention": "inclus dans ce plan ✅" },
-        { "document": "Compte de résultat prévisionnel 3 ans",            "statut_requis": "bloquant",       "delai_obtention": "inclus dans ce plan ✅" },
-        { "document": "Plan de trésorerie 12 mois",                       "statut_requis": "bloquant",       "delai_obtention": "inclus dans ce plan ✅" }
-      ]
-    },
-    "categorie_5_preuves_marche": {
-      "titre": "Preuves de marché & validation commerciale",
-      "ordre_preparation": 3,
-      "items": [
-        { "document": "Étude de marché avec sources datées",    "statut_requis": "tres_important", "delai_obtention": "inclus dans ce plan ✅" },
-        { "document": "Au moins 1 lettre d'intention client",   "statut_requis": "tres_important", "delai_obtention": "variable — à obtenir avant RDV" }
-      ]
-    },
-    "categorie_6_aides_et_presentation": {
-      "titre": "Dossiers d'aides & présentation banque",
-      "ordre_preparation": 4,
-      "items": [
-        { "document": "Subventions régionales / CCI identifiées", "statut_requis": "souhaitable",    "delai_obtention": "1-2 jours de recherche" },
-        { "document": "Executive summary 1-2 pages",              "statut_requis": "tres_important", "delai_obtention": "1 jour" }
-      ]
-    },
-    "score_readiness": {
-      "description": "Score de préparation du dossier bancaire",
-      "calcul": "items bloquants cochés / total items bloquants × 100",
-      "seuils": {
-        "rouge":  "< 60% — Dossier incomplet, RDV prématuré",
-        "orange": "60-80% — Dossier partiel, RDV possible avec réserves",
-        "vert":   "> 80% — Dossier solide, RDV recommandé"
-      }
-    }
+    "documents_bloquants": [
+      { "document": "Pièce d'identité valide",              "delai": "immédiat" },
+      { "document": "CV détaillé orienté entrepreneur",     "delai": "1-2 jours" },
+      { "document": "Avis d'imposition N-1 et N-2",        "delai": "immédiat" },
+      { "document": "Relevés de compte 3 derniers mois",   "delai": "immédiat" },
+      { "document": "Justificatifs apport personnel",       "delai": "immédiat" },
+      { "document": "Statuts société rédigés",              "delai": "3-10 jours" },
+      { "document": "Business plan complet",                "delai": "EADEE ✅" },
+      { "document": "Plan de financement",                  "delai": "inclus ✅" }
+    ],
+    "autorisations_sectorielles": [],
+    "score_readiness": "string — ex: 6/8 documents bloquants réunis — RDV bancaire possible"
   },
 
   "propriete_intellectuelle": null,
@@ -864,6 +776,37 @@ function extractJSON(text) {
   }
 }
 
+// ── APPEL ANTHROPIC AVEC RETRY 429/529 ───────────────────────────────
+
+async function callAnthropicAPI(body, label, signal) {
+  const HEADERS = {
+    'Content-Type': 'application/json',
+    'x-api-key': process.env.ANTHROPIC_API_KEY,
+    'anthropic-version': '2023-06-01',
+  };
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    const resp = await fetch(ANTHROPIC_API, {
+      method: 'POST',
+      headers: HEADERS,
+      body: JSON.stringify(body),
+      signal,
+    });
+    if (resp.ok) return resp;
+    const err = await resp.json().catch(() => ({}));
+    const msg = `${label} API error ${resp.status}: ${err?.error?.message || JSON.stringify(err).slice(0, 200)}`;
+    if ((resp.status === 529 || resp.status === 429) && attempt < 2) {
+      const wait = resp.status === 429 ? 15000 : 8000;
+      console.warn(`[EADEE] ${msg} — retry dans ${wait/1000}s...`);
+      await new Promise(r => setTimeout(r, wait));
+      continue;
+    }
+    const e = new Error(msg);
+    e.apiError = err;
+    e.status = resp.status;
+    throw e;
+  }
+}
+
 // ── GÉNÉRATION PARTIE 1 (STRATÉGIQUE) ────────────────────────────────
 
 async function generatePart1(formData, sysPrompt) {
@@ -875,29 +818,13 @@ ${buildProjectContext(formData)}
 
 ${buildPart1Schema(new Date().toISOString())}`;
 
-  const resp = await fetch(ANTHROPIC_API, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': process.env.ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: 12000,
-      temperature: 0.3,
-      system: sysPrompt,
-      messages: [{ role: 'user', content: userPrompt }],
-    }),
-    signal: AbortSignal.timeout(250000),
-  });
-
-  if (!resp.ok) {
-    const err = await resp.json().catch(() => ({}));
-    const e = new Error(`Part1 API error ${resp.status}`);
-    e.apiError = err;
-    throw e;
-  }
+  const resp = await callAnthropicAPI({
+    model: MODEL,
+    max_tokens: 12000,
+    temperature: 0.3,
+    system: sysPrompt,
+    messages: [{ role: 'user', content: userPrompt }],
+  }, 'Part1', AbortSignal.timeout(250000));
 
   const data = await resp.json();
   const text = (data.content || []).map(c => c.text || '').join('');
@@ -922,29 +849,13 @@ ${buildProjectContext(formData)}
 
 ${buildPart2Schema()}`;
 
-  const resp = await fetch(ANTHROPIC_API, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': process.env.ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: 12000,
-      temperature: 0.3,
-      system: sysPrompt,
-      messages: [{ role: 'user', content: userPrompt }],
-    }),
-    signal: AbortSignal.timeout(250000),
-  });
-
-  if (!resp.ok) {
-    const err = await resp.json().catch(() => ({}));
-    const e = new Error(`Part2 API error ${resp.status}`);
-    e.apiError = err;
-    throw e;
-  }
+  const resp = await callAnthropicAPI({
+    model: MODEL,
+    max_tokens: 12000,
+    temperature: 0.3,
+    system: sysPrompt,
+    messages: [{ role: 'user', content: userPrompt }],
+  }, 'Part2', AbortSignal.timeout(250000));
 
   const data = await resp.json();
   const text = (data.content || []).map(c => c.text || '').join('');
@@ -1062,27 +973,32 @@ Si une donnée n'est pas trouvable, mets value: null et fiabilite: "HYPOTHESE".`
 // ── NORMALISATION DES DONNÉES FORMULAIRE ─────────────────────────────
 
 function normalizeFormData(body) {
+  // Support porteur imbriqué { prenom, nom, annees_experience, diplome, situation, charges_mensuelles }
+  const porteur = body.porteur || {};
   return {
     nom_projet:           body.nom_projet         || body.idea        || '',
     secteur:              body.secteur             || body.sector      || '',
+    sous_secteur:         body.sous_secteur        || '',
     type_projet:          body.type_projet         || 'creation',
-    forme_juridique:      body.forme_juridique     || '',
+    forme_juridique:      body.forme_juridique     || body.statut_juridique || '',
     stade:                body.stade               || body.time        || 'lancement',
-    prenom:               body.prenom              || '',
-    experience_secteur:   body.experience_secteur  || '0',
+    prenom:               body.prenom              || porteur.prenom   || '',
+    nom_porteur:          body.nom_porteur         || porteur.nom      || '',
+    experience_secteur:   body.experience_secteur  || porteur.annees_experience || body.annees_experience || '0',
     experience_gestion:   body.experience_gestion  || 'non',
-    formation:            body.formation           || '',
-    situation:            body.situation           || body.profile     || '',
+    formation:            body.formation           || porteur.diplome  || '',
+    situation:            body.situation           || porteur.situation || body.profile || '',
     apport_personnel:     body.apport_personnel    || body.budget      || '0',
-    charges_personnelles: body.charges_personnelles|| '',
+    charges_personnelles: body.charges_personnelles|| porteur.charges_mensuelles || '',
     credits_en_cours:     body.credits_en_cours    || 'aucun',
-    description_projet:   body.description_projet  || body.idea        || '',
-    zone_geo:             body.zone_geo            || body.city        || 'France',
-    local_necessaire:     body.local_necessaire    || 'non',
+    description_projet:   body.description_projet  || body.description || body.idea || '',
+    zone_geo:             body.zone_geo            || body.ville       || body.city  || 'France',
+    region:               body.region              || '',
+    local_necessaire:     body.local_necessaire    !== undefined ? body.local_necessaire : (body.loyer_mensuel ? 'oui' : 'non'),
     bail_signe:           body.bail_signe          || 'non',
-    employes_prevus:      body.employes_prevus      || 0,
+    employes_prevus:      body.employes_prevus      || body.nb_employes || 0,
     clientele:            body.clientele           || 'mixte',
-    investissement_total: body.investissement_total || body.budget      || '',
+    investissement_total: body.investissement_total || body.budget_total || body.budget || '',
     montant_pret:         body.montant_pret         || '',
     duree_pret:           body.duree_pret           || '',
     autres_financements:  body.autres_financements  || 'aucun',
@@ -1090,8 +1006,18 @@ function normalizeFormData(body) {
     ca_an3:               body.ca_an3               || '',
     secteur_reglemente:   body.secteur_reglemente   || 'non',
     autorisations:        body.autorisations         || 'aucune',
-    concurrents_connus:   body.concurrents_connus    || '',
+    concurrents_connus:   body.concurrents_connus    || (Array.isArray(body.concurrents_locaux) ? body.concurrents_locaux.join(', ') : '') || '',
     preuves_marche:       body.preuves_marche        || 'aucune',
+    // Champs métier restauration / sectoriels
+    licence_iv:           body.licence_iv            || false,
+    type_restauration:    body.type_restauration     || '',
+    haccp:                body.haccp                 || false,
+    aides_visees:         body.aides_visees          || [],
+    loyer_mensuel:        body.loyer_mensuel         || '',
+    masse_salariale:      body.masse_salariale_mensuelle || '',
+    ticket_moyen:         body.ticket_moyen          || '',
+    capacite_accueil:     body.capacite_accueil      || '',
+    jours_ouverture:      body.jours_ouverture       || '',
     credits:              body.credits,
   };
 }
@@ -1299,7 +1225,7 @@ Retourne UNIQUEMENT le JSON, sans markdown.
       duration_ms: durationMs,
       sections_present: presentSections.length,
       sections_total: REQUIRED_SECTIONS.length,
-      pipeline_version: 'v2.2-parallel',
+      pipeline_version: 'v2.4-parallel',
       part1_ok: !part1Failed,
       part2_ok: !part2Failed,
     };
