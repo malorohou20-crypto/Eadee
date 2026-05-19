@@ -359,9 +359,10 @@ function normalizePlanForRenderer(plan) {
   if (plan.templates_communication && typeof plan.templates_communication === 'object') {
     var tc = plan.templates_communication;
     var toEmail = function(e) { return e ? { sujet: e.objet, corps: e.corps } : null; };
-    if (tc.email_prospection_client) p.email_prospection = toEmail(tc.email_prospection_client);
-    if (tc.email_fournisseur)        p.email_fournisseur  = toEmail(tc.email_fournisseur);
-    if (tc.email_relance)            p.email_relance      = toEmail(tc.email_relance);
+    if (tc.email_prospection_client)  p.email_prospection        = toEmail(tc.email_prospection_client);
+    if (tc.email_fournisseur)         p.email_fournisseur         = toEmail(tc.email_fournisseur);
+    if (tc.email_relance)             p.email_relance             = toEmail(tc.email_relance);
+    if (tc.email_presentation_banque) p.email_presentation_banque = toEmail(tc.email_presentation_banque);
   }
 
   // ── persona → champs compatibles renderer ────────────────
@@ -378,7 +379,7 @@ function normalizePlanForRenderer(plan) {
   if (plan.annexes_checklist && typeof plan.annexes_checklist === 'object' && !Array.isArray(plan.annexes_checklist)) {
     var clObj = plan.annexes_checklist;
     var clArr = Object.keys(clObj)
-      .filter(function(k) { return k.indexOf('categorie_') === 0 && clObj[k] && Array.isArray(clObj[k].items); })
+      .filter(function(k) { return k.indexOf('categorie_') === 0 && clObj[k] && Array.isArray(clObj[k].items) && clObj[k].items.length > 0 && clObj[k].applicable !== false; })
       .sort(function(a, b) { return ((clObj[a] && clObj[a].ordre) || 0) - ((clObj[b] && clObj[b].ordre) || 0); })
       .map(function(k) {
         return {
@@ -1680,7 +1681,7 @@ window._renderV2PlanResult = function(plan, container) {
   }).join(''));
 
   // EMAILS
-  [['email_prospection','Email de prospection'],['email_fournisseur','Email fournisseur'],['email_relance','Email de relance']].forEach(function(e) {
+  [['email_presentation_banque','Email de présentation banque'],['email_prospection','Email de prospection'],['email_fournisseur','Email fournisseur'],['email_relance','Email de relance']].forEach(function(e) {
     var em = plan[e[0]];
     if (em && (em.sujet||em.corps)) html += card(e[1],
       '<div style="background:var(--bg);border-radius:6px;padding:14px;border:1px solid var(--rule)">' +
