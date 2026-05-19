@@ -118,6 +118,10 @@ async function confirmDeleteAccount() {
     }
   } catch(e) { toast('Erreur — contacte contact@eadee.fr', 'error'); }
 }
-document.addEventListener('DOMContentLoaded', initCookieBanner);
-document.addEventListener('DOMContentLoaded', () => { setPreviewState('A'); });
+// DOM déjà chargé quand les scripts s'exécutent (chargés en bas de page)
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initCookieBanner);
+} else {
+  initCookieBanner();
+}
 

@@ -87,21 +87,20 @@ async function processPayment() {
 (function handleStripeReturn() {
   const params = new URLSearchParams(window.location.search);
   if (params.get('payment') === 'success') {
-    // Nettoyer l'URL
-    window.history.replaceState({}, '', '/');
-    // Attendre que l'app soit prête puis recharger le profil
-    window.addEventListener('DOMContentLoaded', async () => {
-      await new Promise(r => setTimeout(r, 1500));
-      if (supabaseClient) await loadCurrentUser();
-      showPage('dashboard');
-      showView('generator');
-      toast('Paiement confirmé — tes crédits ont été ajoutés !', 'success');
-    });
+    window.history.replaceState({}, '', window.location.pathname);
+    // DOM déjà chargé quand les scripts s'exécutent → setTimeout direct
+    setTimeout(async () => {
+      if (typeof supabaseClient !== 'undefined' && supabaseClient && typeof loadCurrentUser === 'function') {
+        await loadCurrentUser();
+      }
+      if (typeof go === 'function') go('gen');
+      if (typeof toast === 'function') toast('Paiement confirmé — tes crédits ont été ajoutés !', 'success');
+    }, 800);
   } else if (params.get('payment') === 'cancel') {
-    window.history.replaceState({}, '', '/');
-    window.addEventListener('DOMContentLoaded', () => {
-      toast('Paiement annulé', 'error');
-    });
+    window.history.replaceState({}, '', window.location.pathname);
+    setTimeout(() => {
+      if (typeof toast === 'function') toast('Paiement annulé', 'error');
+    }, 400);
   }
 })();
 

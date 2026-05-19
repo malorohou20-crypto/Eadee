@@ -1018,17 +1018,17 @@
     <section class="screen active" data-screen="gen">
       <div class="page">
 
-        <div class="gen-banner">
+        <div class="gen-banner" id="genBanner" style="display:none">
           <div class="b-left">
             <span class="dot"></span>
             <div>
-              <div class="ttl">Tu avais commencé à décrire une idée.</div>
-              <div class="drft">« je veux cree un site et une application qui repertorie toute… »</div>
+              <div class="ttl" id="genBannerTitle">Tu avais commencé à décrire une idée.</div>
+              <div class="drft" id="genBannerDraft">« … »</div>
             </div>
           </div>
           <div class="b-right">
-            <button class="btn btn-accent">Reprendre</button>
-            <button class="btn btn-ghost">Effacer</button>
+            <button class="btn btn-accent" onclick="resumeDraft()">Reprendre</button>
+            <button class="btn btn-ghost" onclick="discardDraft();document.getElementById('genBanner').style.display='none'">Effacer</button>
           </div>
         </div>
 
@@ -1048,12 +1048,12 @@
               <div class="field">
                 <div class="field-head">
                   <label>Décris ton idée <span class="req">*</span></label>
-                  <a class="examples" href="#">Exemples d'idées →</a>
+                  <a class="examples" href="#" onclick="event.preventDefault();typeof openInspireModal==='function'&&openInspireModal()">Exemples d'idées →</a>
                 </div>
-                <textarea id="dashIdea" placeholder="Ex: Je veux créer une application de méditation pour entrepreneurs stressés avec des sessions de 5 minutes…"></textarea>
+                <textarea id="dashIdea" oninput="onIdeaInput(this)" placeholder="Ex: Je veux créer une application de méditation pour entrepreneurs stressés avec des sessions de 5 minutes…"></textarea>
                 <div class="field-meta">
-                  <span>Plus tu détailles, meilleur sera ton plan.</span>
-                  <span>0 / 500</span>
+                  <span id="idea-quality-msg">Plus tu détailles, meilleur sera ton plan.</span>
+                  <span id="idea-char-count">0 / 500</span>
                 </div>
               </div>
             </div>
@@ -1351,63 +1351,63 @@
         </div>
 
         <div class="insp-grid">
-          <div class="insp">
+          <div class="insp" onclick="pickInspiration('Je veux créer une conciergerie locative pour gérer des biens Airbnb en location courte durée. Commission sur les revenus locatifs, secteur immobilier.')">
             <div class="insp-head"><span class="insp-ix">N°01</span><span class="insp-cat"><span>Immobilier</span><span>Service</span></span></div>
             <h4>Conciergerie locative</h4>
             <p>Gestion déléguée de biens en location courte durée. Commission sur revenus.</p>
             <div class="insp-meta"><span class="mkt">Marché 2,4 Md€</span><span>Capex faible</span></div>
             <span class="insp-cta">Générer ce plan →</span>
           </div>
-          <div class="insp">
+          <div class="insp" onclick="pickInspiration('Je veux ouvrir une dark kitchen spécialisée dans la cuisine healthy et équilibrée, livrée via Uber Eats et Deliveroo. Clientèle active 25-40 ans en ville.')">
             <div class="insp-head"><span class="insp-ix">N°02</span><span class="insp-cat"><span>Food</span><span>Livraison</span></span></div>
             <h4>Dark Kitchen Healthy</h4>
             <p>Cuisine saine livrée via plateformes. Clientèle active 25-40 ans. Fort potentiel de croissance.</p>
             <div class="insp-meta"><span class="mkt">Marché 5,1 Md€</span><span>Capex moyen</span></div>
             <span class="insp-cta">Générer ce plan →</span>
           </div>
-          <div class="insp">
+          <div class="insp" onclick="pickInspiration('Je veux lancer un service de coaching B2B pour consultants et freelances indépendants qui veulent scaler leur activité. 100% en ligne, modèle mensuel récurrent.')">
             <div class="insp-head"><span class="insp-ix">N°03</span><span class="insp-cat"><span>Services B2B</span><span>Formation</span></span></div>
             <h4>Coaching freelance B2B</h4>
             <p>Accompagnement de consultants indépendants pour scaler leur activité. 100% en ligne.</p>
             <div class="insp-meta"><span class="mkt">Marché 800 M€</span><span>Capex faible</span></div>
             <span class="insp-cta">Générer ce plan →</span>
           </div>
-          <div class="insp">
+          <div class="insp" onclick="pickInspiration('Je veux créer un SaaS de gestion tout-en-un pour auto-entrepreneurs et micro-entreprises français. Facturation, comptabilité, suivi clients. Abonnement mensuel 29€.')">
             <div class="insp-head"><span class="insp-ix">N°04</span><span class="insp-cat"><span>Tech</span><span>SaaS</span></span></div>
             <h4>SaaS micro-entreprises</h4>
             <p>Outil de gestion tout-en-un pour auto-entrepreneurs. Abonnement mensuel. 2M de cibles en France.</p>
             <div class="insp-meta"><span class="mkt">Marché 1,2 Md€</span><span>Capex moyen</span></div>
             <span class="insp-cta">Générer ce plan →</span>
           </div>
-          <div class="insp">
+          <div class="insp" onclick="pickInspiration('Je veux ouvrir un studio bien-être proposant yoga, pilates et méditation en cours collectifs et séances privées, en présentiel et en ligne. Clientèle urbaine 30-55 ans.')">
             <div class="insp-head"><span class="insp-ix">N°05</span><span class="insp-cat"><span>Santé</span><span>Sport</span></span></div>
             <h4>Studio bien-être</h4>
             <p>Cours collectifs + séances privées en présentiel et en ligne.</p>
             <div class="insp-meta"><span class="mkt">Marché 5,5 Md€</span><span>Capex élevé</span></div>
             <span class="insp-cta">Générer ce plan →</span>
           </div>
-          <div class="insp">
+          <div class="insp" onclick="pickInspiration('Je veux créer une marque e-commerce de niche vendant des produits spécialisés en ligne. Faibles coûts fixes, forte marge, audience ciblée via réseaux sociaux et SEO.')">
             <div class="insp-head"><span class="insp-ix">N°06</span><span class="insp-cat"><span>E-commerce</span><span>Marque</span></span></div>
             <h4>Marque e-commerce niche</h4>
             <p>Produits spécialisés vendus en ligne avec audience ciblée. Faibles coûts fixes, marge élevée.</p>
             <div class="insp-meta"><span class="mkt">Marché variable</span><span>Capex faible</span></div>
             <span class="insp-cta">Générer ce plan →</span>
           </div>
-          <div class="insp">
+          <div class="insp" onclick="pickInspiration('Je veux créer une formation en ligne sur une expertise métier spécifique. Programme structuré, revenus passifs une fois créé, distribution via ma communauté et publicité digitale.')">
             <div class="insp-head"><span class="insp-ix">N°07</span><span class="insp-cat"><span>Éducation</span><span>Digital</span></span></div>
             <h4>Formation en ligne</h4>
             <p>Programme d'apprentissage sur une expertise métier. Revenus passifs une fois créé. Scalable.</p>
             <div class="insp-meta"><span class="mkt">Marché 3,4 Md€</span><span>Capex faible</span></div>
             <span class="insp-cta">Générer ce plan →</span>
           </div>
-          <div class="insp">
+          <div class="insp" onclick="pickInspiration('Je veux lancer une agence de services digitaux pour PME : création de contenu, gestion réseaux sociaux et SEO. Modèle retainer mensuel récurrent, 3 à 10 clients.')">
             <div class="insp-head"><span class="insp-ix">N°08</span><span class="insp-cat"><span>Agence</span><span>Digital</span></span></div>
             <h4>Agence de services digitaux</h4>
             <p>Création de contenu, réseaux sociaux ou SEO pour PME. Modèle retainer mensuel récurrent.</p>
             <div class="insp-meta"><span class="mkt">Marché 2,1 Md€</span><span>Capex faible</span></div>
             <span class="insp-cta">Générer ce plan →</span>
           </div>
-          <div class="insp">
+          <div class="insp" onclick="pickInspiration('Je veux lancer une marque artisanale premium avec des produits faits main à forte valeur perçue, vendus en ligne (Etsy, site propre) et en boutiques locales.')">
             <div class="insp-head"><span class="insp-ix">N°09</span><span class="insp-cat"><span>Artisanat</span><span>Créatif</span></span></div>
             <h4>Artisanat premium</h4>
             <p>Produits faits main à forte valeur perçue, vendus en ligne et en boutique. Marché du fait-maison en hausse.</p>
@@ -1567,7 +1567,7 @@
                 <div><label>Confirmer</label><input type="password" id="settingsConfirmPwd" placeholder="••••••••" /></div>
               </div>
               <div class="set-foot">
-                <button class="btn btn-ghost">Activer la 2FA</button>
+                <button class="btn btn-ghost" onclick="toast('La 2FA par email sera disponible prochainement.','info')">Activer la 2FA</button>
                 <button class="btn" onclick="updatePassword()">Changer le mot de passe</button>
               </div>
             </div>
@@ -1579,8 +1579,8 @@
               <p class="desc">Pour chaque ami qui crée un compte, vous recevez <b style="color:var(--ink);font-weight:500">1 crédit chacun</b>.</p>
               <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
                 <div class="ref-link"><b>eadee.fr/ref/</b>ALEX2024</div>
-                <button class="btn btn-ghost">Copier</button>
-                <button class="btn">Partager</button>
+                <button class="btn btn-ghost" onclick="navigator.clipboard.writeText('https://eadee.fr/ref/'+((window.user&&window.user.referral_code)||'EADEE')).then(()=>toast('Lien copié !','success')).catch(()=>toast('Copie non supportée','error'))">Copier</button>
+                <button class="btn" onclick="if(navigator.share){navigator.share({title:'EADEE',text:'Crée ton business plan en 60s avec EADEE',url:'https://eadee.fr/ref/'+((window.user&&window.user.referral_code)||'EADEE')})}else{toast('Partage non supporté sur ce navigateur','error')}">Partager</button>
               </div>
               <div class="ref-stats">
                 <span><b>0</b> amis invités</span>
@@ -1761,6 +1761,43 @@
     e.preventDefault();
     go(l.dataset.screen);
   }));
+
+  // ===== Inspiration → pré-remplir formulaire et aller sur gen =====
+  window.pickInspiration = function(text) {
+    go('gen');
+    setTimeout(function() {
+      var ta = document.getElementById('dashIdea');
+      if (ta) {
+        ta.value = text;
+        ta.dispatchEvent(new Event('input'));
+        if (typeof onIdeaInput === 'function') onIdeaInput(ta);
+        ta.focus();
+      }
+    }, 80);
+  };
+
+  // ===== Gen-banner dynamique (brouillon réel depuis localStorage) =====
+  function initGenBanner() {
+    var banner = document.getElementById('genBanner');
+    if (!banner) return;
+    try {
+      var raw = localStorage.getItem('eadee_draft');
+      if (raw) {
+        var draft = JSON.parse(raw);
+        if (draft && draft.idea && draft.idea.trim().length >= 10) {
+          var titleEl = document.getElementById('genBannerTitle');
+          var draftEl = document.getElementById('genBannerDraft');
+          if (titleEl) titleEl.textContent = 'Tu avais commencé à décrire une idée.';
+          if (draftEl) draftEl.textContent = '« ' + draft.idea.substring(0, 70) + (draft.idea.length > 70 ? '…' : '') + ' »';
+          banner.style.display = 'flex';
+          return;
+        }
+      }
+    } catch(e) {}
+    banner.style.display = 'none';
+  }
+  // Lancer après chargement des scripts backend
+  window.addEventListener('load', initGenBanner);
 
   // ===== Keyboard shortcuts =====
   const keys = {g:'gen', e:'expert', p:'plans', i:'insp', c:'credits', ',':'settings', '?':'help'};
