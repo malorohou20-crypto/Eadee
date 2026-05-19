@@ -7,6 +7,13 @@ function initCookieBanner() {
     }, 1200);
   }
 }
+// Init automatique — DOM déjà chargé (scripts en bas de page)
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initCookieBanner);
+} else {
+  initCookieBanner();
+}
+
 async function setCookieConsent(choice) {
   localStorage.setItem('eadee_cookie_consent', choice);
   const b = document.getElementById('cookieBanner');

@@ -130,37 +130,46 @@ function checkDraft() {
 }
 
 function resumeDraft() {
-  const banner = document.getElementById('draft-resume-banner');
-  if (!banner || !banner._draft) return;
+  // v2 : genBanner, v1 : draft-resume-banner
+  const banner = document.getElementById('draft-resume-banner') || document.getElementById('genBanner');
+  if (!banner) return;
+  // Lire le brouillon depuis _draft (v1) OU localStorage (v2)
+  let d = banner._draft;
+  if (!d) {
+    try { d = JSON.parse(localStorage.getItem('eadee_draft') || 'null'); } catch(e) {}
+  }
+  if (!d || !d.idea) return;
   banner.style.display = 'none';
   // Si ça vient de l'historique → ouvre directement le dernier plan généré
-  if (banner._fromHistory) {
-    openFromHistory(0);
-    return;
-  }
-  // Sinon → remplit le formulaire avec le brouillon
-  const d = banner._draft;
+  if (banner._fromHistory) { if (typeof openFromHistory === 'function') openFromHistory(0); return; }
+  // Sinon → remplit le formulaire
   const ta = document.getElementById('dashIdea');
   if (ta) { ta.value = d.idea; ta.dispatchEvent(new Event('input')); }
-  if (d.budget) document.getElementById('dashBudget').value = d.budget;
-  if (d.profile) document.getElementById('dashProfile').value = d.profile;
-  if (d.sector) document.getElementById('dashSector').value = d.sector;
-  if (d.time) document.getElementById('dashTime').value = d.time;
-  if (d.planName) document.getElementById('dashPlanName').value = d.planName;
+  const b = document.getElementById('dashBudget');  if (d.budget && b)  b.value = d.budget;
+  const p = document.getElementById('dashProfile'); if (d.profile && p) p.value = d.profile;
+  const s = document.getElementById('dashSector');  if (d.sector && s)  s.value = d.sector;
+  const t = document.getElementById('dashTime');    if (d.time && t)    t.value = d.time;
+  const n = document.getElementById('dashPlanName'); if (d.planName && n) n.value = d.planName;
 }
 
 function discardDraft() {
   localStorage.removeItem('eadee_draft');
-  const banner = document.getElementById('draft-resume-banner');
+  // v2 : genBanner, v1 : draft-resume-banner
+  const banner = document.getElementById('draft-resume-banner') || document.getElementById('genBanner');
   if (banner) banner.style.display = 'none';
 }
 
 // ========== INSPIRE MODAL ==========
 function openInspireModal() {
-  document.getElementById('inspire-modal').style.display = 'flex';
+  // v2 : écran inspiration dédié (data-screen="insp")
+  if (window.__EADEE_V2 && typeof window.go === 'function') { window.go('insp'); return; }
+  const modal = document.getElementById('inspire-modal');
+  if (modal) modal.style.display = 'flex';
 }
 function closeInspireModal() {
-  document.getElementById('inspire-modal').style.display = 'none';
+  if (window.__EADEE_V2 && typeof window.go === 'function') { window.go('gen'); return; }
+  const modal = document.getElementById('inspire-modal');
+  if (modal) modal.style.display = 'none';
 }
 function pickInspire(text) {
   const ta = document.getElementById('dashIdea');

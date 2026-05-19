@@ -8,11 +8,17 @@
     // Restaurer les crédits demo depuis localStorage (persiste après rechargement)
     const savedDemoCredits = localStorage.getItem('eadee_demo_credits');
     userCredits = savedDemoCredits !== null ? parseInt(savedDemoCredits, 10) : 3;
-    showPage('dashboard');
-    showView('generator');
-    updateUsage();
-    updateDashHeader();
+    // v2 : showPage/showView sont des stubs — on utilise go() si disponible
+    if (window.__EADEE_V2) {
+      if (typeof window.go === 'function') window.go('gen');
+    } else {
+      try { showPage('dashboard'); } catch(e) {}
+      try { showView('generator'); } catch(e) {}
+    }
+    if (typeof updateUsage === 'function') updateUsage();
+    if (typeof updateDashHeader === 'function') updateDashHeader();
   }
 })();
 
-updateNav(); initChat();
+if (typeof updateNav === 'function') updateNav();
+if (typeof initChat === 'function') initChat();
