@@ -92,6 +92,289 @@ function legend(items) {
     }).join('') + '</div>';
 }
 
+// ── NORMALISEUR v3 → renderer ────────────────────────────
+// Traduit le schéma EADEE v3 (objets imbriqués) en clés plates
+// attendues par tous les blocs existants du renderer.
+function normalizePlanForRenderer(plan) {
+  // deep copy pour ne pas muter l'objet original
+  var p;
+  try { p = JSON.parse(JSON.stringify(plan)); } catch(e) { p = plan; }
+
+  // ── meta → clés racines ──────────────────────────────────
+  if (plan.meta && typeof plan.meta === 'object') {
+    p.nom_business  = p.nom_business  || plan.meta.nom_business;
+    p.nom_entreprise= p.nom_entreprise|| plan.meta.nom_business;
+    p.tagline       = p.tagline       || plan.meta.tagline;
+    p.pitch_30s     = p.pitch_30s     || plan.meta.pitch_30s;
+  }
+
+  // ── scores → note racine ─────────────────────────────────
+  if (plan.scores && plan.scores.score_viabilite && plan.scores.score_viabilite.note !== undefined) {
+    p.score_viabilite = plan.scores.score_viabilite.note;
+  }
+
+  // ── porteur_profil_financier ─────────────────────────────
+  if (plan.porteur_projeto && plan.porteur_projeto.profil_financier_personnel) {
+    p.porteur_profil_financier = plan.porteur_projeto.profil_financier_personnel;
+  }
+  if (plan.porteur_projet && plan.porteur_projet.profil_financier_personnel) {
+    p.porteur_profil_financier = plan.porteur_projet.profil_financier_personnel;
+  }
+
+  // ── resume_executif → vision_banquier + texte ────────────
+  if (plan.resume_executif && typeof plan.resume_executif === 'object') {
+    var re = plan.resume_executif;
+    if (re.vision_banquier) {
+      p.resume_vision_banquier = Object.assign({}, re.vision_banquier, {
+        argument_principal_bancaire: re.vision_banquier.argument_principal_bancaire || re.vision_banquier.argument_principal,
+        garanties: Array.isArray(re.vision_banquier.garanties_proposees) ? re.vision_banquier.garanties_proposees.join(', ') : re.vision_banquier.garanties_proposees,
+      });
+    }
+    p.resume_executif = re.synthese_projet || '';
+  }
+
+  // ── presentation_projet → string ─────────────────────────
+  if (plan.presentation_projet && typeof plan.presentation_projet === 'object') {
+    var pp = plan.presentation_projet;
+    var ppParts = [pp.origine_idee, pp.probleme_resolu, pp.vision_3_ans, pp.stade_actuel];
+    if (pp.preuves_concept) ppParts.push('Preuves : ' + pp.preuves_concept);
+    p.presentation_projet = ppParts.filter(Boolean).join(' — ');
+  }
+
+  // ── tresorerie → tresorerie_mensuelle ────────────────────
+  if (plan.tresorerie && plan.tresorerie.tableau_12_mois) {
+    p.tresorerie_mensuelle = plan.tresorerie.tableau_12_mois;
+  }
+
+  // ── projections_revenus → rev_mensuel + jalons + scenarios ─
+  if (plan.projections_revenus && typeof plan.projections_revenus === 'object') {
+    var pr = plan.projections_revenus;
+    if (pr.tableau_mensuel_an1 && pr.tableau_mensuel_an1.length) {
+      p.rev_mensuel = pr.tableau_mensuel_an1.map(function(m) {
+        var v = String(m.ca_ht || '0').replace(/\{\{[VEH]:(.*?)\|.*?\}\}/g, '$1').replace(/[^0-9.]/g, '');
+        return parseFloat(v) || 0;
+      });
+    }
+    if (pr.jalons && pr.jalons.length) {
+      pr.jalons.forEach(function(j) {
+        if (j.mois === 1)  p.rev_m1  = j.ca;
+        if (j.mois === 3)  p.rev_m3  = j.ca;
+        if (j.mois === 6)  p.rev_m6  = j.ca;
+        if (j.mois === 12) p.rev_m12 = j.ca;
+        if (j.mois === 24) p.rev_m24 = j.ca;
+        if (j.mois === 36) p.rev_m36 = j.ca;
+      });
+    }
+    if (pr.scenarios) p.scenarios = pr.scenarios;
+  }
+
+  // ── marche → clés plates ─────────────────────────────────
+  if (plan.marche && typeof plan.marche === 'object') {
+    var mk = plan.marche;
+    p.marche_taille           = mk.taille_france         || mk.taille_marche_france;
+    p.marche_croissance       = mk.taux_croissance        || mk.taux_croissance_annuel;
+    p.marche_part_cible       = mk.part_marche_visee_an1;
+    p.marche_clients_potentiels = null;
+    p.marche_analyse          = mk.analyse_sectorielle;
+    p.marche_tendances        = Array.isArray(mk.tendances_cles) ? mk.tendances_cles : null;
+  }
+
+  // ── proposition_valeur → string + bénéfices ──────────────
+  if (plan.proposition_valeur && typeof plan.proposition_valeur === 'object') {
+    var pv = plan.proposition_valeur;
+    p.proposition_valeur = [pv.usp, pv.preuves_valeur].filter(Boolean).join(' — ');
+    p.proposition_valeur_benefices = Array.isArray(pv.benefices_clients) ? pv.benefices_clients : null;
+  }
+
+  // ── modele_economique → string + offres ──────────────────
+  if (plan.modele_economique && typeof plan.modele_economique === 'object') {
+    var me = plan.modele_economique;
+    p.modele_economique = [
+      me.type ? 'Type : ' + me.type : null,
+      me.description,
+      me.panier_moyen ? 'Panier moyen : ' + me.panier_moyen : null,
+      me.frequence_achat ? 'Fréquence : ' + me.frequence_achat : null,
+    ].filter(Boolean).join(' — ');
+    p.offres = (me.offres || []).map(function(o) {
+      return Object.assign({}, o, { prix: o.prix || o.prix_ht });
+    });
+  }
+
+  // ── strategie_commerciale → string ──────────────────────
+  if (plan.strategie_commerciale && typeof plan.strategie_commerciale === 'object') {
+    var sc2 = plan.strategie_commerciale;
+    p.strategie_commerciale = [
+      sc2.tunnel_vente,
+      sc2.strategie_prix,
+      Array.isArray(sc2.canaux_distribution) ? 'Canaux : ' + sc2.canaux_distribution.join(', ') : null,
+      sc2.objectif_clients_m3  ? 'Obj. M3 : '  + sc2.objectif_clients_m3  + ' clients' : null,
+      sc2.objectif_clients_m12 ? 'Obj. M12 : ' + sc2.objectif_clients_m12 + ' clients' : null,
+    ].filter(Boolean).join(' — ');
+  }
+
+  // ── aspects_juridiques → string ──────────────────────────
+  if (plan.aspects_juridiques && typeof plan.aspects_juridiques === 'object') {
+    var aj = plan.aspects_juridiques;
+    p.aspects_juridiques = [
+      aj.statut_recommande ? 'Statut : ' + aj.statut_recommande : null,
+      aj.justification,
+      aj.regime_fiscal ? 'Fiscal : ' + aj.regime_fiscal : null,
+      aj.regime_social ? 'Social : ' + aj.regime_social : null,
+    ].filter(Boolean).join(' — ');
+  }
+
+  // ── aspects_organisationnels → string + outils ───────────
+  if (plan.aspects_organisationnels && typeof plan.aspects_organisationnels === 'object') {
+    var ao = plan.aspects_organisationnels;
+    var locTxt = ao.locaux && ao.locaux.necessaire
+      ? 'Local : ' + (ao.locaux.type || 'requis') + (ao.locaux.loyer_mensuel ? ' — ' + ao.locaux.loyer_mensuel : '')
+      : null;
+    p.aspects_organisationnels = [
+      ao.structure_equipe ? 'Équipe : ' + ao.structure_equipe : null,
+      locTxt,
+      ao.outils && ao.outils.length ? ao.outils.length + ' outil(s) recommandé(s)' : null,
+    ].filter(Boolean).join(' — ');
+    if (ao.outils && ao.outils.length) {
+      p.outils = ao.outils.map(function(o) {
+        return { nom: o.outil, usage: o.usage, prix: o.cout_mensuel };
+      });
+    }
+  }
+
+  // ── finances_detail → array [{label, valeur}] ────────────
+  if (plan.finances_detail && typeof plan.finances_detail === 'object' && !Array.isArray(plan.finances_detail)) {
+    var fd = plan.finances_detail;
+    var fdArr = [];
+    if (fd.taux_marge_brute)     fdArr.push({ label: 'Marge brute',        valeur: fd.taux_marge_brute });
+    if (fd.taux_marge_nette_an1) fdArr.push({ label: 'Marge nette An1',    valeur: fd.taux_marge_nette_an1 });
+    if (fd.taux_marge_nette_an3) fdArr.push({ label: 'Marge nette An3',    valeur: fd.taux_marge_nette_an3 });
+    if (fd.total_charges_fixes)  fdArr.push({ label: 'Charges fixes/mois', valeur: fd.total_charges_fixes });
+    if (fd.bfr && fd.bfr.calcul) fdArr.push({ label: 'BFR',               valeur: fd.bfr.calcul });
+    p.finances_detail = fdArr;
+  }
+
+  // ── investissements → array [{label, montant, total}] ────
+  if (plan.investissements && typeof plan.investissements === 'object' && !Array.isArray(plan.investissements)) {
+    var inv = plan.investissements;
+    var invArr = (inv.postes || []).map(function(item) {
+      return { label: item.poste, montant: item.montant };
+    });
+    if (inv.total) invArr.push({ label: 'TOTAL', montant: inv.total, total: true });
+    p.investissements = invArr;
+  }
+
+  // ── concurrents → champs compatibles renderer ────────────
+  if (Array.isArray(plan.concurrents)) {
+    p.concurrents = plan.concurrents.map(function(c) {
+      return Object.assign({}, c, {
+        menace: c.niveau_menace || c.menace,
+        description: [
+          c.points_forts  ? '✓ ' + c.points_forts  : null,
+          c.points_faibles ? '✗ ' + c.points_faibles : null,
+        ].filter(Boolean).join('  '),
+        avantage_differentiel: c.notre_avantage || c.avantage_differentiel,
+      });
+    });
+  }
+
+  // ── risques → champs compatibles renderer ────────────────
+  if (Array.isArray(plan.risques)) {
+    p.risques = plan.risques.map(function(r) {
+      var niv = r.impact === 'élevé' || r.probabilite === 'élevée' ? 'élevé'
+              : r.impact === 'moyen'  || r.probabilite === 'moyenne' ? 'moyen'
+              : 'faible';
+      return Object.assign({}, r, {
+        titre: r.risque || r.titre,
+        niveau: niv,
+        solution: r.solution_curative || r.solution,
+      });
+    });
+  }
+
+  // ── plan_actions_90j.phases → actions [{phase,titre,detail}]
+  if (plan.plan_actions_90j && plan.plan_actions_90j.phases && !plan.actions) {
+    p.actions = plan.plan_actions_90j.phases.map(function(ph) {
+      return {
+        phase: ph.semaine,
+        titre: ph.titre,
+        detail: (ph.actions || []).join(' • ') + (ph.livrable ? ' → ' + ph.livrable : ''),
+      };
+    });
+  }
+
+  // ── aides_subventions → array [{nom,montant,...}] ────────
+  if (plan.aides_subventions && typeof plan.aides_subventions === 'object' && !Array.isArray(plan.aides_subventions)) {
+    p.aides_subventions = (plan.aides_subventions.eligibles || []).map(function(a) {
+      return {
+        nom: a.aide,
+        organisme: a.organisme,
+        montant: a.montant,
+        conditions: Array.isArray(a.conditions) ? a.conditions.join('. ') : (a.conditions || ''),
+        priorite: a.priorite,
+        applicable: a.priorite === 'haute' || a.priorite === 'moyenne',
+        lien: null,
+      };
+    });
+  }
+
+  // ── kpis → array [{nom, cible, frequence}] ───────────────
+  if (plan.kpis && typeof plan.kpis === 'object' && !Array.isArray(plan.kpis)) {
+    p.kpis = (plan.kpis.operationnels || []).map(function(k) {
+      return { nom: k.kpi, cible: k.cible_m12 || k.cible_m3, frequence: k.comment_mesurer };
+    });
+  }
+
+  // ── demarches_administratives → demarches_admin ──────────
+  if (Array.isArray(plan.demarches_administratives) && !plan.demarches_admin) {
+    p.demarches_admin = plan.demarches_administratives.map(function(d) {
+      return { etape: d.etape, detail: d.organisme, delai: d.delai_reel, cout: d.cout };
+    });
+  }
+
+  // ── templates_communication → flat email keys ────────────
+  if (plan.templates_communication && typeof plan.templates_communication === 'object') {
+    var tc = plan.templates_communication;
+    var toEmail = function(e) { return e ? { sujet: e.objet, corps: e.corps } : null; };
+    if (tc.email_prospection_client) p.email_prospection = toEmail(tc.email_prospection_client);
+    if (tc.email_fournisseur)        p.email_fournisseur  = toEmail(tc.email_fournisseur);
+    if (tc.email_relance)            p.email_relance      = toEmail(tc.email_relance);
+  }
+
+  // ── persona → champs compatibles renderer ────────────────
+  if (plan.persona && typeof plan.persona === 'object') {
+    p.persona = Object.assign({}, plan.persona, {
+      nom: plan.persona.nom_fictif || plan.persona.nom,
+      douleurs: plan.persona.probleme_principal || plan.persona.douleurs,
+      ou_le_trouver: plan.persona.canal_prefere || plan.persona.ou_le_trouver,
+      motivations: Array.isArray(plan.persona.motivations) ? plan.persona.motivations.join(', ') : plan.persona.motivations,
+    });
+  }
+
+  // ── annexes_checklist (objet catégories → array isNewFmt) ─
+  if (plan.annexes_checklist && typeof plan.annexes_checklist === 'object' && !Array.isArray(plan.annexes_checklist)) {
+    var clObj = plan.annexes_checklist;
+    var clArr = Object.keys(clObj)
+      .filter(function(k) { return k.indexOf('categorie_') === 0 && clObj[k] && Array.isArray(clObj[k].items); })
+      .sort(function(a, b) { return ((clObj[a] && clObj[a].ordre) || 0) - ((clObj[b] && clObj[b].ordre) || 0); })
+      .map(function(k) {
+        return {
+          titre: clObj[k].titre,
+          ordre: clObj[k].ordre,
+          items: (clObj[k].items || []).map(function(item) {
+            // tres_important → très_important pour le badge renderer
+            return Object.assign({}, item, {
+              statut: item.statut === 'tres_important' ? 'très_important' : (item.statut || ''),
+              document: item.document || String(item),
+            });
+          }),
+        };
+      });
+    p.annexes_checklist = clArr.length ? clArr : null;
+  }
+
+  return p;
+}
+
 // ── BLOC 1 — Double score ─────────────────────────────────
 function bloc1(plan) {
   var sc = plan.scores || {};
@@ -1173,6 +1456,7 @@ function bloc12(plan) {
 // ── RENDERER PRINCIPAL ────────────────────────────────────
 window._renderV2PlanResult = function(plan, container) {
   if (!plan || !container) return;
+  plan = normalizePlanForRenderer(plan);
   _pending = []; _cid = 0;
 
   var sc      = plan.scores || {};
