@@ -114,9 +114,6 @@ function normalizePlanForRenderer(plan) {
   }
 
   // ── porteur_profil_financier ─────────────────────────────
-  if (plan.porteur_projeto && plan.porteur_projeto.profil_financier_personnel) {
-    p.porteur_profil_financier = plan.porteur_projeto.profil_financier_personnel;
-  }
   if (plan.porteur_projet && plan.porteur_projet.profil_financier_personnel) {
     p.porteur_profil_financier = plan.porteur_projet.profil_financier_personnel;
   }
@@ -324,6 +321,33 @@ function normalizePlanForRenderer(plan) {
     });
   }
 
+  // ── acquisition → canaux normalisés (array) ─────────────
+  if (plan.acquisition && typeof plan.acquisition === 'object' && !Array.isArray(plan.acquisition)) {
+    p.acquisition = (plan.acquisition.canaux || []).map(function(c) {
+      return Object.assign({}, c, { cac: c.cac || c.cac_estime });
+    });
+  } else if (Array.isArray(plan.acquisition)) {
+    p.acquisition = plan.acquisition.map(function(c) {
+      return Object.assign({}, c, { cac: c.cac || c.cac_estime });
+    });
+  }
+
+  // ── tableau_amortissement → aliases renderer ─────────────
+  if (plan.tableau_amortissement && typeof plan.tableau_amortissement === 'object') {
+    var ta = plan.tableau_amortissement;
+    // analyse_remboursement → analyse_capacite_remboursement (nom renderer)
+    if (ta.analyse_remboursement && !ta.analyse_capacite_remboursement) {
+      p.tableau_amortissement = Object.assign({}, ta, {
+        analyse_capacite_remboursement: ta.analyse_remboursement,
+        conseils_negociation_banque: ta.conseils_negociation || ta.conseils_negociation_banque,
+      });
+    } else if (!ta.analyse_capacite_remboursement) {
+      p.tableau_amortissement = Object.assign({}, ta, {
+        conseils_negociation_banque: ta.conseils_negociation || ta.conseils_negociation_banque,
+      });
+    }
+  }
+
   // ── demarches_administratives → demarches_admin ──────────
   if (Array.isArray(plan.demarches_administratives) && !plan.demarches_admin) {
     p.demarches_admin = plan.demarches_administratives.map(function(d) {
@@ -421,9 +445,9 @@ function bloc1(plan) {
     return h;
   }
 
-  var svC = [['taille_marche','Taille marché',15],['differentiation','Différenciation',20],
+  var svC = [['taille_marche','Taille marché',15],['differenciation','Différenciation',20],
              ['proposition_valeur','Prop. valeur',15],['preuves_marche','Preuves marché',15],
-             ['experience_porteur','Expérience',20],['clarte_modele_eco','Modèle éco',15]];
+             ['experience_secteur','Expérience',20],['clarte_modele_eco','Modèle éco',15]];
   var sbC = [['apport_suffisant','Apport',25],['point_mort_rapide','Point mort',20],
              ['tresorerie_positive_m6','Tréso M6',20],['garanties_disponibles','Garanties',15],
              ['secteur_risque_faible','Risque sect.',10],['experience_porteur','Expérience',10]];
@@ -1492,7 +1516,8 @@ window._renderV2PlanResult = function(plan, container) {
     html += '<div style="padding:14px 18px;background:var(--bg-2,var(--bg));border:1px solid var(--rule);border-radius:6px;margin-bottom:20px">';
     html += '<div style="font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px">⚠ ' + esc(me.titre||'Note importante') + '</div>';
     html += '<p style="font-size:13px;color:var(--ink-2);margin:0;line-height:1.55">' + esc(me.corps||'') + '</p>';
-    if (me.recommandation_concrete) html += '<p style="font-size:13px;color:var(--accent-ink,var(--accent));margin:6px 0 0;font-weight:500">' + esc(me.recommandation_concrete) + '</p>';
+    var meReco = me.recommandation_concrete || me.recommandation;
+    if (meReco) html += '<p style="font-size:13px;color:var(--accent-ink,var(--accent));margin:6px 0 0;font-weight:500">' + esc(meReco) + '</p>';
     html += '</div>';
   }
 
@@ -1665,14 +1690,16 @@ window._renderV2PlanResult = function(plan, container) {
   });
 
   // RESSOURCES GRATUITES
-  if (d && d.ressources_gratuites_recommandees && d.ressources_gratuites_recommandees.length) html += card('Ressources gratuites',
+  var dRessources = d && (d.ressources_gratuites_recommandees || d.ressources_gratuites);
+  if (dRessources && dRessources.length) html += card('Ressources gratuites',
     '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">' +
-    d.ressources_gratuites_recommandees.map(function(r){ return '<div style="padding:14px;background:var(--bg);border-radius:6px;border:1px solid var(--rule)">' +
+    dRessources.map(function(r){ return '<div style="padding:14px;background:var(--bg);border-radius:6px;border:1px solid var(--rule)">' +
       '<div style="font-size:13.5px;font-weight:600;color:var(--ink);margin-bottom:4px">'+esc(r.organisme)+'</div>' +
       '<div style="font-size:12.5px;color:var(--ink-2);margin-bottom:6px;line-height:1.4">'+esc(r.service||'')+'</div>' +
       '<div style="font-family:var(--mono);font-size:11px;color:var(--green)">'+esc(r.cout||'')+'</div>' +
       (r.url?'<div style="font-family:var(--mono);font-size:10px;color:var(--accent);margin-top:4px">'+esc(r.url)+'</div>':'') +
       '</div>'; }).join('') + '</div>');
+  dRessources = null;
 
   html += bloc6(plan, pid);
 
