@@ -417,7 +417,7 @@ function bloc1(plan) {
       '<div style="height:3px;background:var(--accent);border-radius:2px;width:' + p + '%"></div></div>';
   }
 
-  function scoreCard(title, note, criteria, det, interp, msgBanq) {
+  function scoreCard(title, note, criteria, det, interp, msgBanq, amelioration) {
     var col = scoreCol(note);
     var pct = Math.round((note/100)*100);
     var h = '<div style="background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:20px">';
@@ -442,6 +442,20 @@ function bloc1(plan) {
     if (interp) h += '<p style="font-size:13px;color:var(--ink-3);font-style:italic;margin:0 0 10px;line-height:1.5">' + esc(interp) + '</p>';
     if (msgBanq) h += '<div style="border-left:2px solid var(--accent);background:var(--accent-bg);padding:10px 14px;border-radius:0 4px 4px 0">' +
       '<p style="font-family:var(--serif);font-style:italic;color:var(--accent-ink);font-size:13px;margin:0;line-height:1.5">' + esc(msgBanq) + '</p></div>';
+    // Plan d'amélioration conditionnel (note < 70)
+    if (amelioration && amelioration.applicable && note < 70 && amelioration.actions && amelioration.actions.length) {
+      h += '<div style="margin-top:14px;padding:12px 14px;background:var(--bg);border:1px solid var(--rule);border-radius:6px">';
+      h += '<div style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:8px">Plan d\'amélioration</div>';
+      amelioration.actions.forEach(function(a) {
+        h += '<div style="display:flex;gap:8px;margin-bottom:6px;font-size:12.5px;line-height:1.4">' +
+          '<span style="font-family:var(--mono);font-size:10px;color:var(--ink-3);flex-shrink:0;padding-top:1px">' + (a.priorite||'·') + '.</span>' +
+          '<div><span style="color:var(--ink)">' + esc(a.action||'') + '</span>' +
+          (a.delai ? '<span style="color:var(--ink-3);font-family:var(--mono);font-size:10px;margin-left:6px">' + esc(a.delai) + '</span>' : '') +
+          '</div></div>';
+      });
+      if (amelioration.message) h += '<p style="font-size:12px;color:var(--ink-3);font-style:italic;margin:6px 0 0;line-height:1.4">' + esc(amelioration.message) + '</p>';
+      h += '</div>';
+    }
     h += '</div>';
     return h;
   }
@@ -454,8 +468,8 @@ function bloc1(plan) {
              ['secteur_risque_faible','Risque sect.',10],['experience_porteur','Expérience',10]];
 
   var out = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">';
-  if (svN) out += scoreCard('Score de viabilité', svN, svC, sv.detail, sv.interpretation, null);
-  if (sbN) out += scoreCard('Score de bancabilité', sbN, sbC, sb.detail, sb.interpretation, sb.message_banquier);
+  if (svN) out += scoreCard('Score de viabilité', svN, svC, sv.detail, sv.interpretation, null, null);
+  if (sbN) out += scoreCard('Score de bancabilité', sbN, sbC, sb.detail, sb.interpretation, sb.message_banquier, sb.plan_amelioration);
   return out + '</div>';
 }
 
@@ -838,64 +852,97 @@ function bloc8(plan) {
   var rm = plan.rev_mensuel;
   if (!rm || !rm.length) return '';
   var cid = uid();
-  var mnoms = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
-  var lbls = mnoms.slice(0, rm.length);
+  var prRev = plan.projections_revenus || {};
+
+  // ── Construire 36 mois : An1 réel (12 mois) + An2/An3 interpolés (12 mois chacun) ──
+  var mnoms12 = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+  var an1Data = rm.slice(0, 12); // CA mensuel An1 réel
+
+  // Récupérer CA An2 et An3 depuis scenarios.realiste (fallback: estimations)
+  var sc = plan.scenarios || {};
+  var caAn1Total = an1Data.reduce(function(s,v){ return s + (typeof v === 'number' ? v : numVal(v)); }, 0);
+  var caAn2Total = numVal((sc.realiste || {}).ca_an1) || caAn1Total * 1.25; // fallback +25%
+  var caAn3Total = numVal((sc.realiste || {}).ca_an3) || caAn1Total * 1.55; // fallback +55%
+  // Si ca_an2 n'est pas dans scenarios on utilise la moyenne An1/An3
+  if (!caAn2Total || caAn2Total === caAn1Total * 1.25) {
+    var caAn2Scenarios = numVal((sc.realiste || {}).ca_an1);
+    if (caAn2Scenarios > 0) caAn2Total = caAn2Scenarios;
+  }
+  var caAn2Mensuel = caAn2Total / 12;
+  var caAn3Mensuel = caAn3Total / 12;
+
+  var lbls36 = [];
+  var data36 = [];
+  mnoms12.forEach(function(m, i) {
+    lbls36.push(m + ' An1');
+    data36.push(typeof an1Data[i] === 'number' ? an1Data[i] : numVal(an1Data[i]));
+  });
+  mnoms12.forEach(function(m) {
+    lbls36.push(m + ' An2');
+    data36.push(Math.round(caAn2Mensuel));
+  });
+  mnoms12.forEach(function(m) {
+    lbls36.push(m + ' An3');
+    data36.push(Math.round(caAn3Mensuel));
+  });
+
+  var resData12 = (prRev && prRev.tableau_mensuel_an1)
+    ? prRev.tableau_mensuel_an1.map(function(m){ return numVal(m.resultat_net); })
+    : [];
+  // Étendre résultat net sur 36 mois (An2/An3 estimés)
+  var resData36 = resData12.slice(0, 12);
+  var resAn1Last = resData36.length ? resData36[resData36.length-1] : 0;
+  var growthFactor = caAn1Total > 0 ? (caAn2Total / caAn1Total) : 1.25;
+  for (var i2 = 0; i2 < 12; i2++) resData36.push(Math.round(resAn1Last * growthFactor * (1 + i2 * 0.02)));
+  var growthFactor3 = caAn1Total > 0 ? (caAn3Total / caAn1Total) : 1.55;
+  for (var i3 = 0; i3 < 12; i3++) resData36.push(Math.round(resAn1Last * growthFactor3 * (1 + i3 * 0.01)));
+
   var jalons = [
     {l:'M+1',v:numVal(plan.rev_m1)},{l:'M+3',v:numVal(plan.rev_m3)},{l:'M+6',v:numVal(plan.rev_m6)},
     {l:'An1',v:numVal(plan.rev_m12)},{l:'An2',v:numVal(plan.rev_m24)},{l:'An3',v:numVal(plan.rev_m36)}
   ].filter(function(j){ return j.v > 0; });
 
-  var prRev = plan.projections_revenus || {};
-  var resData = (prRev && prRev.tableau_mensuel_an1)
-    ? prRev.tableau_mensuel_an1.map(function(m){ return numVal(m.resultat_net); })
-    : [];
-
   var h = '<div style="background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:24px 28px;margin-bottom:20px">';
-  h += '<div style="font-family:var(--serif);font-size:17px;color:var(--ink);border-bottom:1px solid var(--rule);padding-bottom:10px;margin-bottom:16px">Projections de revenus</div>';
-  h += cvs(cid, 240);
-  h += legend([{c:CC.accent,l:'CA mensuel An1'},{c:CC.green,l:'Résultat net'}]);
+  h += '<div style="font-family:var(--serif);font-size:17px;color:var(--ink);border-bottom:1px solid var(--rule);padding-bottom:10px;margin-bottom:16px">Projections de revenus — 36 mois</div>';
+  h += cvs(cid, 280);
+  h += legend([{c:CC.accent,l:'CA mensuel An1'},{c:CC.orange,l:'CA interpolé An2'},{c:CC.green,l:'CA interpolé An3'},{c:CC.mint,l:'Résultat net (estimé)'}]);
 
-  queue(cid, { type:'line', data:{ labels:lbls, datasets:[
+  queue(cid, { type:'line', data:{ labels:lbls36, datasets:[
     {
-      label:'CA mensuel',
-      data:rm, borderColor:CC.accent, borderWidth:2, fill:true, backgroundColor:'rgba(200,75,47,0.08)', tension:0.4,
-      pointRadius:lbls.map(function(_,i){return [0,2,5,5,8,5,5,5,8,5,5,11].includes(i)?5:2;})
+      label:'CA An1',
+      data:data36.slice(0,12).concat(new Array(24).fill(null)),
+      borderColor:CC.accent, borderWidth:2, fill:true, backgroundColor:'rgba(200,75,47,0.06)', tension:0.4,
+      pointRadius:2, spanGaps:false
+    },
+    {
+      label:'CA An2 (interpolé)',
+      data:new Array(12).fill(null).concat(data36.slice(12,24)).concat(new Array(12).fill(null)),
+      borderColor:CC.orange, borderWidth:2, fill:true, backgroundColor:'rgba(232,168,124,0.06)', tension:0.3,
+      pointRadius:1, borderDash:[5,3], spanGaps:false
+    },
+    {
+      label:'CA An3 (interpolé)',
+      data:new Array(24).fill(null).concat(data36.slice(24,36)),
+      borderColor:CC.green, borderWidth:2, fill:true, backgroundColor:'rgba(58,125,68,0.06)', tension:0.3,
+      pointRadius:1, borderDash:[5,3], spanGaps:false
     },
     {
       label:'Résultat net',
-      data:resData,
-      borderColor:CC.green,
-      borderWidth:1.5,
-      borderDash:[4,4],
-      fill:false,
-      tension:0.3,
-      pointRadius:2
+      data:resData36,
+      borderColor:CC.mint, borderWidth:1.5, borderDash:[4,4], fill:false, tension:0.3, pointRadius:0
     },
     {
-      data:lbls.map(function(){return 0;}),
-      borderColor:CC.grid,
-      borderWidth:1,
-      borderDash:[4,4],
-      pointRadius:0,
-      fill:false
+      data:lbls36.map(function(){return 0;}),
+      borderColor:CC.grid, borderWidth:1, borderDash:[4,4], pointRadius:0, fill:false
     }
-  ]}, options:{ animation:false, maintainAspectRatio:false, plugins:{legend:{display:false},
-    tooltip:{
-      callbacks:{
-        afterBody:function(items){
-          var i=items[0]&&items[0].dataIndex;
-          if(i===undefined)return[];
-          var jalonsData=(prRev&&prRev.jalons)?prRev.jalons:[];
-          var moisVals=[1,3,6,9,12];
-          var foundJalon=null;
-          jalonsData.forEach(function(j){if(moisVals.indexOf(j.mois)!==-1&&moisVals.indexOf(j.mois)===moisVals.indexOf(i+1))foundJalon=j;});
-          return foundJalon&&foundJalon.commentaire?[foundJalon.commentaire]:[];
-        }
-      }
+  ]}, options:{ animation:false, maintainAspectRatio:false, plugins:{legend:{display:false}},
+    scales:{
+      x:{ grid:{color:CC.grid}, ticks:{ color:CC.text, maxTicksLimit:18,
+        callback:function(val, idx){ return [0,11,12,23,24,35].indexOf(idx) !== -1 ? this.getLabelForValue(val) : ''; }
+      }},
+      y:{ grid:{color:CC.grid}, ticks:{color:CC.text, callback:function(v){return v.toLocaleString('fr')+'€';}}, min:0 }
     }
-  },
-    scales:{ x:{grid:{color:CC.grid},ticks:{color:CC.text}},
-      y:{grid:{color:CC.grid},ticks:{color:CC.text,callback:function(v){return v.toLocaleString('fr')+'€';}},min:0} } } });
+  }});
 
   if (jalons.length) {
     h += '<div style="display:grid;grid-template-columns:repeat(' + Math.min(jalons.length,6) + ',1fr);border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-top:14px">';
@@ -1704,13 +1751,18 @@ window._renderV2PlanResult = function(plan, container) {
 
   html += bloc6(plan, pid);
 
-  // DOCS TÉLÉCHARGEABLES
-  html += '<div style="background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:24px 28px;margin-bottom:20px">';
+  // SÉPARATEUR BONUS
+  html += '<div style="margin:32px 0 24px;padding:16px 20px;background:linear-gradient(135deg,var(--accent-bg),var(--bg));border:1px solid var(--rule);border-radius:8px;text-align:center">' +
+    '<div style="font-family:var(--serif);font-size:15px;color:var(--accent-ink);margin-bottom:4px">✦ Bonus inclus dans ton plan</div>' +
+    '<div style="font-family:var(--mono);font-size:11px;color:var(--ink-3)">Templates e-mail · Démarches administratives · KPIs · Ressources gratuites</div></div>';
+
+  // DOCS TÉLÉCHARGEABLES (masqué — section bonus)
+  html += '<div style="display:none;background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:24px 28px;margin-bottom:20px">';
   html += lbl('Documents annexes — téléchargeables');
   html += '<div class="docs-grid" id="dDocsGrid"></div></div>';
 
-  // DOSSIER CRÉATION
-  html += '<div style="background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:24px 28px;margin-bottom:20px">';
+  // DOSSIER CRÉATION (masqué — section bonus)
+  html += '<div style="display:none;background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:24px 28px;margin-bottom:20px">';
   html += lbl('Dossier de création — documents juridiques');
   html += '<p style="font-size:13px;color:var(--ink-3);margin:0 0 14px;line-height:1.5">Statuts, checklist URSSAF, ouverture compte pro — pré-remplis pour ton projet.</p>';
   html += '<button onclick="generateDossier()" class="btn btn-ghost">Générer mon dossier complet →</button></div>';

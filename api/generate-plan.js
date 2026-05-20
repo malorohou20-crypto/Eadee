@@ -39,6 +39,16 @@ const EADEE_SYSTEM_PROMPT = `Tu es EADEE, un expert en création d'entreprise fr
    JSON valide uniquement. Zéro markdown. Zéro preamble. Zéro commentaire.
    Sections non applicables → retourner null explicitement (pas omis).
 
+━━ RÈGLES DE CALCUL OBLIGATOIRES ━━
+
+C1. BILAN ÉQUILIBRÉ : Calcule d'abord le passif (capital + résultat + dettes). Puis actif = passif — déduis les disponibilités comme résidu (disponibilites = total_actif - immobilisations_nettes - stocks - créances). total_actif DOIT toujours égaler total_passif.
+
+C2. JALONS DEPUIS TABLEAU MENSUEL : Les jalons (mois 1/3/6/9/12) doivent reprendre les CA réels du tableau_mensuel_an1. Le jalon mois=12 = CA ANNUEL TOTAL (somme des 12 mois), pas la valeur mensuelle de décembre. Mois 24 et 36 = extrapolations cohérentes.
+
+C3. TRÉSORERIE COHÉRENTE : solde_minimum = réel MIN(solde_cumule) sur 12 mois. Les alertes ne s'affichent que quand solde_cumule < 0. Ne pas mettre "alerte" pour des mois positifs.
+
+C4. CAC JAMAIS 0€ : Chaque canal d'acquisition doit avoir un cac_estime non nul. Format : {{H:XX€/mois|explication}}.
+
 ━━ 15 CONTRÔLES DE COHÉRENCE AVANT DE RETOURNER LE JSON ━━
 
 FINANCIERS :
@@ -151,7 +161,7 @@ function buildIntelligentRules(data) {
   // R1 — Secteur réglementé
   const secteurReglemente = ['restauration','bar','tabac','pharmacie','medecine','médecine','droit','comptabilite','comptabilité','securite','sécurité','finance','assurance','btp','transport','creche','crèche','ecole','école'].some(s => secteur.includes(s) || desc.includes(s));
   if (secteurReglemente || data.secteur_reglemente === 'oui') {
-    rules.push('RÈGLE 1 — SECTEUR RÉGLEMENTÉ DÉTECTÉ : générer categorie_3_autorisations_sectorielles avec items spécifiques au secteur. Alerter dans score_bancabilite sur autorisations bloquantes.');
+    rules.push('RÈGLE 1 — SECTEUR RÉGLEMENTÉ DÉTECTÉ : mettre categorie_4 avec applicable:true et items spécifiques au secteur (licences, diplômes, autorisations préfectorales...). Alerter dans score_bancabilite sur autorisations bloquantes.');
   }
 
   // R2 — Demandeur d'emploi
@@ -210,7 +220,12 @@ function buildOutputSchema(data) {
     "version": "2.1",
     "type_projet_detecte": "string",
     "secteur_reglemente": false,
-    "complexite_dossier": "simple | standard | complexe"
+    "complexite_dossier": "simple | standard | complexe",
+    "structure_plan": {
+      "sections_principales": 23,
+      "extras_inclus": ["templates_communication", "kpis", "demarches_administratives", "ressources_gratuites"],
+      "label_extras": "Bonus inclus dans ton plan"
+    }
   },
 
   "disclaimer": {
@@ -267,7 +282,16 @@ function buildOutputSchema(data) {
         "secteur_risque_faible":  { "points": 0, "commentaire": "string" },
         "experience_porteur":     { "points": 0, "commentaire": "string" }
       },
-      "message_banquier": "string"
+      "message_banquier": "string",
+      "plan_amelioration": {
+        "applicable": true,
+        "actions": [
+          { "priorite": 1, "action": "string — action concrète pour améliorer la bancabilité", "impact": "string", "delai": "string" },
+          { "priorite": 2, "action": "string", "impact": "string", "delai": "string" },
+          { "priorite": 3, "action": "string", "impact": "string", "delai": "string" }
+        ],
+        "message": "string — message d'encouragement synthétique"
+      }
     }
   },
 
@@ -649,36 +673,35 @@ function buildOutputSchema(data) {
   },
 
   "annexes_checklist": {
-    "categorie_1_documents_personnels": {
-      "titre": "Documents personnels du porteur",
+    "categorie_1": {
+      "titre": "Identité et situation personnelle",
       "ordre": 1,
+      "applicable": true,
       "items": [
         { "document": "Pièce d'identité valide",                     "statut": "bloquant",      "delai": "immédiat" },
         { "document": "CV détaillé orienté entrepreneur",             "statut": "bloquant",      "delai": "1-2 jours" },
+        { "document": "Justificatif de domicile récent",              "statut": "bloquant",      "delai": "immédiat" },
+        { "document": "Justificatif de domiciliation entreprise",     "statut": "bloquant",      "delai": "immédiat à 1 semaine" },
+        { "document": "Statuts de la société rédigés",                "statut": "bloquant",      "delai": "3-10 jours" },
+        { "document": "Attestation RC Pro ou devis assurance",        "statut": "conditionnel",  "delai": "1-5 jours" }
+      ]
+    },
+    "categorie_2": {
+      "titre": "Situation financière personnelle",
+      "ordre": 2,
+      "applicable": true,
+      "items": [
         { "document": "Avis d'imposition N-1 et N-2",                "statut": "bloquant",      "delai": "immédiat" },
         { "document": "Relevés de compte personnel 3 derniers mois", "statut": "bloquant",      "delai": "immédiat" },
         { "document": "Justificatifs d'apport personnel",            "statut": "bloquant",      "delai": "immédiat" },
-        { "document": "Situation patrimoniale",                       "statut": "tres_important","delai": "2-3 jours" }
+        { "document": "Situation patrimoniale détaillée",             "statut": "tres_important","delai": "2-3 jours" },
+        { "document": "Tableau des crédits en cours",                 "statut": "tres_important","delai": "immédiat" }
       ]
     },
-    "categorie_2_documents_juridiques": {
-      "titre": "Documents juridiques & réglementaires",
-      "ordre": 2,
-      "items": [
-        { "document": "Statuts de la société rédigés",   "statut": "bloquant", "delai": "3-10 jours" },
-        { "document": "Justificatif de domiciliation",   "statut": "bloquant", "delai": "immédiat à 1 semaine" },
-        { "document": "Attestation RC Pro ou devis",     "statut": "conditionnel", "delai": "1-5 jours" }
-      ]
-    },
-    "categorie_3_autorisations_sectorielles": {
-      "titre": "Autorisations & licences spécifiques",
-      "ordre": 2,
-      "applicable": false,
-      "items": []
-    },
-    "categorie_4_documents_financiers": {
-      "titre": "Documents financiers prévisionnels",
+    "categorie_3": {
+      "titre": "Dossier business plan & documents financiers",
       "ordre": 3,
+      "applicable": true,
       "items": [
         { "document": "Business plan complet",                      "statut": "bloquant",      "delai": "inclus ✅" },
         { "document": "Plan de financement besoins/ressources",     "statut": "bloquant",      "delai": "inclus ✅" },
@@ -691,22 +714,33 @@ function buildOutputSchema(data) {
         { "document": "Scénarios pessimiste/réaliste/optimiste",    "statut": "tres_important","delai": "inclus ✅" }
       ]
     },
-    "categorie_5_preuves_marche": {
-      "titre": "Preuves de marché & validation",
-      "ordre": 3,
+    "categorie_4": {
+      "titre": "Autorisations sectorielles",
+      "ordre": 4,
+      "applicable": false,
+      "items": []
+    },
+    "categorie_5": {
+      "titre": "Garanties et cautions",
+      "ordre": 5,
+      "applicable": true,
       "items": [
-        { "document": "Étude de marché avec sources datées",        "statut": "tres_important", "delai": "inclus ✅" },
-        { "document": "Lettre d'intention ou bon de commande",      "statut": "tres_important", "delai": "à obtenir avant RDV" },
-        { "document": "Benchmark concurrentiel",                    "statut": "souhaitable",    "delai": "inclus ✅" }
+        { "document": "Caution personnelle (lettre d'engagement)",   "statut": "conditionnel",  "delai": "selon banque" },
+        { "document": "Garantie BPI France — dossier initié",        "statut": "conditionnel",  "delai": "RDV sous 2-4 semaines" },
+        { "document": "Nantissement fonds de commerce ou matériel",  "statut": "conditionnel",  "delai": "selon banque" },
+        { "document": "Prêt d'honneur (réseau Initiative/Entreprendre)", "statut": "souhaitable","delai": "4-8 semaines" }
       ]
     },
-    "categorie_6_aides_et_presentation": {
-      "titre": "Aides & présentation banque",
-      "ordre": 4,
+    "categorie_6": {
+      "titre": "Preuves de concept et marché",
+      "ordre": 6,
+      "applicable": true,
       "items": [
-        { "document": "Contact BPI France initié",         "statut": "conditionnel",  "delai": "RDV sous 1-3 semaines" },
-        { "document": "Subventions régionales identifiées","statut": "souhaitable",   "delai": "1-2 jours" },
-        { "document": "Courrier de présentation banque",   "statut": "tres_important","delai": "inclus ✅" }
+        { "document": "Étude de marché avec sources datées",         "statut": "tres_important", "delai": "inclus ✅" },
+        { "document": "Benchmark concurrentiel",                     "statut": "tres_important", "delai": "inclus ✅" },
+        { "document": "Lettre d'intention ou bon de commande client","statut": "tres_important", "delai": "à obtenir avant RDV" },
+        { "document": "Subventions régionales identifiées",          "statut": "souhaitable",    "delai": "1-2 jours" },
+        { "document": "Courrier de présentation banque",             "statut": "tres_important", "delai": "inclus ✅" }
       ]
     },
     "score_readiness": {
