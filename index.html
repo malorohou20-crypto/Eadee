@@ -550,6 +550,26 @@
   }
   .toc-item p{font-size:13.5px;color:var(--ink-2);margin:0;line-height:1.45}
 
+  /* Bonus extras — séparateur + cartes */
+  .toc-bonus-filler{border-right:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+  .toc-sep{
+    grid-column:1 / -1;
+    border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);
+    padding:14px 28px;display:flex;align-items:center;gap:14px;
+    background:oklch(0.97 0.008 70);
+  }
+  .toc-sep-line{flex:1;height:1px;background:oklch(0.82 0.06 70)}
+  .toc-sep-label{
+    font-family:var(--mono);font-size:9.5px;color:oklch(0.46 0.13 70);
+    letter-spacing:0.22em;text-transform:uppercase;font-weight:600;
+  }
+  .toc-item-bonus{background:oklch(0.985 0.005 70)}
+  .toc-item-bonus:hover{background:oklch(0.978 0.010 70)}
+  .toc-item .tag[data-cat="Bonus"]{
+    color:oklch(0.44 0.13 68);border-color:oklch(0.80 0.09 70);
+    background:oklch(0.96 0.020 70);
+  }
+
   .toc-cta{
     margin-top:48px;
     display:grid;grid-template-columns:2fr 1fr;gap:32px;align-items:center;
@@ -1249,6 +1269,48 @@
       <div class="toc-item" data-cat="Action"><div class="toc-item-head"><span class="ix">21</span><span class="tag" data-cat="Action">Action</span></div><h4>Plan d'action 90 jours</h4><p>Actions prioritaires sur 3 mois. Concret, daté, mesurable. Tes 12 premières décisions.</p></div>
       <div class="toc-item" data-cat="Action"><div class="toc-item-head"><span class="ix">22</span><span class="tag" data-cat="Action">Action</span></div><h4>Score de viabilité &amp; bancabilité</h4><p>Double score /100 : viabilité du projet + solidité du dossier financier.</p></div>
       <div class="toc-item" data-cat="Action"><div class="toc-item-head"><span class="ix">23</span><span class="tag" data-cat="Action">Action</span></div><h4>Checklist dossier complet</h4><p>Documents à rassembler classés par priorité. Bloquants vs souhaitables — pour banque et BPI.</p></div>
+
+      <!-- ferme le slot vide col-3 de la rangée 8 -->
+      <div class="toc-bonus-filler" aria-hidden="true"></div>
+
+      <!-- séparateur BONUS INCLUS — pleine largeur -->
+      <div class="toc-sep">
+        <div class="toc-sep-line"></div>
+        <span class="toc-sep-label">✦ Bonus inclus</span>
+        <div class="toc-sep-line"></div>
+      </div>
+
+      <!-- carte bonus 1 -->
+      <div class="toc-item toc-item-bonus" data-cat="Bonus">
+        <div class="toc-item-head"><span class="ix">✦</span><span class="tag" data-cat="Bonus">Bonus</span></div>
+        <h4>Emails rédigés</h4>
+        <p>Prospection clients, présentation banque, relance et fournisseur — 4 emails prêts à envoyer.</p>
+      </div>
+
+      <!-- carte bonus 2 -->
+      <div class="toc-item toc-item-bonus" data-cat="Bonus">
+        <div class="toc-item-head"><span class="ix">✦</span><span class="tag" data-cat="Bonus">Bonus</span></div>
+        <h4>KPIs à suivre</h4>
+        <p>4 indicateurs clés avec cibles M3 et M12. Ce que tu dois mesurer chaque semaine.</p>
+      </div>
+
+      <!-- carte bonus 3 -->
+      <div class="toc-item toc-item-bonus" data-cat="Bonus">
+        <div class="toc-item-head"><span class="ix">✦</span><span class="tag" data-cat="Bonus">Bonus</span></div>
+        <h4>Outils recommandés</h4>
+        <p>5 outils sélectionnés pour ton secteur, avec prix réels et liens directs.</p>
+      </div>
+
+      <!-- carte bonus 4 -->
+      <div class="toc-item toc-item-bonus" data-cat="Bonus">
+        <div class="toc-item-head"><span class="ix">✦</span><span class="tag" data-cat="Bonus">Bonus</span></div>
+        <h4>Ressources gratuites</h4>
+        <p>CCI, BPI, BGE, Réseau Entreprendre — contacts et liens inclus dans chaque plan.</p>
+      </div>
+
+      <!-- ferme les slots vides cols 2-3 de la dernière rangée -->
+      <div class="toc-bonus-filler" aria-hidden="true"></div>
+      <div class="toc-bonus-filler" aria-hidden="true"></div>
     </div>
 
     <div class="toc-cta">
@@ -1619,11 +1681,14 @@
   // TOC filter
   const tabs = document.querySelectorAll('.toc-tab');
   const items = document.querySelectorAll('.toc-item');
+  const tocBonusEls = document.querySelectorAll('.toc-sep, .toc-bonus-filler');
   tabs.forEach(t=>{
     t.addEventListener('click',()=>{
       tabs.forEach(x=>x.classList.remove('active'));
       t.classList.add('active');
       const f = t.dataset.filter;
+      // séparateur + fillers visibles uniquement en vue "Toutes"
+      tocBonusEls.forEach(el=>{ el.style.display = f==='all' ? '' : 'none'; });
       items.forEach(i=>{
         i.style.display = (f==='all' || i.dataset.cat===f) ? '' : 'none';
       });
