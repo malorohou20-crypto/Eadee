@@ -28,6 +28,12 @@ function renderHistory() {
     var thead = grid.querySelector('.plans-thead');
     grid.innerHTML = '';
     if (thead) grid.appendChild(thead);
+    // Mettre à jour le footer
+    var footCount = document.getElementById('plansFooterCount');
+    var footNum = document.getElementById('plansFooterNum');
+    var n = plansHistory.length;
+    if (footCount) footCount.textContent = n + ' plan' + (n > 1 ? 's' : '') + ' · Stockage local · Export PDF disponible sur chaque plan';
+    if (footNum) { var ns = String(n).padStart(2,'0'); footNum.textContent = ns + ' / ' + ns; }
     // Snapshot de plansHistory au moment du rendu pour éviter les race conditions
     window.__historySnapshot = plansHistory.slice();
     plansHistory.forEach(function(p, i) {

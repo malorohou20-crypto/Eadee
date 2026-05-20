@@ -941,7 +941,7 @@
 <div class="app">
   <!-- =================== SIDEBAR =================== -->
   <aside class="side">
-    <a class="side-brand" href="#">
+    <a class="side-brand" href="javascript:void(0)" onclick="go('gen')">
       <span class="side-mark">E</span>
       <span class="side-word">EADEE</span>
       <span class="side-status" aria-hidden="true"></span>
@@ -1307,34 +1307,11 @@
             <span></span>
           </div>
 
-          <div class="plan-row">
-            <div class="plan-icon italic">C</div>
-            <div class="plan-name">
-              CocktailVault
-              <span>« je veux cree un site et une application »</span>
-            </div>
-            <div class="plan-score num">71<sup>/100</sup></div>
-            <div class="plan-budget">7 500€</div>
-            <div class="plan-date">12 MAI 2026</div>
-            <div class="plan-cta"><a class="btn btn-ghost" href="#">Voir le plan →</a></div>
-          </div>
-
-          <div class="plan-row">
-            <div class="plan-icon italic">F</div>
-            <div class="plan-name">
-              FinZen
-              <span>« je veux cree une application de sante fi »</span>
-            </div>
-            <div class="plan-score num s-green">78<sup>/100</sup></div>
-            <div class="plan-budget">5 500€</div>
-            <div class="plan-date">29 AVR 2026</div>
-            <div class="plan-cta"><a class="btn btn-ghost" href="#">Voir le plan →</a></div>
-          </div>
         </div>
 
-        <div class="plans-foot">
-          <span>2 plans · Stockage local · Export PDF disponible sur chaque plan</span>
-          <span class="num">02 / 02</span>
+        <div class="plans-foot" id="plansFooter">
+          <span id="plansFooterCount">Stockage local · Export PDF disponible sur chaque plan</span>
+          <span class="num" id="plansFooterNum">—</span>
         </div>
       </div>
     </section>
@@ -1666,10 +1643,10 @@
             <div class="help-card">
               <span class="label">Ressources</span>
               <ul style="list-style:none;padding:0;margin:10px 0 0;display:flex;flex-direction:column;gap:8px;font-size:13.5px">
-                <li>📘 <a href="#">Guide du business plan parfait</a></li>
-                <li>📊 <a href="#">Comprendre ton score viabilité</a></li>
-                <li>🏦 <a href="#">Préparer un RDV bancaire</a></li>
-                <li>📝 <a href="#">Templates emails fournisseurs</a></li>
+                <li>📘 <span style="cursor:default">Guide du business plan parfait</span></li>
+                <li>📊 <span style="cursor:default">Comprendre ton score viabilité</span></li>
+                <li>🏦 <span style="cursor:default">Préparer un RDV bancaire</span></li>
+                <li>📝 <span style="cursor:default">Templates emails fournisseurs</span></li>
               </ul>
             </div>
           </aside>
@@ -1911,8 +1888,11 @@
   // ===== Settings TOC scrollspy + click =====
   document.querySelectorAll('.set-toc a').forEach(a => {
     a.addEventListener('click', e => {
+      e.preventDefault();
       document.querySelectorAll('.set-toc a').forEach(x => x.classList.remove('on'));
       a.classList.add('on');
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   });
 
