@@ -205,7 +205,9 @@ const genStatuses = [
 ];
 
 async function generateDashPlan() {
-  if (!user) { showAuth('signup'); return; }
+  // En v2, l'auth guard met window.user mais pas la variable let user de 00-state.js
+  if (!user && window.user) { user = window.user; userCredits = window._eadeeCredits || 0; currentPlan = window._eadeePlan || 'free'; }
+  if (!user) { window.location.href = '/?login=true'; return; }
 
   const idea = document.getElementById('dashIdea').value.trim();
   if (!idea || idea.length < 8) {

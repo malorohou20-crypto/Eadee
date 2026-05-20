@@ -138,6 +138,23 @@
   .top-user .av{width:26px;height:26px;border-radius:999px;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-family:var(--serif);font-size:14px}
   .top-user .nm{font-size:13px}
   .top-user .ch{color:var(--ink-3);font-size:10px}
+  .top-user{cursor:pointer;position:relative;user-select:none}
+  .top-user:hover{background:var(--bg-2)}
+  .top-drop{
+    display:none;position:absolute;top:calc(100% + 8px);right:0;
+    background:var(--paper);border:1px solid var(--rule);border-radius:10px;
+    padding:6px;min-width:190px;z-index:500;
+    box-shadow:0 8px 28px -8px oklch(0.20 0.01 60 / 0.18),0 1px 0 var(--rule);
+  }
+  .top-drop.open{display:block}
+  .top-drop-item{
+    padding:8px 12px;border-radius:6px;font-size:13px;cursor:pointer;
+    color:var(--ink-2);transition:background .12s;
+  }
+  .top-drop-item:hover{background:var(--bg);color:var(--ink)}
+  .top-drop-sep{height:1px;background:var(--rule);margin:4px 0}
+  .top-drop-item.danger{color:var(--red)}
+  .top-drop-item.danger:hover{background:var(--red-bg)}
 
   /* ========= CONTENT PAGE ========= */
   .page{padding:36px 40px 80px;max-width:1400px;width:100%}
@@ -731,6 +748,19 @@
     if (avEl && window.user?.name) {
       avEl.textContent = window.user.name[0].toUpperCase();
     }
+    // Header gen personnalisé
+    const firstName = window.user?.name ? window.user.name.split(' ')[0] : '';
+    const genTitle = document.getElementById('genTitle');
+    if (genTitle && firstName) {
+      genTitle.innerHTML = 'Bonjour ' + firstName + ', <em>prêt à valider</em><br/>ta prochaine idée&nbsp;?';
+    }
+    const genSub = document.getElementById('genSub');
+    if (genSub) {
+      const n = (typeof plansHistory !== 'undefined' ? plansHistory : []).length;
+      genSub.innerHTML = n > 0
+        ? 'Tu as déjà généré <b style="color:var(--ink)">' + n + ' plan' + (n>1?'s':'') + '</b> · Continue ou explore une nouvelle idée.'
+        : 'Décris ton idée et reçois ton business plan complet en 60 secondes.';
+    }
     // Bouton générer : désactiver si 0 crédits
     const btn = document.getElementById('dashGenBtn');
     if (btn && window._eadeeCredits <= 0) {
@@ -1002,14 +1032,21 @@
         <span>EADEE</span><span class="sep">/</span><b id="crumb">Générateur</b>
       </div>
       <div class="top-right">
-        <span class="top-pill pro">★ Pro</span>
-        <span class="top-icon" title="Notifications"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"/></svg></span>
-        <div class="top-user">
+        <span class="top-pill pro" style="cursor:pointer" onclick="go('credits')" title="Voir mes crédits">★ Pro</span>
+        <span class="top-icon" style="cursor:pointer" title="Notifications" onclick="toast('Aucune nouvelle notification', 'success')"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"/></svg></span>
+        <div class="top-user" onclick="toggleTopDrop(event)">
           <span class="av">A</span>
           <span>
             <span class="nm">Admin</span>
             <span class="ch">Mon espace ▾</span>
           </span>
+          <div class="top-drop" id="topDrop">
+            <div class="top-drop-item" onclick="event.stopPropagation();closeTopDrop();go('settings')">⚙ Paramètres</div>
+            <div class="top-drop-item" onclick="event.stopPropagation();closeTopDrop();go('plans')">📁 Mes plans</div>
+            <div class="top-drop-item" onclick="event.stopPropagation();closeTopDrop();go('credits')">💳 Crédits</div>
+            <div class="top-drop-sep"></div>
+            <div class="top-drop-item danger" onclick="event.stopPropagation();closeTopDrop();v2Logout()">↩ Se déconnecter</div>
+          </div>
         </div>
       </div>
     </header>
@@ -1034,9 +1071,9 @@
 
         <div class="page-head">
           <div>
-            <span class="page-eyebrow">Dossier N°03 · brouillon</span>
-            <h1>Bonjour Admin, <em>prêt à valider</em><br/>ta prochaine idée&nbsp;?</h1>
-            <p class="page-sub">Tu as déjà généré <b style="color:var(--ink)">2 plans</b> · Continue ou explore une nouvelle idée.</p>
+            <span class="page-eyebrow" id="genEyebrow">Générateur de business plan</span>
+            <h1 id="genTitle">Bonjour, <em>prêt à valider</em><br/>ta prochaine idée&nbsp;?</h1>
+            <p class="page-sub" id="genSub">Décris ton idée et reçois ton business plan complet en 60 secondes.</p>
           </div>
         </div>
 
@@ -1751,6 +1788,29 @@
         ta.focus();
       }
     }, 80);
+  };
+
+  // ===== Dropdown "Mon espace" =====
+  window.toggleTopDrop = function(e) {
+    e.stopPropagation();
+    var d = document.getElementById('topDrop');
+    if (d) d.classList.toggle('open');
+  };
+  window.closeTopDrop = function() {
+    var d = document.getElementById('topDrop');
+    if (d) d.classList.remove('open');
+  };
+  document.addEventListener('click', function() { closeTopDrop(); });
+
+  // ===== Logout v2 =====
+  window.v2Logout = async function() {
+    try {
+      var sb = window._eadeeSb || window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
+      if (sb) await sb.auth.signOut();
+    } catch(e) {}
+    localStorage.removeItem('eadee_history');
+    localStorage.removeItem('eadee_draft');
+    window.location.href = '/';
   };
 
   // ===== Gen-banner dynamique (brouillon réel depuis localStorage) =====
