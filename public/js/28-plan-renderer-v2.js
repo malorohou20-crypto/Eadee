@@ -858,16 +858,16 @@ function bloc8(plan) {
   var mnoms12 = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
   var an1Data = rm.slice(0, 12); // CA mensuel An1 réel
 
-  // Récupérer CA An2 et An3 depuis scenarios.realiste (fallback: estimations)
+  // Récupérer CA An2 et An3 depuis jalons M24/M36 ou scenarios.realiste
   var sc = plan.scenarios || {};
   var caAn1Total = an1Data.reduce(function(s,v){ return s + (typeof v === 'number' ? v : numVal(v)); }, 0);
-  var caAn2Total = numVal((sc.realiste || {}).ca_an1) || caAn1Total * 1.25; // fallback +25%
-  var caAn3Total = numVal((sc.realiste || {}).ca_an3) || caAn1Total * 1.55; // fallback +55%
-  // Si ca_an2 n'est pas dans scenarios on utilise la moyenne An1/An3
-  if (!caAn2Total || caAn2Total === caAn1Total * 1.25) {
-    var caAn2Scenarios = numVal((sc.realiste || {}).ca_an1);
-    if (caAn2Scenarios > 0) caAn2Total = caAn2Scenarios;
-  }
+  // An3 : depuis scenarios.realiste.ca_an3 (annuel) — priorité 1
+  var caAn3Total = numVal((sc.realiste || {}).ca_an3) || 0;
+  if (!caAn3Total && plan.rev_m36) caAn3Total = numVal(plan.rev_m36) * 12; // fallback jalon M36 x12
+  if (!caAn3Total) caAn3Total = caAn1Total * 1.55; // fallback estimation +55%
+  // An2 : interpolation linéaire An1→An3 (pas de valeur directe dans le schéma)
+  var caAn2Total = (caAn1Total + caAn3Total) / 2;
+  if (plan.rev_m24) { var m24 = numVal(plan.rev_m24) * 12; if (m24 > 0) caAn2Total = m24; }
   var caAn2Mensuel = caAn2Total / 12;
   var caAn3Mensuel = caAn3Total / 12;
 
