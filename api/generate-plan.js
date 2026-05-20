@@ -852,11 +852,12 @@ function normalizeFormData(body) {
 
 // ── APPEL ANTHROPIC AVEC RETRY 429/529 ───────────────────────────────
 
-async function callAnthropicAPI(body, label, signal) {
+async function callAnthropicAPI(body, label, signal, extraHeaders = {}) {
   const HEADERS = {
     'Content-Type': 'application/json',
     'x-api-key': process.env.ANTHROPIC_API_KEY,
     'anthropic-version': '2023-06-01',
+    ...extraHeaders,
   };
   for (let attempt = 1; attempt <= 2; attempt++) {
     const resp = await fetch(ANTHROPIC_API, {
@@ -994,25 +995,33 @@ JSON uniquement, sans markdown.`;
       return res.status(200).json({ ...discData, content: [{ type: 'text', text: JSON.stringify(discPlan) }] });
     }
 
-    // ── GÉNÉRATION COMPLÈTE — Appel unique ───────────────────────────
+    // ── GÉNÉRATION COMPLÈTE — Appel unique avec web search ───────────
     const userPrompt = buildUserPrompt(formData);
 
-    console.log(`[EADEE v3.0] Appel Anthropic unique...`);
+    console.log(`[EADEE v3.0] Appel Anthropic + web_search...`);
 
     const resp = await callAnthropicAPI({
       model: MODEL,
       max_tokens: 16000,
       temperature: 0.3,
+      tools: [{ type: 'web_search_20250305', name: 'web_search' }],
       system: EADEE_SYSTEM_PROMPT,
       messages: [{ role: 'user', content: userPrompt }],
-    }, 'Main', AbortSignal.timeout(280000));
+    }, 'Main', AbortSignal.timeout(280000), {
+      'anthropic-beta': 'web-search-2025-03-05',
+    });
 
-    const apiData   = await resp.json();
-    const text      = (apiData.content || []).map(c => c.text || '').join('');
+    const apiData    = await resp.json();
+    const content    = apiData.content || [];
+
+    // ── Extraction texte — ignorer tool_use et tool_result ───────────
+    const text       = content.filter(c => c.type === 'text').map(c => c.text || '').join('');
     const stopReason = apiData.stop_reason;
-    const tokens    = apiData.usage?.output_tokens;
+    const tokens     = apiData.usage?.output_tokens;
 
-    console.log(`[EADEE v3.0] stop_reason: ${stopReason} — tokens: ${tokens} — ${text.length} chars`);
+    // Log du nb de recherches web effectuées
+    const searchCalls = content.filter(c => c.type === 'tool_use' && c.name === 'web_search');
+    console.log(`[EADEE v3.0] stop_reason: ${stopReason} — tokens: ${tokens} — web_search: ${searchCalls.length}x — ${text.length} chars`);
     if (stopReason === 'max_tokens') {
       console.warn(`[EADEE v3.0] ⚠️ Réponse coupée à max_tokens — JSON potentiellement incomplet`);
     }
@@ -1059,8 +1068,10 @@ JSON uniquement, sans markdown.`;
       duration_ms: durationMs,
       sections_present: present.length,
       sections_total: REQUIRED.length,
-      pipeline_version: 'v3.0-single',
+      pipeline_version: 'v3.0-websearch',
       sections_ok: stopReason === 'end_turn',
+      web_search_calls: searchCalls.length,
+      web_search_queries: searchCalls.map(c => c.input?.query).filter(Boolean),
     };
 
     return res.status(200).json({
