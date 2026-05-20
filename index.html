@@ -570,6 +570,19 @@
     background:oklch(0.96 0.020 70);
   }
 
+  .toc-expand-bar{
+    position:relative;margin-top:-90px;
+    background:linear-gradient(to bottom,transparent,var(--bg) 72px);
+    display:flex;justify-content:center;padding:90px 0 28px;
+  }
+  .toc-expand-bar.expanded{
+    background:none;margin-top:0;padding:20px 0 0;
+  }
+  .toc-expand-bar .btn{
+    gap:7px;font-size:13px;
+    box-shadow:0 2px 12px -4px oklch(0.20 0.01 60 / 0.18),0 0 0 1px var(--rule);
+  }
+
   .toc-cta{
     margin-top:48px;
     display:grid;grid-template-columns:2fr 1fr;gap:32px;align-items:center;
@@ -1313,6 +1326,11 @@
       <div class="toc-bonus-filler" aria-hidden="true"></div>
     </div>
 
+    <!-- bouton expand/collapse -->
+    <div class="toc-expand-bar" id="tocExpandBar">
+      <button class="btn btn-ghost" id="tocExpandBtn">Voir les 23 sections + 4 bonus ↓</button>
+    </div>
+
     <div class="toc-cta">
       <p><b>23 sections, 1 plan, 60 secondes.</b> Chaque section est générée et personnalisée à partir de ton idée et de tes données. Aucune section n'est un copier-coller.</p>
       <a class="btn btn-lg btn-accent" href="#" onclick="openAuth('signup');return false;">Générer mon plan →</a>
@@ -1678,22 +1696,62 @@
     else run();
   })();
 
-  // TOC filter
-  const tabs = document.querySelectorAll('.toc-tab');
-  const items = document.querySelectorAll('.toc-item');
+  // TOC — état collapse + filtres
+  const tabs        = document.querySelectorAll('.toc-tab');
+  const items       = document.querySelectorAll('.toc-item');
   const tocBonusEls = document.querySelectorAll('.toc-sep, .toc-bonus-filler');
-  tabs.forEach(t=>{
-    t.addEventListener('click',()=>{
-      tabs.forEach(x=>x.classList.remove('active'));
-      t.classList.add('active');
-      const f = t.dataset.filter;
-      // séparateur + fillers visibles uniquement en vue "Toutes"
-      tocBonusEls.forEach(el=>{ el.style.display = f==='all' ? '' : 'none'; });
-      items.forEach(i=>{
-        i.style.display = (f==='all' || i.dataset.cat===f) ? '' : 'none';
+  const tocExpandBar = document.getElementById('tocExpandBar');
+  const tocExpandBtn = document.getElementById('tocExpandBtn');
+  let tocExpanded   = false;
+  let currentFilter = 'all';
+  const VISIBLE_COLLAPSED = 6; // 2 rangées × 3 cols
+
+  function renderToc() {
+    if (currentFilter !== 'all') {
+      // Filtre catégorie : tout montrer selon cat, masquer bonus + barre
+      tocBonusEls.forEach(el => { el.style.display = 'none'; });
+      tocExpandBar.style.display = 'none';
+      items.forEach(i => {
+        i.style.display = (i.dataset.cat === currentFilter) ? '' : 'none';
       });
+    } else {
+      // Vue "Toutes"
+      tocExpandBar.style.display = '';
+      if (tocExpanded) {
+        tocBonusEls.forEach(el => { el.style.display = ''; });
+        items.forEach(i => { i.style.display = ''; });
+        tocExpandBar.classList.add('expanded');
+        tocExpandBtn.textContent = 'Voir moins ↑';
+      } else {
+        tocBonusEls.forEach(el => { el.style.display = 'none'; });
+        items.forEach((i, idx) => { i.style.display = idx < VISIBLE_COLLAPSED ? '' : 'none'; });
+        tocExpandBar.classList.remove('expanded');
+        tocExpandBtn.textContent = 'Voir les 23 sections + 4 bonus ↓';
+      }
+    }
+  }
+
+  tocExpandBtn.addEventListener('click', () => {
+    tocExpanded = !tocExpanded;
+    if (!tocExpanded) {
+      // Replie et revient en haut de la section
+      renderToc();
+      document.querySelector('.toc-grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      renderToc();
+    }
+  });
+
+  tabs.forEach(t => {
+    t.addEventListener('click', () => {
+      tabs.forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      currentFilter = t.dataset.filter;
+      renderToc();
     });
   });
+
+  renderToc(); // état initial : collapsed
 
   // FAQ: only one open at a time (optional, nicer feel)
   document.querySelectorAll('details.q').forEach(d=>{
