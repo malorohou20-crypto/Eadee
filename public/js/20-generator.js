@@ -2032,13 +2032,16 @@ function updateUsage() {
 
   const btn = document.getElementById('dashGenBtn');
   const banner = document.getElementById('noCredit-banner');
+  const noCredMsg = document.getElementById('noCreditsMsg');
   if (btn) {
     if (userCredits <= 0) {
       btn.disabled = true; btn.style.opacity = '0.4'; btn.style.cursor = 'not-allowed';
       if (banner) banner.style.display = 'flex';
+      if (noCredMsg) noCredMsg.style.display = 'block';
     } else {
       btn.disabled = false; btn.style.opacity = ''; btn.style.cursor = '';
       if (banner) banner.style.display = 'none';
+      if (noCredMsg) noCredMsg.style.display = 'none';
     }
   }
   const scBuy = document.getElementById('sc-buy-btn');
