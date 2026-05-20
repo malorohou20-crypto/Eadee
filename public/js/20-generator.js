@@ -216,9 +216,12 @@ async function generateDashPlan() {
     toast('Décris ton idée d\'abord', 'error'); return;
   }
 
+  // Sync crédits depuis window si nécessaire
+  if (userCredits <= 0 && window._eadeeCredits > 0) userCredits = window._eadeeCredits;
   if (userCredits <= 0) {
     toast('Plus de crédits — recharge un pack pour continuer', 'error');
-    setTimeout(() => showView('billing'), 1000); return;
+    setTimeout(() => { if (typeof window.go === 'function') window.go('credits'); else showView('billing'); }, 800);
+    return;
   }
 
   const budget  = document.getElementById('dashBudget').value;

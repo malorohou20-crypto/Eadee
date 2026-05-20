@@ -761,14 +761,17 @@
         ? 'Tu as déjà généré <b style="color:var(--ink)">' + n + ' plan' + (n>1?'s':'') + '</b> · Continue ou explore une nouvelle idée.'
         : 'Décris ton idée et reçois ton business plan complet en 60 secondes.';
     }
-    // Bouton générer : désactiver si 0 crédits
+    // Bouton générer : désactiver si 0 crédits + montrer message
     const btn = document.getElementById('dashGenBtn');
-    if (btn && window._eadeeCredits <= 0) {
-      btn.disabled = true;
-      btn.style.opacity = '0.4';
-      btn.style.cursor  = 'not-allowed';
-      btn.title = 'Plus de crédits — recharge dans l\'onglet Crédits';
+    const noCredMsg = document.getElementById('noCreditsMsg');
+    const hasCredits = (window._eadeeCredits || 0) > 0;
+    if (btn) {
+      btn.disabled = !hasCredits;
+      btn.style.opacity = hasCredits ? '' : '0.4';
+      btn.style.cursor  = hasCredits ? '' : 'not-allowed';
+      btn.title = hasCredits ? '' : 'Plus de crédits — recharge dans l\'onglet Crédits';
     }
+    if (noCredMsg) noCredMsg.style.display = hasCredits ? 'none' : 'block';
   }
 
   // ── Stubs legacy : ces fonctions sont appelées par les scripts backend ────
@@ -1156,6 +1159,9 @@
 
             <div class="gen-submit">
               <button id="dashGenBtn" class="btn btn-accent btn-lg btn-block" onclick="generateDashPlan()">Générer mon business plan ↗</button>
+              <div id="noCreditsMsg" style="display:none;text-align:center;padding:10px 14px;background:var(--accent-bg);border:1px solid var(--rule);border-radius:8px;font-size:13px;color:var(--accent-ink)">
+                Tu n'as plus de crédits. <button onclick="go('credits')" style="background:none;border:none;color:var(--accent);font-size:13px;cursor:pointer;text-decoration:underline;padding:0">Recharger →</button>
+              </div>
               <div class="meta">
                 <span>60 secondes</span><span>1 crédit par génération</span><span>Non modifiable</span><span>Garantie 14 jours</span>
               </div>
@@ -1318,7 +1324,7 @@
             <h1>Mes plans</h1>
             <p class="page-sub">Tous tes business plans générés. Cliquer pour rouvrir, dupliquer ou ajuster avec l'Expert.</p>
           </div>
-          <a class="btn btn-accent btn-lg" data-screen="gen">+ Nouveau plan</a>
+          <button class="btn btn-accent btn-lg" onclick="go('gen')">+ Nouveau plan</button>
         </div>
 
         <div class="plans-bar">
@@ -2094,29 +2100,29 @@
 
 <!-- ========================= BACKEND JS ========================= -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/public/js/00-state.js?v=3"></script>
-<script src="/public/js/01-utils.js?v=3"></script>
-<script src="/public/js/02-router.js?v=4"></script>
-<script src="/public/js/10-supabase.js?v=4"></script>
-<script src="/public/js/11-auth.js?v=3"></script>
-<script src="/public/js/20-generator.js?v=4"></script>
-<script src="/public/js/21-preview.js?v=3"></script>
-<script src="/public/js/22-live-feed.js?v=3"></script>
-<script src="/public/js/23-draft.js?v=4"></script>
-<script src="/public/js/27-plan-preview.js?v=3"></script>
-<script src="/public/js/30-history.js?v=4"></script>
+<script src="/public/js/00-state.js?v=5"></script>
+<script src="/public/js/01-utils.js?v=5"></script>
+<script src="/public/js/02-router.js?v=5"></script>
+<script src="/public/js/10-supabase.js?v=5"></script>
+<script src="/public/js/11-auth.js?v=5"></script>
+<script src="/public/js/20-generator.js?v=5"></script>
+<script src="/public/js/21-preview.js?v=5"></script>
+<script src="/public/js/22-live-feed.js?v=5"></script>
+<script src="/public/js/23-draft.js?v=5"></script>
+<script src="/public/js/27-plan-preview.js?v=5"></script>
+<script src="/public/js/30-history.js?v=5"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <script src="/public/js/28-plan-renderer-v2.js?v=5"></script>
-<script src="/public/js/50-billing.js?v=3"></script>
-<script src="/public/js/51-settings.js?v=3"></script>
-<script src="/public/js/31-plan-actions.js?v=3"></script>
-<script src="/public/js/60-dossier.js?v=3"></script>
-<script src="/public/js/70-cookies.js?v=3"></script>
-<script src="/public/js/71-legal.js?v=3"></script>
-<script src="/public/js/81-misc.js?v=3"></script>
-<script src="/public/js/85-gen-animations.js?v=6"></script>
-<script src="/public/js/40-chat.js?v=3"></script>
-<script src="/public/js/main.js?v=3"></script>
+<script src="/public/js/50-billing.js?v=5"></script>
+<script src="/public/js/51-settings.js?v=5"></script>
+<script src="/public/js/31-plan-actions.js?v=5"></script>
+<script src="/public/js/60-dossier.js?v=5"></script>
+<script src="/public/js/70-cookies.js?v=5"></script>
+<script src="/public/js/71-legal.js?v=5"></script>
+<script src="/public/js/81-misc.js?v=5"></script>
+<script src="/public/js/85-gen-animations.js?v=5"></script>
+<script src="/public/js/40-chat.js?v=5"></script>
+<script src="/public/js/main.js?v=5"></script>
 
 <script>
 // Charge les plans Supabase après que tous les scripts soient prêts
