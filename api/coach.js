@@ -109,7 +109,7 @@ function formatPlanForContext(plan) {
   if (!plan) return 'Aucun plan chargé.';
   const sections = Array.isArray(plan.sections) ? plan.sections : [];
   return `
-PROJET : ${plan.name || plan.nom_entreprise || 'Sans nom'}
+PROJET : ${plan.nom_business || plan.nom_entreprise || plan.name || 'Sans nom'}
 SECTEUR : ${plan.sector || plan.secteur || ''}
 SCORE VIABILITÉ : ${plan.score || plan.score_viabilite || 'N/A'}/100
 ${sections.map((s, i) => `\n## ${String(i + 1).padStart(2, '0')} — ${s.title || s.titre || ''}\n${s.content || s.contenu || ''}`).join('\n')}
