@@ -2030,6 +2030,26 @@ function updateUsage() {
   document.getElementById('usageFill').style.width = pct + '%';
   document.getElementById('usageCount').textContent = userCredits <= 0 ? '0' : String(userCredits);
 
+  // ── Sidebar credits display ──
+  const sideNum = document.querySelector('.credits-num');
+  if (sideNum) sideNum.textContent = String(userCredits).padStart(2, '0');
+  const sideMax = document.querySelector('.side .credits-meta, .side [class*="credits-meta"]');
+  const creditsBar = document.querySelector('.credits-bar i');
+  if (creditsBar) creditsBar.style.width = pct + '%';
+  const creditsMeta = document.querySelector('.credits-meta');
+  if (creditsMeta) {
+    const packLabel = currentPlan === 'empire' ? 'Empire' : currentPlan === 'pro' ? 'Pro' : 'Solo';
+    creditsMeta.textContent = 'générations disponibles · pack ' + packLabel;
+  }
+  // Max affiché (/ 03)
+  const creditsMax = document.querySelector('.side .credits-wrap > span.label + *') ||
+                     document.querySelector('.side [class*="credits"] span.num') ||
+                     document.evaluate("//span[contains(text(),'/ ')]", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+  // Cibler le "/ 03" directement par son contenu
+  document.querySelectorAll('.side span').forEach(function(el) {
+    if (/^\/\s*\d+$/.test(el.textContent.trim())) el.textContent = '/ ' + String(maxCredits).padStart(2, '0');
+  });
+
   const btn = document.getElementById('dashGenBtn');
   const banner = document.getElementById('noCredit-banner');
   const noCredMsg = document.getElementById('noCreditsMsg');
