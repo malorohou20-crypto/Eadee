@@ -244,6 +244,7 @@ async function sendChatMessage(mode) {
         messages: chatState.conversations[planId],
         plan: plan ? plan.data : null,
         userId: user ? user.email : 'anon',
+        userName: user ? user.name.split(' ')[0] : null,
       }),
     });
 

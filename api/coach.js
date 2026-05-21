@@ -3,6 +3,7 @@ export const config = { runtime: 'edge' };
 const SYSTEM_PROMPT = `Tu es l'Expert Eadee, conseiller business senior spécialisé dans l'entrepreneuriat français.
 
 Tu réponds en français, en tutoiement, avec un ton direct, pragmatique et chaleureux.
+Tu t'adresses à {USER_NAME}.
 
 Tu connais en détail le plan business suivant de l'utilisateur :
 ---
@@ -26,14 +27,16 @@ export default async function handler(req) {
   if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 });
 
   try {
-    const { messages, plan, userId } = await req.json();
+    const { messages, plan, userId, userName } = await req.json();
 
     if (!messages || !Array.isArray(messages)) {
       return new Response('Invalid messages', { status: 400 });
     }
 
     const planContext = formatPlanForContext(plan);
-    const systemPrompt = SYSTEM_PROMPT.replace('{PLAN_CONTEXT}', planContext);
+    const systemPrompt = SYSTEM_PROMPT
+      .replace('{USER_NAME}', userName || 'l\'utilisateur')
+      .replace('{PLAN_CONTEXT}', planContext);
 
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
