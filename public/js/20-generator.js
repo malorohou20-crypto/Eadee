@@ -2025,7 +2025,10 @@ function drawRevenueChart(monthlyData) {
 // ═══════════════════════════════════════════════════════════════════
 
 function updateUsage() {
-  const maxCredits = currentPlan === 'empire' ? 8 : currentPlan === 'pro' ? 3 : 1;
+  // Dériver le plan depuis les crédits si currentPlan n'est pas fiable
+  const _plan = currentPlan || window._eadeePlan || 'free';
+  const maxCredits = _plan === 'empire' ? 8 : _plan === 'pro' ? 3 : userCredits > 3 ? 8 : userCredits > 1 ? 3 : 1;
+  const packLabel  = maxCredits === 8 ? 'Empire' : maxCredits === 3 ? 'Pro' : 'Solo';
   const pct = Math.min((userCredits / maxCredits) * 100, 100);
   document.getElementById('usageFill').style.width = pct + '%';
   document.getElementById('usageCount').textContent = userCredits <= 0 ? '0' : String(userCredits);
@@ -2037,10 +2040,7 @@ function updateUsage() {
   const creditsBar = document.querySelector('.credits-bar i');
   if (creditsBar) creditsBar.style.width = pct + '%';
   const creditsMeta = document.querySelector('.credits-meta');
-  if (creditsMeta) {
-    const packLabel = currentPlan === 'empire' ? 'Empire' : currentPlan === 'pro' ? 'Pro' : 'Solo';
-    creditsMeta.textContent = 'générations disponibles · pack ' + packLabel;
-  }
+  if (creditsMeta) creditsMeta.textContent = 'générations disponibles · pack ' + packLabel;
   // Max affiché (/ 03)
   const creditsMax = document.querySelector('.side .credits-wrap > span.label + *') ||
                      document.querySelector('.side [class*="credits"] span.num') ||
