@@ -1,9 +1,9 @@
 // ========== EXPERT EADEE — CHAT ==========
 
 const CHAT_QUICK_ACTIONS = [
-  'Améliore mon score',
+  'Améliore mon score de viabilité',
   'Aide-moi avec le statut juridique',
-  'Prépare-moi pour la banque',
+  'Comment financer mon projet ?',
   'Mes 3 plus gros risques',
   'Réécris mon résumé exécutif',
   "Plan d'action 30 jours",
@@ -32,7 +32,7 @@ function getChatPlansList() {
   return (plansHistory || []).map(function(p) {
     return {
       id: p.id || p.timestamp,
-      name: p.nom_entreprise || p.name || 'Plan sans nom',
+      name: p.nom_entreprise || p.nom_business || p.name || 'Plan sans nom',
       score: p.score_viabilite || p.score || null,
       data: p,
     };
@@ -126,14 +126,19 @@ function renderChatMsg(m) {
 
 function renderMarkdown(text) {
   if (!text) return '';
-  return text
+  var html = text
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
     .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
     .replace(/\*(.+?)\*/g,'<em>$1</em>')
-    .replace(/^## (.+)$/gm,'<h3>$1</h3>')
-    .replace(/^### (.+)$/gm,'<h3>$1</h3>')
-    .replace(/^- (.+)$/gm,'<li>$1</li>')
-    .replace(/(<li>[\s\S]*<\/li>)/,'<ul>$1</ul>')
+    .replace(/^## (.+)$/gm,'<span style="display:block;font-weight:600;font-size:14px;margin:12px 0 4px;color:var(--ink)">$1</span>')
+    .replace(/^### (.+)$/gm,'<span style="display:block;font-weight:600;font-size:13px;margin:8px 0 4px;color:var(--ink)">$1</span>')
+    .replace(/^\d+\. (.+)$/gm,'<li>$1</li>')
+    .replace(/^- (.+)$/gm,'<li>$1</li>');
+  // Wrap consecutive <li> blocks in <ul>
+  html = html.replace(/(<li>[\s\S]*?<\/li>(\n)?)+/g, function(m) {
+    return '<ul style="margin:8px 0;padding-left:18px;display:flex;flex-direction:column;gap:3px">' + m + '</ul>';
+  });
+  return html
     .replace(/\n\n/g,'<br><br>')
     .replace(/\n/g,'<br>');
 }
@@ -290,9 +295,12 @@ function renderChatConvsList() {
 }
 
 function startNewChatConv() {
-  populateChatPlanSelect();
-  var plans = getChatPlansList();
-  if (plans.length) selectChatPlan(plans[0].id, 'view');
+  // Réinitialiser la conversation du plan actif
+  var planId = chatState.activePlanId;
+  if (!planId) return;
+  localStorage.removeItem('eadee_chat_' + planId);
+  chatState.conversations[planId] = [];
+  selectChatPlan(planId, 'view');
 }
 
 function openChatDrawerFromPlan() {

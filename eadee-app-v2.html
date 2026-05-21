@@ -1261,11 +1261,10 @@
 
         <div class="chat-grid" id="chatViewWrap">
           <aside class="chat-side">
-            <button class="chat-new" onclick="startNewChatConv()">+ Nouvelle conversation</button>
             <div class="chat-hist">
-              <span class="label">Historique</span>
+              <span class="label">Conversations</span>
               <div id="chatConvsList">
-                <div style="font-size:12px;color:#7a7f9a;padding:12px 0">Aucune conversation. Choisis un plan pour commencer.</div>
+                <div style="font-size:12px;color:var(--ink-3);padding:12px 0">Choisis un plan pour commencer.</div>
               </div>
             </div>
           </aside>
@@ -1291,14 +1290,7 @@
               </div>
             </div>
 
-            <div class="quick-chips" id="chatViewQuick">
-              <button onclick="sendQuickAction('Améliore mon score','view')">Améliore mon score</button>
-              <button onclick="sendQuickAction('Aide-moi avec le statut juridique','view')">Aide-moi avec le statut juridique</button>
-              <button onclick="sendQuickAction('Prépare-moi pour la banque','view')">Prépare-moi pour la banque</button>
-              <button onclick="sendQuickAction('Mes 3 plus gros risques','view')">Mes 3 plus gros risques</button>
-              <button onclick="sendQuickAction('Réécris mon résumé exécutif','view')">Réécris mon résumé exécutif</button>
-              <button onclick="sendQuickAction(&quot;Plan d&apos;action 30 jours&quot;,'view')">Plan d'action 30 jours</button>
-            </div>
+            <div class="quick-chips" id="chatViewQuick"></div>
 
             <div class="chat-input">
               <input type="text" id="chatViewInput" placeholder="Pose ta question…"
@@ -2129,7 +2121,7 @@
 <script src="/public/js/71-legal.js?v=5"></script>
 <script src="/public/js/81-misc.js?v=5"></script>
 <script src="/public/js/85-gen-animations.js?v=5"></script>
-<script src="/public/js/40-chat.js?v=5"></script>
+<script src="/public/js/40-chat.js?v=6"></script>
 <script src="/public/js/main.js?v=5"></script>
 
 <script>
