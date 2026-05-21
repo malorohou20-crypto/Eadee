@@ -1777,10 +1777,13 @@
       populateSettings();
     }
   });
-  links.forEach(l => l.addEventListener('click', e => {
+  // Navigation déléguée — capture TOUS les [data-screen] y compris dynamiques / cachés
+  document.addEventListener('click', function(e) {
+    const el = e.target.closest('[data-screen]');
+    if (!el || el.classList.contains('screen')) return; // ignorer les containers d'écran
     e.preventDefault();
-    go(l.dataset.screen);
-  }));
+    go(el.dataset.screen);
+  });
 
   // ===== Inspiration → pré-remplir formulaire et aller sur gen =====
   window.pickInspiration = function(text) {
