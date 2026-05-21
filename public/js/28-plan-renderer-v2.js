@@ -1543,6 +1543,12 @@ window._renderV2PlanResult = function(plan, container) {
 
   var html = '<div style="max-width:960px;margin:0 auto;padding:0 32px 100px">';
 
+  // BOUTON RETOUR
+  html += '<div style="margin-bottom:20px">' +
+    '<button onclick="window.go&&window.go(\'plans\')" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink-2);font-family:var(--mono);font-size:12px;cursor:pointer;transition:background 0.15s" onmouseover="this.style.background=\'var(--bg-2,var(--bg))\'" onmouseout="this.style.background=\'var(--paper)\'">' +
+    '← Mes plans' +
+    '</button></div>';
+
   // EN-TÊTE
   html += '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-bottom:32px;flex-wrap:wrap">';
   html += '<div style="flex:1;min-width:200px">';
