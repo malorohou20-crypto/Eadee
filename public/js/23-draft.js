@@ -5,7 +5,7 @@ function checkOnboarding() {
   if (!localStorage.getItem('eadee_onboarded')) {
     banner.style.display = 'block';
     const title = document.getElementById('onboarding-title');
-    if (title && user) title.textContent = '👋 Bienvenue ' + user.name.split(' ')[0] + ' !';
+    if (title && user) title.textContent = 'Bienvenue ' + user.name.split(' ')[0] + ' !';
   } else {
     banner.style.display = 'none';
   }
@@ -48,9 +48,9 @@ function onIdeaInput(ta) {
   const msg = document.getElementById('idea-quality-msg');
   if (msg) {
     if (len === 0) msg.textContent = 'Plus tu détailles, meilleur sera ton plan.';
-    else if (len < 50) msg.textContent = '🟡 Continue, l\'IA a besoin de plus de contexte.';
-    else if (len < 150) msg.textContent = '🟢 Bien — ajoute ta ville et ton public si possible.';
-    else msg.textContent = '✨ Excellent brief, ton plan sera précis.';
+    else if (len < 50) msg.textContent = 'Continue, l\'IA a besoin de plus de contexte.';
+    else if (len < 150) msg.textContent = 'Bien — ajoute ta ville et ton public si possible.';
+    else msg.textContent = 'Excellent brief, ton plan sera précis.';
   }
   setPreviewState(len >= 30 ? 'B' : 'A');
   updateTips(ta.value.toLowerCase());

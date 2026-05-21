@@ -1,5 +1,15 @@
 // ========== EXPERT EADEE — CHAT ==========
 
+function stripEmojis(s) {
+  if (!s) return s;
+  try {
+    return s.replace(/\p{Extended_Pictographic}/gu, '').replace(/️/g, '');
+  } catch(e) {
+    // Fallback for older browsers
+    return s.replace(/[\u{1F000}-\u{1FFFF}]|[\u{2600}-\u{27BF}]/gu, '');
+  }
+}
+
 const CHAT_QUICK_ACTIONS = [
   'Améliore mon score de viabilité',
   'Aide-moi avec le statut juridique',
@@ -117,7 +127,7 @@ function renderChatMsg(m) {
   var isUser = m.role === 'user';
   var initials = user ? user.name.split(' ').map(function(n) { return n[0]; }).join('').substring(0,2).toUpperCase() : 'U';
   var avatarContent = isUser ? initials : '✦';
-  var bubbleContent = isUser ? escHtml(m.content) : renderMarkdown(m.content);
+  var bubbleContent = isUser ? escHtml(m.content) : renderMarkdown(stripEmojis(m.content));
   return '<div class="chat-msg ' + (isUser ? 'user' : 'bot') + '">' +
     '<div class="chat-msg-avatar">' + avatarContent + '</div>' +
     '<div class="chat-msg-bubble">' + bubbleContent + '</div>' +
