@@ -1577,184 +1577,258 @@ window._renderV2PlanResult = function(plan, container) {
     html += '</div>';
   }
 
-  html += bloc1(plan);
-  if (plan.presentation_projet) html += card('Présentation du projet', para(plan.presentation_projet));
-  if (plan.resume_executif) html += card('Résumé exécutif', para(plan.resume_executif));
-  html += bloc3(plan);
-  html += bloc2(plan, pid);
+  // ── SECTION DISPATCH ────────────────────────────────────────────
+  var _renderSec = function(key) {
+    var h = '';
+    switch (key) {
+      case 'resume_executif':
+        if (plan.resume_executif) h += card('Résumé exécutif', para(plan.resume_executif));
+        h += bloc3(plan);
+        break;
+      case 'porteur_projet':
+        h += bloc2(plan, pid);
+        break;
+      case 'presentation_projet':
+        if (plan.presentation_projet) h += card('Présentation du projet', para(plan.presentation_projet));
+        break;
+      case 'proposition_valeur':
+        var pvBody = '';
+        if (plan.proposition_valeur) pvBody += para(plan.proposition_valeur);
+        if (plan.proposition_valeur_benefices && plan.proposition_valeur_benefices.length)
+          pvBody += '<div style="display:flex;flex-direction:column;gap:6px;margin-top:12px">' +
+            plan.proposition_valeur_benefices.map(function(b){ return '<div style="display:flex;gap:10px;font-size:13.5px;color:var(--ink-2)"><span style="color:var(--green);font-weight:600;flex-shrink:0">✓</span>'+esc(b)+'</div>'; }).join('') + '</div>';
+        if (pvBody.trim()) h += card('Proposition de valeur', pvBody);
+        break;
+      case 'modele_economique':
+        var meBody = '';
+        if (plan.modele_economique) meBody += para(plan.modele_economique);
+        if (plan.offres && plan.offres.length) meBody += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:14px">' +
+          plan.offres.map(function(o){ return '<div style="padding:16px;border:1px solid var(--rule);border-radius:6px;background:var(--bg)">' +
+            '<div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:6px">'+esc(o.nom)+'</div>' +
+            '<p style="font-size:13px;color:var(--ink-2);margin:0 0 8px;line-height:1.45">'+esc(o.description||'')+'</p>' +
+            (o.prix?'<div style="font-family:var(--serif);font-size:20px;color:var(--accent)">'+esc(clean(o.prix))+'</div>':'') +
+            '</div>'; }).join('') + '</div>';
+        if (meBody.trim()) h += card('Modèle économique & offres', meBody);
+        break;
+      case 'strategie_commerciale':
+        if (plan.strategie_commerciale) h += card('Stratégie commerciale', para(plan.strategie_commerciale));
+        h += bloc12(plan);
+        break;
+      case 'marche':
+        var mBody = '';
+        if (plan.marche_analyse) mBody += para(plan.marche_analyse) + '<div style="height:12px"></div>';
+        var mStats = [{label:'Taille du marché',value:plan.marche_taille},{label:'Croissance',value:plan.marche_croissance},
+          {label:'Part cible',value:plan.marche_part_cible},{label:'Clients potentiels',value:plan.marche_clients_potentiels}].filter(function(r){return r.value;});
+        if (mStats.length) mBody += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px">' +
+          mStats.map(function(r){ return '<div style="padding:14px;background:var(--bg);border-radius:6px;border:1px solid var(--rule)">' +
+            '<div style="font-family:var(--mono);font-size:10px;color:var(--ink-3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px">'+esc(r.label)+'</div>' +
+            '<div style="font-family:var(--serif);font-size:18px;color:var(--ink)">'+esc(clean(r.value))+'</div></div>'; }).join('') + '</div>';
+        if (plan.marche_tendances && plan.marche_tendances.length) mBody += '<div style="margin-top:14px">' + lbl('Tendances 2025-2026') +
+          plan.marche_tendances.map(function(t){ return '<div style="font-size:13.5px;color:var(--ink-2);padding:5px 0;border-bottom:1px solid var(--rule)">→ '+esc(t)+'</div>'; }).join('') + '</div>';
+        if (mBody.trim()) h += card('Analyse de marché', mBody);
+        var persona = plan.persona;
+        if (persona && persona.nom) {
+          var perBody = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' +
+            [['Profil',persona.nom+(persona.age?' · '+persona.age:'')],['Situation',persona.situation],
+             ['Douleurs',persona.douleurs],['Motivations',persona.motivations],['Où le trouver',persona.ou_le_trouver]
+            ].filter(function(r){return r[1];}).map(function(r){
+              return '<div style="padding:12px;background:var(--bg);border-radius:6px;border:1px solid var(--rule)">' +
+                '<div style="font-family:var(--mono);font-size:10px;color:var(--ink-3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px">' + esc(r[0]) + '</div>' +
+                '<div style="font-size:13px;color:var(--ink-2);line-height:1.4">' + esc(r[1]) + '</div></div>';
+            }).join('') + '</div>';
+          h += card('Persona client cible', perBody);
+        }
+        break;
+      case 'concurrents':
+        if (plan.concurrence_intro) h += card('Environnement concurrentiel', para(plan.concurrence_intro));
+        if (plan.concurrents && plan.concurrents.length) {
+          var bm = function(m){ return m==='haute'||m==='élevé'?badge(m,'red'):m==='moyenne'||m==='moyen'?badge(m,'accent'):badge(m,'muted'); };
+          h += card('Analyse concurrentielle', plan.concurrents.map(function(c){
+            return '<div style="padding:14px 0;border-bottom:1px solid var(--rule)">' +
+              '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:6px"><b style="font-size:14.5px">'+esc(c.nom)+'</b>'+bm(c.menace)+'</div>' +
+              (c.description?'<p style="color:var(--ink-2);font-size:13.5px;margin:0 0 4px;line-height:1.5">'+esc(c.description)+'</p>':'') +
+              (c.avantage_differentiel?'<p style="color:var(--green);font-size:12.5px;margin:4px 0 0">Notre avantage : '+esc(c.avantage_differentiel)+'</p>':'') +
+              '</div>';
+          }).join(''));
+        }
+        break;
+      case 'plan_financement':
+        h += bloc4(plan);
+        break;
+      case 'investissements':
+        if (plan.investissements && plan.investissements.length) h += card('Investissements',
+          '<div style="display:flex;flex-direction:column">' +
+          plan.investissements.map(function(inv){ return '<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--rule)">' +
+            '<span style="font-size:13.5px;color:'+(inv.total?'var(--ink)':'var(--ink-2)')+';font-weight:'+(inv.total?'600':'400')+'">'+esc(inv.label)+'</span>' +
+            '<span style="font-family:var(--mono);font-size:13px;color:'+(inv.total?'var(--accent)':'var(--ink)')+'">'+esc(clean(inv.montant))+'</span></div>'; }).join('') + '</div>');
+        break;
+      case 'finances_detail':
+        if (plan.finances_detail && plan.finances_detail.length) h += card('Finances — tableau de bord',
+          '<div style="display:flex;flex-direction:column">' +
+          plan.finances_detail.map(function(f){ return '<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--rule)">' +
+            '<span style="font-size:13.5px;color:var(--ink-2)">'+esc(f.label)+'</span>' +
+            '<span style="font-family:var(--mono);font-size:13px;color:var(--ink);font-weight:600">'+esc(clean(f.valeur))+'</span></div>'; }).join('') + '</div>');
+        h += bloc8(plan);
+        h += bloc9(plan);
+        h += bloc13(plan);
+        break;
+      case 'tresorerie':
+        h += bloc7(plan);
+        break;
+      case 'bilan_previsionnel':
+        h += bloc11(plan);
+        break;
+      case 'seuil_rentabilite':
+        h += bloc10(plan);
+        break;
+      case 'tableau_amortissement':
+        h += bloc5(plan);
+        break;
+      case 'aspects_juridiques':
+        if (plan.aspects_juridiques) h += card('Aspects juridiques', para(plan.aspects_juridiques));
+        break;
+      case 'aspects_organisationnels':
+        if (plan.aspects_organisationnels) h += card('Organisation', para(plan.aspects_organisationnels));
+        break;
+      case 'aides_subventions':
+        if (plan.aides_subventions && plan.aides_subventions.length) h += card('Aides & subventions', plan.aides_subventions.map(function(a){
+          return '<div style="display:grid;grid-template-columns:1fr auto;gap:12px;padding:12px 0;border-bottom:1px solid var(--rule);align-items:start">' +
+            '<div><b style="font-size:13.5px;color:'+(a.applicable?'var(--green)':'var(--ink-3)')+'">'+esc(a.nom)+'</b>' +
+            (a.priorite?' <span style="font-family:var(--mono);font-size:10px;color:var(--ink-3)">· '+esc(a.priorite)+'</span>':'') +
+            '<p style="color:var(--ink-2);font-size:13px;margin:4px 0 0">'+esc(a.conditions||'')+'</p></div>' +
+            '<div style="text-align:right"><div style="font-family:var(--mono);font-size:12px;color:var(--ink)">'+esc(clean(a.montant||''))+'</div>' +
+            (a.lien?'<div style="font-family:var(--mono);font-size:10px;color:var(--accent)">'+esc(a.lien)+'</div>':'') +
+            '</div></div>';
+        }).join(''));
+        break;
+      case 'demarches_administratives':
+        if (plan.demarches_admin && plan.demarches_admin.length) h += card('Démarches administratives', plan.demarches_admin.map(function(s){
+          return '<div style="display:grid;grid-template-columns:1fr auto auto;gap:12px;padding:10px 0;border-bottom:1px solid var(--rule);align-items:start">' +
+            '<div><b style="font-size:13.5px;color:var(--ink)">'+esc(s.etape)+'</b>' +
+            (s.detail?'<p style="color:var(--ink-2);font-size:12.5px;margin:4px 0 0;line-height:1.4">'+esc(s.detail)+'</p>':'')+'</div>' +
+            '<span style="font-family:var(--mono);font-size:11px;color:var(--ink-3);white-space:nowrap">'+esc(s.delai||'')+'</span>' +
+            '<span style="font-family:var(--mono);font-size:11px;color:var(--accent);white-space:nowrap">'+esc(s.cout||'')+'</span></div>';
+        }).join(''));
+        break;
+      case 'risques':
+        if (plan.risques && plan.risques.length) h += card('Risques & mitigation', plan.risques.map(function(r){
+          var niv = r.niveau||'';
+          var bT = niv==='élevé'||niv==='haute'?'red':niv==='moyen'||niv==='moyenne'?'accent':'muted';
+          return '<div style="padding:14px 0;border-bottom:1px solid var(--rule)">' +
+            '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:6px"><b style="font-size:14px">'+esc(r.titre)+'</b>'+badge(niv,bT)+'</div>' +
+            (r.solution?'<p style="color:var(--ink-2);font-size:13px;margin:0 0 4px;line-height:1.45">'+esc(r.solution)+'</p>':'') +
+            (r.signal_alarme?'<p style="color:var(--accent);font-size:12px;margin:4px 0 0">🔔 '+esc(r.signal_alarme)+'</p>':'') +
+            (r.solution_preventive?'<p style="color:var(--green);font-size:12px;margin:4px 0 0">🛡 '+esc(r.solution_preventive)+'</p>':'') +
+            '</div>';
+        }).join(''));
+        break;
+      case 'plan_actions_90j':
+        if (plan.actions && plan.actions.length) h += card('Plan d\'action 90 jours', plan.actions.map(function(a){
+          return '<div style="display:grid;grid-template-columns:80px 1fr;gap:14px;padding:12px 0;border-bottom:1px solid var(--rule);align-items:start">' +
+            '<span style="font-family:var(--mono);font-size:10.5px;color:var(--ink-3);letter-spacing:0.08em;padding-top:2px">'+esc(a.phase)+'</span>' +
+            '<div><b style="font-size:14px;display:block;margin-bottom:4px">'+esc(a.titre)+'</b><p style="color:var(--ink-2);font-size:13px;margin:0;line-height:1.45">'+esc(a.detail||'')+'</p></div></div>';
+        }).join(''));
+        break;
+      case 'scores':
+        h += bloc1(plan);
+        break;
+      case 'annexes_checklist':
+        h += bloc6(plan, pid);
+        break;
+    }
+    return h;
+  };
 
-  // PERSONA
-  var persona = plan.persona;
-  if (persona && persona.nom) {
-    var perBody = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' +
-      [['Profil',persona.nom+(persona.age?' · '+persona.age:'')],['Situation',persona.situation],
-       ['Douleurs',persona.douleurs],['Motivations',persona.motivations],['Où le trouver',persona.ou_le_trouver]
-      ].filter(function(r){return r[1];}).map(function(r){
-        return '<div style="padding:12px;background:var(--bg);border-radius:6px;border:1px solid var(--rule)">' +
-          '<div style="font-family:var(--mono);font-size:10px;color:var(--ink-3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px">' + esc(r[0]) + '</div>' +
-          '<div style="font-size:13px;color:var(--ink-2);line-height:1.4">' + esc(r[1]) + '</div></div>';
-      }).join('') + '</div>';
-    html += card('Persona client cible', perBody);
+  var _renderExtra = function(key) {
+    var h = '';
+    switch (key) {
+      case 'templates_communication':
+        [['email_presentation_banque','Email de présentation banque'],['email_prospection','Email de prospection'],['email_fournisseur','Email fournisseur'],['email_relance','Email de relance']].forEach(function(e) {
+          var em = plan[e[0]];
+          if (em && (em.sujet||em.corps)) h += card(e[1],
+            '<div style="background:var(--bg);border-radius:6px;padding:14px;border:1px solid var(--rule)">' +
+            (em.sujet?'<div style="font-family:var(--mono);font-size:11px;color:var(--ink-3);margin-bottom:4px">Objet : <span style="color:var(--ink)">'+esc(em.sujet)+'</span></div>':'') +
+            (em.corps?'<pre style="font-size:13px;color:var(--ink-2);white-space:pre-wrap;margin:8px 0 0;line-height:1.5;font-family:inherit">'+esc(em.corps)+'</pre>':'') +
+            '</div>');
+        });
+        break;
+      case 'kpis':
+        if (plan.kpis && plan.kpis.length) h += card('KPIs à suivre',
+          '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">' +
+          plan.kpis.map(function(k){ return '<div style="padding:14px;background:var(--bg);border-radius:6px;border:1px solid var(--rule)">' +
+            '<div style="font-size:13.5px;font-weight:600;color:var(--ink);margin-bottom:4px">'+esc(k.nom)+'</div>' +
+            '<div style="font-family:var(--serif);font-size:16px;color:var(--accent);margin-bottom:4px">'+esc(clean(k.cible||''))+'</div>' +
+            '<div style="font-family:var(--mono);font-size:10px;color:var(--ink-3)">'+esc(k.frequence||'')+'</div></div>'; }).join('') + '</div>');
+        break;
+      case 'outils':
+        if (plan.outils && plan.outils.length) h += card('Outils recommandés',
+          '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px">' +
+          plan.outils.map(function(o){ return '<div style="padding:14px;background:var(--bg);border-radius:6px;border:1px solid var(--rule)">' +
+            '<div style="font-size:13.5px;font-weight:600;color:var(--ink);margin-bottom:4px">'+esc(o.nom)+'</div>' +
+            '<div style="font-size:12.5px;color:var(--ink-2);margin-bottom:6px;line-height:1.4">'+esc(o.usage||'')+'</div>' +
+            (o.prix?'<div style="font-family:var(--mono);font-size:11px;color:var(--green)">'+esc(clean(o.prix))+'</div>':'') +
+            '</div>'; }).join('') + '</div>');
+        break;
+      case 'ressources_gratuites':
+        var dRes = d && (d.ressources_gratuites_recommandees || d.ressources_gratuites);
+        if (dRes && dRes.length) h += card('Ressources gratuites',
+          '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">' +
+          dRes.map(function(r){ return '<div style="padding:14px;background:var(--bg);border-radius:6px;border:1px solid var(--rule)">' +
+            '<div style="font-size:13.5px;font-weight:600;color:var(--ink);margin-bottom:4px">'+esc(r.organisme)+'</div>' +
+            '<div style="font-size:12.5px;color:var(--ink-2);margin-bottom:6px;line-height:1.4">'+esc(r.service||'')+'</div>' +
+            '<div style="font-family:var(--mono);font-size:11px;color:var(--green)">'+esc(r.cout||'')+'</div>' +
+            (r.url?'<div style="font-family:var(--mono);font-size:10px;color:var(--accent);margin-top:4px">'+esc(r.url)+'</div>':'') +
+            '</div>'; }).join('') + '</div>');
+        break;
+    }
+    return h;
+  };
+
+  // ── RENDER SECTIONS IN ORDER ─────────────────────────────────────
+  var SECTIONS_ORDER = [
+    'resume_executif',        // 01
+    'porteur_projet',         // 02
+    'presentation_projet',    // 03
+    'proposition_valeur',     // 04
+    'modele_economique',      // 05
+    'strategie_commerciale',  // 06
+    'marche',                 // 07
+    'concurrents',            // 08
+    'plan_financement',       // 09
+    'investissements',        // 10
+    'finances_detail',        // 11
+    'tresorerie',             // 12
+    'bilan_previsionnel',     // 13
+    'seuil_rentabilite',      // 14
+    'tableau_amortissement',  // 15
+    'aspects_juridiques',     // 16
+    'aspects_organisationnels', // 17
+    'aides_subventions',      // 18
+    'demarches_administratives', // 19
+    'risques',                // 20
+    'plan_actions_90j',       // 21
+    'scores',                 // 22
+    'annexes_checklist'       // 23
+  ];
+  for (var _si = 0; _si < SECTIONS_ORDER.length; _si++) {
+    html += _renderSec(SECTIONS_ORDER[_si]);
   }
-
-  // MARCHÉ
-  var mBody = '';
-  if (plan.marche_analyse) mBody += para(plan.marche_analyse) + '<div style="height:12px"></div>';
-  var mStats = [{label:'Taille du marché',value:plan.marche_taille},{label:'Croissance',value:plan.marche_croissance},
-    {label:'Part cible',value:plan.marche_part_cible},{label:'Clients potentiels',value:plan.marche_clients_potentiels}].filter(function(r){return r.value;});
-  if (mStats.length) mBody += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px">' +
-    mStats.map(function(r){ return '<div style="padding:14px;background:var(--bg);border-radius:6px;border:1px solid var(--rule)">' +
-      '<div style="font-family:var(--mono);font-size:10px;color:var(--ink-3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px">'+esc(r.label)+'</div>' +
-      '<div style="font-family:var(--serif);font-size:18px;color:var(--ink)">'+esc(clean(r.value))+'</div></div>'; }).join('') + '</div>';
-  if (plan.marche_tendances && plan.marche_tendances.length) mBody += '<div style="margin-top:14px">' + lbl('Tendances 2025-2026') +
-    plan.marche_tendances.map(function(t){ return '<div style="font-size:13.5px;color:var(--ink-2);padding:5px 0;border-bottom:1px solid var(--rule)">→ '+esc(t)+'</div>'; }).join('') + '</div>';
-  if (mBody.trim()) html += card('Analyse de marché', mBody);
-
-  // PROPOSITION DE VALEUR
-  var pvBody = '';
-  if (plan.proposition_valeur) pvBody += para(plan.proposition_valeur);
-  if (plan.proposition_valeur_benefices && plan.proposition_valeur_benefices.length)
-    pvBody += '<div style="display:flex;flex-direction:column;gap:6px;margin-top:12px">' +
-      plan.proposition_valeur_benefices.map(function(b){ return '<div style="display:flex;gap:10px;font-size:13.5px;color:var(--ink-2)"><span style="color:var(--green);font-weight:600;flex-shrink:0">✓</span>'+esc(b)+'</div>'; }).join('') + '</div>';
-  if (pvBody.trim()) html += card('Proposition de valeur', pvBody);
-
-  // CONCURRENCE
-  if (plan.concurrence_intro) html += card('Environnement concurrentiel', para(plan.concurrence_intro));
-  if (plan.concurrents && plan.concurrents.length) {
-    var bm = function(m){ return m==='haute'||m==='élevé'?badge(m,'red'):m==='moyenne'||m==='moyen'?badge(m,'accent'):badge(m,'muted'); };
-    html += card('Analyse concurrentielle', plan.concurrents.map(function(c){
-      return '<div style="padding:14px 0;border-bottom:1px solid var(--rule)">' +
-        '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:6px"><b style="font-size:14.5px">'+esc(c.nom)+'</b>'+bm(c.menace)+'</div>' +
-        (c.description?'<p style="color:var(--ink-2);font-size:13.5px;margin:0 0 4px;line-height:1.5">'+esc(c.description)+'</p>':'') +
-        (c.avantage_differentiel?'<p style="color:var(--green);font-size:12.5px;margin:4px 0 0">Notre avantage : '+esc(c.avantage_differentiel)+'</p>':'') +
-        '</div>';
-    }).join(''));
-  }
-
-  // MODÈLE ÉCO
-  var meBody = '';
-  if (plan.modele_economique) meBody += para(plan.modele_economique);
-  if (plan.offres && plan.offres.length) meBody += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:14px">' +
-    plan.offres.map(function(o){ return '<div style="padding:16px;border:1px solid var(--rule);border-radius:6px;background:var(--bg)">' +
-      '<div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:6px">'+esc(o.nom)+'</div>' +
-      '<p style="font-size:13px;color:var(--ink-2);margin:0 0 8px;line-height:1.45">'+esc(o.description||'')+'</p>' +
-      (o.prix?'<div style="font-family:var(--serif);font-size:20px;color:var(--accent)">'+esc(clean(o.prix))+'</div>':'') +
-      '</div>'; }).join('') + '</div>';
-  if (meBody.trim()) html += card('Modèle économique & offres', meBody);
-
-  if (plan.strategie_commerciale) html += card('Stratégie commerciale', para(plan.strategie_commerciale));
-  html += bloc12(plan);
-  if (plan.aspects_juridiques) html += card('Aspects juridiques', para(plan.aspects_juridiques));
-  if (plan.aspects_organisationnels) html += card('Organisation', para(plan.aspects_organisationnels));
-  html += bloc8(plan);
-  html += bloc9(plan);
-  html += bloc13(plan);
-
-  // FINANCES DÉTAIL
-  if (plan.finances_detail && plan.finances_detail.length) html += card('Finances — tableau de bord',
-    '<div style="display:flex;flex-direction:column">' +
-    plan.finances_detail.map(function(f){ return '<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--rule)">' +
-      '<span style="font-size:13.5px;color:var(--ink-2)">'+esc(f.label)+'</span>' +
-      '<span style="font-family:var(--mono);font-size:13px;color:var(--ink);font-weight:600">'+esc(clean(f.valeur))+'</span></div>'; }).join('') + '</div>');
-
-  html += bloc4(plan);
-  html += bloc7(plan);
-  html += bloc5(plan);
-
-  // INVESTISSEMENTS
-  if (plan.investissements && plan.investissements.length) html += card('Investissements',
-    '<div style="display:flex;flex-direction:column">' +
-    plan.investissements.map(function(inv){ return '<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--rule)">' +
-      '<span style="font-size:13.5px;color:'+(inv.total?'var(--ink)':'var(--ink-2)')+';font-weight:'+(inv.total?'600':'400')+'">'+esc(inv.label)+'</span>' +
-      '<span style="font-family:var(--mono);font-size:13px;color:'+(inv.total?'var(--accent)':'var(--ink)')+'">'+esc(clean(inv.montant))+'</span></div>'; }).join('') + '</div>');
-
-  html += bloc11(plan);
-  html += bloc10(plan);
-
-  // RISQUES
-  if (plan.risques && plan.risques.length) html += card('Risques & mitigation', plan.risques.map(function(r){
-    var niv = r.niveau||'';
-    var bT = niv==='élevé'||niv==='haute'?'red':niv==='moyen'||niv==='moyenne'?'accent':'muted';
-    return '<div style="padding:14px 0;border-bottom:1px solid var(--rule)">' +
-      '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:6px"><b style="font-size:14px">'+esc(r.titre)+'</b>'+badge(niv,bT)+'</div>' +
-      (r.solution?'<p style="color:var(--ink-2);font-size:13px;margin:0 0 4px;line-height:1.45">'+esc(r.solution)+'</p>':'') +
-      (r.signal_alarme?'<p style="color:var(--accent);font-size:12px;margin:4px 0 0">🔔 '+esc(r.signal_alarme)+'</p>':'') +
-      (r.solution_preventive?'<p style="color:var(--green);font-size:12px;margin:4px 0 0">🛡 '+esc(r.solution_preventive)+'</p>':'') +
-      '</div>';
-  }).join(''));
-
-  // ACTIONS 90J
-  if (plan.actions && plan.actions.length) html += card('Plan d\'action 90 jours', plan.actions.map(function(a){
-    return '<div style="display:grid;grid-template-columns:80px 1fr;gap:14px;padding:12px 0;border-bottom:1px solid var(--rule);align-items:start">' +
-      '<span style="font-family:var(--mono);font-size:10.5px;color:var(--ink-3);letter-spacing:0.08em;padding-top:2px">'+esc(a.phase)+'</span>' +
-      '<div><b style="font-size:14px;display:block;margin-bottom:4px">'+esc(a.titre)+'</b><p style="color:var(--ink-2);font-size:13px;margin:0;line-height:1.45">'+esc(a.detail||'')+'</p></div></div>';
-  }).join(''));
-
-  // AIDES
-  if (plan.aides_subventions && plan.aides_subventions.length) html += card('Aides & subventions', plan.aides_subventions.map(function(a){
-    return '<div style="display:grid;grid-template-columns:1fr auto;gap:12px;padding:12px 0;border-bottom:1px solid var(--rule);align-items:start">' +
-      '<div><b style="font-size:13.5px;color:'+(a.applicable?'var(--green)':'var(--ink-3)')+'">'+esc(a.nom)+'</b>' +
-      (a.priorite?' <span style="font-family:var(--mono);font-size:10px;color:var(--ink-3)">· '+esc(a.priorite)+'</span>':'') +
-      '<p style="color:var(--ink-2);font-size:13px;margin:4px 0 0">'+esc(a.conditions||'')+'</p></div>' +
-      '<div style="text-align:right"><div style="font-family:var(--mono);font-size:12px;color:var(--ink)">'+esc(clean(a.montant||''))+'</div>' +
-      (a.lien?'<div style="font-family:var(--mono);font-size:10px;color:var(--accent)">'+esc(a.lien)+'</div>':'') +
-      '</div></div>';
-  }).join(''));
-
-  // KPIs
-  if (plan.kpis && plan.kpis.length) html += card('KPIs à suivre',
-    '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">' +
-    plan.kpis.map(function(k){ return '<div style="padding:14px;background:var(--bg);border-radius:6px;border:1px solid var(--rule)">' +
-      '<div style="font-size:13.5px;font-weight:600;color:var(--ink);margin-bottom:4px">'+esc(k.nom)+'</div>' +
-      '<div style="font-family:var(--serif);font-size:16px;color:var(--accent);margin-bottom:4px">'+esc(clean(k.cible||''))+'</div>' +
-      '<div style="font-family:var(--mono);font-size:10px;color:var(--ink-3)">'+esc(k.frequence||'')+'</div></div>'; }).join('') + '</div>');
-
-  // OUTILS
-  if (plan.outils && plan.outils.length) html += card('Outils recommandés',
-    '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px">' +
-    plan.outils.map(function(o){ return '<div style="padding:14px;background:var(--bg);border-radius:6px;border:1px solid var(--rule)">' +
-      '<div style="font-size:13.5px;font-weight:600;color:var(--ink);margin-bottom:4px">'+esc(o.nom)+'</div>' +
-      '<div style="font-size:12.5px;color:var(--ink-2);margin-bottom:6px;line-height:1.4">'+esc(o.usage||'')+'</div>' +
-      (o.prix?'<div style="font-family:var(--mono);font-size:11px;color:var(--green)">'+esc(clean(o.prix))+'</div>':'') +
-      '</div>'; }).join('') + '</div>');
-
-  // DÉMARCHES
-  if (plan.demarches_admin && plan.demarches_admin.length) html += card('Démarches administratives', plan.demarches_admin.map(function(s){
-    return '<div style="display:grid;grid-template-columns:1fr auto auto;gap:12px;padding:10px 0;border-bottom:1px solid var(--rule);align-items:start">' +
-      '<div><b style="font-size:13.5px;color:var(--ink)">'+esc(s.etape)+'</b>' +
-      (s.detail?'<p style="color:var(--ink-2);font-size:12.5px;margin:4px 0 0;line-height:1.4">'+esc(s.detail)+'</p>':'')+'</div>' +
-      '<span style="font-family:var(--mono);font-size:11px;color:var(--ink-3);white-space:nowrap">'+esc(s.delai||'')+'</span>' +
-      '<span style="font-family:var(--mono);font-size:11px;color:var(--accent);white-space:nowrap">'+esc(s.cout||'')+'</span></div>';
-  }).join(''));
-
-  // EMAILS
-  [['email_presentation_banque','Email de présentation banque'],['email_prospection','Email de prospection'],['email_fournisseur','Email fournisseur'],['email_relance','Email de relance']].forEach(function(e) {
-    var em = plan[e[0]];
-    if (em && (em.sujet||em.corps)) html += card(e[1],
-      '<div style="background:var(--bg);border-radius:6px;padding:14px;border:1px solid var(--rule)">' +
-      (em.sujet?'<div style="font-family:var(--mono);font-size:11px;color:var(--ink-3);margin-bottom:4px">Objet : <span style="color:var(--ink)">'+esc(em.sujet)+'</span></div>':'') +
-      (em.corps?'<pre style="font-size:13px;color:var(--ink-2);white-space:pre-wrap;margin:8px 0 0;line-height:1.5;font-family:inherit">'+esc(em.corps)+'</pre>':'') +
-      '</div>');
-  });
-
-  // RESSOURCES GRATUITES
-  var dRessources = d && (d.ressources_gratuites_recommandees || d.ressources_gratuites);
-  if (dRessources && dRessources.length) html += card('Ressources gratuites',
-    '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">' +
-    dRessources.map(function(r){ return '<div style="padding:14px;background:var(--bg);border-radius:6px;border:1px solid var(--rule)">' +
-      '<div style="font-size:13.5px;font-weight:600;color:var(--ink);margin-bottom:4px">'+esc(r.organisme)+'</div>' +
-      '<div style="font-size:12.5px;color:var(--ink-2);margin-bottom:6px;line-height:1.4">'+esc(r.service||'')+'</div>' +
-      '<div style="font-family:var(--mono);font-size:11px;color:var(--green)">'+esc(r.cout||'')+'</div>' +
-      (r.url?'<div style="font-family:var(--mono);font-size:10px;color:var(--accent);margin-top:4px">'+esc(r.url)+'</div>':'') +
-      '</div>'; }).join('') + '</div>');
-  dRessources = null;
-
-  html += bloc6(plan, pid);
 
   // SÉPARATEUR BONUS
   html += '<div style="margin:32px 0 24px;padding:16px 20px;background:linear-gradient(135deg,var(--accent-bg),var(--bg));border:1px solid var(--rule);border-radius:8px;text-align:center">' +
     '<div style="font-family:var(--serif);font-size:15px;color:var(--accent-ink);margin-bottom:4px">✦ Bonus inclus dans ton plan</div>' +
     '<div style="font-family:var(--mono);font-size:11px;color:var(--ink-3)">Templates e-mail · Démarches administratives · KPIs · Ressources gratuites</div></div>';
+
+  // ── RENDER EXTRAS IN ORDER ───────────────────────────────────────
+  var EXTRAS_ORDER = [
+    'templates_communication',
+    'kpis',
+    'outils',
+    'ressources_gratuites'
+  ];
+  for (var _ei = 0; _ei < EXTRAS_ORDER.length; _ei++) {
+    html += _renderExtra(EXTRAS_ORDER[_ei]);
+  }
 
   // DOCS TÉLÉCHARGEABLES (masqué — section bonus)
   html += '<div style="display:none;background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:24px 28px;margin-bottom:20px">';
