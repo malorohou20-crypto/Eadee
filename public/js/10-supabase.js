@@ -1,4 +1,13 @@
 // ========== SUPABASE AUTH ==========
+// Normalise les noms de plan DB → noms internes app
+function normalizePlan(p) {
+  if (!p) return 'free';
+  if (p === 'builder')  return 'pro';
+  if (p === 'starter')  return 'solo';
+  if (p === 'premium')  return 'pro';
+  return p; // free, empire, pro, solo déjà corrects
+}
+
 async function loadCurrentUser() {
   try {
     // En v2, l'auth guard inline utilise window._eadeeSb / window.supabaseClient
@@ -13,7 +22,7 @@ async function loadCurrentUser() {
     if (window._eadeeUser && window.user) {
       user = window.user;
       userCredits = window._eadeeCredits || 0;
-      currentPlan  = window._eadeePlan  || window.currentPlan || 'free';
+      currentPlan  = normalizePlan(window._eadeePlan || window.currentPlan);
       supabaseClient = window._eadeeSb || window.supabaseClient || supabaseClient;
       // Charger les plans Supabase en arrière-plan
       const { data: userPlans } = await supabaseClient
@@ -62,7 +71,7 @@ async function loadCurrentUser() {
       email: session.user.email,
       name: ((profile?.first_name || '') + ' ' + (profile?.last_name || '')).trim() || session.user.email.split('@')[0],
     };
-    currentPlan = profile?.plan || 'free';
+    currentPlan = normalizePlan(profile?.plan);
     userCredits = profile?.credits || 0;
     const supabasePlans = (userPlans || []).map(p => ({
       ...p.sections,

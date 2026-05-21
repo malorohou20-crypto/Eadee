@@ -711,7 +711,9 @@
       // Charger le profil pour les crédits
       const { data: profile } = await sb.from('profiles').select('credits,plan,first_name,last_name').eq('id', session.user.id).single();
       window._eadeeCredits = profile?.credits ?? 0;
-      window._eadeePlan    = profile?.plan ?? 'free';
+      // Normaliser : DB utilise 'builder'/'starter', app utilise 'pro'/'solo'
+      const _rawPlan = profile?.plan ?? 'free';
+      window._eadeePlan = _rawPlan === 'builder' ? 'pro' : _rawPlan === 'starter' ? 'solo' : _rawPlan === 'premium' ? 'pro' : _rawPlan;
 
       // Initialise les globals legacy attendus par 20-generator.js
       const firstName = profile?.first_name || session.user.email.split('@')[0];
