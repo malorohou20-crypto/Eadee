@@ -97,20 +97,27 @@ function checkDraft() {
   try {
     // Si un plan est déjà affiché, ne pas montrer la bannière
     if (currentResult) return;
+
+    // Résoudre la bannière : v2 = genBanner, v1 = draft-resume-banner
+    const banner = document.getElementById('genBanner') || document.getElementById('draft-resume-banner');
+    if (!banner) return;
+
+    // Résoudre l'élément de prévisualisation du texte
+    const isV2 = banner.id === 'genBanner';
+    const preview = isV2
+      ? document.getElementById('genBannerDraft')
+      : document.getElementById('draft-preview-text');
+
     // Priorité 1 : dernier plan réellement généré (eadee_history)
     const histRaw = localStorage.getItem('eadee_history');
     if (histRaw) {
       const hist = JSON.parse(histRaw);
       if (Array.isArray(hist) && hist.length > 0 && hist[0].idea && hist[0].idea.trim().length >= 10) {
         const last = hist[0];
-        const banner = document.getElementById('draft-resume-banner');
-        const preview = document.getElementById('draft-preview-text');
-        if (banner) {
-          if (preview) preview.textContent = '"' + last.idea.substring(0, 60) + (last.idea.length > 60 ? '…' : '') + '"';
-          banner.style.display = 'flex';
-          banner._fromHistory = true;
-          banner._draft = { idea: last.idea };
-        }
+        if (preview) preview.textContent = '« ' + last.idea.substring(0, 60) + (last.idea.length > 60 ? '…' : '') + ' »';
+        banner.style.display = 'flex';
+        banner._fromHistory = true;
+        banner._draft = { idea: last.idea };
         return;
       }
     }
@@ -119,13 +126,9 @@ function checkDraft() {
     if (!raw) return;
     const draft = JSON.parse(raw);
     if (!draft.idea || draft.idea.trim().length < 10) return;
-    const banner = document.getElementById('draft-resume-banner');
-    const preview = document.getElementById('draft-preview-text');
-    if (banner) {
-      if (preview) preview.textContent = '"' + draft.idea.substring(0, 60) + (draft.idea.length > 60 ? '…' : '') + '"';
-      banner.style.display = 'flex';
-      banner._draft = draft;
-    }
+    if (preview) preview.textContent = '« ' + draft.idea.substring(0, 60) + (draft.idea.length > 60 ? '…' : '') + ' »';
+    banner.style.display = 'flex';
+    banner._draft = draft;
   } catch(e) {}
 }
 

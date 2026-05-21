@@ -1720,10 +1720,11 @@
       if (r) r.style.display = 'none';
       const f = document.querySelector('.gen-grid');
       if (f) f.style.display = '';
-      const b = document.querySelector('.gen-banner');
-      if (b) b.style.display = '';
+      const b = document.getElementById('genBanner');
+      if (b) b.style.display = 'none'; // masqué par défaut, checkDraft le réaffiche si besoin
       const h = document.querySelector('[data-screen="gen"] .page-head');
       if (h) h.style.display = '';
+      setTimeout(function() { if (typeof checkDraft === 'function') checkDraft(); }, 80);
     }
     // Déclencher le chargement des données selon la section (après chargement des scripts)
     setTimeout(function() {
@@ -2124,7 +2125,7 @@
 <script src="/public/js/20-generator.js?v=5"></script>
 <script src="/public/js/21-preview.js?v=5"></script>
 <script src="/public/js/22-live-feed.js?v=5"></script>
-<script src="/public/js/23-draft.js?v=5"></script>
+<script src="/public/js/23-draft.js?v=6"></script>
 <script src="/public/js/27-plan-preview.js?v=5"></script>
 <script src="/public/js/30-history.js?v=5"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
