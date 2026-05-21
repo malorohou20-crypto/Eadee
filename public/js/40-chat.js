@@ -98,6 +98,10 @@ function selectChatPlan(planId, mode) {
   if (subView && mode === 'view') subView.textContent = label;
   if (subDrawer && mode === 'drawer') subDrawer.textContent = label;
 
+  // Sync dropdown
+  var sel = document.getElementById('chatPlanSelect');
+  if (sel) sel.value = String(planId);
+
   var saved = localStorage.getItem('eadee_chat_' + planId);
   chatState.conversations[planId] = saved ? JSON.parse(saved) : [];
 
