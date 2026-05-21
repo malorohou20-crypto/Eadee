@@ -60,7 +60,13 @@ function openChatFullscreen(planId) {
   renderChatConvsList();
   var plans = getChatPlansList();
   var target = planId || (plans.length ? plans[0].id : null);
-  if (target) selectChatPlan(target, 'view');
+  if (target) {
+    selectChatPlan(target, 'view');
+  } else {
+    // Aucun plan — afficher état vide
+    var msgs = document.getElementById('chatViewMessages');
+    if (msgs) msgs.innerHTML = '<div class="msg"><span class="av">✦</span><div class="bb">Tu n\'as pas encore de plan. <a href="javascript:go(\'gen\')" style="color:var(--accent-ink);text-decoration:underline">Génère ton premier plan</a> pour commencer.</div></div>';
+  }
   renderChatQuickActions('view');
 }
 
