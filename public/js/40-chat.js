@@ -128,9 +128,9 @@ function renderChatMsg(m) {
   var initials = user ? user.name.split(' ').map(function(n) { return n[0]; }).join('').substring(0,2).toUpperCase() : 'U';
   var avatarContent = isUser ? initials : '✦';
   var bubbleContent = isUser ? escHtml(m.content) : renderMarkdown(stripEmojis(m.content));
-  return '<div class="chat-msg ' + (isUser ? 'user' : 'bot') + '">' +
-    '<div class="chat-msg-avatar">' + avatarContent + '</div>' +
-    '<div class="chat-msg-bubble">' + bubbleContent + '</div>' +
+  return '<div class="msg' + (isUser ? ' you' : '') + '">' +
+    '<span class="av">' + avatarContent + '</span>' +
+    '<div class="bb">' + bubbleContent + '</div>' +
     '</div>';
 }
 
@@ -138,19 +138,38 @@ function renderMarkdown(text) {
   if (!text) return '';
   var html = text
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    // Headings
+    .replace(/^## (.+)$/gm,'<div class="md-h2">$1</div>')
+    .replace(/^### (.+)$/gm,'<div class="md-h3">$1</div>')
+    // Inline formatting
     .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
     .replace(/\*(.+?)\*/g,'<em>$1</em>')
-    .replace(/^## (.+)$/gm,'<span style="display:block;font-weight:600;font-size:14px;margin:12px 0 4px;color:var(--ink)">$1</span>')
-    .replace(/^### (.+)$/gm,'<span style="display:block;font-weight:600;font-size:13px;margin:8px 0 4px;color:var(--ink)">$1</span>')
-    .replace(/^\d+\. (.+)$/gm,'<li>$1</li>')
-    .replace(/^- (.+)$/gm,'<li>$1</li>');
-  // Wrap consecutive <li> blocks in <ul>
-  html = html.replace(/(<li>[\s\S]*?<\/li>(\n)?)+/g, function(m) {
-    return '<ul style="margin:8px 0;padding-left:18px;display:flex;flex-direction:column;gap:3px">' + m + '</ul>';
+    .replace(/`([^`]+)`/g,'<code class="md-code">$1</code>')
+    // Horizontal rule
+    .replace(/^---$/gm,'<hr class="md-hr">')
+    // Lists — numbered and bullet
+    .replace(/^\d+\. (.+)$/gm,'<li data-ol>$1</li>')
+    .replace(/^[-•] (.+)$/gm,'<li>$1</li>');
+
+  // Wrap consecutive <li> groups
+  html = html.replace(/(<li(?:[^>]*)>[\s\S]*?<\/li>\n?)+/g, function(block) {
+    var isOl = block.indexOf('data-ol') !== -1;
+    var tag = isOl ? 'ol' : 'ul';
+    var inner = block.replace(/ data-ol/g, '');
+    return '<' + tag + ' class="md-list">' + inner + '</' + tag + '>';
   });
-  return html
-    .replace(/\n\n/g,'<br><br>')
-    .replace(/\n/g,'<br>');
+
+  // Paragraphs — double newline
+  html = html.replace(/\n\n+/g,'</p><p class="md-p">');
+  html = '<p class="md-p">' + html + '</p>';
+  // Single newline
+  html = html.replace(/\n/g,'<br>');
+  // Clean empty paragraphs
+  html = html.replace(/<p class="md-p"><\/p>/g,'');
+  html = html.replace(/<p class="md-p">(<div class="md-h|<[ou]l class="md-list|<hr)/g,'$1');
+  html = html.replace(/(<\/div>|<\/[ou]l>|<hr class="md-hr">)<\/p>/g,'$1');
+
+  return html;
 }
 
 function escHtml(s) {
@@ -162,8 +181,8 @@ function showTypingIndicator(mode) {
   var el = document.getElementById(mode === 'view' ? 'chatViewMessages' : 'chatDrawerMessages');
   if (!el) return;
   var div = document.createElement('div');
-  div.className = 'chat-msg bot'; div.id = 'chatTyping' + mode;
-  div.innerHTML = '<div class="chat-msg-avatar">✦</div><div class="chat-msg-bubble chat-typing"><span></span><span></span><span></span></div>';
+  div.className = 'msg'; div.id = 'chatTyping' + mode;
+  div.innerHTML = '<span class="av">✦</span><div class="bb chat-typing"><span></span><span></span><span></span></div>';
   el.appendChild(div);
   el.scrollTop = el.scrollHeight;
 }
@@ -297,9 +316,9 @@ function renderChatConvsList() {
     var saved = localStorage.getItem('eadee_chat_' + p.id);
     var msgs = saved ? JSON.parse(saved) : [];
     var isActive = String(chatState.activePlanId) === String(p.id);
-    return '<div class="chat-conv-card ' + (isActive ? 'active' : '') + '" onclick="selectChatPlan(\'' + p.id + '\',\'view\')">' +
-      '<div class="chat-conv-name">' + escHtml(p.name) + '</div>' +
-      '<div class="chat-conv-meta">' + msgs.length + ' messages</div>' +
+    return '<div class="conv ' + (isActive ? 'active' : '') + '" onclick="selectChatPlan(\'' + p.id + '\',\'view\')">' +
+      '<b>' + escHtml(p.name) + '</b>' +
+      '<div class="meta">' + msgs.length + ' messages</div>' +
       '</div>';
   }).join('');
 }
