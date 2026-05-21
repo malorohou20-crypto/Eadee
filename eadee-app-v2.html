@@ -1160,7 +1160,7 @@
             <div class="gen-submit">
               <button id="dashGenBtn" class="btn btn-accent btn-lg btn-block" onclick="generateDashPlan()">Générer mon business plan ↗</button>
               <div id="noCreditsMsg" style="display:none;text-align:center;padding:12px 16px;background:var(--accent-bg);border:1px solid oklch(0.58 0.14 35 / 0.3);border-radius:8px;font-size:13px;color:var(--accent-ink)">
-                Tu n'as plus de crédits. &nbsp;<a href="javascript:void(0)" onclick="document.querySelectorAll('.screen').forEach(function(s){s.classList.toggle('active',s.dataset.screen==='credits')});document.querySelectorAll('.side-link').forEach(function(l){l.classList.toggle('active',l.dataset.screen==='credits')});window.scrollTo(0,0);if(typeof initBillingView==='function')initBillingView();" style="background:var(--accent);color:var(--paper);text-decoration:none;font-size:12px;cursor:pointer;padding:5px 12px;border-radius:6px;font-weight:500;display:inline-block">Recharger les crédits →</a>
+                Tu n'as plus de crédits. &nbsp;<a data-screen="credits" style="background:var(--accent);color:var(--paper);text-decoration:none;font-size:12px;cursor:pointer;padding:5px 12px;border-radius:6px;font-weight:500;display:inline-block">Recharger les crédits →</a>
               </div>
               <div class="meta">
                 <span>60 secondes</span><span>1 crédit par génération</span><span>Non modifiable</span><span>Garantie 14 jours</span>
