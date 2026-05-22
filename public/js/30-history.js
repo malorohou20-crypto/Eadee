@@ -144,21 +144,37 @@ function renderHistory() {
 
   } else {
     // --- V1 legacy layout ---
+    grid.innerHTML = '';
     if (plans.length === 0) {
       grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px"><div style="font-size:14px;color:#7a7f9a">Aucun plan trouvé.</div></div>';
       return;
     }
-    grid.innerHTML = plans.map(function(p, i) {
+    plans.forEach(function(p) {
       var score  = p.score_viabilite || p.score || null;
       var sector = (p.secteur || (p.idea ? p.idea.slice(0, 40) : '') || '').replace(/\{\{[VEH]:(.*?)\|.*?\}\}/g, '$1').trim();
       var dateStr = (p.date instanceof Date ? p.date : new Date(p.date)).toLocaleDateString('fr-FR', { day:'2-digit', month:'short', year:'numeric' });
-      return '<div class="history-card" onclick="openFromHistory(plansHistory[' + i + '])" style="cursor:pointer;display:flex;align-items:center;gap:16px;padding:18px 22px;background:#1a1d26;border:1px solid rgba(255,255,255,0.07);border-radius:12px">' +
+
+      var card = document.createElement('div');
+      card.className = 'history-card';
+      card.style.cssText = 'cursor:pointer;display:flex;align-items:center;gap:16px;padding:18px 22px;background:#1a1d26;border:1px solid rgba(255,255,255,0.07);border-radius:12px';
+      card.innerHTML =
         '<div style="flex:1"><div style="font-size:16px;color:#ecedf2">' + (p.nom_business || 'Plan sans nom') + '</div><div style="font-size:12px;color:#7a7f9a">' + sector + '</div></div>' +
         (score ? '<div style="font-size:11px;color:#9db8f8;background:rgba(107,143,239,0.1);border:1px solid rgba(107,143,239,0.2);padding:4px 10px;border-radius:20px">Score ' + score + '/100</div>' : '') +
         '<div style="font-size:10px;color:#7a7f9a">' + dateStr + '</div>' +
-        '<button onclick="event.stopPropagation();openFromHistory(plansHistory[' + i + '])" style="padding:7px 16px;background:rgba(107,143,239,0.12);border:1px solid rgba(107,143,239,0.25);border-radius:7px;color:#9db8f8;font-size:12px;cursor:pointer">Voir le plan</button>' +
-        '</div>';
-    }).join('');
+        '<button class="hist-v1-btn" style="padding:7px 16px;background:rgba(107,143,239,0.12);border:1px solid rgba(107,143,239,0.25);border-radius:7px;color:#9db8f8;font-size:12px;cursor:pointer">Voir le plan</button>';
+
+      // Closure sur l'objet plan — évite les références périmées à plansHistory[i]
+      (function(planRef) {
+        card.addEventListener('click', function() { openFromHistory(planRef); });
+        var btn = card.querySelector('.hist-v1-btn');
+        if (btn) btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          openFromHistory(planRef);
+        });
+      })(p);
+
+      grid.appendChild(card);
+    });
   }
 }
 

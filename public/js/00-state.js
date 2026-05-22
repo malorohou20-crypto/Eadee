@@ -1,15 +1,15 @@
 // ========== SUPABASE ==========
 let supabaseClient = null;
 
-const IS_DEMO = new URLSearchParams(window.location.search).get('preview') === 'eadee2024';
+const IS_DEMO = false;
 
 async function initSupabase() {
-  if (IS_DEMO) return; // mode démo — pas besoin de Supabase
   try {
     const res = await fetch('/api/config');
     const cfg = await res.json();
     if (cfg.supabaseUrl && cfg.supabaseAnonKey) {
-      supabaseClient = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+      // Réutiliser le client existant si déjà créé (évite le double GoTrueClient)
+      supabaseClient = window._eadeeSb || window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
       supabaseClient.auth.onAuthStateChange((event) => {
         if (event === 'SIGNED_IN') loadCurrentUser();
         if (event === 'SIGNED_OUT') { user = null; userCredits = 0; currentPlan = 'free'; updateNav(); }
@@ -35,7 +35,13 @@ let plansHistory = (function() {
     return [];
   }
 })();
-let selectedPayPlan = { name: 'Pro', price: 29.99, credits: 3 };
+// Source unique de vérité pour les prix — doit rester synchronisé avec api/lib/pricing.js
+const PLANS_CONFIG = {
+  solo:   { name: 'Solo',   price: 12.99, credits: 1, label: 'Solo — 12,99€ / 1 génér.' },
+  pro:    { name: 'Pro',    price: 29.99, credits: 3, label: 'Pro — 29,99€ / 3 génér.' },
+  empire: { name: 'Empire', price: 59.99, credits: 8, label: 'Empire — 59,99€ / 8 génér.' },
+};
+let selectedPayPlan = { ...PLANS_CONFIG.pro };
 let userCredits = 0;
 let currentResult = null;
 

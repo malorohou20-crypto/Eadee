@@ -239,8 +239,9 @@ function showPlanPreview(plan) {
     </div>`;
   }
 
+  const _planCfg = (typeof PLANS_CONFIG !== 'undefined' && PLANS_CONFIG[plan]) || { label: plan };
   html += `<button class="preview-cta" onclick="closePlanPreview();selectPlan('${plan}')">
-    ${plan === 'solo' ? 'Acheter Solo — 12,99€ / 1 génér.' : plan === 'pro' ? 'Acheter Pro — 29,99€ / 3 génér.' : 'Acheter Empire — 59,99€ / 8 génér.'}
+    Acheter ${_planCfg.label}
   </button>`;
 
   body.innerHTML = html;

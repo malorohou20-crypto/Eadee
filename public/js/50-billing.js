@@ -1,8 +1,9 @@
 ﻿// ========== PAYMENT ==========
 function selectPlan(planId) {
-  const plans = { solo: { name: 'Solo', price: 12.99, credits: 1 }, pro: { name: 'Pro', price: 29.99, credits: 3 }, empire: { name: 'Empire', price: 59.99, credits: 8 } };
   if (!user) { if (typeof showAuth === 'function') showAuth('signup'); return; }
-  selectedPayPlan = plans[planId];
+  selectedPayPlan = (typeof PLANS_CONFIG !== 'undefined' && PLANS_CONFIG[planId])
+    ? { ...PLANS_CONFIG[planId] }
+    : { name: planId, price: 29.99, credits: 3 };
   // Navigation compatible v1 et v2
   if (typeof window.go === 'function') { window.go('credits'); }
   else if (typeof showPage === 'function') { showPage('dashboard'); }
@@ -63,6 +64,7 @@ async function processPayment() {
   if (!user) { toast('Connecte-toi d\'abord', 'error'); return; }
 
   const btn = document.getElementById('payBtn');
+  if (!btn) return;
   btn.disabled = true;
   btn.textContent = '⏳ REDIRECTION STRIPE...';
 
