@@ -20,13 +20,19 @@
       ]
     },
     {
-      "source": "/public/(.*\\.(png|jpg|jpeg|gif|svg|ico|webp|woff2|woff))",
+      "source": "/public/:path*",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
       ]
     },
     {
-      "source": "/(index\\.html|eadee-app-v2\\.html)",
+      "source": "/index.html",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/eadee-app-v2.html",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
       ]
