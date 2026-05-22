@@ -1395,7 +1395,7 @@
       <div class="page">
         <div class="page-head">
           <div>
-            <span class="page-eyebrow">Dossiers générés · 2</span>
+            <span class="page-eyebrow" id="plansEyebrow">Dossiers générés · 0</span>
             <h1>Mes plans</h1>
             <p class="page-sub">Tous tes business plans générés. Cliquer pour rouvrir, dupliquer ou ajuster avec l'Expert.</p>
           </div>
@@ -1404,14 +1404,14 @@
 
         <div class="plans-bar">
           <div class="filter-tabs">
-            <button class="on">Tous<span class="ct">02</span></button>
-            <button>Brouillons<span class="ct">00</span></button>
-            <button>Finalisés<span class="ct">02</span></button>
-            <button>Archivés<span class="ct">00</span></button>
+            <button id="filterTabAll" class="on" onclick="filterPlans('all')">Tous<span class="ct">00</span></button>
+            <button id="filterTabDraft" onclick="filterPlans('draft')">Brouillons<span class="ct">00</span></button>
+            <button id="filterTabFinal" onclick="filterPlans('final')">Finalisés<span class="ct">00</span></button>
+            <button id="filterTabArchived" onclick="filterPlans('archived')">Archivés<span class="ct">00</span></button>
           </div>
           <div class="plans-search">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
-            <input type="text" placeholder="Rechercher un plan…" />
+            <input type="text" id="plansSearch" placeholder="Rechercher un plan…" oninput="searchPlans(this.value)" />
           </div>
         </div>
 
@@ -2191,7 +2191,7 @@
 <script src="/public/js/22-live-feed.js?v=5"></script>
 <script src="/public/js/23-draft.js?v=7"></script>
 <script src="/public/js/27-plan-preview.js?v=5"></script>
-<script src="/public/js/30-history.js?v=5"></script>
+<script src="/public/js/30-history.js?v=6"></script>
 <script src="/public/js/28-plan-renderer-v2.js?v=8"></script>
 <script src="/public/js/50-billing.js?v=5"></script>
 <script src="/public/js/51-settings.js?v=5"></script>
