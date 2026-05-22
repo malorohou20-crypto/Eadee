@@ -1741,14 +1741,19 @@
 
 <!-- ========================= AUTH ========================= -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- Modale login / signup -->
 <div id="authOverlay" style="display:none;position:fixed;inset:0;background:rgba(20,18,14,0.55);z-index:9000;backdrop-filter:blur(6px)" onclick="if(event.target===this)closeAuth()">
   <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--paper);border:1px solid var(--rule);border-radius:18px;padding:44px 40px;width:min(440px,94vw);box-shadow:0 32px 80px rgba(20,18,14,0.18)">
     <h2 id="authTitle" style="font-family:'Instrument Serif',serif;font-size:30px;font-weight:400;margin:0 0 6px;color:var(--ink)">Créer un compte</h2>
     <p id="authSub" style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);margin:0 0 28px">Commencez gratuitement</p>
     <div style="display:flex;flex-direction:column;gap:14px">
       <input id="authEmail" type="email" placeholder="votre@email.com" style="width:100%;box-sizing:border-box;padding:13px 16px;border:1px solid var(--rule);border-radius:8px;font-family:'Geist',sans-serif;font-size:15px;background:var(--bg);color:var(--ink);outline:none" />
-      <input id="authPassword" type="password" placeholder="Mot de passe" style="width:100%;box-sizing:border-box;padding:13px 16px;border:1px solid var(--rule);border-radius:8px;font-family:'Geist',sans-serif;font-size:15px;background:var(--bg);color:var(--ink);outline:none" />
-      <div id="authError" style="display:none;color:#c0392b;font-size:13px;font-family:'JetBrains Mono',monospace"></div>
+      <input id="authPassword" type="password" placeholder="Mot de passe (8 car. min.)" style="width:100%;box-sizing:border-box;padding:13px 16px;border:1px solid var(--rule);border-radius:8px;font-family:'Geist',sans-serif;font-size:15px;background:var(--bg);color:var(--ink);outline:none" />
+      <div id="authForgotWrap" style="display:none;text-align:right;margin-top:-4px">
+        <a href="#" onclick="forgotPwd();return false;" style="font-size:12px;color:var(--ink-3);font-family:'Geist',sans-serif;text-decoration:none">Mot de passe oublié ?</a>
+      </div>
+      <div id="authError" style="display:none;font-size:13px;font-family:'JetBrains Mono',monospace"></div>
       <button id="authSubmit" onclick="submitAuth()" style="padding:14px;background:var(--ink);color:var(--paper);border:none;border-radius:999px;font-family:'Geist',sans-serif;font-size:15px;font-weight:500;cursor:pointer;transition:opacity .15s">Créer mon compte →</button>
     </div>
     <p style="text-align:center;margin:18px 0 0;font-size:13px;color:var(--ink-3);font-family:'Geist',sans-serif">
@@ -1756,44 +1761,128 @@
     </p>
   </div>
 </div>
+
+<!-- Modale réinitialisation mot de passe (retour email reset) -->
+<div id="resetOverlay" style="display:none;position:fixed;inset:0;background:rgba(20,18,14,0.55);z-index:9001;backdrop-filter:blur(6px)">
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--paper);border:1px solid var(--rule);border-radius:18px;padding:44px 40px;width:min(440px,94vw);box-shadow:0 32px 80px rgba(20,18,14,0.18)">
+    <h2 style="font-family:'Instrument Serif',serif;font-size:30px;font-weight:400;margin:0 0 6px;color:var(--ink)">Nouveau mot de passe</h2>
+    <p style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);margin:0 0 28px">Choisis un nouveau mot de passe</p>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <input id="resetPwd" type="password" placeholder="Nouveau mot de passe (8 car. min.)" style="width:100%;box-sizing:border-box;padding:13px 16px;border:1px solid var(--rule);border-radius:8px;font-family:'Geist',sans-serif;font-size:15px;background:var(--bg);color:var(--ink);outline:none" />
+      <div id="resetError" style="display:none;color:#c0392b;font-size:13px;font-family:'JetBrains Mono',monospace"></div>
+      <button id="resetSubmit" onclick="submitReset()" style="padding:14px;background:var(--ink);color:var(--paper);border:none;border-radius:999px;font-family:'Geist',sans-serif;font-size:15px;font-weight:500;cursor:pointer;transition:opacity .15s">Enregistrer →</button>
+    </div>
+  </div>
+</div>
+
 <script>
 (function(){
   const SB_URL='https://gyzyvcvphizbbdhaiwne.supabase.co';
   const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd5enl2Y3ZwaGl6YmJkaGFpd25lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0MDc2MzQsImV4cCI6MjA5Mjk4MzYzNH0.onkLrBBW1BV4Rk2Rj2Er2boqvT3_RI4gbUwaJEtHsvc';
   const sb = supabase.createClient(SB_URL, SB_KEY);
   let authMode = 'signup';
-  window.openAuth = function(mode){
+
+  function showAuthErr(msg, color) {
+    var el = document.getElementById('authError');
+    el.textContent = msg;
+    el.style.color = color || '#c0392b';
+    el.style.display = 'block';
+  }
+  function translateErr(msg) {
+    if (!msg) return 'Erreur de connexion.';
+    if (msg.includes('Invalid login credentials')) return 'Email ou mot de passe incorrect.';
+    if (msg.includes('User already registered'))   return 'Email déjà utilisé. Connecte-toi plutôt.';
+    if (msg.includes('Email not confirmed'))        return 'Confirme ton email avant de te connecter.';
+    if (msg.includes('Password should be'))         return 'Mot de passe trop court (8 caractères min).';
+    return msg;
+  }
+
+  window.openAuth = function(mode) {
     authMode = mode || 'signup';
-    document.getElementById('authTitle').textContent = authMode==='login' ? 'Connexion' : 'Créer un compte';
-    document.getElementById('authSub').textContent = authMode==='login' ? 'Bon retour !' : 'Commencez gratuitement';
-    document.getElementById('authSubmit').textContent = authMode==='login' ? 'Se connecter →' : 'Créer mon compte →';
-    document.getElementById('authToggleTxt').textContent = authMode==='login' ? 'Pas encore de compte ? ' : 'Déjà un compte ? ';
-    document.getElementById('authToggleLink').textContent = authMode==='login' ? 'Créer un compte' : 'Se connecter';
-    document.getElementById('authError').style.display='none';
-    document.getElementById('authOverlay').style.display='block';
+    var isLogin = authMode === 'login';
+    document.getElementById('authTitle').textContent    = isLogin ? 'Connexion'             : 'Créer un compte';
+    document.getElementById('authSub').textContent      = isLogin ? 'Bon retour !'           : 'Commencez gratuitement';
+    document.getElementById('authSubmit').textContent   = isLogin ? 'Se connecter →'         : 'Créer mon compte →';
+    document.getElementById('authToggleTxt').textContent= isLogin ? 'Pas encore de compte ? ': 'Déjà un compte ? ';
+    document.getElementById('authToggleLink').textContent = isLogin ? 'Créer un compte'      : 'Se connecter';
+    document.getElementById('authForgotWrap').style.display = isLogin ? 'block' : 'none';
+    document.getElementById('authError').style.display  = 'none';
+    document.getElementById('authOverlay').style.display = 'block';
   };
-  window.closeAuth = function(){ document.getElementById('authOverlay').style.display='none'; };
-  window.toggleAuthMode = function(){ window.openAuth(authMode==='signup'?'login':'signup'); };
-  window.submitAuth = async function(){
-    const email = document.getElementById('authEmail').value.trim();
-    const password = document.getElementById('authPassword').value;
-    const errEl = document.getElementById('authError');
-    const btn = document.getElementById('authSubmit');
-    errEl.style.display='none';
-    btn.textContent='…'; btn.disabled=true;
+  window.closeAuth      = function() { document.getElementById('authOverlay').style.display = 'none'; };
+  window.toggleAuthMode = function() { window.openAuth(authMode === 'signup' ? 'login' : 'signup'); };
+
+  window.submitAuth = async function() {
+    var email    = document.getElementById('authEmail').value.trim();
+    var password = document.getElementById('authPassword').value;
+    var btn      = document.getElementById('authSubmit');
+    document.getElementById('authError').style.display = 'none';
+    // Validation front
+    var emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !password)        { showAuthErr('Email et mot de passe requis.');          return; }
+    if (!emailRx.test(email))       { showAuthErr('Adresse email invalide.');                return; }
+    if (password.length < 8)        { showAuthErr('Minimum 8 caractères pour le mot de passe.'); return; }
+    btn.textContent = '…'; btn.disabled = true;
     try {
-      const res = authMode==='signup'
-        ? await sb.auth.signUp({email, password})
-        : await sb.auth.signInWithPassword({email, password});
-      if(res.error) throw res.error;
+      var res = authMode === 'signup'
+        ? await sb.auth.signUp({ email, password })
+        : await sb.auth.signInWithPassword({ email, password });
+      if (res.error) throw res.error;
+      if (authMode === 'signup' && !res.data.session) {
+        showAuthErr('✉ Vérifie ton email pour activer ton compte.', '#16a34a');
+        btn.textContent = 'Créer mon compte →'; btn.disabled = false;
+        return;
+      }
       window.location.href = '/eadee-app-v2.html';
-    } catch(e){
-      errEl.textContent = e.message || 'Erreur de connexion';
-      errEl.style.display='block';
-      btn.textContent = authMode==='login' ? 'Se connecter →' : 'Créer mon compte →';
-      btn.disabled=false;
+    } catch(e) {
+      showAuthErr(translateErr(e.message));
+      btn.textContent = authMode === 'login' ? 'Se connecter →' : 'Créer mon compte →';
+      btn.disabled = false;
     }
   };
+
+  window.forgotPwd = async function() {
+    var email = document.getElementById('authEmail').value.trim();
+    var emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email)               { showAuthErr('Saisis ton email d\'abord.');  return; }
+    if (!emailRx.test(email)) { showAuthErr('Adresse email invalide.');      return; }
+    try {
+      var { error } = await sb.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/?reset=true',
+      });
+      if (error) throw error;
+      showAuthErr('✉ Email de réinitialisation envoyé — vérifie ta boîte.', '#16a34a');
+    } catch(e) {
+      showAuthErr(e.message || 'Erreur — réessaie.');
+    }
+  };
+
+  window.submitReset = async function() {
+    var pwd    = document.getElementById('resetPwd').value;
+    var errEl  = document.getElementById('resetError');
+    var btn    = document.getElementById('resetSubmit');
+    errEl.style.display = 'none';
+    if (pwd.length < 8) { errEl.textContent = 'Minimum 8 caractères.'; errEl.style.display = 'block'; return; }
+    btn.textContent = '…'; btn.disabled = true;
+    try {
+      var { error } = await sb.auth.updateUser({ password: pwd });
+      if (error) throw error;
+      document.getElementById('resetOverlay').style.display = 'none';
+      window.location.href = '/eadee-app-v2.html';
+    } catch(e) {
+      errEl.textContent = e.message || 'Erreur — réessaie.';
+      errEl.style.display = 'block';
+      btn.textContent = 'Enregistrer →'; btn.disabled = false;
+    }
+  };
+
+  // Détection du lien de réinitialisation dans l'URL (hash #type=recovery injecté par Supabase)
+  sb.auth.onAuthStateChange(function(event) {
+    if (event === 'PASSWORD_RECOVERY') {
+      document.getElementById('authOverlay').style.display = 'none';
+      document.getElementById('resetOverlay').style.display = 'block';
+    }
+  });
 })();
 </script>
 
