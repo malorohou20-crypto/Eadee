@@ -9,17 +9,40 @@ function populateSettings() {
   if (emailEl && user.email) emailEl.value = user.email;
 }
 
-function saveSettings() {
+async function saveSettings() {
   if (!user) return;
-  const nameEl = document.getElementById('settingsName');
+  const nameEl  = document.getElementById('settingsName');
   const emailEl = document.getElementById('settingsEmail');
-  const name = nameEl ? nameEl.value.trim() : '';
+  const name  = nameEl  ? nameEl.value.trim()  : '';
   const email = emailEl ? emailEl.value.trim() : '';
-  if (name) user.name = name;
-  if (email) user.email = email;
+
+  // Mise à jour du nom dans Supabase
+  if (supabaseClient && user.id && name) {
+    try {
+      const parts = name.split(' ');
+      await supabaseClient.from('profiles')
+        .update({ first_name: parts[0] || '', last_name: parts.slice(1).join(' ') || '' })
+        .eq('id', user.id);
+      user.name = name;
+    } catch(e) { console.warn('saveSettings Supabase:', e); }
+  }
+
+  // Mise à jour de l'email (envoie un email de confirmation)
+  if (supabaseClient && email && email !== user.email) {
+    try {
+      const { error } = await supabaseClient.auth.updateUser({ email });
+      if (error) throw error;
+      if (typeof toast === 'function') toast('Email mis à jour — vérifie ta boîte mail pour confirmer', 'success');
+    } catch(e) {
+      if (typeof toast === 'function') toast('Erreur email : ' + (e.message || 'Réessaie'), 'error');
+      return;
+    }
+  } else {
+    if (typeof toast === 'function') toast('Profil mis à jour ✓', 'success');
+  }
+
   if (typeof updateNav === 'function') updateNav();
   if (typeof initChat === 'function') initChat();
-  if (typeof toast === 'function') toast('Profil mis à jour ✓', 'success');
 }
 
 // Changer le mot de passe via Supabase
@@ -30,7 +53,7 @@ async function updatePassword() {
   const newPwd = newPwdEl ? newPwdEl.value.trim() : '';
   const confirmPwd = confirmEl ? confirmEl.value.trim() : '';
   if (!newPwd) { if (typeof toast === 'function') toast('Saisis un nouveau mot de passe', 'error'); return; }
-  if (newPwd.length < 8) { if (typeof toast === 'function') toast('Mot de passe trop court (min. 8 caractères)', 'error'); return; }
+  if (newPwd.length < 12) { if (typeof toast === 'function') toast('Mot de passe trop court (min. 12 caractères)', 'error'); return; }
   if (newPwd !== confirmPwd) { if (typeof toast === 'function') toast('Les mots de passe ne correspondent pas', 'error'); return; }
   try {
     const { error } = await supabaseClient.auth.updateUser({ password: newPwd });
@@ -46,15 +69,19 @@ async function updatePassword() {
 // ========== RGPD — EXPORT DONNÉES ==========
 async function exportMyData() {
   if (!user || !supabaseClient) { toast('Connecte-toi d\'abord', 'error'); return; }
+  const confirmed = confirm('Télécharger toutes tes données (plans, conversations, achats) au format JSON ?');
+  if (!confirmed) return;
   toast('Préparation de tes données…', 'success');
 
   try {
-    const [profile, plans, chats, purchases] = await Promise.all([
-      supabaseClient.from('profiles').select('*').eq('id', user.id).single(),
-      supabaseClient.from('plans').select('*').eq('user_id', user.id),
-      supabaseClient.from('chat_conversations').select('*').eq('user_id', user.id),
-      supabaseClient.from('purchases').select('*').eq('user_id', user.id),
-    ]);
+    const profile = await supabaseClient.from('profiles').select('*').eq('id', user.id).single();
+    const plans   = await supabaseClient.from('plans').select('*').eq('user_id', user.id);
+
+    // Tables optionnelles — ne pas planter si elles n'existent pas encore
+    let chats     = { data: [] };
+    let purchases = { data: [] };
+    try { chats     = await supabaseClient.from('chat_conversations').select('*').eq('user_id', user.id); } catch(_) {}
+    try { purchases = await supabaseClient.from('purchases').select('*').eq('user_id', user.id); } catch(_) {}
 
     const data = {
       export_date: new Date().toISOString(),
@@ -65,14 +92,11 @@ async function exportMyData() {
       purchases: purchases.data || [],
     };
 
-    // Logger la demande
-    await supabaseClient.from('rgpd_requests').insert({ user_id: user.id, type: 'export', status: 'completed', completed_at: new Date().toISOString() });
-
     // Téléchargement JSON
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href = url;
-    a.download = `eadee-export-${user.name.replace(/\s+/g, '-')}-${Date.now()}.json`;
+    a.download = `eadee-export-${(user.name || user.email || 'data').replace(/\s+/g, '-')}-${Date.now()}.json`;
     a.click(); URL.revokeObjectURL(url);
     toast('Export téléchargé', 'success');
   } catch(e) { toast('Erreur lors de l\'export', 'error'); }
