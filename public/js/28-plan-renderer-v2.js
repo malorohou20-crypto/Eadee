@@ -1855,7 +1855,15 @@ window._renderV2PlanResult = function(plan, container) {
   html += '</div>';
   container.innerHTML = html;
 
-  setTimeout(initCharts, 60);
+  // Lazy-load Chart.js uniquement quand un plan est affiché
+  if (typeof Chart !== 'undefined') {
+    setTimeout(initCharts, 60);
+  } else {
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js';
+    s.onload = function() { setTimeout(initCharts, 30); };
+    document.head.appendChild(s);
+  }
   if (typeof fillDocumentsAnnexes === 'function') fillDocumentsAnnexes(plan);
   if (typeof fillBancabilite === 'function') fillBancabilite(plan);
   if (typeof applyReliabilityIndicators === 'function') applyReliabilityIndicators(container);
