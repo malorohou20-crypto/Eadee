@@ -42,6 +42,7 @@ async function saveSettings() {
   }
 
   if (typeof updateNav === 'function') updateNav();
+  if (typeof window._updateV2UserUI === 'function') window._updateV2UserUI();
   if (typeof initChat === 'function') initChat();
 }
 

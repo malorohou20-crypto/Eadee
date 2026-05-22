@@ -1051,6 +1051,9 @@
   // stopLiveFeed / startLiveFeed → no-op sur la v2
   window.stopLiveFeed  = function() {};
   window.startLiveFeed = function() {};
+
+  // Exposé globalement pour que saveSettings() puisse rafraîchir la topbar
+  window._updateV2UserUI = _updateV2UserUI;
 })();
 </script>
 
@@ -2238,7 +2241,7 @@
 <script defer src="/public/js/30-history.js?v=6"></script>
 <script defer src="/public/js/28-plan-renderer-v2.js?v=9"></script>
 <script defer src="/public/js/50-billing.js?v=6"></script>
-<script defer src="/public/js/51-settings.js?v=6"></script>
+<script defer src="/public/js/51-settings.js?v=7"></script>
 <script defer src="/public/js/31-plan-actions.js?v=6"></script>
 <script defer src="/public/js/60-dossier.js?v=6"></script>
 <script defer src="/public/js/70-cookies.js?v=6"></script>
