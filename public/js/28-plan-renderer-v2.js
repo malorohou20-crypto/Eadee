@@ -51,13 +51,15 @@ function numVal(s) {
 }
 function para(s) {
   if (!s) return '';
-  var t = String(s).replace(/\{\{[VEH]:(.*?)\|.*?\}\}/g,'$1');
+  var t = String(s).replace(/\{\{[VEH]:(.*?)\|.*?\}\}/g,'$1').trim();
+  if (!t || t.toLowerCase() === 'null') return '';
   return '<p style="font-size:14px;color:var(--ink-2);margin:0;line-height:1.65">' + t + '</p>';
 }
 function lbl(t) {
   return '<div style="font-family:var(--mono);font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px">' + esc(t) + '</div>';
 }
 function card(title, body) {
+  if (!body || !body.trim()) return '';
   return '<div style="background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:24px 28px;margin-bottom:20px">' +
     (title ? '<div style="font-family:var(--serif);font-size:17px;color:var(--ink);border-bottom:1px solid var(--rule);padding-bottom:10px;margin-bottom:16px">' + esc(title) + '</div>' : '') +
     body + '</div>';

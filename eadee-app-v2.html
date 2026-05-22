@@ -626,13 +626,27 @@
   }
   @media (max-width:880px){
     .app{grid-template-columns:1fr}
-    .side{position:relative;height:auto;border-right:0;border-bottom:1px solid var(--rule)}
+    .side{position:fixed;left:0;top:0;bottom:0;z-index:400;width:260px;transform:translateX(-100%);transition:transform .3s var(--ease-smooth,ease);border-right:1px solid var(--rule)}
+    .side.open{transform:translateX(0)}
+    #sideBackdrop{display:block}
+    .hamburger{display:flex}
     .insp-grid{grid-template-columns:1fr}
     .plans-thead, .plan-row{grid-template-columns:42px 1fr auto;gap:12px}
     .plans-thead .h-budget,.plans-thead .h-date,.plan-budget,.plan-date{display:none}
-    .page{padding:24px 20px 80px}
-    .page h1{font-size:40px}
+    .plans-bar{flex-wrap:wrap;gap:8px}
+    .filter-tabs{overflow-x:auto}
+    .page{padding:24px 16px 80px}
+    .page h1{font-size:36px}
+    .page-head{grid-template-columns:1fr}
+    .page-head .btn-lg{justify-self:start}
   }
+  @media (max-width:520px){
+    .page h1{font-size:28px}
+    .chat-grid{grid-template-columns:1fr}
+    .topbar{padding:0 12px}
+  }
+  #sideBackdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:399;backdrop-filter:blur(2px)}
+  .hamburger{display:none;align-items:center;justify-content:center;width:36px;height:36px;background:none;border:1px solid var(--rule);border-radius:6px;cursor:pointer;color:var(--ink-2);flex-shrink:0}
 </style>
 <style>
 /* ── Documents annexes ─────────────────────────────── */
@@ -834,6 +848,8 @@
       btn.title = hasCredits ? '' : 'Plus de crédits — recharge dans l\'onglet Crédits';
     }
     if (noCredMsg) noCredMsg.style.display = hasCredits ? 'none' : 'block';
+    // Sync toute la sidebar crédits (max, meta, barre)
+    if (typeof window.updateUsage === 'function') window.updateUsage();
   }
 
   // ── Stubs legacy : ces fonctions sont appelées par les scripts backend ────
@@ -889,8 +905,21 @@
   // updateUsage → met à jour la sidebar crédits v2
   window.updateUsage = function() {
     const credits = window.userCredits ?? window._eadeeCredits ?? 0;
+    const plan    = window.currentPlan ?? window._eadeePlan ?? 'free';
+    const planLabels = { pro: 'pack Pro', solo: 'pack Solo', empire: 'pack Empire', free: 'Gratuit', starter: 'pack Solo', builder: 'pack Pro', premium: 'pack Pro' };
+    const maxMap     = { pro: 3, solo: 1, empire: 8, free: 1, starter: 1, builder: 3, premium: 3 };
+    const maxC = maxMap[plan] ?? 1;
+    const label = planLabels[plan] ?? plan;
+
     const numEl = document.querySelector('.credits-num');
     if (numEl) numEl.textContent = String(credits).padStart(2, '0');
+
+    const maxEl  = document.getElementById('creditsMax');
+    if (maxEl)  maxEl.textContent = '/ ' + String(maxC).padStart(2, '0');
+
+    const metaEl = document.getElementById('creditsMeta');
+    if (metaEl) metaEl.textContent = 'générations disponibles · ' + label;
+
     const btn = document.getElementById('dashGenBtn');
     if (btn) {
       if (credits <= 0) {
@@ -900,9 +929,8 @@
       }
     }
     // Barre de progression crédits
-    const maxC = window.currentPlan === 'empire' ? 8 : window.currentPlan === 'pro' ? 3 : 1;
-    const pct  = Math.min((credits / maxC) * 100, 100);
-    const bar  = document.querySelector('.credits-bar i');
+    const pct = Math.min((credits / maxC) * 100, 100);
+    const bar = document.querySelector('.credits-bar i');
     if (bar) bar.style.width = pct + '%';
   };
 
@@ -1076,16 +1104,18 @@
       </a>
     </nav>
 
+    <div id="sideBackdrop" onclick="toggleMobileSidebar()"></div>
+
     <div class="side-credits">
       <div class="credits-head">
         <div>
           <span class="credits-label">Crédits restants</span>
           <span class="credits-num num">02</span>
         </div>
-        <span class="label">/ 03</span>
+        <span class="label" id="creditsMax">/ —</span>
       </div>
       <div class="credits-bar"><i></i></div>
-      <div class="credits-meta">générations disponibles · pack Pro</div>
+      <div class="credits-meta" id="creditsMeta">générations disponibles</div>
       <a class="credits-cta" data-screen="credits" onclick="event.preventDefault();window.go('credits')">Recharger</a>
     </div>
   </aside>
@@ -1094,6 +1124,9 @@
   <main class="main">
     <header class="topbar">
       <div class="crumb">
+        <button class="hamburger" onclick="toggleMobileSidebar()" aria-label="Menu" style="margin-right:10px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
         <span>EADEE</span><span class="sep">/</span><b id="crumb">Générateur</b>
       </div>
       <div class="top-right">
@@ -1773,10 +1806,22 @@
   const crumb = document.getElementById('crumb');
   const labels = {gen:'Générateur', expert:'Expert Eadee', plans:'Mes plans', insp:'Inspiration', credits:'Crédits', settings:'Paramètres', help:'Aide & Support'};
 
+  function toggleMobileSidebar() {
+    const side = document.querySelector('.side');
+    const bd   = document.getElementById('sideBackdrop');
+    if (!side) return;
+    const open = side.classList.toggle('open');
+    if (bd) { bd.style.display = open ? 'block' : 'none'; }
+  }
+
   function go(name){
     screens.forEach(s => s.classList.toggle('active', s.dataset.screen === name));
     document.querySelectorAll('.side-link').forEach(l => l.classList.toggle('active', l.dataset.screen === name));
     crumb.textContent = labels[name] || '—';
+    // Close mobile sidebar on navigate
+    const side = document.querySelector('.side');
+    const bd   = document.getElementById('sideBackdrop');
+    if (side && side.classList.contains('open')) { side.classList.remove('open'); if (bd) bd.style.display='none'; }
     window.scrollTo({top:0, behavior:'instant'});
     // Reset générateur : cacher le résultat et réafficher le formulaire
     if (name === 'gen') {
@@ -2192,7 +2237,7 @@
 <script src="/public/js/23-draft.js?v=7"></script>
 <script src="/public/js/27-plan-preview.js?v=5"></script>
 <script src="/public/js/30-history.js?v=6"></script>
-<script src="/public/js/28-plan-renderer-v2.js?v=8"></script>
+<script src="/public/js/28-plan-renderer-v2.js?v=9"></script>
 <script src="/public/js/50-billing.js?v=5"></script>
 <script src="/public/js/51-settings.js?v=5"></script>
 <script src="/public/js/31-plan-actions.js?v=5"></script>
