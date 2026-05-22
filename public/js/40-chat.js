@@ -76,7 +76,15 @@ function openChatDrawer(planId, prefilledQuestion) {
   var backdrop = document.getElementById('chatBackdrop');
   if (drawer) drawer.classList.add('open');
   if (backdrop) backdrop.classList.add('visible');
-  if (planId) selectChatPlan(planId, 'drawer');
+
+  // Fallback : si pas de planId explicite, utilise le plan affiché actuellement
+  var targetId = planId || chatState.activePlanId ||
+    (typeof currentResult !== 'undefined' && currentResult
+      ? (currentResult.id || currentResult.timestamp || currentResult._supabaseId)
+      : null);
+
+  if (targetId) selectChatPlan(targetId, 'drawer');
+
   if (prefilledQuestion) {
     var input = document.getElementById('chatDrawerInput');
     if (input) { input.value = prefilledQuestion; autoGrow(input); input.focus(); }
