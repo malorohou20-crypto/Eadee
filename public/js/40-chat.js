@@ -36,6 +36,7 @@ let chatState = {
   activePlanId: null,
   activeMode: null, // 'view' | 'drawer'
   sending: false,
+  _abortController: null,
 };
 
 function getChatPlansList() {
@@ -120,7 +121,7 @@ function selectChatPlan(planId, mode) {
   chatState.conversations[planId] = saved ? JSON.parse(saved) : [];
 
   if (chatState.conversations[planId].length === 0) {
-    var firstName = user ? user.name.split(' ')[0] : 'toi';
+    var firstName = user ? (user.name || '').split(' ')[0] || 'toi' : 'toi';
     chatState.conversations[planId].push({
       role: 'assistant',
       content: 'Salut **' + firstName + '** ! Je connais ton plan **' + plan.name + '** par cœur.' + (plan.score ? ' Score actuel : **' + plan.score + '/100**.' : '') + '\n\nComment puis-je t\'aider aujourd\'hui ?',
@@ -143,7 +144,7 @@ function renderChatMessages(mode) {
 
 function renderChatMsg(m) {
   var isUser = m.role === 'user';
-  var initials = user ? user.name.split(' ').map(function(n) { return n[0]; }).join('').substring(0,2).toUpperCase() : 'U';
+  var initials = user ? (user.name || 'U').split(' ').map(function(n) { return n[0] || ''; }).join('').substring(0,2).toUpperCase() || 'U' : 'U';
   var avatarContent = isUser ? initials : '✦';
   var bubbleContent = isUser ? escHtml(m.content) : renderMarkdown(stripEmojis(m.content));
   return '<div class="msg' + (isUser ? ' you' : '') + '">' +
@@ -250,10 +251,23 @@ async function sendChatMessage(mode) {
   renderChatMessages(mode);
   showTypingIndicator(mode);
 
+  // Annuler la requête précédente si elle est encore en cours
+  if (chatState._abortController) chatState._abortController.abort();
+  chatState._abortController = new AbortController();
+
   try {
+    var _chatAuthHdr = {};
+    try {
+      var _sb = window._eadeeSb || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
+      if (_sb) {
+        var _sess = await _sb.auth.getSession();
+        if (_sess.data.session?.access_token) _chatAuthHdr = { 'Authorization': 'Bearer ' + _sess.data.session.access_token };
+      }
+    } catch(_) {}
     var res = await fetch('/api/coach', {
+      signal: chatState._abortController.signal,
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ..._chatAuthHdr },
       body: JSON.stringify({
         messages: chatState.conversations[planId],
         plan: plan ? plan.data : null,
@@ -321,19 +335,23 @@ function renderChatConvsList() {
   var el = document.getElementById('chatConvsList');
   if (!el) return;
   var plans = getChatPlansList();
+  // Cache le résultat localStorage pour éviter la double lecture
+  var savedMap = {};
   var withConvs = plans.filter(function(p) {
     var saved = localStorage.getItem('eadee_chat_' + p.id);
     if (!saved) return false;
-    var msgs = JSON.parse(saved);
-    return msgs.length > 1;
+    try {
+      var msgs = JSON.parse(saved);
+      if (msgs.length > 1) { savedMap[p.id] = msgs; return true; }
+      return false;
+    } catch(_) { return false; }
   });
   if (!withConvs.length) {
     el.innerHTML = '<div style="font-size:12px;color:#7a7f9a;padding:12px 0">Aucune conversation. Choisis un plan pour commencer.</div>';
     return;
   }
   el.innerHTML = withConvs.map(function(p) {
-    var saved = localStorage.getItem('eadee_chat_' + p.id);
-    var msgs = saved ? JSON.parse(saved) : [];
+    var msgs = savedMap[p.id] || [];
     var isActive = String(chatState.activePlanId) === String(p.id);
     return '<div class="conv ' + (isActive ? 'active' : '') + '" onclick="selectChatPlan(\'' + p.id + '\',\'view\')">' +
       '<b>' + escHtml(p.name) + '</b>' +

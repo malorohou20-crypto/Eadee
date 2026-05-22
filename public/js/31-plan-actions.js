@@ -94,9 +94,17 @@ async function downloadDoc(type, btn) {
   if (!currentResult) { toast('Génère d\'abord un plan', 'error'); return; }
   if (btn) btn.classList.add('loading');
   try {
+    let _docAuthHdr = {};
+    try {
+      const _sb = window._eadeeSb || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
+      if (_sb) {
+        const { data: { session } } = await _sb.auth.getSession();
+        if (session?.access_token) _docAuthHdr = { 'Authorization': 'Bearer ' + session.access_token };
+      }
+    } catch(_) {}
     const res = await fetch('/api/generate-document', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ..._docAuthHdr },
       body: JSON.stringify({ type, plan: currentResult }),
     });
     if (!res.ok) {
@@ -111,6 +119,8 @@ async function downloadDoc(type, btn) {
     // PDF HTML → ouvrir dans un nouvel onglet pour impression navigateur
     if (type.endsWith('_pdf') || type === 'fiche_synthese') {
       window.open(url, '_blank');
+      // Libérer le blob après que le navigateur a eu le temps de charger la page
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
       toast('Document ouvert — utilisez Ctrl+P pour exporter en PDF', 'success');
     } else {
       const a = document.createElement('a');

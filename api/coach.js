@@ -26,6 +26,21 @@ Tu n'es PAS expert-comptable ni avocat : pour des conseils juridiques ou fiscaux
 export default async function handler(req) {
   if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 });
 
+  // ── Auth guard — Bearer JWT Supabase ──────────────────────────────────
+  const authHeader = req.headers.get('authorization') || '';
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  if (!token) return new Response(JSON.stringify({ error: 'Non authentifié' }), { status: 401 });
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+    const userRes = await fetch(`${supabaseUrl}/auth/v1/user`, {
+      headers: { 'apikey': supabaseAnonKey, 'Authorization': `Bearer ${token}` },
+    });
+    if (!userRes.ok) return new Response(JSON.stringify({ error: 'Token invalide' }), { status: 401 });
+  } catch (_) {
+    return new Response(JSON.stringify({ error: 'Vérification auth échouée' }), { status: 401 });
+  }
+
   try {
     const { messages, plan, userId, userName } = await req.json();
 

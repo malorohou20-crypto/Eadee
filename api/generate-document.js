@@ -32,6 +32,21 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // ── Auth guard — Bearer JWT Supabase ──────────────────────────────────
+  const authHeader = req.headers['authorization'] || '';
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  if (!token) return res.status(401).json({ error: 'Non authentifié' });
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+    const userRes = await fetch(`${supabaseUrl}/auth/v1/user`, {
+      headers: { 'apikey': supabaseAnonKey, 'Authorization': `Bearer ${token}` },
+    });
+    if (!userRes.ok) return res.status(401).json({ error: 'Token invalide' });
+  } catch (_) {
+    return res.status(401).json({ error: 'Vérification auth échouée' });
+  }
+
   try {
     const { type, plan: rawPlan } = req.body;
     if (!type || !rawPlan) {

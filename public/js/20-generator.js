@@ -204,6 +204,8 @@ const genStatuses = [
   'Finalisation du business plan complet...'
 ];
 
+let _genAbortController = null;
+
 async function generateDashPlan() {
   // En v2, l'auth guard met window.user mais pas la variable let user de 00-state.js
   if (!user && window.user) { user = window.user; userCredits = window._eadeeCredits || 0; currentPlan = window._eadeePlan || 'free'; }
@@ -242,9 +244,23 @@ async function generateDashPlan() {
 
   try {
     // ── Pipeline complet v2.0 avec system prompt bancaire + INSEE + web search ──
+    // Annuler toute génération précédente
+    if (_genAbortController) _genAbortController.abort();
+    _genAbortController = new AbortController();
+
+    let _genAuthHdr = {};
+    try {
+      const _sb = window._eadeeSb || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
+      if (_sb) {
+        const { data: { session } } = await _sb.auth.getSession();
+        if (session?.access_token) _genAuthHdr = { 'Authorization': 'Bearer ' + session.access_token };
+      }
+    } catch(_) {}
+
     const res = await fetch('/api/generate-plan', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      signal: _genAbortController.signal,
+      headers: { 'Content-Type': 'application/json', ..._genAuthHdr },
       body: JSON.stringify({
         idea,
         sector,
@@ -282,14 +298,14 @@ async function generateDashPlan() {
     if (IS_DEMO) {
       localStorage.setItem('eadee_demo_credits', String(userCredits));
     } else if (supabaseClient && user) {
-      const userId = (await supabaseClient.auth.getUser()).data.user?.id;
+      const userId = user?.id;
       // Sauvegarder le plan dans Supabase (persistance cross-session)
       supabaseClient.from('plans').insert({
         user_id: userId,
         name: plan.nom_business || 'Plan sans nom',
         score: plan.score_viabilite || null,
         sections: plan,
-      }).then(function(result) {
+      }).select().then(function(result) {
         if (result.error) { console.error('Save plan Supabase:', result.error); }
         else if (result.data && result.data[0]) {
           // Mettre à jour l'ID en mémoire avec l'ID Supabase
@@ -298,7 +314,7 @@ async function generateDashPlan() {
         }
       });
       // Décrémenter les crédits
-      supabaseClient.from('profiles').update({ credits: userCredits }).eq('id', userId).then(() => {});
+      if (userId) supabaseClient.from('profiles').update({ credits: userCredits }).eq('id', userId).then(() => {});
     }
 
     stopGenSectionsAnim();

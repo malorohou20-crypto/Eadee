@@ -1883,6 +1883,15 @@
       document.getElementById('resetOverlay').style.display = 'block';
     }
   });
+
+  // Ouvrir la modal auth si ?login=true (redirect depuis eadee-app-v2.html)
+  (function() {
+    var p = new URLSearchParams(window.location.search);
+    if (p.get('login') === 'true') {
+      window.history.replaceState({}, '', window.location.pathname);
+      window.openAuth(p.get('mode') || 'signup');
+    }
+  })();
 })();
 </script>
 
