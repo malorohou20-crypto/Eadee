@@ -1594,28 +1594,9 @@
               <span style="font-family:var(--sans);font-size:10.5px;color:var(--ink-3);letter-spacing:0.06em">×8</span>
             </div>
 
-            <div class="card pay-form" style="padding:0;margin-top:18px">
-              <div class="pay-form-head">
-                <span class="label">Paiement sécurisé</span>
-                <span class="secure">SSL 256-bit · Stripe</span>
-              </div>
-              <div class="pay-fields">
-                <div class="field">
-                  <label>Titulaire de la carte</label>
-                  <input type="text" placeholder="Jean Dupont" />
-                </div>
-                <div class="field">
-                  <label>Numéro de carte</label>
-                  <input type="text" placeholder="1234 5678 9012 3456" />
-                </div>
-                <div class="row-2">
-                  <div class="field"><label>Expiration</label><input type="text" placeholder="MM/AA" /></div>
-                  <div class="field"><label>CVC</label><input type="text" placeholder="123" /></div>
-                </div>
-              </div>
-              <div class="pay-actions">
-                <button id="payBtn" class="btn btn-accent btn-lg btn-block" onclick="processPayment()">Acheter mes crédits — 29,99€</button>
-              </div>
+            <div style="margin-top:18px">
+              <button id="payBtn" class="btn btn-accent btn-lg btn-block" onclick="processPayment()">Payer avec Stripe →</button>
+              <p style="text-align:center;margin:10px 0 0;font-size:12px;color:var(--ink-3);font-family:var(--mono)">SSL 256-bit · Paiement sécurisé Stripe</p>
             </div>
           </div>
 
@@ -1691,13 +1672,12 @@
             <div class="card set-section" id="s-secu">
               <span class="label">02 · Sécurité</span>
               <h2 style="margin-top:8px">Mot de passe</h2>
-              <p class="desc">Choisis un mot de passe d'au moins 12 caractères. Active la 2FA pour plus de tranquillité.</p>
+              <p class="desc">Choisis un mot de passe d'au moins 12 caractères.</p>
               <div class="fields">
                 <div><label>Nouveau mot de passe</label><input type="password" id="settingsNewPwd" placeholder="••••••••" /></div>
                 <div><label>Confirmer</label><input type="password" id="settingsConfirmPwd" placeholder="••••••••" /></div>
               </div>
               <div class="set-foot">
-                <button class="btn btn-ghost" onclick="toast('La 2FA par email sera disponible prochainement.','info')">Activer la 2FA</button>
                 <button class="btn" onclick="updatePassword()">Changer le mot de passe</button>
               </div>
             </div>
@@ -2284,6 +2264,16 @@ document.addEventListener('DOMContentLoaded', async function() {
       <div class="dossier-spinner"></div>
       <div class="dossier-loading-text" id="dossierLoadingText">Génération du dossier en cours…</div>
     </div>
+  </div>
+</div>
+
+<div id="legalModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;justify-content:center;align-items:center;padding:20px" onclick="if(event.target===this)closeLegal()">
+  <div style="background:var(--paper);border:1px solid var(--rule);border-radius:16px;width:min(680px,95vw);max-height:85vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.12)">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:24px 28px;border-bottom:1px solid var(--rule);flex-shrink:0">
+      <h3 id="legalModalTitle" style="font-family:var(--serif);font-size:20px;font-weight:400;margin:0;color:var(--ink)"></h3>
+      <button onclick="closeLegal()" style="background:none;border:none;cursor:pointer;color:var(--ink-3);font-size:24px;line-height:1;padding:4px">×</button>
+    </div>
+    <div id="legalModalBody" style="overflow-y:auto;padding:28px;font-size:14px;line-height:1.75;color:var(--ink-2)"></div>
   </div>
 </div>
 

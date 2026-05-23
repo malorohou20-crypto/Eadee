@@ -83,8 +83,15 @@ function traduireErreurAuth(msg) {
   return msg;
 }
 
-function handleGoogleAuth() {
-  toast('Connexion Google bientôt disponible.', 'error');
+async function handleGoogleAuth() {
+  try {
+    await supabaseClient.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin + '/eadee-app-v2.html' }
+    });
+  } catch(e) {
+    toast('Erreur Google — réessaie.', 'error');
+  }
 }
 
 async function logout() {
