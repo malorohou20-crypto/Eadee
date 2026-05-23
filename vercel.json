@@ -1,7 +1,7 @@
 {
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/((?!eadee-app-v2\\.html$|test-renderer-v3\\.html$).*)", "destination": "/index.html" }
+    { "source": "/((?!eadee-app-v2\\.html$).*)", "destination": "/index.html" }
   ],
   "functions": {
     "api/generate-plan.js": { "maxDuration": 300 }
