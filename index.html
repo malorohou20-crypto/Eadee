@@ -752,6 +752,10 @@
     .cookie{left:12px;right:12px;max-width:none}
     .foot-mark{display:none}
   }
+
+  /* ——— SCROLL REVEAL ——— */
+  .reveal{opacity:0;transform:translateY(22px);transition:opacity .65s ease,transform .65s ease}
+  .reveal.visible{opacity:1;transform:translateY(0)}
 </style>
 </head>
 <body>
@@ -1673,6 +1677,34 @@
       btn.disabled=false;
     }
   };
+})();
+
+// ——— SCROLL REVEAL ———
+(function(){
+  const groups = [
+    { sel: '.section-head',   delay: 0 },
+    { sel: '#process .step',  stagger: 0.1 },
+    { sel: '.feature-text',   delay: 0 },
+    { sel: '.feature-visual', delay: 0.14 },
+    { sel: '.trans-col',      stagger: 0.1 },
+    { sel: '.section-lead',   delay: 0.12 },
+    { sel: '.toc-tabs',       delay: 0.12 },
+    { sel: '.toc-grid',       delay: 0.2 },
+    { sel: '.price',          stagger: 0.1 },
+    { sel: '.price-foot',     delay: 0.3 },
+    { sel: '.price-bullets',  delay: 0.35 },
+    { sel: '.faq',            delay: 0.1 },
+  ];
+  groups.forEach(({sel, delay=0, stagger}) => {
+    document.querySelectorAll(sel).forEach((el, i) => {
+      el.classList.add('reveal');
+      el.style.transitionDelay = (stagger ? i * stagger : delay) + 's';
+    });
+  });
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 })();
 </script>
 
