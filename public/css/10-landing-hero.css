@@ -206,7 +206,7 @@
   z-index: 2;
 }
 .hero-intro-word {
-  font-family: "Fraunces", "Instrument Serif", Georgia, serif;
+  font-family: "Instrument Serif", "Iowan Old Style", "Apple Garamond", Georgia, serif;
   font-style: italic;
   font-size: clamp(52px, 7vw, 72px);
   letter-spacing: 2px;
@@ -225,7 +225,7 @@
   text-align: center;
 }
 .hero-h1-new {
-  font-family: "Fraunces", "Instrument Serif", Georgia, serif;
+  font-family: "Instrument Serif", "Iowan Old Style", "Apple Garamond", Georgia, serif;
   font-weight: 400;
   font-size: clamp(48px, 7.5vw, 88px);
   line-height: 1.04;
