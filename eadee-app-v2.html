@@ -123,7 +123,7 @@
   }
 
   /* ========= TOPBAR ========= */
-  .main{display:flex;flex-direction:column;min-width:0}
+  .main{display:flex;flex-direction:column;min-width:0;position:relative;overflow:clip}
   .topbar{
     display:flex;align-items:center;justify-content:space-between;
     padding:14px 32px;border-bottom:1px solid var(--rule);background:var(--bg);
@@ -209,9 +209,24 @@
   .btn-block{width:100%;justify-content:center}
 
   /* sections / screens */
-  .screen{display:none}
-  .screen.active{display:block;animation:screenIn var(--dur-slow) var(--ease-out) both}
-  @keyframes screenIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .screen{display:none;position:relative}
+  .screen.active{
+    display:block;position:relative;z-index:1;
+    animation:screenIn 380ms cubic-bezier(0.16,1,0.3,1) both;
+  }
+  .screen.leaving{
+    display:block;position:absolute;top:0;left:0;right:0;
+    z-index:0;pointer-events:none;
+    animation:screenOut 160ms cubic-bezier(0.4,0,1,1) forwards;
+  }
+  @keyframes screenIn{
+    from{opacity:0;transform:translateY(16px);filter:blur(5px)}
+    to{opacity:1;transform:translateY(0);filter:blur(0)}
+  }
+  @keyframes screenOut{
+    from{opacity:1;transform:translateY(0);filter:blur(0)}
+    to{opacity:0;transform:translateY(-10px);filter:blur(3px)}
+  }
 
   /* ====================== SCREEN: GENERATOR ====================== */
   .gen-banner{
@@ -1809,33 +1824,51 @@
   }
 
   function go(name){
-    screens.forEach(s => s.classList.toggle('active', s.dataset.screen === name));
+    const current = document.querySelector('.screen.active');
+    const next    = document.querySelector('.screen[data-screen="' + name + '"]');
+    if (!next || (current && current === next)) return;
+
+    // Mise à jour immédiate : sidebar + breadcrumb + fermeture mobile
     document.querySelectorAll('.side-link').forEach(l => l.classList.toggle('active', l.dataset.screen === name));
     crumb.textContent = labels[name] || '—';
-    // Close mobile sidebar on navigate
     const side = document.querySelector('.side');
     const bd   = document.getElementById('sideBackdrop');
     if (side && side.classList.contains('open')) { side.classList.remove('open'); if (bd) bd.style.display='none'; }
-    window.scrollTo({top:0, behavior:'instant'});
-    // Reset générateur : cacher le résultat et réafficher le formulaire
-    if (name === 'gen') {
-      const r = document.getElementById('dashPlanResult');
-      if (r) r.style.display = 'none';
-      const f = document.querySelector('.gen-grid');
-      if (f) f.style.display = '';
-      const b = document.getElementById('genBanner');
-      if (b) b.style.display = 'none'; // masqué par défaut, checkDraft le réaffiche si besoin
-      const h = document.querySelector('[data-screen="gen"] .page-head');
-      if (h) h.style.display = '';
-      setTimeout(function() { if (typeof checkDraft === 'function') checkDraft(); }, 80);
+
+    // Animation sortie sur l'écran courant
+    if (current) {
+      current.classList.add('leaving');
+      current.classList.remove('active');
+      setTimeout(function(){ current.classList.remove('leaving'); }, 280);
     }
-    // Déclencher le chargement des données selon la section (après chargement des scripts)
-    setTimeout(function() {
-      if (name === 'plans'    && typeof renderHistory === 'function')      { try { renderHistory(); } catch(e) { console.warn('renderHistory:', e); } }
-      if (name === 'expert'   && typeof _initChatView === 'function') { try { _initChatView(); } catch(e) { console.warn('_initChatView:', e); } }
-      if (name === 'settings' && typeof populateSettings === 'function')   { try { populateSettings(); } catch(e) { console.warn('populateSettings:', e); } }
-      if (name === 'credits'  && typeof initBillingView === 'function')    { try { initBillingView(); } catch(e) { console.warn('initBillingView:', e); } }
-    }, 50);
+
+    // Entrée du nouvel écran avec léger décalage (overlap cross-fade)
+    var delay = current ? 80 : 0;
+    setTimeout(function(){
+      screens.forEach(function(s){ if (s !== current) s.classList.remove('active'); });
+      next.classList.add('active');
+      window.scrollTo({top:0, behavior:'instant'});
+
+      // Reset générateur
+      if (name === 'gen') {
+        const r = document.getElementById('dashPlanResult');
+        if (r) r.style.display = 'none';
+        const f = document.querySelector('.gen-grid');
+        if (f) f.style.display = '';
+        const b = document.getElementById('genBanner');
+        if (b) b.style.display = 'none';
+        const h = document.querySelector('[data-screen="gen"] .page-head');
+        if (h) h.style.display = '';
+        setTimeout(function() { if (typeof checkDraft === 'function') checkDraft(); }, 80);
+      }
+      // Chargement des données par section
+      setTimeout(function() {
+        if (name === 'plans'    && typeof renderHistory === 'function')    { try { renderHistory(); } catch(e) { console.warn('renderHistory:', e); } }
+        if (name === 'expert'   && typeof _initChatView === 'function')    { try { _initChatView(); } catch(e) { console.warn('_initChatView:', e); } }
+        if (name === 'settings' && typeof populateSettings === 'function') { try { populateSettings(); } catch(e) { console.warn('populateSettings:', e); } }
+        if (name === 'credits'  && typeof initBillingView === 'function')  { try { initBillingView(); } catch(e) { console.warn('initBillingView:', e); } }
+      }, 50);
+    }, delay);
   }
   // Exposer go() globalement pour openFromHistory et autres JS
   window.go = go;
