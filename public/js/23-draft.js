@@ -5,7 +5,7 @@ function checkOnboarding() {
   if (!localStorage.getItem('eadee_onboarded')) {
     banner.style.display = 'block';
     const title = document.getElementById('onboarding-title');
-    if (title && user) title.textContent = 'Bienvenue ' + user.name.split(' ')[0] + ' !';
+    if (title && user) title.textContent = 'Bienvenue ' + (user.name || user.email || '').split(' ')[0] + ' !';
   } else {
     banner.style.display = 'none';
   }
@@ -21,7 +21,7 @@ function updateDashHeader() {
   const titleEl = document.getElementById('dash-gen-title');
   const subEl = document.getElementById('dash-gen-sub');
   if (!titleEl || !subEl) return;
-  const firstName = user ? user.name.split(' ')[0] : '';
+  const firstName = user ? (user.name || user.email || '').split(' ')[0] : '';
   if (firstName) {
     titleEl.textContent = 'Bonjour ' + firstName + ', prêt à valider ta prochaine idée ?';
   } else {
@@ -117,6 +117,7 @@ function checkDraft() {
         if (preview) preview.textContent = '« ' + last.idea.substring(0, 60) + (last.idea.length > 60 ? '…' : '') + ' »';
         banner.style.display = 'flex';
         banner._fromHistory = true;
+        banner._historyPlan = last; // stocker la référence directe, pas l'index
         banner._draft = { idea: last.idea };
         return;
       }
@@ -143,8 +144,8 @@ function resumeDraft() {
   }
   if (!d || !d.idea) return;
   banner.style.display = 'none';
-  // Si ça vient de l'historique → ouvre directement le dernier plan généré
-  if (banner._fromHistory) { if (typeof openFromHistory === 'function') openFromHistory(0); return; }
+  // Si ça vient de l'historique → ouvre directement le plan référencé (évite l'index périmé)
+  if (banner._fromHistory) { if (typeof openFromHistory === 'function') openFromHistory(banner._historyPlan || plansHistory[0]); return; }
   // Sinon → remplit le formulaire
   const ta = document.getElementById('dashIdea');
   if (ta) { ta.value = d.idea; ta.dispatchEvent(new Event('input')); }

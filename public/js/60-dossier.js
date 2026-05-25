@@ -132,9 +132,19 @@ Réponds UNIQUEMENT avec un JSON valide (pas de markdown, pas de backticks):
 }`;
 
   try {
+    // Récupérer le token Supabase pour l'auth du proxy
+    let authHeader = {};
+    const sb = window._eadeeSb || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
+    if (sb) {
+      try {
+        const { data: { session } } = await sb.auth.getSession();
+        if (session?.access_token) authHeader = { 'Authorization': 'Bearer ' + session.access_token };
+      } catch(_) {}
+    }
+
     const res = await fetch("/api/proxy", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...authHeader },
       body: JSON.stringify({
         model: "claude-sonnet-4-6",
         max_tokens: 8000,

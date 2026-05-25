@@ -46,7 +46,9 @@ function copyPlan() {
     `RISQUES & SOLUTIONS`,
     (r.risques||[]).map(ri => `${ri.titre}\n→ Solution : ${ri.solution}`).join('\n\n'),
   ].join('\n');
-  navigator.clipboard.writeText(text).then(() => toast('Copié dans le presse-papiers ✓', 'success'));
+  navigator.clipboard.writeText(text)
+    .then(() => toast('Copié dans le presse-papiers ✓', 'success'))
+    .catch(() => toast('Copie impossible — autorise le presse-papiers', 'error'));
 }
 
 function savePlan() {

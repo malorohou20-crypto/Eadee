@@ -27,6 +27,8 @@ async function handleAuth() {
   if (errEl) errEl.style.display = 'none';
 
   if (!email || !password) return showAuthError('Email et mot de passe requis.');
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) return showAuthError('Adresse email invalide.');
   if (isSignup && nameInput && !name) return showAuthError('Ton prénom est requis.');
   if (password.length < 8) return showAuthError('Minimum 8 caractères pour le mot de passe.');
 
@@ -91,6 +93,22 @@ async function handleGoogleAuth() {
     });
   } catch(e) {
     toast('Erreur Google — réessaie.', 'error');
+  }
+}
+
+async function forgotPassword() {
+  const email = document.getElementById('authEmail')?.value.trim();
+  if (!email) return showAuthError('Saisis ton email d\'abord.');
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) return showAuthError('Adresse email invalide.');
+  try {
+    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '/?reset=true'
+    });
+    if (error) throw error;
+    showAuthError('✉ Email de réinitialisation envoyé — vérifie ta boîte.');
+  } catch(e) {
+    showAuthError(e.message || 'Erreur — réessaie.');
   }
 }
 

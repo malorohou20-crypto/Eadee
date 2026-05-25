@@ -31,7 +31,7 @@ function updateNav() {
     const planLabel = currentPlan === 'pro' ? 'Pro' : currentPlan === 'empire' ? 'Empire' : currentPlan === 'solo' ? 'Solo' : 'Découverte';
     nr.innerHTML = `
       <span class="nav-plan ${planBadge}" onclick="showPage('dashboard');showView('billing')" style="cursor:pointer" title="Changer de plan">${planLabel}</span>
-      <button class="nav-btn btn-ghost" onclick="showPage('dashboard');showView('settings')">${user.name.split(' ')[0]}</button>
+      <button class="nav-btn btn-ghost" onclick="showPage('dashboard');showView('settings')">${(user.name || user.email || 'Mon compte').split(' ')[0]}</button>
       <button class="nav-btn" style="background:transparent;border:none;color:#9db8f8;font-size:18px;padding:4px 8px;position:relative" onclick="toggleNotifDropdown()" title="Notifications" id="notif-btn">
         <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 2a6 6 0 00-6 6c0 4-2 5-2 5h16s-2-1-2-5a6 6 0 00-6-6z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M11.73 17a2 2 0 01-3.46 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span id="notif-badge" style="position:absolute;top:0;right:0;width:8px;height:8px;border-radius:50%;background:#f87171;display:none"></span>
       </button>

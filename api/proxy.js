@@ -7,6 +7,28 @@ export default async function handler(req, res) {
 
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
 
+  // Vérification JWT Supabase — seuls les utilisateurs authentifiés peuvent utiliser le proxy
+  const authHeader = req.headers['authorization'] || '';
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  if (!token) {
+    return res.status(401).json({ error: { message: 'Non authentifié' } });
+  }
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+    const userRes = await fetch(`${supabaseUrl}/auth/v1/user`, {
+      headers: {
+        'apikey': supabaseAnonKey,
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    if (!userRes.ok) {
+      return res.status(401).json({ error: { message: 'Token invalide' } });
+    }
+  } catch (_) {
+    return res.status(401).json({ error: { message: 'Vérification auth échouée' } });
+  }
+
   try {
     // Validation minimale : éviter l'abus de max_tokens et forcer le modèle autorisé
     const body = req.body;

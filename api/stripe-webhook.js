@@ -12,6 +12,10 @@ async function verifyStripeSignature(payload, sigHeader, secret) {
   const signature = parts['v1'];
   if (!timestamp || !signature) return false;
 
+  // Anti-replay : rejeter les événements de plus de 5 minutes
+  const timestampAge = Math.abs(Date.now() / 1000 - parseInt(timestamp, 10));
+  if (timestampAge > 300) return false;
+
   const signedPayload = `${timestamp}.${payload}`;
   const key = await crypto.subtle.importKey(
     'raw',
