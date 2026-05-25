@@ -81,8 +81,9 @@
     text-decoration:none;color:var(--ink);
   }
   .side-mark{
-    width:30px;height:30px;border-radius:6px;background:var(--ink);color:var(--paper);
+    width:30px;height:30px;border-radius:6px;background:oklch(0.26 0.012 58);color:var(--ink);
     display:grid;place-items:center;font-family:var(--serif);font-style:italic;font-size:20px;line-height:1;
+    border:1px solid var(--rule-2);
   }
   .side-word{font-family:var(--serif);font-size:22px;letter-spacing:0.04em}
   .side-status{
@@ -99,14 +100,14 @@
     font-size:14px;cursor:pointer;
     transition:background var(--dur-fast) var(--ease-smooth),color var(--dur-fast) var(--ease-smooth),transform var(--dur-base) var(--ease-out);
   }
-  .side-link:hover{background:var(--paper);transform:translateX(2px)}
+  .side-link:hover{background:rgba(228,221,214,0.06);transform:translateX(2px)}
   .side-link:active{transform:translateX(1px) scale(0.98)}
-  .side-link.active{background:var(--ink);color:var(--paper);transform:none}
+  .side-link.active{background:rgba(200,75,47,0.14);color:var(--rust);transform:none}
   .side-link .ic{width:18px;height:18px;display:grid;place-items:center;color:currentColor}
   .side-link .ic svg{width:16px;height:16px;stroke:currentColor;stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
   .side-link .kbd{font-family:var(--sans);font-size:10px;color:var(--ink-3);opacity:0;transition:opacity .15s}
   .side-link:hover .kbd{opacity:1}
-  .side-link.active .kbd{color:oklch(0.7 0.01 70);opacity:1}
+  .side-link.active .kbd{color:var(--rust);opacity:0.6}
 
   .side-credits{
     margin:12px;padding:18px;border:1px solid var(--rule);border-radius:10px;background:var(--paper);
@@ -119,8 +120,12 @@
   .credits-meta{font-family:var(--sans);font-size:10.5px;color:var(--ink-3);margin-bottom:12px}
   .credits-cta{
     display:block;text-align:center;text-decoration:none;
-    background:var(--ink);color:var(--paper);padding:9px 12px;border-radius:6px;font-size:13px;
+    background:rgba(200,75,47,0.10);color:var(--rust);
+    padding:9px 12px;border-radius:6px;font-size:13px;
+    border:1px solid rgba(200,75,47,0.30);
+    transition:background .15s,color .15s;
   }
+  .credits-cta:hover{background:rgba(200,75,47,0.18);color:var(--accent)}
 
   /* ========= TOPBAR ========= */
   .main{display:flex;flex-direction:column;min-width:0;position:relative;overflow:clip}
@@ -269,7 +274,7 @@
     border-right:1px solid var(--rule);cursor:pointer;transition:background .15s;
   }
   .seg button:last-child{border-right:0}
-  .seg button.on{background:var(--ink);color:var(--paper)}
+  .seg button.on{background:var(--paper);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,0.25)}
   .seg button:hover:not(.on){background:var(--paper)}
   .row-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
   .help{font-family:var(--sans);font-size:11px;color:var(--ink-3);letter-spacing:0.02em;display:inline-flex;align-items:center;gap:6px}
@@ -451,9 +456,9 @@
     padding:7px 12px;border-radius:999px;font:inherit;font-size:12.5px;cursor:pointer;
     font-family:var(--sans);letter-spacing:0.04em;
   }
-  .filter-tabs button.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .filter-tabs button.on{background:rgba(200,75,47,0.12);color:var(--rust);border-color:rgba(200,75,47,0.35)}
   .filter-tabs button .ct{margin-left:6px;color:var(--ink-3);font-size:10.5px}
-  .filter-tabs button.on .ct{color:oklch(0.7 0.01 70)}
+  .filter-tabs button.on .ct{color:var(--rust);opacity:0.7}
   .plans-search{display:flex;align-items:center;gap:8px;border:1px solid var(--rule);background:var(--paper);border-radius:999px;padding:7px 14px;font-size:13px;color:var(--ink-3);min-width:220px}
   .plans-search input{border:0;outline:0;background:transparent;font:inherit;font-size:13px;flex:1;color:var(--ink)}
 
@@ -595,7 +600,7 @@
     display:block;padding:8px 12px;border-radius:6px;color:var(--ink-2);text-decoration:none;font-size:13.5px;
   }
   .set-toc a:hover{background:var(--paper)}
-  .set-toc a.on{background:var(--ink);color:var(--paper)}
+  .set-toc a.on{background:rgba(200,75,47,0.12);color:var(--rust)}
   .set-section{margin-bottom:28px;scroll-margin-top:90px}
   .set-section h2{font-family:var(--serif);font-size:32px;letter-spacing:-0.015em;margin:0 0 6px;font-weight:400}
   .set-section .desc{color:var(--ink-2);font-size:14px;margin:0 0 18px;max-width:540px;line-height:1.5}
