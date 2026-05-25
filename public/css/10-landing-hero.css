@@ -132,8 +132,6 @@
   position: relative; z-index: 1;
   width: 100%;
   padding: 0 32px;
-  mask-image: linear-gradient(to bottom, black 55%, transparent 92%);
-  -webkit-mask-image: linear-gradient(to bottom, black 55%, transparent 92%);
 }
 .mock-glow {
   position: absolute;
