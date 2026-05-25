@@ -157,7 +157,7 @@ const legalContent = {
       </ul>
       <p><strong>Cookies strictement nécessaires (sans consentement) :</strong></p>
       <table style="width:100%;font-size:12px;border-collapse:collapse;margin-bottom:16px">
-        <thead><tr style="border-bottom:1px solid rgba(255,255,255,0.1)"><th style="text-align:left;padding:6px 8px;color:#7a7f9a">Nom</th><th style="text-align:left;padding:6px 8px;color:#7a7f9a">Finalité</th><th style="text-align:left;padding:6px 8px;color:#7a7f9a">Durée</th></tr></thead>
+        <thead><tr style="border-bottom:1px solid rgba(228,221,214,0.1)"><th style="text-align:left;padding:6px 8px;color:#7a7060">Nom</th><th style="text-align:left;padding:6px 8px;color:#7a7060">Finalité</th><th style="text-align:left;padding:6px 8px;color:#7a7060">Durée</th></tr></thead>
         <tbody>
           <tr><td style="padding:6px 8px"><code>sb-access-token</code></td><td style="padding:6px 8px">Session Supabase (auth)</td><td style="padding:6px 8px">1 heure</td></tr>
           <tr><td style="padding:6px 8px"><code>sb-refresh-token</code></td><td style="padding:6px 8px">Renouvellement session</td><td style="padding:6px 8px">1 mois</td></tr>

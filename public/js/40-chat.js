@@ -347,7 +347,7 @@ function renderChatConvsList() {
     } catch(_) { return false; }
   });
   if (!withConvs.length) {
-    el.innerHTML = '<div style="font-size:12px;color:#7a7f9a;padding:12px 0">Aucune conversation. Choisis un plan pour commencer.</div>';
+    el.innerHTML = '<div style="font-size:12px;color:#7a7060;padding:12px 0">Aucune conversation. Choisis un plan pour commencer.</div>';
     return;
   }
   el.innerHTML = withConvs.map(function(p) {

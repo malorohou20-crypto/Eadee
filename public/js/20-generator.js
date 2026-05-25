@@ -334,9 +334,9 @@ async function generateDashPlan() {
     document.getElementById('dashGenerating').style.display = 'none';
     const errStateEl = document.getElementById('dashEmptyState');
     errStateEl.innerHTML = `
-      <div style="font-size:11px;font-family:'DM Mono',monospace;letter-spacing:0.15em;color:rgba(255,255,255,0.25);margin-bottom:12px">ERREUR</div>
-      <div style="font-size:14px;color:rgba(255,255,255,0.5);max-width:260px;line-height:1.6;text-align:center">
-        <strong style="color:rgba(255,255,255,0.7)">Erreur :</strong><br><span id="dashErrMsg"></span>
+      <div style="font-size:11px;font-family:'DM Mono',monospace;letter-spacing:0.15em;color:rgba(228,221,214,0.25);margin-bottom:12px">ERREUR</div>
+      <div style="font-size:14px;color:rgba(228,221,214,0.5);max-width:260px;line-height:1.6;text-align:center">
+        <strong style="color:rgba(228,221,214,0.7)">Erreur :</strong><br><span id="dashErrMsg"></span>
       </div>
       <button onclick="resetGenerator()" style="margin-top:16px;padding:8px 20px;background:var(--acid);color:var(--ink);border:none;border-radius:4px;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:0.1em;cursor:pointer;">Réessayer</button>
     `;
@@ -369,7 +369,7 @@ function renderReliability(text) {
       V: { color: '#34d399', bg: 'rgba(52,211,153,0.12)', border: 'rgba(52,211,153,0.3)',  label: 'Vérifié' },
       E: { color: '#fbbf24', bg: 'rgba(251,191,36,0.12)', border: 'rgba(251,191,36,0.3)',  label: 'Estimation' },
       H: { color: '#ef4444', bg: 'rgba(239,68,68,0.12)',  border: 'rgba(239,68,68,0.3)',   label: 'Hypothèse' },
-    }[type] || { color: '#7a7f9a', bg: 'rgba(122,127,154,0.1)', border: 'rgba(122,127,154,0.2)', label: '?' };
+    }[type] || { color: '#7a7060', bg: 'rgba(122,112,96,0.1)', border: 'rgba(122,112,96,0.2)', label: '?' };
 
     const safeVal = value.replace(/</g,'&lt;').replace(/>/g,'&gt;');
     const safeSrc = source.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -519,19 +519,19 @@ function drawCrescendoChart(canvasId, labels, values) {
     if (canvas._chart) { canvas._chart.destroy(); }
     const ctx = canvas.getContext('2d');
     const gradient = ctx.createLinearGradient(0, 0, 0, 180);
-    gradient.addColorStop(0, 'rgba(107,143,239,0.35)');
-    gradient.addColorStop(1, 'rgba(167,139,250,0.02)');
+    gradient.addColorStop(0, 'rgba(200,75,47,0.35)');
+    gradient.addColorStop(1, 'rgba(212,132,90,0.02)');
     canvas._chart = new Chart(ctx, {
       type: 'line',
       data: {
         labels,
         datasets: [{
           data: values,
-          borderColor: '#a78bfa',
+          borderColor: '#d4845a',
           backgroundColor: gradient,
           fill: true,
           tension: 0.4,
-          pointBackgroundColor: '#6b8fef',
+          pointBackgroundColor: '#c84b2f',
           pointBorderColor: '#fff',
           pointBorderWidth: 2,
           pointRadius: 5,
@@ -550,8 +550,8 @@ function drawCrescendoChart(canvasId, labels, values) {
           }
         }},
         scales: {
-          x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#7a7f9a', font: { size: 10, family: 'DM Mono' } } },
-          y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#7a7f9a', font: { size: 10, family: 'DM Mono' },
+          x: { grid: { color: 'rgba(228,221,214,0.05)' }, ticks: { color: '#7a7060', font: { size: 10, family: 'DM Mono' } } },
+          y: { grid: { color: 'rgba(228,221,214,0.05)' }, ticks: { color: '#7a7060', font: { size: 10, family: 'DM Mono' },
             callback: v => v >= 1000 ? (v/1000).toFixed(0)+'k€' : v+'€'
           } },
         }
@@ -570,12 +570,12 @@ function drawDonutChart(canvasId, labels, values, colors) {
       type: 'doughnut',
       data: {
         labels,
-        datasets: [{ data: values, backgroundColor: colors, borderColor: '#13141a', borderWidth: 2 }]
+        datasets: [{ data: values, backgroundColor: colors, borderColor: '#1c1915', borderWidth: 2 }]
       },
       options: {
         responsive: true, maintainAspectRatio: false,
         plugins: {
-          legend: { position: 'right', labels: { color: '#7a7f9a', font: { size: 10, family: 'DM Mono' }, padding: 10, boxWidth: 10 } },
+          legend: { position: 'right', labels: { color: '#7a7060', font: { size: 10, family: 'DM Mono' }, padding: 10, boxWidth: 10 } },
         }
       }
     });
@@ -595,8 +595,8 @@ function drawBarChart(canvasId, labels, values, label) {
         datasets: [{
           label,
           data: values,
-          backgroundColor: ['rgba(239,68,68,0.6)','rgba(251,191,36,0.6)','rgba(52,211,153,0.6)','rgba(107,143,239,0.6)'],
-          borderColor: ['#ef4444','#fbbf24','#34d399','#6b8fef'],
+          backgroundColor: ['rgba(239,68,68,0.6)','rgba(251,191,36,0.6)','rgba(52,211,153,0.6)','rgba(212,132,90,0.6)'],
+          borderColor: ['#ef4444','#fbbf24','#34d399','#d4845a'],
           borderWidth: 1,
           borderRadius: 4,
         }]
@@ -606,8 +606,8 @@ function drawBarChart(canvasId, labels, values, label) {
         responsive: true, maintainAspectRatio: false,
         plugins: { legend: { display: false } },
         scales: {
-          x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#7a7f9a', font: { size: 10 } }, max: 100 },
-          y: { grid: { display: false }, ticks: { color: '#ecedf2', font: { size: 11 } } },
+          x: { grid: { color: 'rgba(228,221,214,0.05)' }, ticks: { color: '#7a7060', font: { size: 10 } }, max: 100 },
+          y: { grid: { display: false }, ticks: { color: '#e4ddd6', font: { size: 11 } } },
         }
       }
     });
@@ -684,15 +684,15 @@ function renderRiskCard(r) {
       <div class="risk-title">${esc(r.titre)}</div>
       <div class="risk-level" style="color:${lc};background:${lc}18;border:1px solid ${lc}40">${esc(r.niveau||'')}</div>
     </div>
-    ${r.signal_alarme ? `<div style="font-size:12px;color:rgba(255,255,255,0.45);margin-bottom:6px;line-height:1.5"><span style="color:#fbbf24;font-weight:600">⚠ Signal :</span> ${esc(r.signal_alarme)}</div>` : ''}
-    ${r.solution_preventive ? `<div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:6px;line-height:1.5"><span style="color:#34d399;font-weight:600">✓ Prévention :</span> ${esc(r.solution_preventive)}</div>` : ''}
+    ${r.signal_alarme ? `<div style="font-size:12px;color:rgba(228,221,214,0.45);margin-bottom:6px;line-height:1.5"><span style="color:#fbbf24;font-weight:600">⚠ Signal :</span> ${esc(r.signal_alarme)}</div>` : ''}
+    ${r.solution_preventive ? `<div style="font-size:12px;color:rgba(228,221,214,0.5);margin-bottom:6px;line-height:1.5"><span style="color:#34d399;font-weight:600">✓ Prévention :</span> ${esc(r.solution_preventive)}</div>` : ''}
     <div class="risk-solution"><strong>Mitigation :</strong> ${esc(r.solution)}</div>
   </div>`;
 }
 
 // Helper: aide card
 function renderAideCard(a) {
-  const prioColor = a.priorite==='haute' ? '#34d399' : a.priorite==='moyenne' ? '#fbbf24' : 'rgba(255,255,255,0.3)';
+  const prioColor = a.priorite==='haute' ? '#34d399' : a.priorite==='moyenne' ? '#fbbf24' : 'rgba(228,221,214,0.3)';
   return `<div class="aide-card${a.applicable===false?' aide-disabled':''}">
     <div class="aide-header">
       <div class="aide-nom">${esc(a.nom)}${a.priorite ? `<span style="display:inline-block;margin-left:8px;font-size:9px;font-family:'DM Mono',monospace;font-weight:600;padding:2px 7px;border-radius:10px;background:${prioColor}18;color:${prioColor};border:1px solid ${prioColor}40">${esc(a.priorite)}</span>` : ''}</div>
@@ -706,13 +706,13 @@ function renderAideCard(a) {
 // Helper: persona mini
 function renderPersonaMini(p) {
   if (!p) return '';
-  return `<div style="margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.06)">
-    <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:14px">Client idéal (Persona)</div>
+  return `<div style="margin-top:24px;padding-top:20px;border-top:1px solid rgba(228,221,214,0.06)">
+    <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(228,221,214,0.3);margin-bottom:14px">Client idéal (Persona)</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="stat-mini"><div class="stat-mini-label">Prénom / Âge</div><div style="font-size:15px;font-weight:700;color:#fff;margin-top:4px">${esc(p.nom)}, ${esc(p.age)}</div></div>
-      <div class="stat-mini"><div class="stat-mini-label">Situation</div><div style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:4px;line-height:1.5">${esc(p.situation)}</div></div>
-      <div class="stat-mini" style="grid-column:span 2"><div class="stat-mini-label">Douleurs</div><div style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:4px;line-height:1.6">${esc(p.douleurs)}</div></div>
-      <div class="stat-mini"><div class="stat-mini-label">Motivations</div><div style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:4px;line-height:1.5">${esc(p.motivations)}</div></div>
+      <div class="stat-mini"><div class="stat-mini-label">Prénom / Âge</div><div style="font-size:15px;font-weight:700;color:#e4ddd6;margin-top:4px">${esc(p.nom)}, ${esc(p.age)}</div></div>
+      <div class="stat-mini"><div class="stat-mini-label">Situation</div><div style="font-size:13px;color:rgba(228,221,214,0.7);margin-top:4px;line-height:1.5">${esc(p.situation)}</div></div>
+      <div class="stat-mini" style="grid-column:span 2"><div class="stat-mini-label">Douleurs</div><div style="font-size:13px;color:rgba(228,221,214,0.7);margin-top:4px;line-height:1.6">${esc(p.douleurs)}</div></div>
+      <div class="stat-mini"><div class="stat-mini-label">Motivations</div><div style="font-size:13px;color:rgba(228,221,214,0.7);margin-top:4px;line-height:1.5">${esc(p.motivations)}</div></div>
       <div class="stat-mini"><div class="stat-mini-label">Où le trouver</div><div style="font-size:13px;color:var(--acid);margin-top:4px;line-height:1.5">${esc(p.ou_le_trouver)}</div></div>
     </div>
   </div>`;
@@ -720,17 +720,17 @@ function renderPersonaMini(p) {
 
 // Helper: email block
 function renderEmailBlock(label, data) {
-  return `<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;overflow:hidden">
-    <div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:space-between">
-      <div style="font-weight:700;font-size:14px;color:#fff">${esc(label)}</div>
+  return `<div style="background:rgba(228,221,214,0.04);border:1px solid rgba(228,221,214,0.1);border-radius:10px;overflow:hidden">
+    <div style="padding:12px 16px;border-bottom:1px solid rgba(228,221,214,0.07);display:flex;align-items:center;justify-content:space-between">
+      <div style="font-weight:700;font-size:14px;color:#e4ddd6">${esc(label)}</div>
       <button onclick="copyEmail(this)" data-text="${encodeURIComponent('Objet: '+(data.sujet||'')+'\n\n'+(data.corps||''))}"
-        style="font-family:'DM Mono',monospace;font-size:11px;background:rgba(107,143,239,0.1);color:var(--acid);border:1px solid rgba(107,143,239,0.2);border-radius:20px;padding:4px 12px;cursor:pointer">Copier</button>
+        style="font-family:'DM Mono',monospace;font-size:11px;background:rgba(200,75,47,0.1);color:var(--acid);border:1px solid rgba(200,75,47,0.2);border-radius:20px;padding:4px 12px;cursor:pointer">Copier</button>
     </div>
     <div style="padding:14px 16px">
-      <div style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:6px">OBJET</div>
+      <div style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(228,221,214,0.35);margin-bottom:6px">OBJET</div>
       <div style="font-size:13px;color:var(--acid);font-weight:600;margin-bottom:12px">${esc(data.sujet||'')}</div>
-      <div style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:6px">CORPS</div>
-      <div style="font-size:13px;color:rgba(255,255,255,0.75);line-height:1.75;white-space:pre-wrap">${esc(data.corps||'')}</div>
+      <div style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(228,221,214,0.35);margin-bottom:6px">CORPS</div>
+      <div style="font-size:13px;color:rgba(228,221,214,0.75);line-height:1.75;white-space:pre-wrap">${esc(data.corps||'')}</div>
     </div>
   </div>`;
 }
@@ -738,19 +738,19 @@ function renderEmailBlock(label, data) {
 // Helper: démarches admin
 function renderDemarchesHtml(demarches) {
   if (!demarches?.length) return '';
-  return `<div style="margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.06)">
-    <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:14px">Démarches administratives</div>
+  return `<div style="margin-top:24px;padding-top:20px;border-top:1px solid rgba(228,221,214,0.06)">
+    <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(228,221,214,0.3);margin-bottom:14px">Démarches administratives</div>
     <div style="display:flex;flex-direction:column;gap:10px">
       ${demarches.map(d => `
-        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:8px;padding:14px 16px">
+        <div style="background:rgba(228,221,214,0.04);border:1px solid rgba(228,221,214,0.09);border-radius:8px;padding:14px 16px">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px">
-            <div style="font-weight:700;font-size:13px;color:#fff">${esc(d.etape)}</div>
+            <div style="font-weight:700;font-size:13px;color:#e4ddd6">${esc(d.etape)}</div>
             <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <span style="font-family:'DM Mono',monospace;font-size:10px;background:rgba(107,143,239,0.1);color:var(--acid);padding:2px 8px;border-radius:20px">${esc(d.delai)}</span>
-              <span style="font-family:'DM Mono',monospace;font-size:10px;background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.5);padding:2px 8px;border-radius:20px">${esc(d.cout)}</span>
+              <span style="font-family:'DM Mono',monospace;font-size:10px;background:rgba(200,75,47,0.1);color:var(--acid);padding:2px 8px;border-radius:20px">${esc(d.delai)}</span>
+              <span style="font-family:'DM Mono',monospace;font-size:10px;background:rgba(228,221,214,0.07);color:rgba(228,221,214,0.5);padding:2px 8px;border-radius:20px">${esc(d.cout)}</span>
             </div>
           </div>
-          <div style="font-size:13px;color:rgba(255,255,255,0.65);line-height:1.65;margin-bottom:6px">${esc(d.detail)}</div>
+          <div style="font-size:13px;color:rgba(228,221,214,0.65);line-height:1.65;margin-bottom:6px">${esc(d.detail)}</div>
           <a href="https://${esc(d.lien)}" target="_blank" rel="noopener noreferrer" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--acid);text-decoration:none;opacity:0.7">→ ${esc(d.lien)}</a>
         </div>`).join('')}
     </div>
@@ -778,38 +778,38 @@ function renderScoreBancabilite(sb) {
     const pts = d.points ?? 0;
     const pct = Math.round((pts / r.max) * 100);
     const c2 = pct >= 70 ? '#34d399' : pct >= 40 ? '#fbbf24' : '#ef4444';
-    return `<div style="display:flex;flex-direction:column;gap:4px;padding:10px 14px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.07)">
+    return `<div style="display:flex;flex-direction:column;gap:4px;padding:10px 14px;background:rgba(228,221,214,0.03);border-radius:8px;border:1px solid rgba(228,221,214,0.07)">
       <div style="display:flex;justify-content:space-between;align-items:center">
-        <div style="font-size:12px;color:rgba(255,255,255,0.6)">${r.l}</div>
+        <div style="font-size:12px;color:rgba(228,221,214,0.6)">${r.l}</div>
         <div style="font-family:'DM Mono',monospace;font-size:11px;font-weight:700;color:${c2}">${pts}/${r.max}</div>
       </div>
-      <div style="height:4px;background:rgba(255,255,255,0.07);border-radius:2px">
+      <div style="height:4px;background:rgba(228,221,214,0.07);border-radius:2px">
         <div style="height:4px;width:${pct}%;background:${c2};border-radius:2px;transition:width 0.6s"></div>
       </div>
-      ${d.commentaire ? `<div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:2px;line-height:1.4">${esc(d.commentaire)}</div>` : ''}
+      ${d.commentaire ? `<div style="font-size:11px;color:rgba(228,221,214,0.35);margin-top:2px;line-height:1.4">${esc(d.commentaire)}</div>` : ''}
     </div>`;
   }).join('');
 
-  return `<div class="plan-block" style="border-color:${color}30;background:linear-gradient(135deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01))">
+  return `<div class="plan-block" style="border-color:${color}30;background:linear-gradient(135deg,rgba(228,221,214,0.02),rgba(228,221,214,0.01))">
     <div class="plan-block-title" style="color:${color}">🏦 Score Bancabilité</div>
     <div style="display:flex;align-items:center;gap:20px;margin-bottom:20px;flex-wrap:wrap">
       <div style="display:flex;align-items:center;gap:12px">
         <div style="width:64px;height:64px;border-radius:50%;border:3px solid ${color};display:flex;align-items:center;justify-content:center;flex-shrink:0">
           <div style="text-align:center">
             <div style="font-size:22px;font-weight:800;color:${color};line-height:1">${sb.note}</div>
-            <div style="font-family:'DM Mono',monospace;font-size:8px;color:rgba(255,255,255,0.35);letter-spacing:0.1em">/100</div>
+            <div style="font-family:'DM Mono',monospace;font-size:8px;color:rgba(228,221,214,0.35);letter-spacing:0.1em">/100</div>
           </div>
         </div>
         <div>
           <div style="font-size:14px;font-weight:700;color:${color}">${label}</div>
-          <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:3px;max-width:280px;line-height:1.5">${esc(sb.interpretation||'')}</div>
+          <div style="font-size:12px;color:rgba(228,221,214,0.5);margin-top:3px;max-width:280px;line-height:1.5">${esc(sb.interpretation||'')}</div>
         </div>
       </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">${detail ? rows : ''}</div>
-    ${sb.message_banquier ? `<div style="padding:14px 16px;background:rgba(107,143,239,0.07);border:1px solid rgba(107,143,239,0.2);border-radius:10px">
-      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:8px">Ce que dira le banquier</div>
-      <div style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.7;font-style:italic">"${esc(sb.message_banquier)}"</div>
+    ${sb.message_banquier ? `<div style="padding:14px 16px;background:rgba(200,75,47,0.07);border:1px solid rgba(200,75,47,0.2);border-radius:10px">
+      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(228,221,214,0.3);margin-bottom:8px">Ce que dira le banquier</div>
+      <div style="font-size:13px;color:rgba(228,221,214,0.7);line-height:1.7;font-style:italic">"${esc(sb.message_banquier)}"</div>
     </div>` : ''}
   </div>`;
 }
@@ -819,39 +819,39 @@ function renderPlanFinancement(pf) {
   const besoins = pf.besoins || {};
   const ressources = pf.ressources || {};
 
-  const row = (label, val) => val ? `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
-    <div style="font-size:13px;color:rgba(255,255,255,0.6)">${esc(label)}</div>
-    <div style="font-size:13px;font-weight:600;color:#fff">${relText(String(val))}</div>
+  const row = (label, val) => val ? `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(228,221,214,0.05)">
+    <div style="font-size:13px;color:rgba(228,221,214,0.6)">${esc(label)}</div>
+    <div style="font-size:13px;font-weight:600;color:#e4ddd6">${relText(String(val))}</div>
   </div>` : '';
 
   return `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
       <div>
-        <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:10px">Besoins</div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(228,221,214,0.3);margin-bottom:10px">Besoins</div>
         ${row('Investissements matériels', besoins.investissements_materiels)}
         ${row('Investissements immatériels', besoins.investissements_immateriels)}
         ${row('BFR démarrage', besoins.bfr_demarrage)}
         ${row('Trésorerie de sécurité', besoins.tresorerie_securite)}
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;margin-top:4px;border-top:1px solid rgba(255,255,255,0.12)">
-          <div style="font-size:13px;font-weight:700;color:#fff">TOTAL BESOINS</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;margin-top:4px;border-top:1px solid rgba(228,221,214,0.12)">
+          <div style="font-size:13px;font-weight:700;color:#e4ddd6">TOTAL BESOINS</div>
           <div style="font-size:15px;font-weight:800;color:var(--acid)">${relText(String(besoins.total_besoins||'—'))}</div>
         </div>
       </div>
       <div>
-        <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:10px">Ressources</div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(228,221,214,0.3);margin-bottom:10px">Ressources</div>
         ${row('Apport personnel', ressources.apport_personnel)}
         ${row('Prêt bancaire', ressources.pret_bancaire)}
         ${ressources.pret_bpi && ressources.pret_bpi !== 'null' ? row('Prêt BPI', ressources.pret_bpi) : ''}
         ${ressources.pret_honneur && ressources.pret_honneur !== 'null' ? row('Prêt d\'honneur', ressources.pret_honneur) : ''}
         ${ressources.subventions && ressources.subventions !== 'null' ? row('Subventions', ressources.subventions) : ''}
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;margin-top:4px;border-top:1px solid rgba(255,255,255,0.12)">
-          <div style="font-size:13px;font-weight:700;color:#fff">TOTAL RESSOURCES</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;margin-top:4px;border-top:1px solid rgba(228,221,214,0.12)">
+          <div style="font-size:13px;font-weight:700;color:#e4ddd6">TOTAL RESSOURCES</div>
           <div style="font-size:15px;font-weight:800;color:#34d399">${relText(String(ressources.total_ressources||'—'))}</div>
         </div>
       </div>
     </div>
-    ${pf.message_banquier ? `<div style="padding:12px 16px;background:rgba(107,143,239,0.07);border:1px solid rgba(107,143,239,0.2);border-radius:10px;font-size:13px;color:rgba(255,255,255,0.65);line-height:1.7">
-      <span style="color:#9db8f8;font-weight:600">💬 Vision banquier : </span>${esc(pf.message_banquier)}
+    ${pf.message_banquier ? `<div style="padding:12px 16px;background:rgba(200,75,47,0.07);border:1px solid rgba(200,75,47,0.2);border-radius:10px;font-size:13px;color:rgba(228,221,214,0.65);line-height:1.7">
+      <span style="color:#d4845a;font-weight:600">💬 Vision banquier : </span>${esc(pf.message_banquier)}
     </div>` : ''}`;
 }
 
@@ -865,28 +865,28 @@ function renderScenariosBlock(sc) {
   const cards = configs.map(({ key, label, color, icon }) => {
     const s = sc[key];
     if (!s) return '';
-    return `<div style="padding:14px;background:rgba(255,255,255,0.03);border:1px solid ${color}30;border-radius:10px">
+    return `<div style="padding:14px;background:rgba(228,221,214,0.03);border:1px solid ${color}30;border-radius:10px">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
         <div style="width:24px;height:24px;border-radius:50%;background:${color}20;color:${color};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;flex-shrink:0">${icon}</div>
         <div style="font-weight:700;font-size:13px;color:${color}">${label}</div>
       </div>
-      <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:10px;line-height:1.5;font-style:italic">${esc(s.hypothese||'')}</div>
+      <div style="font-size:11px;color:rgba(228,221,214,0.4);margin-bottom:10px;line-height:1.5;font-style:italic">${esc(s.hypothese||'')}</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
-        <div style="text-align:center;padding:6px;background:rgba(255,255,255,0.04);border-radius:6px">
-          <div style="font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,0.3);margin-bottom:2px">CA An 1</div>
+        <div style="text-align:center;padding:6px;background:rgba(228,221,214,0.04);border-radius:6px">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:rgba(228,221,214,0.3);margin-bottom:2px">CA An 1</div>
           <div style="font-size:13px;font-weight:700;color:${color}">${relText(String(s.ca_an1||'—'))}</div>
         </div>
-        <div style="text-align:center;padding:6px;background:rgba(255,255,255,0.04);border-radius:6px">
-          <div style="font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,0.3);margin-bottom:2px">CA An 3</div>
+        <div style="text-align:center;padding:6px;background:rgba(228,221,214,0.04);border-radius:6px">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:rgba(228,221,214,0.3);margin-bottom:2px">CA An 3</div>
           <div style="font-size:13px;font-weight:700;color:${color}">${relText(String(s.ca_an3||'—'))}</div>
         </div>
       </div>
-      ${s.point_mort_mois ? `<div style="margin-top:8px;font-size:11px;color:rgba(255,255,255,0.45);text-align:center">Break-even : ${relText(String(s.point_mort_mois))}</div>` : ''}
+      ${s.point_mort_mois ? `<div style="margin-top:8px;font-size:11px;color:rgba(228,221,214,0.45);text-align:center">Break-even : ${relText(String(s.point_mort_mois))}</div>` : ''}
     </div>`;
   }).join('');
 
-  return `<div style="margin-top:20px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.06)">
-    <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:12px">Scénarios financiers</div>
+  return `<div style="margin-top:20px;padding-top:20px;border-top:1px solid rgba(228,221,214,0.06)">
+    <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(228,221,214,0.3);margin-bottom:12px">Scénarios financiers</div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">${cards}</div>
   </div>`;
 }
@@ -896,24 +896,24 @@ function renderTresorerieMensuelle(tm) {
   const rows = tm.map(m => {
     const hasAlert = m.alerte && m.alerte !== 'null';
     return `<tr style="${hasAlert ? 'background:rgba(239,68,68,0.08)' : ''}">
-      <td style="padding:7px 10px;font-size:12px;color:rgba(255,255,255,0.7);border-bottom:1px solid rgba(255,255,255,0.04);white-space:nowrap">${esc(m.mois||'')}</td>
-      <td style="padding:7px 10px;font-size:12px;color:#34d399;font-family:'DM Mono',monospace;border-bottom:1px solid rgba(255,255,255,0.04);text-align:right">${relText(String(m.encaissements||'—'))}</td>
-      <td style="padding:7px 10px;font-size:12px;color:#ef4444;font-family:'DM Mono',monospace;border-bottom:1px solid rgba(255,255,255,0.04);text-align:right">${relText(String(m.decaissements||'—'))}</td>
-      <td style="padding:7px 10px;font-size:12px;font-weight:600;font-family:'DM Mono',monospace;border-bottom:1px solid rgba(255,255,255,0.04);text-align:right">${relText(String(m.solde_mois||'—'))}</td>
-      <td style="padding:7px 10px;font-size:12px;font-weight:700;color:var(--acid);font-family:'DM Mono',monospace;border-bottom:1px solid rgba(255,255,255,0.04);text-align:right">${relText(String(m.solde_cumule||'—'))}</td>
-      ${hasAlert ? `<td style="padding:7px 10px;font-size:11px;color:#fbbf24;border-bottom:1px solid rgba(255,255,255,0.04)">⚠ ${esc(m.alerte)}</td>` : '<td></td>'}
+      <td style="padding:7px 10px;font-size:12px;color:rgba(228,221,214,0.7);border-bottom:1px solid rgba(228,221,214,0.04);white-space:nowrap">${esc(m.mois||'')}</td>
+      <td style="padding:7px 10px;font-size:12px;color:#34d399;font-family:'DM Mono',monospace;border-bottom:1px solid rgba(228,221,214,0.04);text-align:right">${relText(String(m.encaissements||'—'))}</td>
+      <td style="padding:7px 10px;font-size:12px;color:#ef4444;font-family:'DM Mono',monospace;border-bottom:1px solid rgba(228,221,214,0.04);text-align:right">${relText(String(m.decaissements||'—'))}</td>
+      <td style="padding:7px 10px;font-size:12px;font-weight:600;font-family:'DM Mono',monospace;border-bottom:1px solid rgba(228,221,214,0.04);text-align:right">${relText(String(m.solde_mois||'—'))}</td>
+      <td style="padding:7px 10px;font-size:12px;font-weight:700;color:var(--acid);font-family:'DM Mono',monospace;border-bottom:1px solid rgba(228,221,214,0.04);text-align:right">${relText(String(m.solde_cumule||'—'))}</td>
+      ${hasAlert ? `<td style="padding:7px 10px;font-size:11px;color:#fbbf24;border-bottom:1px solid rgba(228,221,214,0.04)">⚠ ${esc(m.alerte)}</td>` : '<td></td>'}
     </tr>`;
   }).join('');
 
-  return `<div style="margin-top:20px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.06);overflow-x:auto">
-    <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:10px">Trésorerie mensuelle détaillée</div>
+  return `<div style="margin-top:20px;padding-top:20px;border-top:1px solid rgba(228,221,214,0.06);overflow-x:auto">
+    <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(228,221,214,0.3);margin-bottom:10px">Trésorerie mensuelle détaillée</div>
     <table style="width:100%;border-collapse:collapse;min-width:520px">
       <thead>
-        <tr style="background:rgba(255,255,255,0.04)">
-          <th style="padding:8px 10px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.3);text-align:left">Mois</th>
-          <th style="padding:8px 10px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.3);text-align:right">Encaissements</th>
-          <th style="padding:8px 10px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.3);text-align:right">Décaissements</th>
-          <th style="padding:8px 10px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.3);text-align:right">Solde mois</th>
+        <tr style="background:rgba(228,221,214,0.04)">
+          <th style="padding:8px 10px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(228,221,214,0.3);text-align:left">Mois</th>
+          <th style="padding:8px 10px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(228,221,214,0.3);text-align:right">Encaissements</th>
+          <th style="padding:8px 10px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(228,221,214,0.3);text-align:right">Décaissements</th>
+          <th style="padding:8px 10px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(228,221,214,0.3);text-align:right">Solde mois</th>
           <th style="padding:8px 10px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--acid);text-align:right">Cumulé</th>
           <th></th>
         </tr>
@@ -935,14 +935,14 @@ function renderDisclaimer(d) {
     <div style="font-size:22px;line-height:1;flex-shrink:0">⚠️</div>
     <div style="flex:1">
       <div style="font-size:13px;font-weight:600;color:var(--gold);margin-bottom:6px">${esc(msg.titre||'')}</div>
-      <div style="font-size:13px;color:rgba(255,255,255,0.65);line-height:1.6;margin-bottom:10px">${esc(msg.corps||'')}</div>
+      <div style="font-size:13px;color:rgba(228,221,214,0.65);line-height:1.6;margin-bottom:10px">${esc(msg.corps||'')}</div>
       ${msg.recommandation_concrete ? `<div style="font-size:12px;color:rgba(251,191,36,0.8);background:rgba(251,191,36,0.08);border-radius:6px;padding:8px 12px;margin-bottom:12px">${esc(msg.recommandation_concrete)}</div>` : ''}
-      ${res.length ? `<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">${res.map(r=>`<a href="https://${esc(r.url)}" target="_blank" rel="noopener" style="font-size:11px;padding:4px 10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:20px;color:rgba(255,255,255,0.6);text-decoration:none;white-space:nowrap" title="${esc(r.service)}">${esc(r.organisme)} — ${esc(r.cout)}</a>`).join('')}</div>` : ''}
+      ${res.length ? `<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">${res.map(r=>`<a href="https://${esc(r.url)}" target="_blank" rel="noopener" style="font-size:11px;padding:4px 10px;background:rgba(228,221,214,0.06);border:1px solid rgba(228,221,214,0.1);border-radius:20px;color:rgba(228,221,214,0.6);text-decoration:none;white-space:nowrap" title="${esc(r.service)}">${esc(r.organisme)} — ${esc(r.cout)}</a>`).join('')}</div>` : ''}
       <details style="margin-top:10px">
-        <summary style="font-size:11px;color:rgba(255,255,255,0.35);cursor:pointer;list-style:none">Ce plan fait / ne fait pas ▾</summary>
+        <summary style="font-size:11px;color:rgba(228,221,214,0.35);cursor:pointer;list-style:none">Ce plan fait / ne fait pas ▾</summary>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
-          <div><div style="font-size:11px;font-weight:600;color:var(--green);margin-bottom:6px">✓ Ce plan fait</div>${fait.map(f=>`<div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:3px">• ${esc(f)}</div>`).join('')}</div>
-          <div><div style="font-size:11px;font-weight:600;color:rgba(248,113,113,0.9);margin-bottom:6px">✗ Ne remplace pas</div>${nfait.map(f=>`<div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:3px">• ${esc(f)}</div>`).join('')}</div>
+          <div><div style="font-size:11px;font-weight:600;color:var(--green);margin-bottom:6px">✓ Ce plan fait</div>${fait.map(f=>`<div style="font-size:11px;color:rgba(228,221,214,0.5);margin-bottom:3px">• ${esc(f)}</div>`).join('')}</div>
+          <div><div style="font-size:11px;font-weight:600;color:rgba(248,113,113,0.9);margin-bottom:6px">✗ Ne remplace pas</div>${nfait.map(f=>`<div style="font-size:11px;color:rgba(228,221,214,0.5);margin-bottom:3px">• ${esc(f)}</div>`).join('')}</div>
         </div>
       </details>
     </div>
@@ -965,22 +965,22 @@ function renderTableauAmortissement(ta) {
     <div style="overflow-x:auto;margin-bottom:16px">
       <table style="width:100%;border-collapse:collapse;font-size:12px;font-family:'DM Mono',monospace">
         <thead>
-          <tr style="border-bottom:1px solid rgba(255,255,255,0.1)">
-            <th style="text-align:left;padding:6px 8px;color:rgba(255,255,255,0.4);font-weight:500">Année</th>
-            <th style="text-align:right;padding:6px 8px;color:rgba(255,255,255,0.4);font-weight:500">Mensualité</th>
-            <th style="text-align:right;padding:6px 8px;color:rgba(255,255,255,0.4);font-weight:500">Capital remboursé</th>
-            <th style="text-align:right;padding:6px 8px;color:rgba(255,255,255,0.4);font-weight:500">Intérêts payés</th>
-            <th style="text-align:right;padding:6px 8px;color:rgba(255,255,255,0.4);font-weight:500">Capital restant</th>
+          <tr style="border-bottom:1px solid rgba(228,221,214,0.1)">
+            <th style="text-align:left;padding:6px 8px;color:rgba(228,221,214,0.4);font-weight:500">Année</th>
+            <th style="text-align:right;padding:6px 8px;color:rgba(228,221,214,0.4);font-weight:500">Mensualité</th>
+            <th style="text-align:right;padding:6px 8px;color:rgba(228,221,214,0.4);font-weight:500">Capital remboursé</th>
+            <th style="text-align:right;padding:6px 8px;color:rgba(228,221,214,0.4);font-weight:500">Intérêts payés</th>
+            <th style="text-align:right;padding:6px 8px;color:rgba(228,221,214,0.4);font-weight:500">Capital restant</th>
           </tr>
         </thead>
         <tbody>
           ${ech.map((row,i)=>`
-            <tr style="border-bottom:1px solid rgba(255,255,255,0.05);${i%2===0?'background:rgba(255,255,255,0.02)':''}">
-              <td style="padding:6px 8px;color:rgba(255,255,255,0.6)">An ${row.annee||i+1}</td>
+            <tr style="border-bottom:1px solid rgba(228,221,214,0.05);${i%2===0?'background:rgba(228,221,214,0.02)':''}">
+              <td style="padding:6px 8px;color:rgba(228,221,214,0.6)">An ${row.annee||i+1}</td>
               <td style="padding:6px 8px;text-align:right;color:var(--text)">${relText(row.mensualite||'—')}</td>
               <td style="padding:6px 8px;text-align:right;color:var(--green)">${relText(row.capital_rembourse_annee||'—')}</td>
               <td style="padding:6px 8px;text-align:right;color:rgba(248,113,113,0.8)">${relText(row.interets_payes_annee||'—')}</td>
-              <td style="padding:6px 8px;text-align:right;color:rgba(255,255,255,0.5)">${relText(row.capital_restant_du_fin_annee||'—')}</td>
+              <td style="padding:6px 8px;text-align:right;color:rgba(228,221,214,0.5)">${relText(row.capital_restant_du_fin_annee||'—')}</td>
             </tr>`).join('')}
         </tbody>
       </table>
@@ -996,20 +996,20 @@ function renderTableauAmortissement(ta) {
       <div class="stat-mini"><div class="stat-mini-label">Coût total crédit</div><div class="stat-mini-val">${relText(p.cout_total_credit||'—')}</div></div>
     </div>
     ${echeancierHtml}
-    ${acr.verdict ? `<div style="background:rgba(255,255,255,0.04);border-left:3px solid ${pctColor};border-radius:6px;padding:12px 16px;margin-bottom:14px">
-      <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">Capacité de remboursement</div>
+    ${acr.verdict ? `<div style="background:rgba(228,221,214,0.04);border-left:3px solid ${pctColor};border-radius:6px;padding:12px 16px;margin-bottom:14px">
+      <div style="font-size:11px;color:rgba(228,221,214,0.4);margin-bottom:4px">Capacité de remboursement</div>
       <div style="font-size:13px;color:var(--text);line-height:1.5">${esc(acr.verdict)}</div>
       <div style="font-size:20px;font-weight:700;color:${pctColor};margin-top:6px">${relText(acr.mensualite_vs_marge_nette_an1||'')}</div>
-      <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:2px">${esc(acr.appreciation||'')}</div>
+      <div style="font-size:11px;color:rgba(228,221,214,0.35);margin-top:2px">${esc(acr.appreciation||'')}</div>
     </div>` : ''}
-    ${diff.recommande ? `<div style="background:rgba(107,143,239,0.06);border:1px solid rgba(107,143,239,0.2);border-radius:8px;padding:12px 16px;margin-bottom:14px">
+    ${diff.recommande ? `<div style="background:rgba(200,75,47,0.06);border:1px solid rgba(200,75,47,0.2);border-radius:8px;padding:12px 16px;margin-bottom:14px">
       <div style="font-size:12px;font-weight:600;color:var(--acid);margin-bottom:6px">💡 Différé recommandé — ${esc(diff.type||'')} (${esc(diff.duree_conseillee||'')})</div>
-      <div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:1.5">${esc(diff.explication||'')}</div>
+      <div style="font-size:12px;color:rgba(228,221,214,0.6);line-height:1.5">${esc(diff.explication||'')}</div>
     </div>` : ''}
-    ${conseilsList.length ? `<div style="margin-top:4px"><div style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.4);letter-spacing:0.05em;margin-bottom:8px">CONSEILS NÉGOCIATION BANQUE</div>
-      ${conseilsList.map(c=>`<div style="font-size:12px;color:rgba(255,255,255,0.6);padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05);line-height:1.5">• ${esc(c)}</div>`).join('')}
+    ${conseilsList.length ? `<div style="margin-top:4px"><div style="font-size:11px;font-weight:600;color:rgba(228,221,214,0.4);letter-spacing:0.05em;margin-bottom:8px">CONSEILS NÉGOCIATION BANQUE</div>
+      ${conseilsList.map(c=>`<div style="font-size:12px;color:rgba(228,221,214,0.6);padding:6px 0;border-bottom:1px solid rgba(228,221,214,0.05);line-height:1.5">• ${esc(c)}</div>`).join('')}
     </div>` : ''}
-    ${ta.note_importante ? `<div style="margin-top:14px;font-size:11px;color:rgba(255,255,255,0.3);line-height:1.5;font-style:italic">${esc(ta.note_importante)}</div>` : ''}
+    ${ta.note_importante ? `<div style="margin-top:14px;font-size:11px;color:rgba(228,221,214,0.3);line-height:1.5;font-style:italic">${esc(ta.note_importante)}</div>` : ''}
   `);
 }
 
@@ -1043,7 +1043,7 @@ function buildAllSections(plan) {
   // ── 01 Résumé Exécutif ──
   h += planBlock('01 — Résumé Exécutif',
     `<div class="plan-block-content">${relText(plan.resume_executif||'')}</div>
-    ${plan.pitch_30s ? `<div style="margin-top:20px;font-size:15px;line-height:1.85;color:#ecedf2;background:rgba(107,143,239,0.06);border:1px solid rgba(107,143,239,0.2);border-radius:10px;padding:20px;font-style:italic">${esc(plan.pitch_30s)}</div>` : ''}`,
+    ${plan.pitch_30s ? `<div style="margin-top:20px;font-size:15px;line-height:1.85;color:#e4ddd6;background:rgba(200,75,47,0.06);border:1px solid rgba(200,75,47,0.2);border-radius:10px;padding:20px;font-style:italic">${esc(plan.pitch_30s)}</div>` : ''}`,
     'Peux-tu améliorer mon résumé exécutif pour le rendre plus percutant ?');
 
   // ── 02 Porteur de Projet ──
@@ -1166,7 +1166,7 @@ function buildAllSections(plan) {
         <div class="stat-mini"><div class="stat-mini-label">Charges fixes/mois</div><div class="stat-mini-val">${relText(sr.charges_fixes_mensuelles||'—')}</div></div>
         <div class="stat-mini"><div class="stat-mini-label">Taux marge/CV</div><div class="stat-mini-val">${relText(sr.taux_marge_sur_cv||'—')}</div></div>
         <div class="stat-mini"><div class="stat-mini-label">Point mort CA/mois</div><div class="stat-mini-val" style="color:#34d399">${relText(sr.point_mort_ca||'—')}</div></div>
-        <div class="stat-mini"><div class="stat-mini-label">Break-even atteint</div><div class="stat-mini-val" style="color:#a78bfa">${relText(sr.break_even_mois||'—')}</div></div>
+        <div class="stat-mini"><div class="stat-mini-label">Break-even atteint</div><div class="stat-mini-val" style="color:#d4845a">${relText(sr.break_even_mois||'—')}</div></div>
       </div>
       ${sr.detail ? `<div class="plan-block-content">${relText(sr.detail)}</div>` : ''}`,
       'Comment atteindre plus vite mon seuil de rentabilité ?');
@@ -1213,7 +1213,7 @@ function buildAllSections(plan) {
         <div class="stat-mini">
           <div class="stat-mini-label">${esc(k.nom)}</div>
           <div class="stat-mini-val" style="font-size:18px">${relText(k.cible||'')}</div>
-          <div style="font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,0.3);margin-top:6px">${esc(k.frequence||'')}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:rgba(228,221,214,0.3);margin-top:6px">${esc(k.frequence||'')}</div>
         </div>`).join('')}
     </div>`);
 
@@ -1243,7 +1243,7 @@ function buildAllSections(plan) {
 
   // Placeholder IDs pour fillDocumentsAnnexes + fillBancabilite
   h += planBlock('✦ Documents Annexes',
-    `<p style="font-size:12px;color:rgba(255,255,255,0.35);margin-bottom:14px;line-height:1.5">Génère les pièces justificatives prêtes à soumettre à ta banque ou à BPI France.</p>
+    `<p style="font-size:12px;color:rgba(228,221,214,0.35);margin-bottom:14px;line-height:1.5">Génère les pièces justificatives prêtes à soumettre à ta banque ou à BPI France.</p>
     <div class="docs-grid" id="dDocsGrid"></div>`);
   h += planBlock('✦ Checklist Bancabilité', `
     <div class="banc-score-bar" style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
@@ -1383,9 +1383,9 @@ function fillPlan(plan) {
   if (badge) {
     const labels = { empire: 'Empire ✦', pro: 'Pro', solo: 'Solo' };
     badge.textContent = labels[currentPlan] || 'Découverte';
-    if (currentPlan === 'empire') { badge.style.background='rgba(167,139,250,0.15)'; badge.style.borderColor='rgba(167,139,250,0.3)'; badge.style.color='#a78bfa'; }
-    else if (currentPlan === 'pro') { badge.style.background='rgba(107,143,239,0.12)'; badge.style.borderColor='rgba(107,143,239,0.25)'; badge.style.color='#9db8f8'; }
-    else { badge.style.background='rgba(255,255,255,0.05)'; badge.style.borderColor='rgba(255,255,255,0.1)'; badge.style.color='#7a7f9a'; }
+    if (currentPlan === 'empire') { badge.style.background='rgba(212,132,90,0.15)'; badge.style.borderColor='rgba(212,132,90,0.3)'; badge.style.color='#d4845a'; }
+    else if (currentPlan === 'pro') { badge.style.background='rgba(200,75,47,0.12)'; badge.style.borderColor='rgba(200,75,47,0.25)'; badge.style.color='#d4845a'; }
+    else { badge.style.background='rgba(228,221,214,0.05)'; badge.style.borderColor='rgba(228,221,214,0.1)'; badge.style.color='#7a7060'; }
   }
 
   const score = plan.score_viabilite || plan.scores?.score_viabilite?.note || 72;
@@ -1428,7 +1428,7 @@ function fillPlan(plan) {
         drawBarChart('concChart', plan.concurrents.map(c => c.nom.split(' ')[0]), plan.concurrents.map(c => c.menace==='haute'?85:c.menace==='moyenne'?55:25), 'Menace');
       }
       const nonTotal = (plan.investissements||[]).filter(i=>!i.total);
-      if (nonTotal.length) drawDonutChart('investDonut', nonTotal.map(i=>i.label.replace(/^\d+\.\s*/,'').substring(0,20)), nonTotal.map(i=>parseAmount(i.montant)||1), ['#6b8fef','#a78bfa','#34d399','#fbbf24','#ef4444','#9db8f8']);
+      if (nonTotal.length) drawDonutChart('investDonut', nonTotal.map(i=>i.label.replace(/^\d+\.\s*/,'').substring(0,20)), nonTotal.map(i=>parseAmount(i.montant)||1), ['#c84b2f','#d4845a','#34d399','#fbbf24','#ef4444','#d4845a']);
       if (plan.tresorerie_soldes?.length) drawCrescendoChart('tresoChart', ['M1','M2','M3','M4','M5','M6','M7','M8','M9','M10','M11','M12'].slice(0,plan.tresorerie_soldes.length), plan.tresorerie_soldes);
     }, 250);
 
@@ -1568,7 +1568,7 @@ function fillPlan(plan) {
       investEl.appendChild(wrap);
       const donutLabels = nonTotalInvest.map(i => i.label.replace(/^\d+\.\s+/, '').substring(0, 20));
       const donutVals = nonTotalInvest.map(i => parseAmount(i.montant) || 1);
-      const donutColors = ['#6b8fef','#a78bfa','#34d399','#fbbf24','#ef4444','#9db8f8'];
+      const donutColors = ['#c84b2f','#d4845a','#34d399','#fbbf24','#ef4444','#d4845a'];
       setTimeout(() => drawDonutChart('investDonut', donutLabels, donutVals, donutColors), 400);
     }
   }
@@ -1598,7 +1598,7 @@ function fillPlan(plan) {
     <div class="stat-mini">
       <div class="stat-mini-label">${esc(k.nom)}</div>
       <div class="stat-mini-val" style="font-size:16px">${relText(k.cible || '')}</div>
-      <div style="font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,0.3);margin-top:4px">${esc(k.frequence || '')}</div>
+      <div style="font-family:'DM Mono',monospace;font-size:9px;color:rgba(228,221,214,0.3);margin-top:4px">${esc(k.frequence || '')}</div>
     </div>`).join(''));
 
   // ── 12. Pitch 30s ────────────────────────────────────────────────
@@ -1608,10 +1608,10 @@ function fillPlan(plan) {
   const p = plan.persona;
   setInner('dPersona', p ? `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="stat-mini"><div class="stat-mini-label">Prénom / Âge</div><div style="font-size:15px;font-weight:700;color:#fff;margin-top:4px">${esc(p.nom)}, ${esc(p.age)}</div></div>
-      <div class="stat-mini"><div class="stat-mini-label">Situation</div><div style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:4px;line-height:1.5">${esc(p.situation)}</div></div>
-      <div class="stat-mini" style="grid-column:span 2"><div class="stat-mini-label">Douleurs principales</div><div style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:4px;line-height:1.6">${esc(p.douleurs)}</div></div>
-      <div class="stat-mini"><div class="stat-mini-label">Motivations</div><div style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:4px;line-height:1.5">${esc(p.motivations)}</div></div>
+      <div class="stat-mini"><div class="stat-mini-label">Prénom / Âge</div><div style="font-size:15px;font-weight:700;color:#e4ddd6;margin-top:4px">${esc(p.nom)}, ${esc(p.age)}</div></div>
+      <div class="stat-mini"><div class="stat-mini-label">Situation</div><div style="font-size:13px;color:rgba(228,221,214,0.7);margin-top:4px;line-height:1.5">${esc(p.situation)}</div></div>
+      <div class="stat-mini" style="grid-column:span 2"><div class="stat-mini-label">Douleurs principales</div><div style="font-size:13px;color:rgba(228,221,214,0.7);margin-top:4px;line-height:1.6">${esc(p.douleurs)}</div></div>
+      <div class="stat-mini"><div class="stat-mini-label">Motivations</div><div style="font-size:13px;color:rgba(228,221,214,0.7);margin-top:4px;line-height:1.5">${esc(p.motivations)}</div></div>
       <div class="stat-mini"><div class="stat-mini-label">Où le trouver</div><div style="font-size:13px;color:var(--acid);margin-top:4px;line-height:1.5">${esc(p.ou_le_trouver)}</div></div>
     </div>` : '');
 
@@ -1620,15 +1620,15 @@ function fillPlan(plan) {
     const el = document.getElementById('dDemarchesBlock');
     if (el) el.style.display = 'block';
     setInner('dDemarches', (plan.demarches_admin || []).map(d => `
-      <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:8px;padding:14px 16px">
+      <div style="background:rgba(228,221,214,0.04);border:1px solid rgba(228,221,214,0.09);border-radius:8px;padding:14px 16px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px">
-          <div style="font-weight:700;font-size:13px;color:#fff">${esc(d.etape)}</div>
+          <div style="font-weight:700;font-size:13px;color:#e4ddd6">${esc(d.etape)}</div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <span style="font-family:'DM Mono',monospace;font-size:10px;background:rgba(107,143,239,0.1);color:var(--acid);padding:2px 8px;border-radius:20px">${esc(d.delai)}</span>
-            <span style="font-family:'DM Mono',monospace;font-size:10px;background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.5);padding:2px 8px;border-radius:20px">${esc(d.cout)}</span>
+            <span style="font-family:'DM Mono',monospace;font-size:10px;background:rgba(200,75,47,0.1);color:var(--acid);padding:2px 8px;border-radius:20px">${esc(d.delai)}</span>
+            <span style="font-family:'DM Mono',monospace;font-size:10px;background:rgba(228,221,214,0.07);color:rgba(228,221,214,0.5);padding:2px 8px;border-radius:20px">${esc(d.cout)}</span>
           </div>
         </div>
-        <div style="font-size:13px;color:rgba(255,255,255,0.65);line-height:1.65;margin-bottom:6px">${esc(d.detail)}</div>
+        <div style="font-size:13px;color:rgba(228,221,214,0.65);line-height:1.65;margin-bottom:6px">${esc(d.detail)}</div>
         <a href="https://${esc(d.lien)}" target="_blank" rel="noopener noreferrer" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--acid);text-decoration:none;opacity:0.7">→ ${esc(d.lien)}</a>
       </div>`).join(''));
   }
@@ -1642,17 +1642,17 @@ function fillPlan(plan) {
     if (plan.email_prospection)  emails.push({ label: 'Email Prospection',     data: plan.email_prospection });
     if (plan.email_relance)      emails.push({ label: 'Email Relance (J+7)',   data: plan.email_relance });
     setInner('dEmails', emails.map(e => `
-      <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;overflow:hidden">
-        <div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:space-between">
-          <div style="font-weight:700;font-size:14px;color:#fff">${esc(e.label)}</div>
+      <div style="background:rgba(228,221,214,0.04);border:1px solid rgba(228,221,214,0.1);border-radius:10px;overflow:hidden">
+        <div style="padding:12px 16px;border-bottom:1px solid rgba(228,221,214,0.07);display:flex;align-items:center;justify-content:space-between">
+          <div style="font-weight:700;font-size:14px;color:#e4ddd6">${esc(e.label)}</div>
           <button onclick="copyEmail(this)" data-text="${encodeURIComponent('Objet: ' + (e.data.sujet||'') + '\n\n' + (e.data.corps||''))}"
-            style="font-family:'DM Mono',monospace;font-size:11px;background:rgba(107,143,239,0.1);color:var(--acid);border:1px solid rgba(107,143,239,0.2);border-radius:20px;padding:4px 12px;cursor:pointer">Copier</button>
+            style="font-family:'DM Mono',monospace;font-size:11px;background:rgba(200,75,47,0.1);color:var(--acid);border:1px solid rgba(200,75,47,0.2);border-radius:20px;padding:4px 12px;cursor:pointer">Copier</button>
         </div>
         <div style="padding:14px 16px">
-          <div style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:6px">OBJET</div>
+          <div style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(228,221,214,0.35);margin-bottom:6px">OBJET</div>
           <div style="font-size:13px;color:var(--acid);font-weight:600;margin-bottom:12px">${esc(e.data.sujet || '')}</div>
-          <div style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:6px">CORPS</div>
-          <div style="font-size:13px;color:rgba(255,255,255,0.75);line-height:1.75;white-space:pre-wrap">${esc(e.data.corps || '')}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(228,221,214,0.35);margin-bottom:6px">CORPS</div>
+          <div style="font-size:13px;color:rgba(228,221,214,0.75);line-height:1.75;white-space:pre-wrap">${esc(e.data.corps || '')}</div>
         </div>
       </div>`).join(''));
   }
@@ -1778,7 +1778,7 @@ function _oldInjectExtraSections_DEAD(plan) {
         <div class="stat-mini"><div class="stat-mini-label">Charges fixes/mois</div><div class="stat-mini-val">${relText(sr.charges_fixes_mensuelles || '—')}</div></div>
         <div class="stat-mini"><div class="stat-mini-label">Taux marge/CV</div><div class="stat-mini-val">${relText(sr.taux_marge_sur_cv || '—')}</div></div>
         <div class="stat-mini"><div class="stat-mini-label">Point mort (CA/mois)</div><div class="stat-mini-val" style="color:#34d399">${relText(sr.point_mort_ca || '—')}</div></div>
-        <div class="stat-mini"><div class="stat-mini-label">Break-even atteint</div><div class="stat-mini-val" style="color:#a78bfa">${relText(sr.break_even_mois || '—')}</div></div>
+        <div class="stat-mini"><div class="stat-mini-label">Break-even atteint</div><div class="stat-mini-val" style="color:#d4845a">${relText(sr.break_even_mois || '—')}</div></div>
       </div>
       ${sr.detail ? `<div class="plan-block-content">${relText(sr.detail)}</div>` : ''}
     </div>`;
@@ -1921,7 +1921,7 @@ function renderTimeline90j(actions, elId) {
   el.innerHTML = `<div class="timeline-90j">
     ${renderGroup(gr1, 'Jours 1–30', '#34d399')}
     ${renderGroup(gr2, 'Jours 31–60', '#fbbf24')}
-    ${renderGroup(gr3, 'Jours 61–90', '#a78bfa')}
+    ${renderGroup(gr3, 'Jours 61–90', '#d4845a')}
   </div>`;
 }
 
@@ -1976,10 +1976,10 @@ function drawRevenueChart(monthlyData) {
   for (let i = 0; i <= gridSteps; i++) {
     const y = pad.t + ch - (i / gridSteps) * ch;
     const val = Math.round((i / gridSteps) * max);
-    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.strokeStyle = 'rgba(228,221,214,0.06)';
     ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(W - pad.r, y); ctx.stroke();
-    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.fillStyle = 'rgba(228,221,214,0.3)';
     const label = val >= 1000 ? (val/1000).toFixed(0)+'k€' : val+'€';
     ctx.fillText(label, pad.l - 6, y + 4);
   }
@@ -1990,8 +1990,8 @@ function drawRevenueChart(monthlyData) {
   }));
 
   const grad = ctx.createLinearGradient(0, pad.t, 0, H - pad.b);
-  grad.addColorStop(0, 'rgba(107,143,239,0.2)');
-  grad.addColorStop(1, 'rgba(107,143,239,0)');
+  grad.addColorStop(0, 'rgba(200,75,47,0.2)');
+  grad.addColorStop(1, 'rgba(200,75,47,0)');
   ctx.beginPath();
   ctx.moveTo(pts[0].x, pts[0].y);
   for (let i = 1; i < pts.length; i++) {
@@ -2010,7 +2010,7 @@ function drawRevenueChart(monthlyData) {
     const cpx = (pts[i-1].x + pts[i].x) / 2;
     ctx.bezierCurveTo(cpx, pts[i-1].y, cpx, pts[i].y, pts[i].x, pts[i].y);
   }
-  ctx.strokeStyle = '#9db8f8';
+  ctx.strokeStyle = '#d4845a';
   ctx.lineWidth = 2.5;
   ctx.stroke();
 
@@ -2019,18 +2019,18 @@ function drawRevenueChart(monthlyData) {
     const {x, y} = pts[i];
     ctx.beginPath();
     ctx.arc(x, y, 4, 0, Math.PI*2);
-    ctx.fillStyle = '#9db8f8';
+    ctx.fillStyle = '#d4845a';
     ctx.fill();
-    ctx.strokeStyle = '#0a0a0a';
+    ctx.strokeStyle = '#1c1915';
     ctx.lineWidth = 2;
     ctx.stroke();
     const val = monthlyData[i];
     const label = val >= 1000 ? (val/1000).toFixed(1)+'k€' : val+'€';
-    ctx.fillStyle = '#9db8f8';
+    ctx.fillStyle = '#d4845a';
     ctx.font = 'bold 10px DM Mono, monospace';
     ctx.textAlign = 'center';
     ctx.fillText(label, x, y - 9);
-    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    ctx.fillStyle = 'rgba(228,221,214,0.35)';
     ctx.font = '10px DM Mono, monospace';
     ctx.fillText('M'+(i+1), x, H - pad.b + 18);
   });

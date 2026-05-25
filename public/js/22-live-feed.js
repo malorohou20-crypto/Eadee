@@ -27,10 +27,10 @@ const liveFeedPool = [
 ];
 
 const _lfGradients = [
-  'linear-gradient(135deg,#6b8fef,#a78bfa)',
-  'linear-gradient(135deg,#a78bfa,#ec4899)',
+  'linear-gradient(135deg,#c84b2f,#d4845a)',
+  'linear-gradient(135deg,#d4845a,#e8a94c)',
   'linear-gradient(135deg,#fbbf24,#f59e0b)',
-  'linear-gradient(135deg,#34d399,#6b8fef)',
+  'linear-gradient(135deg,#34d399,#c84b2f)',
 ];
 
 function _lfFormatTime(secsAgo) {
@@ -50,7 +50,7 @@ function _lfBuildEvent(data, secsAgo) {
   div.innerHTML = `
     <div class="lf-avatar" style="background:${grad}">${initiale}</div>
     <div class="lf-body">
-      <div class="lf-name">${data.name} <span style="font-weight:400;color:#7a7f9a">· ${data.city}</span></div>
+      <div class="lf-name">${data.name} <span style="font-weight:400;color:#7a7060">· ${data.city}</span></div>
       <div class="lf-desc">${data.detail}</div>
       <div class="lf-time">${ts}</div>
     </div>

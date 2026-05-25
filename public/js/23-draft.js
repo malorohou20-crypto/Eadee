@@ -43,7 +43,7 @@ function onIdeaInput(ta) {
   const counter = document.getElementById('idea-char-count');
   if (counter) {
     counter.textContent = len + ' / 500';
-    counter.style.color = len > 420 ? '#f59e0b' : len >= 150 ? '#34d399' : len >= 50 ? '#6b8fef' : '#7a7f9a';
+    counter.style.color = len > 420 ? '#f59e0b' : len >= 150 ? '#34d399' : len >= 50 ? '#d4845a' : '#7a7060';
   }
   const msg = document.getElementById('idea-quality-msg');
   if (msg) {

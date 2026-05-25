@@ -106,13 +106,13 @@ function toggleFaq(btn) {
     ctx.textAlign = 'right';
     ySteps.forEach(v => {
       const y = yPos(v);
-      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+      ctx.strokeStyle = 'rgba(228,221,214,0.06)';
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(padL, y);
       ctx.lineTo(padL + chartW, y);
       ctx.stroke();
-      ctx.fillStyle = '#7a7f9a';
+      ctx.fillStyle = '#7a7060';
       const label = v === 0 ? '0€' : (v / 1000) + 'k€';
       ctx.fillText(label, padL - 5, y + 3.5);
     });
@@ -121,7 +121,7 @@ function toggleFaq(btn) {
     const beY = yPos(breakEven);
     ctx.save();
     ctx.setLineDash([5, 4]);
-    ctx.strokeStyle = 'rgba(122,127,154,0.55)';
+    ctx.strokeStyle = 'rgba(122,112,96,0.55)';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
     ctx.moveTo(padL, beY);
@@ -131,8 +131,8 @@ function toggleFaq(btn) {
 
     // Gradient fill under curve
     const grad = ctx.createLinearGradient(0, padT, 0, padT + chartH);
-    grad.addColorStop(0, 'rgba(167,139,250,0.28)');
-    grad.addColorStop(1, 'rgba(167,139,250,0.00)');
+    grad.addColorStop(0, 'rgba(212,132,90,0.28)');
+    grad.addColorStop(1, 'rgba(212,132,90,0.00)');
 
     // Smooth bezier path
     function smoothPath(fillMode) {
@@ -158,7 +158,7 @@ function toggleFaq(btn) {
 
     // Stroke
     smoothPath(false);
-    ctx.strokeStyle = '#a78bfa';
+    ctx.strokeStyle = '#d4845a';
     ctx.lineWidth = 2.5;
     ctx.lineJoin = 'round';
     ctx.stroke();
@@ -168,18 +168,18 @@ function toggleFaq(btn) {
       const x = xPos(i), y = yPos(p[1]);
       ctx.beginPath();
       ctx.arc(x, y, 5, 0, Math.PI * 2);
-      ctx.fillStyle = '#a78bfa';
+      ctx.fillStyle = '#d4845a';
       ctx.fill();
       ctx.beginPath();
       ctx.arc(x, y, 3, 0, Math.PI * 2);
-      ctx.fillStyle = '#0f1117';
+      ctx.fillStyle = '#1c1915';
       ctx.fill();
     });
 
     // X labels
     ctx.font = '9px DM Mono, monospace';
     ctx.textAlign = 'center';
-    ctx.fillStyle = '#7a7f9a';
+    ctx.fillStyle = '#7a7060';
     pts.forEach((p, i) => {
       ctx.fillText(p[0], xPos(i), padT + chartH + 17);
     });

@@ -171,10 +171,10 @@ Réponds UNIQUEMENT avec un JSON valide (pas de markdown, pas de backticks):
   } catch(e) {
     clearInterval(ltInterval);
     loading.style.display = 'none';
-    body.innerHTML = `<div style="color:#ff6b6b;padding:40px;text-align:center;">
-      <div style="font-size:11px;font-family:'DM Mono',monospace;letter-spacing:0.15em;color:rgba(255,255,255,0.3);margin-bottom:16px;">ERREUR</div>
+    body.innerHTML = `<div style="color:#f87171;padding:40px;text-align:center;">
+      <div style="font-size:11px;font-family:'DM Mono',monospace;letter-spacing:0.15em;color:rgba(228,221,214,0.3);margin-bottom:16px;">ERREUR</div>
       <div style="font-size:16px;font-weight:600;margin-bottom:8px;">Erreur lors de la génération</div>
-      <div style="font-size:13px;color:rgba(255,255,255,0.5);">${e.message}</div>
+      <div style="font-size:13px;color:rgba(228,221,214,0.5);">${e.message}</div>
     </div>`;
   }
 }
@@ -238,8 +238,8 @@ function renderDossier(d, r) {
       <div class="dossier-card">
         <div class="dossier-card-title">⚖️ Forme juridique recommandée : ${fj.recommandation}</div>
         <p>${fj.pourquoi}</p>
-        ${avs ? `<div style="margin:12px 0 0"><strong style="color:#9db8f8;font-size:13px;">Avantages :</strong><ul class="dossier-doclist" style="margin-top:8px">${avs}</ul></div>` : ''}
-        ${alts ? `<div style="margin:18px 0 0"><strong style="color:rgba(255,255,255,0.7);font-size:13px;">Alternatives à considérer :</strong><ul class="dossier-doclist" style="margin-top:8px">${alts}</ul></div>` : ''}
+        ${avs ? `<div style="margin:12px 0 0"><strong style="color:#d4845a;font-size:13px;">Avantages :</strong><ul class="dossier-doclist" style="margin-top:8px">${avs}</ul></div>` : ''}
+        ${alts ? `<div style="margin:18px 0 0"><strong style="color:rgba(228,221,214,0.7);font-size:13px;">Alternatives à considérer :</strong><ul class="dossier-doclist" style="margin-top:8px">${alts}</ul></div>` : ''}
       </div>
     </div>`);
 
@@ -255,9 +255,9 @@ function renderDossier(d, r) {
     <div class="dossier-section">
       <div class="dossier-card">
         <div class="dossier-card-title">📄 Statuts — ${r.nom_business}</div>
-        ${statuts.preambule ? `<p style="font-style:italic;color:rgba(255,255,255,0.5);margin-bottom:20px;">${statuts.preambule}</p>` : ''}
+        ${statuts.preambule ? `<p style="font-style:italic;color:rgba(228,221,214,0.5);margin-bottom:20px;">${statuts.preambule}</p>` : ''}
         ${articles}
-        <p style="margin-top:20px;font-size:12px;color:rgba(255,255,255,0.3);">Ces statuts sont un modèle pré-rempli. Fais-les relire par un avocat ou un expert-comptable avant dépôt.</p>
+        <p style="margin-top:20px;font-size:12px;color:rgba(228,221,214,0.3);">Ces statuts sont un modèle pré-rempli. Fais-les relire par un avocat ou un expert-comptable avant dépôt.</p>
       </div>
     </div>`);
 
@@ -274,7 +274,7 @@ function renderDossier(d, r) {
       <div class="dossier-card">
         <div class="dossier-card-title">Inscription URSSAF & Sécurité Sociale</div>
         <p>${ursf.intro}</p>
-        ${ursf.regime ? `<p><strong style="color:#9db8f8">Régime :</strong> ${ursf.regime}</p>` : ''}
+        ${ursf.regime ? `<p><strong style="color:#d4845a">Régime :</strong> ${ursf.regime}</p>` : ''}
       </div>
       ${ursafDocs ? `<div class="dossier-card">
         <div class="dossier-card-title">Documents requis</div>
@@ -302,7 +302,7 @@ function renderDossier(d, r) {
       <div class="dossier-bank-name">${b.nom}</div>
       <div class="dossier-bank-offer">${b.offre}</div>
       <div class="dossier-bank-price">${b.prix}</div>
-      ${b.pourquoi ? `<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:6px;">${b.pourquoi}</div>` : ''}
+      ${b.pourquoi ? `<div style="font-size:12px;color:rgba(228,221,214,0.4);margin-top:6px;">${b.pourquoi}</div>` : ''}
     </div>`).join('');
   sections.push(`
     <div class="dossier-section">
@@ -332,8 +332,8 @@ function renderDossier(d, r) {
       <div class="dossier-section">
         <div class="dossier-card">
           <div class="dossier-card-title">📍 Recherche & prise de local</div>
-          ${loc.type_recommande ? `<p><strong style="color:#9db8f8">Type recommandé :</strong> ${loc.type_recommande}</p>` : ''}
-          ${altsLoc ? `<div style="margin-top:12px"><strong style="color:rgba(255,255,255,0.7);font-size:13px;">Alternatives :</strong><ul class="dossier-doclist" style="margin-top:8px">${altsLoc}</ul></div>` : ''}
+          ${loc.type_recommande ? `<p><strong style="color:#d4845a">Type recommandé :</strong> ${loc.type_recommande}</p>` : ''}
+          ${altsLoc ? `<div style="margin-top:12px"><strong style="color:rgba(228,221,214,0.7);font-size:13px;">Alternatives :</strong><ul class="dossier-doclist" style="margin-top:8px">${altsLoc}</ul></div>` : ''}
         </div>
         ${pts ? `<div class="dossier-card">
           <div class="dossier-card-title">Points d'attention</div>
@@ -355,8 +355,8 @@ function renderDossier(d, r) {
   const totalOblig = invAdmin.filter(i => i.obligatoire).map(i => i.montant).join(' + ');
   const invRows = invAdmin.map(i => `
     <li style="${i.obligatoire ? '' : 'opacity:0.6'}">
-      <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${i.obligatoire ? '#9db8f8' : 'rgba(255,255,255,0.15)'};margin-right:8px;vertical-align:middle"></span>${i.poste}</span>
-      <span style="font-weight:600;color:${i.obligatoire ? '#9db8f8' : 'rgba(255,255,255,0.5)'}">${i.montant}</span>
+      <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${i.obligatoire ? '#d4845a' : 'rgba(228,221,214,0.15)'};margin-right:8px;vertical-align:middle"></span>${i.poste}</span>
+      <span style="font-weight:600;color:${i.obligatoire ? '#d4845a' : 'rgba(228,221,214,0.5)'}">${i.montant}</span>
     </li>`).join('');
   sections.push(`
     <div class="dossier-section">
@@ -365,7 +365,7 @@ function renderDossier(d, r) {
         <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px;">
           ${invRows}
         </ul>
-        ${totalOblig ? `<div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.08);font-size:12px;color:rgba(255,255,255,0.35);font-family:'DM Mono',monospace;display:flex;gap:16px;align-items:center"><span><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#9db8f8;margin-right:6px;vertical-align:middle"></span>obligatoire</span><span><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.15);margin-right:6px;vertical-align:middle"></span>optionnel</span></div>` : ''}
+        ${totalOblig ? `<div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(228,221,214,0.08);font-size:12px;color:rgba(228,221,214,0.35);font-family:'DM Mono',monospace;display:flex;gap:16px;align-items:center"><span><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#d4845a;margin-right:6px;vertical-align:middle"></span>obligatoire</span><span><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:rgba(228,221,214,0.15);margin-right:6px;vertical-align:middle"></span>optionnel</span></div>` : ''}
       </div>
     </div>`);
 

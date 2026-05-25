@@ -93,7 +93,7 @@ function renderHistory() {
       if (!plansHistory || plansHistory.length === 0) {
         emptyRow.innerHTML =
           '<div style="font-size:14px;color:var(--ink-2);margin-bottom:20px">Tu n\'as pas encore généré de plan.</div>' +
-          '<button onclick="window.go&&window.go(\'gen\')" style="padding:10px 24px;background:var(--accent,#6b8fef);color:#fff;border:none;border-radius:6px;font-size:14px;cursor:pointer">Commencer mon premier plan</button>';
+          '<button onclick="window.go&&window.go(\'gen\')" style="padding:10px 24px;background:var(--accent,#c84b2f);color:#fff;border:none;border-radius:6px;font-size:14px;cursor:pointer">Commencer mon premier plan</button>';
       } else {
         emptyRow.innerHTML = '<div style="font-size:14px;color:var(--ink-2)">Aucun plan ne correspond à ta recherche.</div>';
       }
@@ -146,7 +146,7 @@ function renderHistory() {
     // --- V1 legacy layout ---
     grid.innerHTML = '';
     if (plans.length === 0) {
-      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px"><div style="font-size:14px;color:#7a7f9a">Aucun plan trouvé.</div></div>';
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px"><div style="font-size:14px;color:#7a7060">Aucun plan trouvé.</div></div>';
       return;
     }
     plans.forEach(function(p) {
@@ -156,12 +156,12 @@ function renderHistory() {
 
       var card = document.createElement('div');
       card.className = 'history-card';
-      card.style.cssText = 'cursor:pointer;display:flex;align-items:center;gap:16px;padding:18px 22px;background:#1a1d26;border:1px solid rgba(255,255,255,0.07);border-radius:12px';
+      card.style.cssText = 'cursor:pointer;display:flex;align-items:center;gap:16px;padding:18px 22px;background:#252219;border:1px solid rgba(228,221,214,0.07);border-radius:12px';
       card.innerHTML =
-        '<div style="flex:1"><div style="font-size:16px;color:#ecedf2">' + (p.nom_business || 'Plan sans nom') + '</div><div style="font-size:12px;color:#7a7f9a">' + sector + '</div></div>' +
-        (score ? '<div style="font-size:11px;color:#9db8f8;background:rgba(107,143,239,0.1);border:1px solid rgba(107,143,239,0.2);padding:4px 10px;border-radius:20px">Score ' + score + '/100</div>' : '') +
-        '<div style="font-size:10px;color:#7a7f9a">' + dateStr + '</div>' +
-        '<button class="hist-v1-btn" style="padding:7px 16px;background:rgba(107,143,239,0.12);border:1px solid rgba(107,143,239,0.25);border-radius:7px;color:#9db8f8;font-size:12px;cursor:pointer">Voir le plan</button>';
+        '<div style="flex:1"><div style="font-size:16px;color:#e4ddd6">' + (p.nom_business || 'Plan sans nom') + '</div><div style="font-size:12px;color:#7a7060">' + sector + '</div></div>' +
+        (score ? '<div style="font-size:11px;color:#d4845a;background:rgba(200,75,47,0.1);border:1px solid rgba(200,75,47,0.2);padding:4px 10px;border-radius:20px">Score ' + score + '/100</div>' : '') +
+        '<div style="font-size:10px;color:#7a7060">' + dateStr + '</div>' +
+        '<button class="hist-v1-btn" style="padding:7px 16px;background:rgba(200,75,47,0.12);border:1px solid rgba(200,75,47,0.25);border-radius:7px;color:#d4845a;font-size:12px;cursor:pointer">Voir le plan</button>';
 
       // Closure sur l'objet plan — évite les références périmées à plansHistory[i]
       (function(planRef) {

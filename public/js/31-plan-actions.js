@@ -203,7 +203,7 @@ function fillBancabilite(plan) {
       return `
         <div class="banc-item${isChecked ? ' checked' : ''}" data-id="${item.id}" onclick="toggleBanc(this, '${planId}')">
           <div class="banc-checkbox">
-            ${isChecked ? `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#13141a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>` : ''}
+            ${isChecked ? `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#1c1915" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>` : ''}
           </div>
           <div class="banc-item-text">${item.label}</div>
         </div>`;
