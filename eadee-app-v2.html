@@ -767,6 +767,11 @@
   80%  { background-color: oklch(0.21  0.015 52); }
   100% { background-color: oklch(0.097 0.010 56); }
 }
+@keyframes sp-icon {
+  0%   { opacity: 0; transform: translateY(7px) scale(0.90); }
+  10%  { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 1; }
+}
 @keyframes sp-logo {
   0%   { color: oklch(0.26 0.05 42); opacity: 0; transform: translateY(8px); }
   9%   { opacity: 1; transform: translateY(0); }
@@ -788,7 +793,7 @@
   position: fixed; inset: 0; z-index: 9999;
   display: flex; align-items: center; justify-content: center;
   background-color: oklch(0.965 0.012 85);
-  animation: sp-bg 1.9s cubic-bezier(0.4,0,0.2,1) 0.05s both;
+  animation: sp-bg 2.9s cubic-bezier(0.4,0,0.2,1) 0.05s both;
 }
 #splashScreen.sp-out {
   animation: sp-exit 0.46s ease forwards !important;
@@ -796,9 +801,13 @@
 }
 #splashScreen.sp-gone { display: none; }
 .sp-inner {
-  display: flex; flex-direction: column; align-items: center; gap: 14px;
+  display: flex; flex-direction: column; align-items: center; gap: 16px;
   user-select: none;
 }
+.sp-icon {
+  animation: sp-icon 2.9s cubic-bezier(0.4,0,0.2,1) 0.05s both;
+}
+.sp-icon svg { display: block; }
 .sp-logo {
   font-family: "Instrument Serif", Georgia, serif;
   font-style: italic;
@@ -806,13 +815,13 @@
   font-weight: 400;
   letter-spacing: -0.04em;
   line-height: 1;
-  animation: sp-logo 1.9s cubic-bezier(0.4,0,0.2,1) 0.05s both;
+  animation: sp-logo 2.9s cubic-bezier(0.4,0,0.2,1) 0.05s both;
 }
 .sp-line {
   height: 1.5px;
   border-radius: 1px;
   background: linear-gradient(90deg, transparent, oklch(0.51 0.19 28), oklch(0.71 0.15 50), transparent);
-  animation: sp-line 1.9s cubic-bezier(0.4,0,0.2,1) 0.05s both;
+  animation: sp-line 2.9s cubic-bezier(0.4,0,0.2,1) 0.05s both;
   width: 0;
 }
 </style>
@@ -822,6 +831,14 @@
 <!-- SPLASH — transition landing claire → dashboard sombre -->
 <div id="splashScreen" aria-hidden="true">
   <div class="sp-inner">
+    <div class="sp-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="56" height="56" fill="none">
+        <rect width="32" height="32" rx="8" fill="var(--paper)"/>
+        <rect x="7.5" y="7.5" width="17" height="3.75" rx="1.9" fill="var(--ink)"/>
+        <rect x="7.5" y="14.1" width="10.5" height="3.75" rx="1.9" fill="var(--accent)"/>
+        <rect x="7.5" y="20.75" width="17" height="3.75" rx="1.9" fill="var(--ink)"/>
+      </svg>
+    </div>
     <div class="sp-logo">eadee</div>
     <div class="sp-line"></div>
   </div>
@@ -842,8 +859,8 @@
   // ── Splash controller ────────────────────────────────────────────────────────
   (function() {
     var _authDone = false, _minDone = false;
-    // Attendre la fin de l'animation (1.9s + 0.05s delay + petite marge)
-    setTimeout(function() { _minDone = true; _tryClose(); }, 2100);
+    // Attendre la fin de l'animation (2.9s + 0.05s delay + petite marge)
+    setTimeout(function() { _minDone = true; _tryClose(); }, 3100);
     // Filet de sécurité : ferme après 7s quoi qu'il arrive
     setTimeout(function() { _authDone = true; _minDone = true; _tryClose(); }, 7000);
 
