@@ -758,9 +758,74 @@
 .dossier-spinner{width:48px;height:48px;border:3px solid var(--rule);border-top-color:var(--ink);border-radius:50%;animation:spin .8s linear infinite}
 .dossier-loading-text{font-size:14px;color:var(--ink-3)}
 @keyframes spin{to{transform:rotate(360deg)}}
+
+/* ═══════════════ SPLASH SCREEN ═══════════════ */
+@keyframes sp-bg {
+  0%   { background-color: oklch(0.965 0.012 85); }
+  26%  { background-color: oklch(0.80  0.09  64); }
+  54%  { background-color: oklch(0.46  0.13  40); }
+  80%  { background-color: oklch(0.21  0.015 52); }
+  100% { background-color: oklch(0.097 0.010 56); }
+}
+@keyframes sp-logo {
+  0%   { color: oklch(0.26 0.05 42); opacity: 0; transform: translateY(8px); }
+  9%   { opacity: 1; transform: translateY(0); }
+  52%  { color: oklch(0.52 0.13 38); }
+  78%  { color: oklch(0.74 0.10 46); }
+  100% { color: oklch(0.88 0.025 68); }
+}
+@keyframes sp-line {
+  0%,62% { width: 0;   opacity: 0; }
+  75%    { opacity: 1; }
+  100%   { width: 72px; opacity: 1; }
+}
+@keyframes sp-exit {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+#splashScreen {
+  position: fixed; inset: 0; z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  background-color: oklch(0.965 0.012 85);
+  animation: sp-bg 1.9s cubic-bezier(0.4,0,0.2,1) 0.05s both;
+}
+#splashScreen.sp-out {
+  animation: sp-exit 0.46s ease forwards !important;
+  pointer-events: none;
+}
+#splashScreen.sp-gone { display: none; }
+.sp-inner {
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+  user-select: none;
+}
+.sp-logo {
+  font-family: "Instrument Serif", Georgia, serif;
+  font-style: italic;
+  font-size: clamp(60px, 9.5vw, 100px);
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  animation: sp-logo 1.9s cubic-bezier(0.4,0,0.2,1) 0.05s both;
+}
+.sp-line {
+  height: 1.5px;
+  border-radius: 1px;
+  background: linear-gradient(90deg, transparent, oklch(0.51 0.19 28), oklch(0.71 0.15 50), transparent);
+  animation: sp-line 1.9s cubic-bezier(0.4,0,0.2,1) 0.05s both;
+  width: 0;
+}
 </style>
 </head>
 <body>
+
+<!-- SPLASH — transition landing claire → dashboard sombre -->
+<div id="splashScreen" aria-hidden="true">
+  <div class="sp-inner">
+    <div class="sp-logo">eadee</div>
+    <div class="sp-line"></div>
+  </div>
+</div>
 
 <!-- ============================================================
      EADEE v2 — COMPAT + AUTH GUARD
@@ -773,6 +838,25 @@
 <script>
 (function() {
   'use strict';
+
+  // ── Splash controller ────────────────────────────────────────────────────────
+  (function() {
+    var _authDone = false, _minDone = false;
+    // Attendre la fin de l'animation (1.9s + 0.05s delay + petite marge)
+    setTimeout(function() { _minDone = true; _tryClose(); }, 2100);
+    // Filet de sécurité : ferme après 7s quoi qu'il arrive
+    setTimeout(function() { _authDone = true; _minDone = true; _tryClose(); }, 7000);
+
+    function _tryClose() {
+      if (!_authDone || !_minDone) return;
+      var sp = document.getElementById('splashScreen');
+      if (!sp || sp.classList.contains('sp-gone')) return;
+      sp.classList.add('sp-out');
+      setTimeout(function() { sp.classList.add('sp-gone'); }, 480);
+    }
+
+    window._splashDone = function() { _authDone = true; _tryClose(); };
+  })();
 
   // ── Flag global — signale à tous les scripts qu'on est dans le nouveau HTML ──
   window.__EADEE_V2 = true;
@@ -796,6 +880,7 @@
         window.userCredits = window._eadeeCredits;
         window.currentPlan = 'pro';
         _updateV2UserUI();
+        if (typeof window._splashDone === 'function') window._splashDone();
         return;
       }
 
@@ -834,9 +919,11 @@
       window.supabaseClient = sb;
 
       _updateV2UserUI();
+      if (typeof window._splashDone === 'function') window._splashDone();
     } catch (e) {
       console.warn('[v2 auth guard]', e);
       // En cas d'erreur réseau, on ne redirect pas (meilleure UX offline)
+      if (typeof window._splashDone === 'function') window._splashDone();
     }
   })();
 
