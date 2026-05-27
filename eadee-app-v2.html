@@ -721,6 +721,83 @@
   .top-drop-item:hover::after, .filter-tabs button:hover::after, .plan-row:hover::after {
     transform: translateX(150%) skewX(-12deg);
   }
+
+  /* ─── Contours — border glow on hover (dashboard) ─── */
+
+  /* Extensions de transition pour les éléments sans transition border */
+  .card       { transition: box-shadow var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out), border-color 0.22s var(--ease-out); }
+  .side-credits { transition: border-color 0.22s ease, box-shadow 0.22s ease; }
+  .help-card  { transition: border-color 0.22s ease, box-shadow 0.22s ease; }
+  .dossier-card { transition: border-color 0.22s ease, box-shadow 0.22s ease; }
+  .filter-tabs button { transition: border-color 0.18s ease, background 0.15s ease, color 0.15s ease; }
+
+  /* .card — border accent + ring externe */
+  .card:hover {
+    border-color: oklch(0.42 0.01 60);
+    box-shadow: var(--shadow-hover), 0 0 0 2px oklch(0.57 0.145 34 / 0.18);
+  }
+
+  /* .side-credits, .help-card, .dossier-card */
+  .side-credits:hover {
+    border-color: oklch(0.42 0.01 60);
+    box-shadow: 0 0 0 2px oklch(0.57 0.145 34 / 0.13), inset 0 1px 0 oklch(1 0 0 / 0.07);
+  }
+  .help-card:hover {
+    border-color: oklch(0.42 0.01 60);
+    box-shadow: 0 0 0 2px oklch(0.57 0.145 34 / 0.13), inset 0 1px 0 oklch(1 0 0 / 0.07);
+  }
+  .dossier-card:hover {
+    border-color: oklch(0.42 0.01 60);
+    box-shadow: 0 0 0 2px oklch(0.57 0.145 34 / 0.13), inset 0 1px 0 oklch(1 0 0 / 0.07);
+  }
+
+  /* .pack — border + ring */
+  .pack:hover {
+    border-color: oklch(0.42 0.01 60);
+    box-shadow: 0 0 0 2px oklch(0.57 0.145 34 / 0.15), inset 0 1px 0 oklch(1 0 0 / 0.07);
+  }
+  .pack.on:hover {
+    border-color: var(--ink);
+    box-shadow: 0 0 0 1px var(--ink) inset, 0 0 0 3px oklch(0.57 0.145 34 / 0.20);
+  }
+
+  /* .conv — ring accent en plus de la border ink */
+  .conv:hover {
+    border-color: var(--ink);
+    transform: translateX(2px);
+    box-shadow: var(--shadow-lift), 0 0 0 2px oklch(0.57 0.145 34 / 0.20);
+  }
+
+  /* .chat-new — ring accent */
+  .chat-new:hover {
+    border-color: var(--accent);
+    color: var(--accent-ink);
+    box-shadow: 0 0 0 3px oklch(0.57 0.145 34 / 0.15);
+  }
+
+  /* Boutons dashboard — ring terracotta */
+  .btn:not(.btn-ghost):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px -6px oklch(0.20 0.01 60 / 0.30), 0 0 0 2px oklch(0.57 0.145 34 / 0.25), inset 0 1px 0 oklch(1 0 0 / 0.18);
+  }
+
+  /* .filter-tabs button */
+  .filter-tabs button:hover { border-color: oklch(0.42 0.01 60); }
+  .filter-tabs button.on:hover { border-color: rgba(200,75,47,0.55); }
+
+  /* .plan-row — ring inset en plus de l'accent bar */
+  .plan-row:hover {
+    background: var(--bg);
+    box-shadow: inset 3px 0 0 var(--accent), inset 0 0 0 1px oklch(0.40 0.01 60 / 0.60);
+  }
+
+  /* .doc-btn — ring accent au hover */
+  .doc-btn:hover {
+    background: var(--paper);
+    border-color: var(--accent);
+    color: var(--ink);
+    box-shadow: 0 0 0 2px oklch(0.57 0.145 34 / 0.20);
+  }
 </style>
 <style>
 /* ── Documents annexes ─────────────────────────────── */
