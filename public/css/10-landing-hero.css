@@ -385,32 +385,25 @@
 
 /* ══ Contours — border glow (hero elements) ══ */
 
-/* Transition extension pour box-shadow sur btn-s */
-.btn-s { transition: border-color 0.15s, color 0.15s, transform 0.15s, box-shadow 0.22s ease; }
-.chip  { transition: border-color 0.18s ease; }
+.btn-s { transition: border-color 0.15s, color 0.15s, transform 0.15s, box-shadow 0.28s ease; }
+.chip  { transition: border-color 0.20s ease; }
 
-/* btn-p : ring sombre autour du fond ink */
+/* btn-p : glow flou sombre */
 .btn-p:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-hover), 0 0 0 3px oklch(0.20 0.012 60 / 0.12), inset 0 1px 0 oklch(1 0 0 / 0.22);
+  box-shadow: var(--shadow-hover), 0 0 14px 0 oklch(0.20 0.012 60 / 0.18), inset 0 1px 0 oklch(1 0 0 / 0.22);
 }
 
-/* btn-s : border + ring accent */
+/* btn-s : border accent + glow flou */
 .btn-s:hover {
-  border-color: oklch(0.58 0.14 35 / 0.70);
+  border-color: oklch(0.58 0.14 35 / 0.65);
   color: var(--ink);
   transform: translateY(-2px);
-  box-shadow: 0 0 0 3px oklch(0.58 0.14 35 / 0.09);
+  box-shadow: 0 0 12px 0 oklch(0.58 0.14 35 / 0.14);
 }
 
-/* chip : accent border */
+/* chip : border accent seulement */
 .chip:hover { border-color: oklch(0.58 0.14 35 / 0.55); }
-
-/* Hero mock — ring subtil sur les cartes */
-.mock-score:hover, .kpis .kpi:hover, .mock-chart:hover {
-  outline: 1.5px solid oklch(1 0 0 / 0.16);
-  outline-offset: 0;
-}
 
 /* ══ Responsive ══ */
 @media (max-width: 768px) {
