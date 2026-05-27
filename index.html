@@ -626,7 +626,16 @@
   [data-theme="dark"] .price.featured {
     background: oklch(0.158 0.012 57);
     border-color: oklch(0.52 0.14 35 / 0.5);
+    color: var(--ink);
   }
+  [data-theme="dark"] .price.featured .price-name,
+  [data-theme="dark"] .price.featured .price-sub { color: var(--ink); }
+  [data-theme="dark"] .price.featured .price-meta { color: var(--ink-2); border-color: var(--rule); }
+  [data-theme="dark"] .price.featured .price-meta b { color: var(--ink); }
+  [data-theme="dark"] .price.featured .price-credit { color: var(--ink-2); }
+  [data-theme="dark"] .price.featured .price-big { color: var(--ink); }
+  [data-theme="dark"] .price.featured .strike { color: var(--ink-3); }
+  [data-theme="dark"] .price.featured .price-badge { color: oklch(0.72 0.12 40); }
   [data-theme="dark"] .testim { border-color: var(--rule); }
 
 </style>
