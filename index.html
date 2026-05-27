@@ -589,6 +589,45 @@
   /* ——— SCROLL REVEAL ——— */
   .reveal{opacity:0;transform:translateY(22px);transition:opacity .65s ease,transform .65s ease}
   .reveal.visible{opacity:1;transform:translateY(0)}
+
+  /* ——— SECTION SOMBRE (data-theme="dark") ——— */
+  [data-theme="dark"] {
+    --bg:         oklch(0.097 0.010 56);
+    --bg-2:       oklch(0.138 0.012 56);
+    --paper:      oklch(0.158 0.012 57);
+    --ink:        oklch(0.88  0.025 68);
+    --ink-2:      oklch(0.70  0.018 65);
+    --ink-3:      oklch(0.48  0.012 60);
+    --ink-4:      oklch(0.32  0.010 60);
+    --rule:       oklch(0.22  0.008 58);
+    --rule-2:     oklch(0.30  0.008 58);
+    --accent-ink: oklch(0.76  0.15  40);
+    --green-bg:   oklch(0.20  0.05  145);
+    --shadow-lift:  0 4px 28px -4px rgba(0,0,0,0.55), 0 1px 0 var(--rule);
+    --shadow-hover: 0 8px 36px -8px rgba(0,0,0,0.65), 0 1px 0 var(--rule);
+    background: var(--bg);
+    color: var(--ink);
+  }
+  /* Overrides spécifiques composants sur fond sombre */
+  [data-theme="dark"] .process { border-top-color: oklch(0.30 0.008 58); }
+  [data-theme="dark"] .chart .bar.dim { background: var(--rule-2); }
+  [data-theme="dark"] .btn { box-shadow: none; }
+  [data-theme="dark"] .btn:hover { box-shadow: 0 6px 20px -6px rgba(0,0,0,0.5); }
+  [data-theme="dark"] .card {
+    box-shadow: 0 1px 0 var(--rule), 0 30px 60px -40px rgba(0,0,0,0.5);
+  }
+  [data-theme="dark"] .chat-row.user .chat-bubble {
+    background: oklch(0.58 0.14 35);
+    color: oklch(0.97 0.008 85);
+    border-color: oklch(0.58 0.14 35);
+  }
+  [data-theme="dark"] .pricing { border-color: var(--rule); }
+  [data-theme="dark"] .price { border-color: var(--rule); }
+  [data-theme="dark"] .price.featured {
+    background: oklch(0.158 0.012 57);
+    border-color: oklch(0.52 0.14 35 / 0.5);
+  }
+  [data-theme="dark"] .testim { border-color: var(--rule); }
 </style>
 </head>
 <body>
@@ -829,7 +868,7 @@
 </div>
 
 <!-- ========================= PROCESS ========================= -->
-<section id="process">
+<section id="process" data-theme="dark">
   <div class="wrap">
     <div class="section-head">
       <div class="left">
@@ -861,7 +900,6 @@
   </div>
 </section>
 
-<hr class="rule" />
 
 <!-- ========================= FEATURE 1 — VIABILITY ========================= -->
 <section id="features">
@@ -924,10 +962,9 @@
   </div>
 </section>
 
-<hr class="rule" />
 
 <!-- ========================= FEATURE 2 — PROJECTIONS ========================= -->
-<section>
+<section data-theme="dark">
   <div class="wrap">
     <div class="feature reverse">
       <div class="feature-text">
@@ -998,7 +1035,6 @@
   </div>
 </section>
 
-<hr class="rule" />
 
 <!-- ========================= FEATURE 3 — EXPERT 24/7 ========================= -->
 <section>
@@ -1064,10 +1100,9 @@
   </div>
 </section>
 
-<hr class="rule" />
 
 <!-- ========================= FEATURE 4 — BANK / BPI ========================= -->
-<section style="background:var(--bg-2)">
+<section data-theme="dark">
   <div class="wrap">
     <div class="feature reverse">
       <div class="feature-text">
@@ -1218,10 +1253,9 @@
   </div>
 </section>
 
-<hr class="rule" />
 
 <!-- ========================= TESTIMONIALS ========================= -->
-<section>
+<section data-theme="dark">
   <div class="wrap">
     <div class="section-head">
       <div class="left">
@@ -1299,7 +1333,7 @@
 </section>
 
 <!-- ========================= PRICING ========================= -->
-<section id="pricing" style="background:var(--bg-2)">
+<section id="pricing" data-theme="dark">
   <div class="wrap">
     <div class="section-head">
       <div class="left">
@@ -1420,7 +1454,7 @@
 </section>
 
 <!-- ========================= FOOTER ========================= -->
-<footer>
+<footer data-theme="dark">
   <div class="wrap">
     <div class="foot-grid">
       <div class="foot-intro">
