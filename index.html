@@ -655,56 +655,73 @@
 
   /* ─── Reflet — gloss reflection effect ─────────────────── */
 
-  /* Overflow + position sur tous les éléments concernés */
+  /* position + overflow sur tous les éléments */
   .card, .testim, .toc-item, .price-foot, details.q { overflow: hidden; position: relative; }
-  .price, .step { overflow: hidden; }
+  .price, .step { overflow: hidden; } /* déjà position:relative */
   .btn, .toc-tab { overflow: hidden; position: relative; }
 
-  /* Lueur diagonale ambiante — source de lumière haut-gauche */
-  .card, .price, .testim, .toc-item, .step, .price-foot, details.q {
-    background-image: linear-gradient(
-      148deg,
-      oklch(1 0 0 / 0.10) 0%,
-      oklch(1 0 0 / 0.04) 22%,
-      transparent 50%
-    );
-  }
-  .price.featured {
-    box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.20);
-  }
-  .btn:not(.btn-ghost), .toc-tab {
-    background-image: linear-gradient(148deg, oklch(1 0 0 / 0.18) 0%, transparent 55%);
-  }
+  /* Highlight bord-haut — surfaces sombres uniquement */
+  .price.featured,
+  .btn:not(.btn-ghost),
   .toc-tab.active {
-    background-image: linear-gradient(148deg, oklch(1 0 0 / 0.14) 0%, transparent 50%);
+    box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.22);
   }
 
-  /* Sweep shimmer au hover */
-  .card::after, .price::after, .testim::after, .btn::after,
-  .toc-item::after, .toc-tab::after, .step::after, .price-foot::after, details.q::after {
+  /* ── SWEEP SHIMMER — fond CLAIR (crème/blanc) ──
+     Opacité 50% : seule valeur visible sur fond clair */
+  .card::after,
+  .price:not(.featured)::after,
+  .testim::after,
+  .toc-item::after,
+  .step::after,
+  .price-foot::after,
+  details.q::after,
+  .toc-tab:not(.active)::after {
     content: "";
-    position: absolute;
-    inset: 0;
+    position: absolute; inset: 0;
     background: linear-gradient(
       108deg,
-      transparent 18%,
-      oklch(1 0 0 / 0.16) 50%,
-      transparent 82%
+      transparent 12%,
+      oklch(1 0.01 80 / 0.52) 50%,
+      transparent 88%
     );
-    transform: translateX(-140%) skewX(-12deg);
-    transition: transform 0.72s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    pointer-events: none;
-    z-index: 1;
+    transform: translateX(-150%) skewX(-12deg);
+    transition: transform 0.70s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    pointer-events: none; z-index: 1;
   }
-  .card:hover::after, .price:hover::after, .testim:hover::after, .btn:hover::after,
-  .toc-item:hover::after, .toc-tab:hover::after, .step:hover::after,
-  .price-foot:hover::after, details.q:hover::after {
-    transform: translateX(140%) skewX(-12deg);
+
+  /* ── SWEEP SHIMMER — fond SOMBRE (encre/accent) ── */
+  .price.featured::after,
+  .btn:not(.btn-ghost)::after,
+  .toc-tab.active::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(
+      108deg,
+      transparent 12%,
+      oklch(1 0 0 / 0.26) 50%,
+      transparent 88%
+    );
+    transform: translateX(-150%) skewX(-12deg);
+    transition: transform 0.70s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    pointer-events: none; z-index: 1;
   }
-  [data-theme="dark"] .card::after, [data-theme="dark"] .price::after,
-  [data-theme="dark"] .testim::after, [data-theme="dark"] .toc-item::after,
-  [data-theme="dark"] .step::after {
-    background: linear-gradient(108deg, transparent 18%, oklch(1 0 0 / 0.07) 50%, transparent 82%);
+
+  /* Ghost button (fond transparent) */
+  .btn.btn-ghost::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(108deg, transparent 12%, oklch(0.20 0.01 60 / 0.18) 50%, transparent 88%);
+    transform: translateX(-150%) skewX(-12deg);
+    transition: transform 0.70s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    pointer-events: none; z-index: 1;
+  }
+
+  /* Déclenchement hover */
+  .card:hover::after, .price:hover::after, .testim:hover::after,
+  .toc-item:hover::after, .step:hover::after, .price-foot:hover::after,
+  details.q:hover::after, .btn:hover::after, .toc-tab:hover::after {
+    transform: translateX(150%) skewX(-12deg);
   }
 
 </style>

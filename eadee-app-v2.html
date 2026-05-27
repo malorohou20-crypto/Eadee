@@ -680,6 +680,47 @@
   }
   #sideBackdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:399;backdrop-filter:blur(2px)}
   .hamburger{display:none;align-items:center;justify-content:center;width:36px;height:36px;background:none;border:1px solid var(--rule);border-radius:6px;cursor:pointer;color:var(--ink-2);flex-shrink:0}
+
+  /* ─── Reflet — gloss sweep (dashboard — fond sombre) ─── */
+
+  /* position + overflow sur tous les éléments */
+  .card, .side-credits, .pack, .conv,
+  .help-card, .dossier-card, .plan-icon, .chat-new { overflow: hidden; position: relative; }
+  .btn, .chat-send, .top-drop-item { overflow: hidden; position: relative; }
+  .filter-tabs button { overflow: hidden; position: relative; }
+  .plan-row { overflow: hidden; position: relative; }
+
+  /* Highlight bord-haut — surfaces sombres */
+  .card, .side-credits, .pack, .conv, .help-card, .dossier-card {
+    box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.07);
+  }
+  .btn:not(.btn-ghost), .chat-send { box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.18); }
+
+  /* Sweep shimmer — surfaces sombres */
+  .card::after, .side-credits::after, .pack::after, .conv::after,
+  .help-card::after, .dossier-card::after, .plan-icon::after, .chat-new::after,
+  .btn::after, .chat-send::after, .top-drop-item::after,
+  .filter-tabs button::after, .plan-row::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(
+      108deg,
+      transparent 12%,
+      oklch(1 0 0 / 0.14) 50%,
+      transparent 88%
+    );
+    transform: translateX(-150%) skewX(-12deg);
+    transition: transform 0.70s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    pointer-events: none; z-index: 1;
+  }
+
+  /* Déclenchement hover */
+  .card:hover::after, .side-credits:hover::after, .pack:hover::after, .conv:hover::after,
+  .help-card:hover::after, .dossier-card:hover::after, .plan-icon:hover::after,
+  .chat-new:hover::after, .btn:hover::after, .chat-send:hover::after,
+  .top-drop-item:hover::after, .filter-tabs button:hover::after, .plan-row:hover::after {
+    transform: translateX(150%) skewX(-12deg);
+  }
 </style>
 <style>
 /* ── Documents annexes ─────────────────────────────── */
@@ -692,6 +733,15 @@
 @keyframes doc-progress{0%{left:0;width:30%}50%{left:40%;width:50%}100%{left:100%;width:0}}
 .doc-icon{color:var(--ink-4);transition:color .18s;flex-shrink:0}
 .doc-btn:hover .doc-icon{color:var(--accent,#c84b2f)}
+/* Reflet sur doc-btn (::before car ::after = animation loading) */
+.doc-btn::before{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(108deg,transparent 12%,oklch(1 0 0 / 0.14) 50%,transparent 88%);
+  transform:translateX(-150%) skewX(-12deg);
+  transition:transform 0.70s cubic-bezier(0.25,0.46,0.45,0.94);
+  pointer-events:none;z-index:1;
+}
+.doc-btn:hover::before{transform:translateX(150%) skewX(-12deg)}
 .doc-label{font-size:12px;font-weight:600;line-height:1.4;color:var(--ink)}
 .doc-format{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-4)}
 

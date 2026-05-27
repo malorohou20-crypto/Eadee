@@ -330,7 +330,7 @@
   background-image: linear-gradient(148deg, oklch(1 0 0 / 0.14) 0%, transparent 55%);
 }
 
-/* Sweep shimmer au hover */
+/* Sweep shimmer au hover — surfaces sombres hero */
 .mock-score::after, .kpis .kpi::after, .mock-chart::after,
 .side-credits::after, .credits-cta::after {
   content: "";
@@ -338,18 +338,18 @@
   inset: 0;
   background: linear-gradient(
     108deg,
-    transparent 18%,
-    oklch(1 0 0 / 0.10) 50%,
-    transparent 82%
+    transparent 12%,
+    oklch(1 0 0 / 0.22) 50%,
+    transparent 88%
   );
-  transform: translateX(-140%) skewX(-12deg);
+  transform: translateX(-150%) skewX(-12deg);
   transition: transform 0.68s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   pointer-events: none;
   z-index: 1;
 }
 .mock-score:hover::after, .kpis .kpi:hover::after, .mock-chart:hover::after,
 .side-credits:hover::after, .credits-cta:hover::after {
-  transform: translateX(140%) skewX(-12deg);
+  transform: translateX(150%) skewX(-12deg);
 }
 
 /* ══ Responsive ══ */
