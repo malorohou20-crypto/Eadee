@@ -507,7 +507,8 @@
   }
   .insp{
     padding:26px 26px 22px;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);
-    display:flex;flex-direction:column;gap:10px;cursor:pointer;transition:background .15s;
+    display:flex;flex-direction:column;gap:10px;cursor:pointer;
+    transition:background .15s,border-right-color .22s ease,border-bottom-color .22s ease;
   }
   .insp:hover{background:var(--bg)}
   .insp-head{display:flex;justify-content:space-between;align-items:baseline}
@@ -689,6 +690,7 @@
   .btn, .chat-send, .top-drop-item { overflow: hidden; position: relative; }
   .filter-tabs button { overflow: hidden; position: relative; }
   .plan-row { overflow: hidden; position: relative; }
+  .insp { overflow: hidden; position: relative; }
 
   /* Highlight bord-haut — surfaces sombres */
   .card, .side-credits, .pack, .conv, .help-card, .dossier-card {
@@ -700,7 +702,7 @@
   .card::after, .side-credits::after, .pack::after, .conv::after,
   .help-card::after, .dossier-card::after, .plan-icon::after, .chat-new::after,
   .btn::after, .chat-send::after, .top-drop-item::after,
-  .filter-tabs button::after, .plan-row::after {
+  .filter-tabs button::after, .plan-row::after, .insp::after {
     content: "";
     position: absolute; inset: 0;
     background: linear-gradient(
@@ -718,7 +720,8 @@
   .card:hover::after, .side-credits:hover::after, .pack:hover::after, .conv:hover::after,
   .help-card:hover::after, .dossier-card:hover::after, .plan-icon:hover::after,
   .chat-new:hover::after, .btn:hover::after, .chat-send:hover::after,
-  .top-drop-item:hover::after, .filter-tabs button:hover::after, .plan-row:hover::after {
+  .top-drop-item:hover::after, .filter-tabs button:hover::after, .plan-row:hover::after,
+  .insp:hover::after {
     transform: translateX(150%) skewX(-12deg);
   }
 
@@ -730,30 +733,31 @@
   .help-card  { transition: border-color 0.22s ease, box-shadow 0.22s ease; }
   .dossier-card { transition: border-color 0.22s ease, box-shadow 0.22s ease; }
   .filter-tabs button { transition: border-color 0.18s ease, background 0.15s ease, color 0.15s ease; }
+  .insp       { transition: background .15s, border-right-color 0.22s ease, border-bottom-color 0.22s ease; }
 
   /* .card — border accent + glow flou */
   .card:hover {
-    border-color: oklch(0.42 0.01 60);
+    border-color: oklch(0.57 0.145 34 / 0.55);
     box-shadow: var(--shadow-hover), 0 0 16px 0 oklch(0.57 0.145 34 / 0.18);
   }
 
   /* .side-credits, .help-card, .dossier-card — border + glow flou */
   .side-credits:hover {
-    border-color: oklch(0.42 0.01 60);
+    border-color: oklch(0.57 0.145 34 / 0.55);
     box-shadow: 0 0 12px 0 oklch(0.57 0.145 34 / 0.14);
   }
   .help-card:hover {
-    border-color: oklch(0.42 0.01 60);
+    border-color: oklch(0.57 0.145 34 / 0.55);
     box-shadow: 0 0 12px 0 oklch(0.57 0.145 34 / 0.14);
   }
   .dossier-card:hover {
-    border-color: oklch(0.42 0.01 60);
+    border-color: oklch(0.57 0.145 34 / 0.55);
     box-shadow: 0 0 12px 0 oklch(0.57 0.145 34 / 0.14);
   }
 
   /* .pack — border + glow flou */
   .pack:hover {
-    border-color: oklch(0.42 0.01 60);
+    border-color: oklch(0.57 0.145 34 / 0.55);
     box-shadow: 0 0 12px 0 oklch(0.57 0.145 34 / 0.16);
   }
   .pack.on:hover {
@@ -782,8 +786,14 @@
   }
 
   /* .filter-tabs button — border-color seulement */
-  .filter-tabs button:hover { border-color: oklch(0.42 0.01 60); }
+  .filter-tabs button:hover { border-color: oklch(0.57 0.145 34 / 0.55); }
   .filter-tabs button.on:hover { border-color: rgba(200,75,47,0.55); }
+
+  /* .insp — bordures partielles (droite + bas), comme toc-item landing */
+  .insp:hover {
+    border-right-color: oklch(0.57 0.145 34 / 0.55);
+    border-bottom-color: oklch(0.57 0.145 34 / 0.40);
+  }
 
   /* .plan-row — barre accent inset seulement (pas de ring dur) */
   .plan-row:hover {
