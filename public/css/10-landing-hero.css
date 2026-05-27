@@ -88,11 +88,22 @@
   background: var(--ink); color: var(--paper);
   padding: 14px 30px; border-radius: 999px;
   text-decoration: none; letter-spacing: -0.01em;
-  box-shadow: var(--shadow-lift);
+  box-shadow: var(--shadow-lift), inset 0 1px 0 oklch(1 0 0 / 0.22);
   transition: transform 0.15s, box-shadow 0.18s;
   display: inline-flex; align-items: center;
+  position: relative; overflow: hidden;
 }
-.btn-p:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+.btn-p:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover), inset 0 1px 0 oklch(1 0 0 / 0.22); }
+.btn-p::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(108deg, transparent 12%, oklch(1 0 0 / 0.26) 50%, transparent 88%);
+  transform: translateX(-150%) skewX(-12deg);
+  transition: transform 0.70s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  pointer-events: none;
+}
+.btn-p:hover::after { transform: translateX(150%) skewX(-12deg); }
+
 .btn-s {
   font-size: 14.5px; color: var(--ink-2);
   text-decoration: none;
@@ -101,8 +112,18 @@
   letter-spacing: -0.01em;
   transition: border-color 0.15s, color 0.15s, transform 0.15s;
   display: inline-flex; align-items: center;
+  position: relative; overflow: hidden;
 }
 .btn-s:hover { border-color: var(--ink-4); color: var(--ink); transform: translateY(-2px); }
+.btn-s::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(108deg, transparent 12%, oklch(1 0.01 80 / 0.45) 50%, transparent 88%);
+  transform: translateX(-150%) skewX(-12deg);
+  transition: transform 0.70s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  pointer-events: none;
+}
+.btn-s:hover::after { transform: translateX(150%) skewX(-12deg); }
 
 /* ── Proof chips ── */
 .hero-proof {
@@ -118,7 +139,17 @@
   border-radius: 999px;
   background: oklch(0.99 0.008 90 / 0.55);
   letter-spacing: -0.003em;
+  position: relative; overflow: hidden;
 }
+.chip::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(108deg, transparent 12%, oklch(1 0.01 80 / 0.52) 50%, transparent 88%);
+  transform: translateX(-150%) skewX(-12deg);
+  transition: transform 0.65s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  pointer-events: none;
+}
+.chip:hover::after { transform: translateX(150%) skewX(-12deg); }
 .chip-dot {
   width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;
   background: oklch(0.48 0.08 145 / 0.12);
