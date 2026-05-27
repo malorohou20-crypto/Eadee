@@ -628,6 +628,81 @@
     border-color: oklch(0.52 0.14 35 / 0.5);
   }
   [data-theme="dark"] .testim { border-color: var(--rule); }
+
+  /* ——— TRANSITIONS DIAGONALES SOMBRE ↔ CLAIR ——— */
+  section[data-theme="dark"] {
+    transform: skewY(-2deg);
+    margin-top:   -56px;
+    margin-bottom: -56px;
+    padding-top:    calc(104px + 56px);
+    padding-bottom: calc(104px + 56px);
+    z-index: 2;
+  }
+  footer[data-theme="dark"] {
+    transform: skewY(-2deg);
+    margin-top: -56px;
+    padding-top: calc(72px + 56px);
+    z-index: 2;
+  }
+
+  /* Counter-skew sur le contenu pour le garder droit */
+  section[data-theme="dark"] > .wrap,
+  footer[data-theme="dark"]  > .wrap {
+    transform: skewY(2deg);
+  }
+
+  /* Sections claires restent derrière */
+  section:not([data-theme="dark"]) {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Ligne accent sur les bords diagonaux */
+  section[data-theme="dark"]::before,
+  footer[data-theme="dark"]::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg,
+      transparent 0%,
+      oklch(0.58 0.14 35 / 0.25) 20%,
+      oklch(0.76 0.15 40 / 0.45) 50%,
+      oklch(0.58 0.14 35 / 0.25) 80%,
+      transparent 100%
+    );
+    transform: skewY(2deg);
+    transform-origin: left;
+  }
+  section[data-theme="dark"]::after,
+  footer[data-theme="dark"]::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg,
+      transparent 0%,
+      oklch(0.58 0.14 35 / 0.20) 20%,
+      oklch(0.76 0.15 40 / 0.35) 50%,
+      oklch(0.58 0.14 35 / 0.20) 80%,
+      transparent 100%
+    );
+    transform: skewY(2deg);
+    transform-origin: left;
+  }
+
+  /* Mobile — angle réduit */
+  @media (max-width:680px) {
+    section[data-theme="dark"],
+    footer[data-theme="dark"] {
+      transform: skewY(-1deg);
+      margin-top:   -24px;
+      margin-bottom: -24px;
+      padding-top:    calc(64px + 24px);
+      padding-bottom: calc(64px + 24px);
+    }
+    footer[data-theme="dark"] { padding-top: calc(56px + 24px); }
+    section[data-theme="dark"] > .wrap,
+    footer[data-theme="dark"]  > .wrap { transform: skewY(1deg); }
+  }
 </style>
 </head>
 <body>
