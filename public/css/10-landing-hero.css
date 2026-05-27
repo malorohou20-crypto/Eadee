@@ -311,6 +311,47 @@
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
 
+/* ══ Reflet — gloss effect sur les éléments du hero mock ══ */
+.mock-score, .kpis .kpi, .mock-chart, .side-credits, .credits-cta {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Lueur ambiante top-gauche — surfaces sombres */
+.mock-score, .kpis .kpi, .mock-chart, .side-credits {
+  background-image: linear-gradient(
+    148deg,
+    oklch(1 0 0 / 0.07) 0%,
+    oklch(1 0 0 / 0.02) 20%,
+    transparent 45%
+  );
+}
+.credits-cta {
+  background-image: linear-gradient(148deg, oklch(1 0 0 / 0.14) 0%, transparent 55%);
+}
+
+/* Sweep shimmer au hover */
+.mock-score::after, .kpis .kpi::after, .mock-chart::after,
+.side-credits::after, .credits-cta::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    108deg,
+    transparent 18%,
+    oklch(1 0 0 / 0.10) 50%,
+    transparent 82%
+  );
+  transform: translateX(-140%) skewX(-12deg);
+  transition: transform 0.68s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  pointer-events: none;
+  z-index: 1;
+}
+.mock-score:hover::after, .kpis .kpi:hover::after, .mock-chart:hover::after,
+.side-credits:hover::after, .credits-cta:hover::after {
+  transform: translateX(140%) skewX(-12deg);
+}
+
 /* ══ Responsive ══ */
 @media (max-width: 768px) {
   .hero-inner { padding: 64px 20px 40px; }
