@@ -257,7 +257,7 @@
 .score-n { font-size: 22px; font-weight: 600; color: oklch(0.62 0.14 145); line-height: 1; }
 .score-s { font-size: 9px; color: oklch(0.46 0.008 68); margin-top: 1px; }
 .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-.kpi { background: oklch(0.155 0.010 57); border: 1px solid oklch(0.220 0.008 58); border-radius: 8px; padding: 14px 16px; }
+.kpis .kpi { background: oklch(0.155 0.010 57); border: 1px solid oklch(0.220 0.008 58); border-radius: 8px; padding: 14px 16px; }
 .kpi-l { font-size: 9px; color: oklch(0.46 0.008 68); text-transform: uppercase; letter-spacing: 0.10em; margin-bottom: 8px; }
 .kpi-v { font-size: 18px; font-weight: 500; letter-spacing: -0.03em; color: oklch(0.90 0.008 80); line-height: 1; }
 .kpi-h { font-size: 9px; margin-top: 4px; color: oklch(0.46 0.008 68); line-height: 1.3; }
