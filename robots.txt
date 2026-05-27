@@ -1,0 +1,12 @@
+# robots.txt — eadee.fr
+User-agent: *
+Allow: /
+
+# Bloquer les pages inutiles à l'indexation
+Disallow: /api/
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /compte/
+
+# Sitemap
+Sitemap: https://www.eadee.fr/sitemap.xml

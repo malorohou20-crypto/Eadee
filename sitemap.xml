@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- Page principale -->
+  <url>
+    <loc>https://www.eadee.fr/</loc>
+    <lastmod>2026-05-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- Pages SEO secteurs (à créer) -->
+  <url>
+    <loc>https://www.eadee.fr/secteurs/restauration</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.eadee.fr/secteurs/e-commerce</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.eadee.fr/secteurs/coaching</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.eadee.fr/secteurs/auto-entrepreneur</loc>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Articles blog (à créer) -->
+  <url>
+    <loc>https://www.eadee.fr/blog/comment-faire-un-business-plan</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.eadee.fr/blog/business-plan-bpi-france</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.eadee.fr/blog/business-plan-auto-entrepreneur</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.eadee.fr/blog/financement-creation-entreprise-france</loc>
+    <priority>0.7</priority>
+  </url>
+
+</urlset>
