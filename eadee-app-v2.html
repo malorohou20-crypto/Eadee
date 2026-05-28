@@ -975,6 +975,149 @@
   width: 0;
 }
 </style>
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   DASHBOARD MINIMAL — oklch warm palette + no shimmer/glow
+   Override block — all rules here supersede the base styles above
+═══════════════════════════════════════════════════════════════ */
+
+/* 1 ── Root palette → oklch */
+:root {
+  --bg:         oklch(0.112 0.010 56);
+  --bg-2:       oklch(0.140 0.009 56);
+  --paper:      oklch(0.165 0.008 58);
+  --ink:        oklch(0.880 0.007 78);
+  --ink-2:      oklch(0.618 0.007 70);
+  --ink-3:      oklch(0.418 0.006 65);
+  --ink-4:      oklch(0.278 0.005 62);
+  --rule:       oklch(0.218 0.008 58);
+  --rule-2:     oklch(0.252 0.007 58);
+  --accent:     oklch(0.568 0.145 34);
+  --accent-bg:  oklch(0.568 0.145 34 / 0.11);
+  --accent-ink: oklch(0.732 0.100 52);
+  --card:       oklch(0.165 0.008 58);
+  --card-2:     oklch(0.192 0.008 58);
+  --rust:       oklch(0.680 0.115 46);
+  --gold:       oklch(0.732 0.100 52);
+  --muted:      oklch(0.418 0.006 65);
+  --text:       oklch(0.880 0.007 78);
+  --cream:      oklch(0.165 0.008 58);
+  --shadow-lift:  0 2px 12px -3px oklch(0 0 0 / 0.42);
+  --shadow-hover: 0 4px 18px -5px oklch(0 0 0 / 0.48);
+}
+
+/* 2 ── Kill shimmer sweep pseudo-elements */
+.card::after, .side-credits::after, .pack::after, .conv::after,
+.help-card::after, .dossier-card::after, .plan-icon::after, .chat-new::after,
+.btn::after, .chat-send::after, .top-drop-item::after,
+.filter-tabs button::after, .plan-row::after, .insp::after {
+  display: none !important;
+}
+.doc-btn::before { display: none !important; }
+
+/* 3 ── Remove inset top-edge highlight; restore clean shadows */
+.card, .side-credits, .pack, .conv, .help-card, .dossier-card {
+  box-shadow: var(--shadow-lift);
+}
+.btn:not(.btn-ghost), .chat-send { box-shadow: none; }
+
+/* 4 ── Simplified hover — no glow rings, no border flares */
+.card {
+  transition: border-color 0.18s ease,
+              box-shadow var(--dur-base) var(--ease-out),
+              transform var(--dur-base) var(--ease-out);
+}
+.card:hover {
+  border-color: oklch(0.295 0.008 58);
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-1px);
+}
+.side-credits:hover, .help-card:hover, .dossier-card:hover {
+  border-color: oklch(0.295 0.008 58);
+  box-shadow: var(--shadow-lift);
+}
+.pack:hover {
+  border-color: oklch(0.360 0.008 60);
+  box-shadow: none;
+}
+.pack.on:hover {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 1px var(--ink) inset;
+}
+.conv:hover {
+  border-color: oklch(0.360 0.008 60);
+  transform: translateX(2px);
+  box-shadow: var(--shadow-lift);
+}
+.chat-new:hover {
+  border-color: oklch(0.568 0.145 34 / 0.45);
+  color: var(--accent-ink);
+  box-shadow: none;
+}
+.btn:not(.btn-ghost):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 12px -3px oklch(0 0 0 / 0.28);
+}
+.filter-tabs button:hover  { border-color: oklch(0.320 0.008 60); }
+.filter-tabs button.on:hover { border-color: oklch(0.568 0.145 34 / 0.40); }
+.insp:hover {
+  border-right-color:  oklch(0.295 0.008 58);
+  border-bottom-color: oklch(0.295 0.008 58);
+}
+.doc-btn:hover {
+  border-color: oklch(0.568 0.145 34 / 0.40);
+  box-shadow: none;
+}
+
+/* 5 ── Sidebar — minimal active state + quieter section labels */
+.side-link.active {
+  background: oklch(0.568 0.145 34 / 0.09);
+  color: oklch(0.732 0.100 52);
+}
+.side-link.active .kbd { color: oklch(0.732 0.100 52); opacity: 0.55; }
+.side-section {
+  font-size: 9.5px;
+  letter-spacing: 0.10em;
+  color: oklch(0.300 0.006 62);
+  padding: 20px 10px 6px;
+}
+.side-mark {
+  background: oklch(0.235 0.010 58);
+  border-color: oklch(0.265 0.009 58);
+}
+
+/* 6 ── Topbar — refined blur */
+.topbar {
+  background: oklch(0.112 0.010 56 / 0.90);
+  backdrop-filter: saturate(130%) blur(14px);
+  -webkit-backdrop-filter: saturate(130%) blur(14px);
+}
+
+/* 7 ── Credits widget CTA — oklch accent */
+.credits-cta {
+  background: oklch(0.568 0.145 34 / 0.08);
+  color:      oklch(0.680 0.115 46);
+  border-color: oklch(0.568 0.145 34 / 0.22);
+}
+.credits-cta:hover {
+  background: oklch(0.568 0.145 34 / 0.15);
+  color:      oklch(0.732 0.100 52);
+}
+
+/* 8 ── Filter tabs active — oklch */
+.filter-tabs button.on {
+  background:   oklch(0.568 0.145 34 / 0.10);
+  color:        oklch(0.680 0.115 46);
+  border-color: oklch(0.568 0.145 34 / 0.28);
+}
+.filter-tabs button.on .ct { color: oklch(0.680 0.115 46); opacity: 0.7; }
+
+/* 9 ── Settings sidebar active */
+.set-toc a.on {
+  background: oklch(0.568 0.145 34 / 0.10);
+  color:      oklch(0.680 0.115 46);
+}
+</style>
 </head>
 <body>
 
