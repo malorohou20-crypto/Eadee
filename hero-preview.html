@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EADEE — Hero Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:      oklch(0.968 0.010 84);
+  --paper:   oklch(0.995 0.004 85);
+  --ink:     oklch(0.17 0.012 55);
+  --ink-2:   oklch(0.34 0.012 60);
+  --ink-3:   oklch(0.52 0.012 60);
+  --ink-4:   oklch(0.72 0.010 70);
+  --rule:    oklch(0.87 0.010 76);
+  --accent:  oklch(0.57 0.145 34);
+  --green:   oklch(0.48 0.08 145);
+
+  /* Mock dark palette */
+  --m-bg:    oklch(0.118 0.011 56);
+  --m-2:     oklch(0.148 0.010 56);
+  --m-3:     oklch(0.175 0.009 56);
+  --m-rule:  oklch(0.220 0.008 58);
+  --m-text:  oklch(0.88 0.008 80);
+  --m-muted: oklch(0.46 0.008 68);
+
+  --serif: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+  --sans:  "Geist", system-ui, sans-serif;
+  --ease:  cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ── ANIMATIONS ── */
+@keyframes up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes mockRise {
+  from { opacity: 0; transform: translateY(32px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.a1 { animation: up 0.7s var(--ease) 0.05s both; }
+.a2 { animation: up 0.7s var(--ease) 0.15s both; }
+.a3 { animation: up 0.7s var(--ease) 0.28s both; }
+.a4 { animation: up 0.7s var(--ease) 0.42s both; }
+.a5 { animation: up 0.7s var(--ease) 0.54s both; }
+.a-mock { animation: mockRise 1s var(--ease) 0.52s both; }
+
+/* ── BACKGROUND ── */
+.hero-bg {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -8%,
+      oklch(0.57 0.145 34 / 0.055) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 20% 70%,
+      oklch(0.70 0.06 78 / 0.04) 0%, transparent 65%);
+}
+.hero-grain {
+  position: fixed; inset: 0; z-index: 0;
+  pointer-events: none; opacity: 0.028; mix-blend-mode: multiply;
+}
+
+/* ── NAV ── */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  border-bottom: 1px solid oklch(0.87 0.010 76 / 0.7);
+  background: oklch(0.968 0.010 84 / 0.88);
+  backdrop-filter: blur(14px) saturate(130%);
+  -webkit-backdrop-filter: blur(14px) saturate(130%);
+}
+.nav-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  max-width: 1280px; margin: 0 auto;
+  padding: 14px 32px;
+}
+.nav-brand {
+  font-family: var(--serif);
+  font-size: 22px; color: var(--ink);
+  text-decoration: none; letter-spacing: 0.04em;
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 400;
+}
+.nav-logo {
+  width: 30px; height: 30px; border-radius: 6px;
+  background: var(--ink);
+  display: flex; align-items: center; justify-content: center;
+}
+.nav-links {
+  list-style: none;
+  display: flex; gap: 28px; align-items: center;
+}
+.nav-links a {
+  font-size: 14px; color: var(--ink-3);
+  text-decoration: none; transition: color 0.15s;
+}
+.nav-links a:hover { color: var(--ink); }
+.nav-end {
+  display: flex; align-items: center; gap: 14px;
+}
+.nav-login {
+  font-size: 14px; color: var(--ink-3);
+  text-decoration: none; transition: color 0.15s;
+}
+.nav-login:hover { color: var(--ink); }
+.nav-cta {
+  font-size: 14px; font-weight: 500;
+  background: var(--ink); color: white;
+  padding: 9px 20px; border-radius: 999px;
+  text-decoration: none; transition: opacity 0.15s, transform 0.15s;
+  border: 1px solid var(--ink);
+}
+.nav-cta:hover { opacity: 0.85; transform: translateY(-1px); }
+
+/* ── HERO CONTENT ── */
+.hero {
+  position: relative; z-index: 1;
+  padding-top: 57px;
+  display: flex; flex-direction: column;
+  align-items: center;
+}
+
+.hero-inner {
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 80px 40px 52px;
+  display: flex; flex-direction: column;
+  align-items: center; text-align: center;
+  gap: 0;
+}
+
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 11px; font-weight: 500; letter-spacing: 0.11em;
+  text-transform: uppercase; color: var(--accent);
+  margin-bottom: 26px;
+}
+.eyebrow::before, .eyebrow::after {
+  content: ''; display: block;
+  width: 24px; height: 1px;
+  background: currentColor; opacity: 0.4;
+}
+
+.h1 {
+  font-family: var(--serif);
+  font-size: clamp(48px, 7.5vw, 88px);
+  font-weight: 400;
+  line-height: 1.04;
+  letter-spacing: -0.020em;
+  color: var(--ink);
+  margin-bottom: 22px;
+  font-style: normal;
+}
+.h1 em { font-style: italic; color: var(--accent); }
+
+.sub {
+  font-size: 17px; line-height: 1.6;
+  color: var(--ink-3); font-weight: 300;
+  letter-spacing: -0.005em;
+  margin-bottom: 36px;
+  max-width: 480px;
+}
+
+.ctas {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 36px;
+}
+.btn-p {
+  font-size: 14.5px; font-weight: 500;
+  background: var(--ink); color: white;
+  padding: 14px 30px; border-radius: 999px;
+  text-decoration: none; letter-spacing: -0.01em;
+  box-shadow: 0 1px 0 oklch(0.87 0.010 76), 0 4px 16px oklch(0.17 0.012 55 / 0.18);
+  transition: transform 0.15s, box-shadow 0.18s;
+}
+.btn-p:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 1px 0 oklch(0.87 0.010 76), 0 8px 28px oklch(0.17 0.012 55 / 0.26);
+}
+.btn-s {
+  font-size: 14.5px; color: var(--ink-2);
+  text-decoration: none;
+  padding: 14px 24px; border-radius: 999px;
+  border: 1px solid var(--rule);
+  letter-spacing: -0.01em;
+  transition: border-color 0.15s, color 0.15s, transform 0.15s;
+}
+.btn-s:hover { border-color: var(--ink-4); color: var(--ink); transform: translateY(-2px); }
+
+.proof {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  justify-content: center;
+}
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12.5px; color: var(--ink-3);
+  padding: 5px 13px 5px 8px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: oklch(0.995 0.004 85 / 0.55);
+  letter-spacing: -0.003em;
+}
+.chip-dot {
+  width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;
+  background: oklch(0.48 0.08 145 / 0.12);
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ── MOCK SECTION ── */
+.mock-wrap {
+  position: relative; z-index: 1;
+  width: 100%;
+  padding: 0 32px;
+  mask-image: linear-gradient(to bottom, black 55%, transparent 92%);
+  -webkit-mask-image: linear-gradient(to bottom, black 55%, transparent 92%);
+}
+
+/* Glow behind the mock */
+.mock-glow {
+  position: absolute;
+  top: -60px; left: 50%; transform: translateX(-50%);
+  width: 70%; height: 120px;
+  background: radial-gradient(
+    ellipse at 50% 100%,
+    oklch(0.57 0.145 34 / 0.10) 0%,
+    oklch(0.60 0.10 50 / 0.04) 50%,
+    transparent 80%
+  );
+  pointer-events: none; z-index: 0;
+}
+
+.mock-window {
+  position: relative; z-index: 1;
+  max-width: 1100px; margin: 0 auto;
+  border-radius: 12px 12px 0 0;
+  overflow: hidden;
+  border: 1px solid oklch(0.30 0.009 57);
+  border-bottom: none;
+  box-shadow:
+    0 0 0 1px oklch(0.22 0.008 57 / 0.5),
+    0 -4px 40px oklch(0.17 0.012 55 / 0.12),
+    inset 0 1px 0 oklch(0.35 0.008 60 / 0.3);
+}
+
+/* Titlebar */
+.mock-bar {
+  height: 38px; background: oklch(0.145 0.010 57);
+  border-bottom: 1px solid var(--m-rule);
+  display: flex; align-items: center; padding: 0 16px; gap: 8px;
+  flex-shrink: 0;
+}
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.dr { background: oklch(0.60 0.19 22); }
+.dy { background: oklch(0.68 0.14 65); }
+.dg { background: oklch(0.55 0.17 145); }
+.mock-url {
+  flex: 1; text-align: center;
+  font-size: 10.5px; color: oklch(0.40 0.008 65); letter-spacing: 0.02em;
+  font-family: var(--sans);
+}
+
+/* App body */
+.mock-body {
+  display: flex;
+  height: 540px;
+  background: var(--m-bg);
+}
+
+/* Sidebar */
+.mock-side {
+  width: 188px; flex-shrink: 0;
+  background: oklch(0.105 0.010 56);
+  border-right: 1px solid var(--m-rule);
+  display: flex; flex-direction: column;
+  padding: 16px 0;
+}
+.side-brand {
+  display: flex; align-items: center; gap: 9px;
+  padding: 0 16px 14px;
+  border-bottom: 1px solid var(--m-rule);
+  margin-bottom: 12px;
+}
+.side-logo {
+  width: 24px; height: 24px; border-radius: 5px;
+  background: oklch(0.25 0.012 58);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.side-name {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: 14.5px; color: var(--m-text); letter-spacing: 0.2px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 9px;
+  margin: 1px 8px; padding: 7px 10px;
+  border-radius: 6px; font-size: 12.5px; color: var(--m-muted);
+  cursor: default;
+}
+.nav-item.active {
+  background: oklch(0.57 0.145 34 / 0.14);
+  color: oklch(0.75 0.10 36);
+}
+.nav-pip {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: currentColor; opacity: 0.5; flex-shrink: 0;
+}
+.nav-item.active .nav-pip { opacity: 1; }
+
+.nav-sep {
+  height: 1px; background: var(--m-rule);
+  margin: 8px 12px;
+}
+.credits-meta {
+  font-size: 9.5px; color: var(--m-muted);
+  margin-top: 4px; letter-spacing: 0.02em;
+}
+.credits-cta {
+  margin-top: 9px;
+  font-size: 10px; font-weight: 500;
+  color: oklch(0.57 0.145 34);
+  text-align: center;
+  padding: 5px 0;
+  border: 1px solid oklch(0.57 0.145 34 / 0.35);
+  border-radius: 5px;
+  cursor: default;
+}
+
+.side-credits {
+  margin: auto 10px 0;
+  background: oklch(0.155 0.010 57);
+  border: 1px solid var(--m-rule);
+  border-radius: 8px; padding: 12px;
+}
+.credits-row {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 7px;
+}
+.credits-lbl { font-size: 10px; color: var(--m-muted); letter-spacing: 0.04em; }
+.credits-val { font-size: 10px; color: oklch(0.68 0.12 36); }
+.credits-bar {
+  height: 3px; border-radius: 2px;
+  background: oklch(0.22 0.008 58);
+}
+.credits-fill {
+  height: 100%; width: 33%; border-radius: 2px;
+  background: oklch(0.57 0.145 34);
+}
+
+/* Main content */
+.mock-main {
+  flex: 1; padding: 22px 26px;
+  display: flex; flex-direction: column; gap: 18px; overflow: hidden;
+}
+
+/* Plan header */
+.plan-head {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  gap: 14px;
+}
+.plan-eyebrow {
+  font-size: 9px; font-weight: 500; letter-spacing: 0.12em;
+  text-transform: uppercase; color: oklch(0.55 0.14 145);
+  margin-bottom: 5px;
+}
+.plan-title {
+  font-size: 14px; font-weight: 500;
+  color: var(--m-text); line-height: 1.3;
+}
+.plan-tagline {
+  font-size: 10.5px; color: var(--m-muted); margin-top: 3px;
+  font-style: italic; letter-spacing: 0.01em;
+}
+.score {
+  display: flex; flex-direction: column; align-items: center;
+  background: oklch(0.155 0.010 57);
+  border: 1px solid var(--m-rule);
+  border-radius: 8px; padding: 8px 14px; flex-shrink: 0;
+}
+.score-lbl { font-size: 8px; color: var(--m-muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 3px; }
+.score-n { font-size: 22px; font-weight: 600; color: oklch(0.62 0.14 145); line-height: 1; }
+.score-s { font-size: 9px; color: var(--m-muted); margin-top: 1px; }
+
+/* KPI row */
+.kpis {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+}
+.kpi {
+  background: oklch(0.155 0.010 57);
+  border: 1px solid var(--m-rule);
+  border-radius: 8px; padding: 14px 16px;
+}
+.kpi-l {
+  font-size: 9px; color: var(--m-muted);
+  text-transform: uppercase; letter-spacing: 0.10em; margin-bottom: 8px;
+}
+.kpi-v {
+  font-size: 18px; font-weight: 500; letter-spacing: -0.03em;
+  color: oklch(0.90 0.008 80); line-height: 1;
+}
+.kpi-h { font-size: 9px; margin-top: 4px; color: var(--m-muted); line-height: 1.3; }
+.kpi-h.g { color: oklch(0.60 0.13 145); }
+
+/* Chart */
+.chart {
+  flex: 1;
+  background: oklch(0.155 0.010 57);
+  border: 1px solid var(--m-rule);
+  border-radius: 8px; padding: 16px;
+  display: flex; flex-direction: column; gap: 12px; min-height: 0;
+}
+.chart-head {
+  display: flex; justify-content: space-between; align-items: center;
+}
+.chart-lbl { font-size: 9px; color: var(--m-muted); text-transform: uppercase; letter-spacing: 0.10em; }
+.chart-val { font-size: 12px; color: oklch(0.70 0.11 36); }
+.bars {
+  display: flex; align-items: flex-end; gap: 5px; flex: 1; min-height: 0;
+}
+.bar {
+  flex: 1; border-radius: 3px 3px 0 0;
+  background: oklch(0.57 0.145 34 / 0.18);
+}
+.bar.hi { background: oklch(0.57 0.145 34 / 0.65); }
+.bar.md { background: oklch(0.57 0.145 34 / 0.40); }
+
+/* Right panel */
+.mock-right {
+  width: 228px; flex-shrink: 0;
+  border-left: 1px solid var(--m-rule);
+  background: oklch(0.112 0.010 56);
+  padding: 16px 14px;
+  display: flex; flex-direction: column; gap: 10px; overflow: hidden;
+}
+.panel-title {
+  font-size: 9.5px; color: var(--m-muted);
+  text-transform: uppercase; letter-spacing: 0.10em;
+  padding-bottom: 9px; border-bottom: 1px solid var(--m-rule);
+  flex-shrink: 0;
+}
+.cat-group { display: flex; flex-direction: column; gap: 3px; }
+.cat-label {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 8.5px; font-weight: 600; letter-spacing: 0.09em;
+  text-transform: uppercase; margin-bottom: 2px;
+}
+.cat-label.strat { color: oklch(0.62 0.11 236); }
+.cat-label.markt { color: oklch(0.65 0.12 168); }
+.cat-label.finan { color: oklch(0.68 0.14 65); }
+.cat-label.actn  { color: oklch(0.70 0.11 36); }
+.cat-label.legal { color: oklch(0.65 0.10 300); }
+.cat-label::before {
+  content: '';
+  width: 5px; height: 5px; border-radius: 2px;
+  background: currentColor; opacity: 0.7; flex-shrink: 0;
+}
+.sect {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 8px; border-radius: 5px;
+}
+.sect-name { font-size: 10.5px; color: oklch(0.60 0.007 70); flex: 1; line-height: 1.3; }
+.sect-check {
+  width: 13px; height: 13px; border-radius: 50%;
+  background: oklch(0.48 0.08 145 / 0.15);
+  border: 1px solid oklch(0.48 0.08 145 / 0.35);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.sect-check svg { display: block; }
+
+/* ════════════════════════════════════
+   LANDING — BEYOND HERO
+════════════════════════════════════ */
+.lp-wrap { max-width: 1280px; margin: 0 auto; padding: 0 48px; }
+.lp-sec  { padding: 100px 0; position: relative; }
+
+/* ── TYPE PARTAGÉ ── */
+.s-over { font-size: 10.5px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; display: block; margin-bottom: 16px; }
+.on-light { color: var(--ink-3); }
+.on-dark  { color: var(--m-muted); }
+.s-h2 { font-family: var(--serif); font-size: clamp(36px, 4.8vw, 62px); font-weight: 400; line-height: 1.03; letter-spacing: -0.020em; color: var(--ink); }
+.s-h2 em { font-style: italic; color: var(--accent); }
+.s-h2.dk { color: var(--m-text); }
+.s-h2.dk em { color: oklch(0.72 0.12 36); }
+.sec-head { margin-bottom: 52px; }
+
+/* ── MARQUEE ── */
+.mq-band { background: var(--ink); padding: 16px 0; overflow: hidden; }
+@keyframes mq-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.mq-track { display: flex; animation: mq-scroll 55s linear infinite; white-space: nowrap; }
+.mq-track span { font-family: var(--serif); font-style: italic; font-size: 24px; display: inline-flex; align-items: center; padding: 0 24px; color: oklch(0.82 0.007 80); }
+.mq-track span::before { content: "·"; color: var(--accent); margin-right: 24px; font-style: normal; }
+
+/* ── PROCESS (dark) ── */
+.proc-sec { background: var(--m-bg); border-top: 1px solid var(--m-rule); border-bottom: 1px solid var(--m-rule); }
+.proc-head { padding-bottom: 52px; border-bottom: 1px solid var(--m-rule); }
+.proc-steps { display: grid; grid-template-columns: repeat(3, 1fr); }
+.proc-step { padding: 44px 36px 72px; border-right: 1px solid var(--m-rule); position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 18px; }
+.proc-step:last-child { border-right: 0; }
+.proc-n-ghost { font-family: var(--serif); font-style: italic; font-size: 220px; line-height: 1; color: oklch(0.155 0.010 56); position: absolute; right: -20px; bottom: -28px; pointer-events: none; user-select: none; letter-spacing: -0.04em; }
+.proc-idx { width: 26px; height: 26px; border-radius: 50%; border: 1px solid oklch(0.32 0.008 60); display: flex; align-items: center; justify-content: center; font-size: 10.5px; color: var(--m-muted); font-weight: 500; flex-shrink: 0; }
+.proc-h3 { font-family: var(--serif); font-size: 34px; font-weight: 400; line-height: 1.04; letter-spacing: -0.015em; color: var(--m-text); position: relative; z-index: 1; }
+.proc-p { font-size: 14.5px; color: var(--m-muted); line-height: 1.6; max-width: 300px; position: relative; z-index: 1; }
+
+/* ── FEATURE ROWS ── */
+.ft-sec { background: var(--bg); }
+.ft-sec.on-dk { background: var(--m-bg); border-top: 1px solid var(--m-rule); border-bottom: 1px solid var(--m-rule); }
+.ft-row { display: grid; grid-template-columns: 5fr 6fr; gap: 88px; align-items: center; }
+.ft-row.flip { grid-template-columns: 6fr 5fr; }
+.ft-row.flip .ft-text { order: 2; }
+.ft-row.flip .ft-visual { order: 1; }
+.ft-over { font-size: 10.5px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; display: block; margin-bottom: 16px; color: var(--ink-3); }
+.on-dk .ft-over { color: var(--m-muted); }
+.ft-h2 { font-family: var(--serif); font-size: clamp(30px, 3.8vw, 50px); font-weight: 400; line-height: 1.04; letter-spacing: -0.018em; color: var(--ink); margin: 0 0 20px; }
+.ft-h2 em { font-style: italic; color: var(--accent); }
+.on-dk .ft-h2 { color: var(--m-text); }
+.on-dk .ft-h2 em { color: oklch(0.72 0.12 36); }
+.ft-lead { font-size: 15px; line-height: 1.62; margin-bottom: 30px; max-width: 460px; color: var(--ink-3); }
+.on-dk .ft-lead { color: var(--m-muted); }
+.ft-list { list-style: none; padding: 0; border-top: 1px solid var(--rule); }
+.on-dk .ft-list { border-color: var(--m-rule); }
+.ft-li { padding: 16px 0; border-bottom: 1px solid var(--rule); display: grid; grid-template-columns: 30px 1fr; gap: 14px; }
+.on-dk .ft-li { border-color: var(--m-rule); }
+.ft-ix { font-size: 10px; color: var(--ink-4); letter-spacing: 0.08em; padding-top: 3px; }
+.on-dk .ft-ix { color: var(--m-muted); }
+.ft-b { font-weight: 500; font-size: 14.5px; display: block; margin-bottom: 3px; color: var(--ink); }
+.on-dk .ft-b { color: var(--m-text); }
+.ft-t { font-size: 13.5px; line-height: 1.5; color: var(--ink-3); }
+.on-dk .ft-t { color: var(--m-muted); }
+
+/* ── DARK CARDS ── */
+.dk { background: var(--m-2); border: 1px solid var(--m-rule); border-radius: 14px; overflow: hidden; box-shadow: 0 32px 72px oklch(0.08 0.010 56 / 0.55); }
+.on-dk .dk { background: oklch(0.155 0.010 57); box-shadow: 0 0 0 1px oklch(0.26 0.008 58); }
+.dk-hd { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--m-rule); font-size: 10px; letter-spacing: 0.09em; color: var(--m-muted); text-transform: uppercase; }
+.dk-hd .live { display: inline-flex; align-items: center; gap: 5px; color: oklch(0.58 0.14 145); }
+.dk-hd .live::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+.dk-bd { padding: 22px 18px; }
+
+/* Score card */
+.score-big-n { font-family: var(--serif); font-size: 88px; line-height: 0.9; letter-spacing: -0.03em; color: var(--m-text); }
+.score-big-n sup { font-size: 22px; color: var(--m-muted); font-family: var(--sans); font-weight: 400; vertical-align: top; margin-left: 4px; }
+.score-verdict { margin-top: 12px; font-size: 13px; color: oklch(0.58 0.14 145); display: flex; align-items: center; gap: 7px; }
+.score-verdict::before { content: "●"; font-size: 7px; }
+.score-verdict em { font-style: normal; color: var(--m-muted); margin-left: 6px; }
+.score-stats-row { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 22px; border-top: 1px solid var(--m-rule); }
+.score-stat { padding: 13px 10px 13px 0; border-right: 1px solid var(--m-rule); }
+.score-stat:last-child { border-right: 0; }
+.score-stat:not(:first-child) { padding-left: 10px; }
+.score-stat .sv { font-family: var(--serif); font-size: 24px; color: var(--m-text); line-height: 1; display: block; margin-bottom: 4px; }
+.score-stat .sv em { color: oklch(0.72 0.12 36); font-style: italic; }
+.score-stat .sl { font-size: 9px; letter-spacing: 0.10em; text-transform: uppercase; color: var(--m-muted); }
+
+/* Chart card */
+.chart-big-n { font-family: var(--serif); font-size: 72px; line-height: 0.95; letter-spacing: -0.03em; color: var(--m-text); }
+.chart-big-n sup { font-size: 18px; color: var(--m-muted); font-family: var(--sans); font-weight: 400; vertical-align: top; }
+.chart-sub-l { font-size: 10px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--m-muted); margin-top: 4px; }
+.chart-bars { display: flex; align-items: flex-end; gap: 4px; height: 80px; margin: 18px 0 8px; }
+.c-bar { flex: 1; border-radius: 2px 2px 0 0; background: oklch(0.57 0.145 34 / 0.16); }
+.c-bar.md { background: oklch(0.57 0.145 34 / 0.40); }
+.c-bar.hi { background: oklch(0.57 0.145 34 / 0.72); }
+.chart-axis { display: flex; justify-content: space-between; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--m-muted); }
+.chart-kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 14px; border-top: 1px solid var(--m-rule); }
+.ck { padding: 11px 10px 11px 0; border-right: 1px solid var(--m-rule); }
+.ck:last-child { border-right: 0; padding-right: 0; padding-left: 10px; }
+.ck:not(:first-child) { padding-left: 10px; }
+.ck .kl { font-size: 9px; letter-spacing: 0.10em; text-transform: uppercase; color: var(--m-muted); }
+.ck .kv { font-family: var(--serif); font-size: 22px; color: var(--m-text); line-height: 1.1; display: block; margin-top: 2px; }
+.ck .kv.acc { color: oklch(0.72 0.12 36); }
+
+/* Chat card */
+.chat-msgs { display: flex; flex-direction: column; gap: 12px; }
+.chat-r { display: flex; gap: 10px; align-items: flex-start; }
+.chat-r.user { flex-direction: row-reverse; }
+.chat-av { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-family: var(--serif); font-size: 12px; }
+.chat-av.ex { background: oklch(0.22 0.008 58); color: var(--m-muted); border: 1px solid var(--m-rule); }
+.chat-av.usr { background: oklch(0.57 0.145 34); color: white; }
+.chat-bub { background: oklch(0.158 0.010 57); border: 1px solid var(--m-rule); border-radius: 10px; padding: 10px 13px; font-size: 13px; line-height: 1.5; color: var(--m-text); max-width: 88%; }
+.chat-r.user .chat-bub { background: oklch(0.57 0.145 34); color: white; border-color: transparent; }
+.chat-bub b { color: oklch(0.72 0.12 36); font-weight: 600; }
+.chat-r.user .chat-bub b { color: oklch(0.92 0.06 50); }
+.chat-typing { font-size: 10px; letter-spacing: 0.10em; text-transform: uppercase; color: var(--m-muted); margin-top: 2px; }
+
+/* ── NUMBERS BAND (dark) ── */
+.nums-sec { background: var(--m-bg); border-top: 1px solid var(--m-rule); border-bottom: 1px solid var(--m-rule); }
+.nums-inner { max-width: 1280px; margin: 0 auto; padding: 0 48px; display: grid; grid-template-columns: repeat(3, 1fr); }
+.num-block { padding: 64px 40px; border-right: 1px solid var(--m-rule); display: flex; flex-direction: column; gap: 14px; }
+.num-block:first-child { padding-left: 0; }
+.num-block:last-child { border-right: 0; }
+.num-n { font-family: var(--serif); font-size: clamp(64px, 9vw, 96px); line-height: 0.88; letter-spacing: -0.035em; color: var(--m-text); }
+.num-n em { color: oklch(0.68 0.12 36); font-style: italic; }
+.num-lbl { font-size: 14.5px; color: var(--m-muted); line-height: 1.45; max-width: 280px; }
+
+/* ── TESTIMONIALS (dark) ── */
+.testim-sec { background: var(--m-bg); }
+.testim-grid { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--m-rule); }
+.testim-c { padding: 36px 28px 32px; border-right: 1px solid var(--m-rule); display: flex; flex-direction: column; gap: 18px; }
+.testim-c:last-child { border-right: 0; }
+.testim-mark { font-family: var(--serif); font-style: italic; font-size: 64px; line-height: 0.6; color: var(--accent); height: 24px; display: block; }
+.testim-q { font-family: var(--serif); font-size: 18px; line-height: 1.44; color: var(--m-text); font-weight: 400; }
+.testim-meta { font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; color: oklch(0.36 0.008 62); }
+.testim-by { margin-top: auto; padding-top: 18px; border-top: 1px solid var(--m-rule); display: flex; align-items: center; gap: 12px; }
+.testim-ph { width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-family: var(--serif); font-size: 14px; color: white; }
+.testim-who b { display: block; font-size: 13px; font-weight: 500; color: var(--m-text); }
+.testim-who span { font-size: 10px; letter-spacing: 0.08em; color: var(--m-muted); }
+
+/* ── PRICING (light) ── */
+.pricing-sec { background: var(--bg); }
+.pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--rule); border-radius: 14px; overflow: hidden; }
+.pc { padding: 32px 28px; border-right: 1px solid var(--rule); background: oklch(0.995 0.004 85); display: flex; flex-direction: column; gap: 14px; }
+.pc.feat { background: var(--m-bg); }
+.pc:last-child { border-right: 0; }
+.pc-badge { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
+.feat .pc-badge { color: oklch(0.68 0.10 50); }
+.pc-name { font-family: var(--serif); font-size: 34px; line-height: 1; color: var(--ink); font-weight: 400; }
+.feat .pc-name { color: var(--m-text); }
+.pc-sub { font-size: 12.5px; color: var(--ink-3); }
+.feat .pc-sub { color: var(--m-muted); }
+.pc-price-row { display: flex; align-items: baseline; gap: 10px; }
+.pc-strike { font-size: 13px; color: var(--ink-4); text-decoration: line-through; }
+.feat .pc-strike { color: oklch(0.30 0.008 60); }
+.pc-price { font-family: var(--serif); font-size: 48px; line-height: 1; letter-spacing: -0.025em; color: var(--ink); }
+.feat .pc-price { color: var(--m-text); }
+.pc-meta { padding: 12px 0; border-top: 1px dashed var(--rule); border-bottom: 1px dashed var(--rule); font-size: 13px; color: var(--ink-2); }
+.feat .pc-meta { border-color: var(--m-rule); color: oklch(0.55 0.008 65); }
+.feat .pc-meta b { color: var(--m-text); }
+.pc-btn { align-self: start; display: inline-flex; padding: 11px 24px; border-radius: 999px; font-size: 13.5px; font-weight: 500; text-decoration: none; cursor: pointer; font-family: var(--sans); border: 1px solid var(--ink); color: var(--ink); background: transparent; transition: all 0.15s; }
+.pc-btn:hover { background: var(--ink); color: white; }
+.feat .pc-btn { border-color: var(--accent); background: var(--accent); color: white; }
+.feat .pc-btn:hover { opacity: 0.88; }
+.pc-note { font-size: 12px; color: var(--ink-4); margin-top: auto; }
+.feat .pc-note { color: var(--m-muted); }
+.pricing-note { margin-top: 24px; padding: 18px 22px; border: 1px solid var(--rule); border-radius: 10px; background: oklch(0.995 0.004 85); font-size: 13.5px; color: var(--ink-3); line-height: 1.5; }
+.pricing-note b { color: var(--ink); font-weight: 500; }
+.pricing-tags { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 5px 12px; font-size: 11.5px; color: var(--ink-3); }
+.pricing-tags span::after { content: "·"; color: var(--ink-4); margin-left: 12px; }
+.pricing-tags span:last-child::after { content: ""; }
+
+/* ── BANCABILITÉ CARD ── */
+.banca-score-n { font-family: var(--serif); font-size: 80px; line-height: 0.9; letter-spacing: -0.03em; color: var(--m-text); }
+.banca-score-n sup { font-size: 20px; color: var(--m-muted); font-family: var(--sans); font-weight: 400; vertical-align: top; }
+.banca-verdict { margin-top: 12px; font-size: 13px; color: oklch(0.68 0.12 50); display: flex; align-items: center; gap: 7px; }
+.banca-verdict::before { content: "●"; font-size: 7px; }
+.banca-verdict em { font-style: normal; color: var(--m-muted); margin-left: 6px; }
+.banca-list { margin-top: 20px; border-top: 1px solid var(--m-rule); }
+.banca-row { display: grid; grid-template-columns: 20px 1fr auto; gap: 10px; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--m-rule); }
+.banca-row:last-child { border-bottom: 0; }
+.banca-chk { width: 16px; height: 16px; border-radius: 50%; background: oklch(0.48 0.08 145 / 0.12); border: 1px solid oklch(0.48 0.08 145 / 0.35); display: flex; align-items: center; justify-content: center; }
+.banca-label { font-size: 13px; color: var(--m-muted); }
+.banca-val { font-size: 11.5px; color: oklch(0.58 0.14 145); font-weight: 500; }
+
+/* ── TOC 23 SECTIONS (light) ── */
+.toc-sec { background: var(--bg); }
+.toc-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 36px; }
+.toc-tab { font-size: 12px; font-weight: 500; padding: 7px 14px; border-radius: 999px; border: 1px solid var(--rule); background: transparent; color: var(--ink-3); cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 6px; font-family: var(--sans); }
+.toc-tab .ct { font-size: 10px; background: var(--rule); border-radius: 999px; padding: 1px 6px; color: var(--ink-4); }
+.toc-tab.active { background: var(--ink); color: white; border-color: var(--ink); }
+.toc-tab.active .ct { background: oklch(0.32 0.010 55); color: oklch(0.65 0.007 72); }
+.toc-tab:hover:not(.active) { border-color: var(--ink-4); color: var(--ink); }
+.toc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 12px; overflow: hidden; }
+.toc-item { background: var(--paper); padding: 24px 22px; display: flex; flex-direction: column; gap: 8px; transition: background 0.12s; }
+.toc-item.hidden { display: none; }
+.toc-item:hover { background: oklch(0.985 0.006 84); }
+.toc-item-head { display: flex; align-items: center; gap: 8px; }
+.toc-ix { font-family: var(--serif); font-size: 13px; color: var(--ink-4); min-width: 22px; }
+.toc-tag { font-size: 9px; font-weight: 500; letter-spacing: 0.10em; text-transform: uppercase; padding: 2px 7px; border-radius: 999px; }
+.toc-tag[data-cat="Stratégie"] { background: oklch(0.62 0.11 236 / 0.10); color: oklch(0.40 0.11 236); }
+.toc-tag[data-cat="Marché"]    { background: oklch(0.55 0.12 168 / 0.10); color: oklch(0.35 0.12 168); }
+.toc-tag[data-cat="Finance"]   { background: oklch(0.68 0.14 65  / 0.10); color: oklch(0.40 0.14 65); }
+.toc-tag[data-cat="Juridique"] { background: oklch(0.65 0.10 300 / 0.10); color: oklch(0.38 0.10 300); }
+.toc-tag[data-cat="Action"]    { background: oklch(0.57 0.145 34 / 0.10); color: oklch(0.40 0.145 34); }
+.toc-tag[data-cat="Bonus"]     { background: oklch(0.68 0.10 260 / 0.10); color: oklch(0.38 0.10 260); }
+.toc-item h4 { font-family: var(--serif); font-size: 18px; font-weight: 400; line-height: 1.15; color: var(--ink); }
+.toc-item p { font-size: 13px; line-height: 1.5; color: var(--ink-3); }
+.toc-item-bonus { background: oklch(0.975 0.008 82); }
+.toc-item-bonus h4 { color: oklch(0.38 0.10 260); }
+.toc-sep { grid-column: 1 / -1; background: var(--bg); display: flex; align-items: center; gap: 16px; padding: 16px 22px; }
+.toc-sep-line { flex: 1; height: 1px; background: var(--rule); }
+.toc-sep-label { font-size: 10px; font-weight: 500; letter-spacing: 0.13em; text-transform: uppercase; color: var(--ink-4); white-space: nowrap; }
+.toc-bottom { margin-top: 40px; padding: 28px 32px; background: var(--m-bg); border-radius: 12px; display: flex; justify-content: space-between; align-items: center; gap: 24px; }
+.toc-bottom p { font-size: 15px; color: var(--m-muted); line-height: 1.5; max-width: 560px; }
+.toc-bottom p b { color: var(--m-text); }
+.toc-bottom-btn { flex-shrink: 0; display: inline-flex; padding: 13px 26px; background: var(--accent); color: white; border-radius: 999px; font-size: 14px; font-weight: 500; text-decoration: none; white-space: nowrap; font-family: var(--sans); transition: opacity 0.15s; }
+.toc-bottom-btn:hover { opacity: 0.88; }
+
+/* ── FAQ (dark) ── */
+.faq-sec { background: var(--m-bg); border-top: 1px solid var(--m-rule); border-bottom: 1px solid var(--m-rule); }
+.faq-list { border-top: 1px solid oklch(0.24 0.008 58); }
+.faq-q { border-bottom: 1px solid oklch(0.20 0.008 58); }
+.faq-q summary { list-style: none; cursor: pointer; padding: 26px 0; display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: center; font-family: var(--serif); font-size: 24px; line-height: 1.2; color: var(--m-text); }
+.faq-q summary::-webkit-details-marker { display: none; }
+.faq-q summary::after { content: "+"; font-family: var(--sans); font-size: 22px; color: var(--m-muted); }
+.faq-q[open] summary::after { content: "−"; color: var(--accent); }
+.faq-a { padding: 0 0 26px; font-size: 15px; line-height: 1.65; color: var(--m-muted); max-width: 700px; }
+
+/* ── FOOTER (dark) ── */
+.lp-footer { background: var(--m-bg); padding: 64px 0 28px; border-top: 1px solid var(--m-rule); }
+.lp-foot-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 52px; padding-bottom: 40px; border-bottom: 1px solid var(--m-rule); }
+.lp-foot-brand { font-family: var(--serif); font-size: 20px; letter-spacing: 0.04em; color: var(--m-text); display: flex; align-items: center; gap: 9px; text-decoration: none; margin-bottom: 12px; }
+.lp-foot-logo { width: 28px; height: 28px; border-radius: 6px; background: oklch(0.22 0.008 58); display: flex; align-items: center; justify-content: center; }
+.lp-foot-tagline { font-size: 13.5px; color: var(--m-muted); line-height: 1.5; margin-bottom: 12px; max-width: 260px; }
+.lp-foot-email { font-size: 12.5px; color: oklch(0.60 0.10 48); text-decoration: none; }
+.lp-foot-col-h { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.38 0.008 62); margin-bottom: 14px; }
+.lp-foot-ul { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+.lp-foot-ul a { font-size: 13px; color: oklch(0.46 0.008 65); text-decoration: none; transition: color 0.15s; }
+.lp-foot-ul a:hover { color: var(--m-text); }
+.lp-foot-bottom { padding-top: 22px; display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; }
+.lp-foot-legal { font-size: 11px; color: oklch(0.32 0.008 62); line-height: 1.6; }
+.lp-foot-legal a { color: oklch(0.42 0.008 65); }
+.lp-foot-wm { font-family: var(--serif); font-style: italic; font-size: 88px; line-height: 0.8; color: oklch(0.19 0.008 57); user-select: none; }
+
+</style>
+</head>
+<body>
+
+<!-- Background -->
+<div class="hero-bg" aria-hidden="true"></div>
+<svg class="hero-grain" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <filter id="g"><feTurbulence type="fractalNoise" baseFrequency="0.68" numOctaves="4" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
+  <rect width="100%" height="100%" filter="url(#g)"/>
+</svg>
+
+<!-- Nav -->
+<nav class="nav">
+  <div class="nav-inner a1">
+    <a class="nav-brand" href="#">
+      <div class="nav-logo">
+        <svg viewBox="0 0 18 18" width="17" height="17" fill="none">
+          <rect x="2" y="2"    width="14" height="2.7" rx="1.35" fill="white"/>
+          <rect x="2" y="7.65" width="8.5" height="2.7" rx="1.35" fill="oklch(0.57 0.145 34)"/>
+          <rect x="2" y="13.3" width="14" height="2.7" rx="1.35" fill="white"/>
+        </svg>
+      </div>
+      eadee
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="#">Comment ça marche</a></li>
+      <li><a href="#">Fonctionnalités</a></li>
+      <li><a href="#">Tarifs</a></li>
+      <li><a href="#">FAQ</a></li>
+    </ul>
+
+    <div class="nav-end">
+      <a class="nav-login" href="#">Connexion</a>
+      <a class="nav-cta" href="#">Commencer →</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+
+  <div class="hero-inner">
+
+    <h1 class="h1 a3">
+      Un business plan complet<br>
+      et <em>professionnel.</em>
+    </h1>
+
+    <p class="sub a4">L'idée est là. Le plan aussi.</p>
+
+    <div class="ctas a5">
+      <a class="btn-p" href="#">Créer mon plan</a>
+      <a class="btn-s" href="#">Voir les tarifs →</a>
+    </div>
+
+    <div class="proof a5">
+      <span class="chip">
+        <div class="chip-dot">
+          <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+            <path d="M1.5 4L3.2 5.8L6.5 2.2" stroke="oklch(0.48 0.08 145)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        Compatible banque &amp; BPI France
+      </span>
+      <span class="chip">
+        <div class="chip-dot">
+          <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+            <path d="M1.5 4L3.2 5.8L6.5 2.2" stroke="oklch(0.48 0.08 145)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        Expert Eadee 24h/24
+      </span>
+      <span class="chip">
+        <div class="chip-dot">
+          <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+            <path d="M1.5 4L3.2 5.8L6.5 2.2" stroke="oklch(0.48 0.08 145)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        Sans abonnement
+      </span>
+    </div>
+
+  </div>
+
+  <!-- Product mock -->
+  <div class="mock-wrap a-mock">
+    <div class="mock-glow"></div>
+    <div class="mock-window">
+
+      <!-- Titlebar -->
+      <div class="mock-bar">
+        <div class="dot dr"></div>
+        <div class="dot dy"></div>
+        <div class="dot dg"></div>
+        <div class="mock-url">eadee.fr / plan</div>
+      </div>
+
+      <!-- App -->
+      <div class="mock-body">
+
+        <!-- Sidebar -->
+        <div class="mock-side">
+          <div class="side-brand">
+            <div class="side-logo">
+              <svg viewBox="0 0 16 16" width="14" height="14" fill="none">
+                <rect x="2" y="2"   width="12" height="2.5" rx="1.25" fill="white"/>
+                <rect x="2" y="6.75" width="7.5" height="2.5" rx="1.25" fill="oklch(0.57 0.145 34)"/>
+                <rect x="2" y="11.5" width="12" height="2.5" rx="1.25" fill="white"/>
+              </svg>
+            </div>
+            <span class="side-name">eadee</span>
+          </div>
+          <div class="nav-item active"><div class="nav-pip"></div>Générateur</div>
+          <div class="nav-item"><div class="nav-pip"></div>Expert Eadee</div>
+          <div class="nav-item"><div class="nav-pip"></div>Mes plans</div>
+          <div class="nav-item"><div class="nav-pip"></div>Inspiration</div>
+          <div class="nav-sep"></div>
+          <div class="nav-item"><div class="nav-pip"></div>Crédits</div>
+          <div class="nav-item"><div class="nav-pip"></div>Paramètres</div>
+          <div class="nav-item"><div class="nav-pip"></div>Aide &amp; Support</div>
+          <div class="side-credits">
+            <div class="credits-row">
+              <span class="credits-lbl">Crédits restants</span>
+              <span class="credits-val">02</span>
+            </div>
+            <div class="credits-bar"><div class="credits-fill"></div></div>
+            <div class="credits-meta">générations disponibles</div>
+            <div class="credits-cta">Recharger</div>
+          </div>
+        </div>
+
+        <!-- Main -->
+        <div class="mock-main">
+
+          <div class="plan-head">
+            <div>
+              <div class="plan-eyebrow">Plan généré ✓</div>
+              <div class="plan-title">Boutique Mode Éco-responsable</div>
+              <div class="plan-tagline">La mode durable au cœur de Paris</div>
+            </div>
+            <div class="score">
+              <div class="score-lbl">Score viabilité</div>
+              <span class="score-n">92</span>
+              <span class="score-s">/ 100</span>
+            </div>
+          </div>
+
+          <div class="kpis">
+            <div class="kpi">
+              <div class="kpi-l">CA an 3</div>
+              <div class="kpi-v">285k€</div>
+              <div class="kpi-h">revenus mois 36 × 12</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-l">Investissement</div>
+              <div class="kpi-v">28k€</div>
+              <div class="kpi-h">budget total requis</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-l">Part marché an 1</div>
+              <div class="kpi-v">2,4%</div>
+              <div class="kpi-h g">part marché an 1</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-l">Point mort</div>
+              <div class="kpi-v">Mois 8</div>
+              <div class="kpi-h g">seuil de rentabilité</div>
+            </div>
+          </div>
+
+          <div class="chart">
+            <div class="chart-head">
+              <span class="chart-lbl">Chiffre d'affaires prévisionnel</span>
+              <span class="chart-val">+180 K€</span>
+            </div>
+            <div class="bars">
+              <div class="bar" style="height:22%"></div>
+              <div class="bar" style="height:34%"></div>
+              <div class="bar" style="height:44%"></div>
+              <div class="bar md" style="height:52%"></div>
+              <div class="bar md" style="height:60%"></div>
+              <div class="bar hi" style="height:68%"></div>
+              <div class="bar hi" style="height:76%"></div>
+              <div class="bar hi" style="height:84%"></div>
+              <div class="bar hi" style="height:90%"></div>
+              <div class="bar hi" style="height:100%"></div>
+              <div class="bar hi" style="height:96%"></div>
+              <div class="bar hi" style="height:100%"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right panel — sections par catégorie -->
+        <div class="mock-right">
+          <div class="panel-title">23 sections + bonus ✓</div>
+
+          <div class="cat-group">
+            <div class="cat-label strat">Stratégie</div>
+            <div class="sect"><div class="sect-check"><svg width="7" height="7" viewBox="0 0 7 7" fill="none"><path d="M1 3.5L2.8 5.2L6 1.5" stroke="oklch(0.55 0.14 145)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="sect-name">Résumé exécutif</span></div>
+            <div class="sect"><div class="sect-check"><svg width="7" height="7" viewBox="0 0 7 7" fill="none"><path d="M1 3.5L2.8 5.2L6 1.5" stroke="oklch(0.55 0.14 145)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="sect-name">Présentation du projet</span></div>
+            <div class="sect"><div class="sect-check"><svg width="7" height="7" viewBox="0 0 7 7" fill="none"><path d="M1 3.5L2.8 5.2L6 1.5" stroke="oklch(0.55 0.14 145)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="sect-name">Proposition de valeur</span></div>
+          </div>
+
+          <div class="cat-group">
+            <div class="cat-label markt">Marché</div>
+            <div class="sect"><div class="sect-check"><svg width="7" height="7" viewBox="0 0 7 7" fill="none"><path d="M1 3.5L2.8 5.2L6 1.5" stroke="oklch(0.55 0.14 145)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="sect-name">Analyse de marché</span></div>
+            <div class="sect"><div class="sect-check"><svg width="7" height="7" viewBox="0 0 7 7" fill="none"><path d="M1 3.5L2.8 5.2L6 1.5" stroke="oklch(0.55 0.14 145)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="sect-name">Concurrents &amp; positionnement</span></div>
+          </div>
+
+          <div class="cat-group">
+            <div class="cat-label finan">Finance</div>
+            <div class="sect"><div class="sect-check"><svg width="7" height="7" viewBox="0 0 7 7" fill="none"><path d="M1 3.5L2.8 5.2L6 1.5" stroke="oklch(0.55 0.14 145)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="sect-name">Prévisions financières 3 ans</span></div>
+            <div class="sect"><div class="sect-check"><svg width="7" height="7" viewBox="0 0 7 7" fill="none"><path d="M1 3.5L2.8 5.2L6 1.5" stroke="oklch(0.55 0.14 145)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="sect-name">Plan de trésorerie</span></div>
+            <div class="sect"><div class="sect-check"><svg width="7" height="7" viewBox="0 0 7 7" fill="none"><path d="M1 3.5L2.8 5.2L6 1.5" stroke="oklch(0.55 0.14 145)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="sect-name">Seuil de rentabilité</span></div>
+          </div>
+
+          <div class="cat-group">
+            <div class="cat-label actn">Action</div>
+            <div class="sect"><div class="sect-check"><svg width="7" height="7" viewBox="0 0 7 7" fill="none"><path d="M1 3.5L2.8 5.2L6 1.5" stroke="oklch(0.55 0.14 145)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="sect-name">Stratégie commerciale</span></div>
+            <div class="sect"><div class="sect-check"><svg width="7" height="7" viewBox="0 0 7 7" fill="none"><path d="M1 3.5L2.8 5.2L6 1.5" stroke="oklch(0.55 0.14 145)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="sect-name">Plan d'action 90 jours</span></div>
+            <div class="sect"><div class="sect-check"><svg width="7" height="7" viewBox="0 0 7 7" fill="none"><path d="M1 3.5L2.8 5.2L6 1.5" stroke="oklch(0.55 0.14 145)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="sect-name">Aides &amp; subventions</span></div>
+          </div>
+
+          <div class="cat-group">
+            <div class="cat-label legal">Légal</div>
+            <div class="sect"><div class="sect-check"><svg width="7" height="7" viewBox="0 0 7 7" fill="none"><path d="M1 3.5L2.8 5.2L6 1.5" stroke="oklch(0.55 0.14 145)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="sect-name">Aspects juridiques</span></div>
+            <div class="sect"><div class="sect-check"><svg width="7" height="7" viewBox="0 0 7 7" fill="none"><path d="M1 3.5L2.8 5.2L6 1.5" stroke="oklch(0.55 0.14 145)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="sect-name">Démarches administratives</span></div>
+          </div>
+
+          <div class="cat-group">
+            <div class="cat-label" style="color:oklch(0.68 0.10 260)">✦ Bonus</div>
+            <div class="sect"><div class="sect-check"><svg width="7" height="7" viewBox="0 0 7 7" fill="none"><path d="M1 3.5L2.8 5.2L6 1.5" stroke="oklch(0.55 0.14 145)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="sect-name">Documents annexes</span></div>
+            <div class="sect"><div class="sect-check"><svg width="7" height="7" viewBox="0 0 7 7" fill="none"><path d="M1 3.5L2.8 5.2L6 1.5" stroke="oklch(0.55 0.14 145)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="sect-name">Checklist bancabilité</span></div>
+            <div class="sect"><div class="sect-check"><svg width="7" height="7" viewBox="0 0 7 7" fill="none"><path d="M1 3.5L2.8 5.2L6 1.5" stroke="oklch(0.55 0.14 145)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="sect-name">KPIs &amp; Outils</span></div>
+          </div>
+
+        </div>
+
+      </div><!-- /mock-body -->
+    </div><!-- /mock-window -->
+  </div><!-- /mock-wrap -->
+
+</section>
+
+<!-- ════ MARQUEE ════ -->
+<div class="mq-band">
+  <div class="mq-track" aria-hidden="true">
+    <span>Restauration</span><span>SaaS &amp; App</span><span>Coaching pro</span><span>E-commerce</span><span>Artisanat</span><span>Freelance</span><span>Beauté &amp; bien-être</span><span>Consulting B2B</span><span>Conciergerie Airbnb</span><span>Formation en ligne</span><span>Sport &amp; fitness</span><span>Boutique physique</span>
+    <span>Restauration</span><span>SaaS &amp; App</span><span>Coaching pro</span><span>E-commerce</span><span>Artisanat</span><span>Freelance</span><span>Beauté &amp; bien-être</span><span>Consulting B2B</span><span>Conciergerie Airbnb</span><span>Formation en ligne</span><span>Sport &amp; fitness</span><span>Boutique physique</span>
+  </div>
+</div>
+
+<!-- ════ PROCESS — dark ════ -->
+<section class="proc-sec lp-sec">
+  <div class="lp-wrap">
+    <div class="proc-head">
+      <span class="s-over on-dark">Le process</span>
+      <h2 class="s-h2 dk">De l'idée au plan. <em>En 3 étapes.</em></h2>
+    </div>
+    <div class="proc-steps">
+      <div class="proc-step">
+        <div class="proc-idx">01</div>
+        <h3 class="proc-h3">Décris ton idée</h3>
+        <p class="proc-p">Une phrase suffit. Ton secteur, ta ville, ton budget. Pas de formulaire interminable.</p>
+        <div class="proc-n-ghost">1</div>
+      </div>
+      <div class="proc-step">
+        <div class="proc-idx">02</div>
+        <h3 class="proc-h3">Eadee structure tout</h3>
+        <p class="proc-p">Marché, concurrents, stratégie, finances, juridique. 23 sections générées et personnalisées à ton projet.</p>
+        <div class="proc-n-ghost">2</div>
+      </div>
+      <div class="proc-step">
+        <div class="proc-idx">03</div>
+        <h3 class="proc-h3">Tu récupères un plan prêt</h3>
+        <p class="proc-p">Projections 3 ans, emails rédigés, checklist des démarches. Compatible banque et BPI France.</p>
+        <div class="proc-n-ghost">3</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ FEATURE 1 — SCORE — light ════ -->
+<section class="ft-sec lp-sec">
+  <div class="lp-wrap">
+    <div class="ft-row">
+      <div class="ft-text">
+        <span class="ft-over">Score de viabilité</span>
+        <h2 class="ft-h2">Ton projet est-il vraiment viable ? <em>Avant d'investir un euro.</em></h2>
+        <p class="ft-lead">100 points d'analyse avant que tu dépenses quoi que ce soit. Marché, concurrents, modèle — tout est passé au crible.</p>
+        <ul class="ft-list">
+          <li class="ft-li"><span class="ft-ix">01</span><div><b class="ft-b">Analyse de marché chiffrée</b><span class="ft-t">Taille, tendances, part de marché cible — adapté à ton secteur en France.</span></div></li>
+          <li class="ft-li"><span class="ft-ix">02</span><div><b class="ft-b">Concurrents réels avec leurs prix</b><span class="ft-t">Leurs failles identifiées. Ton positionnement différenciant clarifié.</span></div></li>
+          <li class="ft-li"><span class="ft-ix">03</span><div><b class="ft-b">Un verdict clair</b><span class="ft-t">Score /100 avec explication directe : ce qui est solide, ce qui doit évoluer.</span></div></li>
+        </ul>
+      </div>
+      <div class="ft-visual">
+        <div class="dk">
+          <div class="dk-hd"><span>Score EADEE · VélôBretagne</span><span class="live">Live</span></div>
+          <div class="dk-bd">
+            <div class="score-big-n">87<sup>/100</sup></div>
+            <div class="score-verdict">Projet viable <em>— Fort potentiel de marché</em></div>
+            <div class="score-stats-row">
+              <div class="score-stat"><span class="sv">1,8 <em>Mds€</em></span><span class="sl">Marché</span></div>
+              <div class="score-stat"><span class="sv">+22<em>%</em></span><span class="sl">Croissance</span></div>
+              <div class="score-stat"><span class="sv">8 400</span><span class="sl">Clients cibles</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ FEATURE 2 — PROJECTIONS — dark ════ -->
+<section class="ft-sec on-dk lp-sec">
+  <div class="lp-wrap">
+    <div class="ft-row flip">
+      <div class="ft-text">
+        <span class="ft-over">Projections financières</span>
+        <h2 class="ft-h2">Des projections <em>construites, pas inventées.</em></h2>
+        <p class="ft-lead">Chaque chiffre est étiqueté : vérifié, estimé ou hypothèse. Tu sais ce qui est solide avant ton rendez-vous banque.</p>
+        <ul class="ft-list">
+          <li class="ft-li"><span class="ft-ix">01</span><div><b class="ft-b">CA mois 1, 3, 6, An 1 et An 3</b><span class="ft-t">Seuil de rentabilité, point mort, BFR et tableau d'amortissement calculés.</span></div></li>
+          <li class="ft-li"><span class="ft-ix">02</span><div><b class="ft-b">Charges détaillées et justifiées</b><span class="ft-t">Fixes, variables, investissements — chaque poste expliqué. Export PDF structuré.</span></div></li>
+          <li class="ft-li"><span class="ft-ix">03</span><div><b class="ft-b">3 scénarios documentés</b><span class="ft-t">Pessimiste, réaliste, optimiste — avec les hypothèses expliquées pour chacun.</span></div></li>
+        </ul>
+      </div>
+      <div class="ft-visual">
+        <div class="dk">
+          <div class="dk-hd"><span>Projections CA · VélôBretagne</span><span>An 3</span></div>
+          <div class="dk-bd">
+            <div class="chart-big-n">185 000<sup>€</sup></div>
+            <div class="chart-sub-l">projection an 3</div>
+            <div class="chart-bars">
+              <div class="c-bar" style="height:18%"></div><div class="c-bar" style="height:26%"></div><div class="c-bar" style="height:34%"></div><div class="c-bar" style="height:44%"></div><div class="c-bar md" style="height:54%"></div><div class="c-bar md" style="height:62%"></div><div class="c-bar hi" style="height:70%"></div><div class="c-bar hi" style="height:82%"></div><div class="c-bar hi" style="height:94%"></div><div class="c-bar hi" style="height:88%"></div><div class="c-bar hi" style="height:100%"></div><div class="c-bar hi" style="height:96%"></div>
+            </div>
+            <div class="chart-axis"><span>M1</span><span>M3</span><span>M6</span><span>An 1</span><span>An 3</span></div>
+            <div class="chart-kpi-row">
+              <div class="ck"><span class="kl">Marge brute</span><span class="kv acc">71%</span></div>
+              <div class="ck"><span class="kl">Break-even</span><span class="kv">Mois 4</span></div>
+              <div class="ck"><span class="kl">ROI initial</span><span class="kv acc">340%</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ FEATURE 3 — EXPERT — light ════ -->
+<section class="ft-sec lp-sec">
+  <div class="lp-wrap">
+    <div class="ft-row">
+      <div class="ft-text">
+        <span class="ft-over">Expert Eadee</span>
+        <h2 class="ft-h2">Ton conseiller. <em>24 heures sur 24.</em></h2>
+        <p class="ft-lead">Ton Expert Eadee connaît chaque ligne de ton plan. Il répond, affine et te guide — à n'importe quelle heure, sans attente.</p>
+        <ul class="ft-list">
+          <li class="ft-li"><span class="ft-ix">01</span><div><b class="ft-b">Connaissance totale de ton plan</b><span class="ft-t">Toutes les données de ton projet en mémoire. Pas besoin de tout ré-expliquer.</span></div></li>
+          <li class="ft-li"><span class="ft-ix">02</span><div><b class="ft-b">Business, stratégie, finances</b><span class="ft-t">Pose n'importe quelle question — il répond avec du concret adapté à ton secteur.</span></div></li>
+          <li class="ft-li"><span class="ft-ix">03</span><div><b class="ft-b">Mise à jour du plan en direct</b><span class="ft-t">Il peut modifier, affiner ou régénérer des sections entières sur tes retours.</span></div></li>
+        </ul>
+      </div>
+      <div class="ft-visual">
+        <div class="dk">
+          <div class="dk-hd"><span>Expert EADEE · En ligne</span><span class="live">Actif</span></div>
+          <div class="dk-bd">
+            <div class="chat-msgs">
+              <div class="chat-r"><div class="chat-av ex">✦</div><div class="chat-bub">Ta marge de <b>71%</b> est solide. Je recommande les partenariats hôtels avant la pub — ROI 3× plus rapide, aucun coût d'acquisition.</div></div>
+              <div class="chat-r user"><div class="chat-av usr">T</div><div class="chat-bub">Comment signer mes 10 premiers clients ?</div></div>
+              <div class="chat-r"><div class="chat-av ex">✦</div><div class="chat-bub">Commence par ton réseau : identifie <b>20 contacts ciblés</b>, envoie le template préparé. Objectif : 3 rendez-vous cette semaine.</div></div>
+              <div class="chat-typing">Expert en train de réfléchir…</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ FEATURE 4 — BANCABILITÉ — dark ════ -->
+<section class="ft-sec on-dk lp-sec">
+  <div class="lp-wrap">
+    <div class="ft-row flip">
+      <div class="ft-text">
+        <span class="ft-over">Dossier bancaire &amp; BPI</span>
+        <h2 class="ft-h2">Tu prépares un dossier bancaire ou BPI ? <em>EADEE est structuré pour ça aussi.</em></h2>
+        <p class="ft-lead">EADEE suit la structure standard demandée par les banques françaises et BPI France. Ce qu'on te dit clairement : EADEE te fait gagner plusieurs semaines de structuration. Pour un RDV bancaire, fais valider les chiffres par un expert-comptable ou ta CCI — on t'indique les ressources gratuites directement dans ton plan.</p>
+        <ul class="ft-list">
+          <li class="ft-li"><span class="ft-ix">01</span><div><b class="ft-b">Plan de financement besoins / ressources</b><span class="ft-t">Équilibré et justifié — le tableau n°1 que cherche un banquier.</span></div></li>
+          <li class="ft-li"><span class="ft-ix">02</span><div><b class="ft-b">Score de bancabilité /100</b><span class="ft-t">Sur les 6 critères réels évalués par les banques : apport, point mort, trésorerie, garanties…</span></div></li>
+          <li class="ft-li"><span class="ft-ix">03</span><div><b class="ft-b">Checklist documents + ressources gratuites</b><span class="ft-t">Documents bloquants vs souhaitables. Contacts CCI, BGE, BPI inclus dans chaque plan.</span></div></li>
+        </ul>
+      </div>
+      <div class="ft-visual">
+        <div class="dk">
+          <div class="dk-hd"><span>Score bancabilité · VélôBretagne</span><span>BPI ready</span></div>
+          <div class="dk-bd">
+            <div class="banca-score-n">78<sup>/100</sup></div>
+            <div class="banca-verdict">Dossier solide <em>— Apport à renforcer</em></div>
+            <div class="banca-list">
+              <div class="banca-row">
+                <div class="banca-chk"><svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1.5 4L3.2 5.8L6.5 2.2" stroke="oklch(0.55 0.14 145)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <span class="banca-label">Plan financement</span>
+                <span class="banca-val">Équilibré</span>
+              </div>
+              <div class="banca-row">
+                <div class="banca-chk"><svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1.5 4L3.2 5.8L6.5 2.2" stroke="oklch(0.55 0.14 145)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <span class="banca-label">Trésorerie 12 mois</span>
+                <span class="banca-val">Sans tension</span>
+              </div>
+              <div class="banca-row">
+                <div class="banca-chk"><svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1.5 4L3.2 5.8L6.5 2.2" stroke="oklch(0.55 0.14 145)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <span class="banca-label">Bilan prévisionnel 3 ans</span>
+                <span class="banca-val">Cohérent</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ 23 SECTIONS TOC — light ════ -->
+<section class="toc-sec lp-sec">
+  <div class="lp-wrap">
+    <div class="sec-head">
+      <span class="s-over on-light">Ce que tu obtiens</span>
+      <h2 class="s-h2">23 sections. <em>Rien n'est laissé au hasard.</em></h2>
+    </div>
+    <p style="font-size:15px;color:var(--ink-3);line-height:1.55;max-width:680px;margin-bottom:36px">Chaque plan Eadee contient ces 23 sections, complètes et personnalisées à ton projet. Aucun copier-coller, aucune section vide.</p>
+
+    <div class="toc-tabs" role="tablist">
+      <button class="toc-tab active" data-filter="all">Toutes <span class="ct">23</span></button>
+      <button class="toc-tab" data-filter="Stratégie">Stratégie <span class="ct">6</span></button>
+      <button class="toc-tab" data-filter="Marché">Marché <span class="ct">2</span></button>
+      <button class="toc-tab" data-filter="Finance">Finance <span class="ct">7</span></button>
+      <button class="toc-tab" data-filter="Juridique">Juridique <span class="ct">4</span></button>
+      <button class="toc-tab" data-filter="Action">Action <span class="ct">4</span></button>
+    </div>
+
+    <div class="toc-grid">
+      <div class="toc-item" data-cat="Stratégie"><div class="toc-item-head"><span class="toc-ix">01</span><span class="toc-tag" data-cat="Stratégie">Stratégie</span></div><h4>Résumé exécutif</h4><p>La synthèse de ton projet en 1 paragraphe percutant pour accrocher banquiers et investisseurs.</p></div>
+      <div class="toc-item" data-cat="Stratégie"><div class="toc-item-head"><span class="toc-ix">02</span><span class="toc-tag" data-cat="Stratégie">Stratégie</span></div><h4>Présentation du porteur</h4><p>Template structuré pour présenter ton parcours, tes compétences, ta légitimité.</p></div>
+      <div class="toc-item" data-cat="Stratégie"><div class="toc-item-head"><span class="toc-ix">03</span><span class="toc-tag" data-cat="Stratégie">Stratégie</span></div><h4>Présentation du projet</h4><p>Origine, vision, mission. Le pourquoi de ton entreprise raconté de façon mémorable.</p></div>
+      <div class="toc-item" data-cat="Stratégie"><div class="toc-item-head"><span class="toc-ix">04</span><span class="toc-tag" data-cat="Stratégie">Stratégie</span></div><h4>Proposition de valeur unique</h4><p>Ton USP clairement formulée : pourquoi un client te choisit toi et pas un autre.</p></div>
+      <div class="toc-item" data-cat="Stratégie"><div class="toc-item-head"><span class="toc-ix">05</span><span class="toc-tag" data-cat="Stratégie">Stratégie</span></div><h4>Modèle économique</h4><p>Tes offres, tes prix, comment tu génères de la marge. Avec exemples chiffrés.</p></div>
+      <div class="toc-item" data-cat="Stratégie"><div class="toc-item-head"><span class="toc-ix">06</span><span class="toc-tag" data-cat="Stratégie">Stratégie</span></div><h4>Stratégie commerciale</h4><p>Positionnement marketing, tunnel de vente, promesse de marque et canaux d'acquisition.</p></div>
+      <div class="toc-item" data-cat="Marché"><div class="toc-item-head"><span class="toc-ix">07</span><span class="toc-tag" data-cat="Marché">Marché</span></div><h4>Étude de marché</h4><p>Taille, croissance, tendances. Sources sectorielles citées. Adapté à la France.</p></div>
+      <div class="toc-item" data-cat="Marché"><div class="toc-item-head"><span class="toc-ix">08</span><span class="toc-tag" data-cat="Marché">Marché</span></div><h4>Analyse concurrentielle</h4><p>Tes 4–5 concurrents réels, leurs failles, leurs prix, ton positionnement différenciant.</p></div>
+      <div class="toc-item" data-cat="Finance"><div class="toc-item-head"><span class="toc-ix">09</span><span class="toc-tag" data-cat="Finance">Finance</span></div><h4>Plan de financement</h4><p>Besoins vs ressources équilibrés. Le tableau n°1 regardé par ton banquier avant tout.</p></div>
+      <div class="toc-item" data-cat="Finance"><div class="toc-item-head"><span class="toc-ix">10</span><span class="toc-tag" data-cat="Finance">Finance</span></div><h4>Plan d'investissement</h4><p>Chaque poste justifié par niveau de priorité. Matériel, immatériel, BFR.</p></div>
+      <div class="toc-item" data-cat="Finance"><div class="toc-item-head"><span class="toc-ix">11</span><span class="toc-tag" data-cat="Finance">Finance</span></div><h4>Compte de résultat 3 ans</h4><p>CA, charges, résultat sur 3 années glissantes. An 1 mensuel + années 2–3 annuelles.</p></div>
+      <div class="toc-item" data-cat="Finance"><div class="toc-item-head"><span class="toc-ix">12</span><span class="toc-tag" data-cat="Finance">Finance</span></div><h4>Plan de trésorerie 12 mois</h4><p>Entrées et sorties mensuelles. Alertes si tension de trésorerie détectée.</p></div>
+      <div class="toc-item" data-cat="Finance"><div class="toc-item-head"><span class="toc-ix">13</span><span class="toc-tag" data-cat="Finance">Finance</span></div><h4>Bilan prévisionnel 3 ans</h4><p>Actif et passif simplifié à fin d'an 1, 2 et 3. Vision patrimoniale de l'entreprise.</p></div>
+      <div class="toc-item" data-cat="Finance"><div class="toc-item-head"><span class="toc-ix">14</span><span class="toc-tag" data-cat="Finance">Finance</span></div><h4>Seuil de rentabilité</h4><p>Point mort calculé + délai pour l'atteindre en mois. À partir de quand tu es rentable.</p></div>
+      <div class="toc-item" data-cat="Finance"><div class="toc-item-head"><span class="toc-ix">15</span><span class="toc-tag" data-cat="Finance">Finance</span></div><h4>Tableau d'amortissement</h4><p>Mensualité estimée, capacité de remboursement, option différé conseillée si besoin.</p></div>
+      <div class="toc-item" data-cat="Juridique"><div class="toc-item-head"><span class="toc-ix">16</span><span class="toc-tag" data-cat="Juridique">Juridique</span></div><h4>Aspects juridiques</h4><p>Statut recommandé (SAS, EI, SARL…) avec justification chiffrée. Autorisations sectorielles.</p></div>
+      <div class="toc-item" data-cat="Juridique"><div class="toc-item-head"><span class="toc-ix">17</span><span class="toc-tag" data-cat="Juridique">Juridique</span></div><h4>Aspects organisationnels</h4><p>Équipe, locaux, sous-traitance. Comment ton activité s'organise au quotidien.</p></div>
+      <div class="toc-item" data-cat="Juridique"><div class="toc-item-head"><span class="toc-ix">18</span><span class="toc-tag" data-cat="Juridique">Juridique</span></div><h4>Aides &amp; subventions</h4><p>BPI, ACRE, Pôle Emploi, prêts d'honneur — ce à quoi tu as droit, avec montants et liens.</p></div>
+      <div class="toc-item" data-cat="Juridique"><div class="toc-item-head"><span class="toc-ix">19</span><span class="toc-tag" data-cat="Juridique">Juridique</span></div><h4>Démarches administratives</h4><p>Les 6 étapes dans l'ordre, avec délais et coûts réels. De l'immatriculation à l'ouverture.</p></div>
+      <div class="toc-item" data-cat="Action"><div class="toc-item-head"><span class="toc-ix">20</span><span class="toc-tag" data-cat="Action">Action</span></div><h4>Analyse des risques</h4><p>5 risques concrets avec plan de mitigation pour chacun. Risques marché, financiers, légaux.</p></div>
+      <div class="toc-item" data-cat="Action"><div class="toc-item-head"><span class="toc-ix">21</span><span class="toc-tag" data-cat="Action">Action</span></div><h4>Plan d'action 90 jours</h4><p>Actions prioritaires sur 3 mois. Concret, daté, mesurable. Tes 12 premières décisions.</p></div>
+      <div class="toc-item" data-cat="Action"><div class="toc-item-head"><span class="toc-ix">22</span><span class="toc-tag" data-cat="Action">Action</span></div><h4>Score de viabilité &amp; bancabilité</h4><p>Double score /100 : viabilité du projet + solidité du dossier financier.</p></div>
+      <div class="toc-item" data-cat="Action"><div class="toc-item-head"><span class="toc-ix">23</span><span class="toc-tag" data-cat="Action">Action</span></div><h4>Checklist dossier complet</h4><p>Documents à rassembler classés par priorité. Bloquants vs souhaitables — pour banque et BPI.</p></div>
+
+      <div class="toc-sep"><div class="toc-sep-line"></div><span class="toc-sep-label">✦ Bonus inclus</span><div class="toc-sep-line"></div></div>
+
+      <div class="toc-item toc-item-bonus" data-cat="Bonus"><div class="toc-item-head"><span class="toc-ix">✦</span><span class="toc-tag" data-cat="Bonus">Bonus</span></div><h4>Emails rédigés</h4><p>Prospection clients, présentation banque, relance et fournisseur — 4 emails prêts à envoyer.</p></div>
+      <div class="toc-item toc-item-bonus" data-cat="Bonus"><div class="toc-item-head"><span class="toc-ix">✦</span><span class="toc-tag" data-cat="Bonus">Bonus</span></div><h4>KPIs à suivre</h4><p>4 indicateurs clés avec cibles M3 et M12. Ce que tu dois mesurer chaque semaine.</p></div>
+      <div class="toc-item toc-item-bonus" data-cat="Bonus"><div class="toc-item-head"><span class="toc-ix">✦</span><span class="toc-tag" data-cat="Bonus">Bonus</span></div><h4>Outils recommandés</h4><p>5 outils sélectionnés pour ton secteur, avec prix réels et liens directs.</p></div>
+      <div class="toc-item toc-item-bonus" data-cat="Bonus"><div class="toc-item-head"><span class="toc-ix">✦</span><span class="toc-tag" data-cat="Bonus">Bonus</span></div><h4>Ressources gratuites</h4><p>CCI, BPI, BGE, Réseau Entreprendre — contacts et liens inclus dans chaque plan.</p></div>
+    </div>
+
+    <div class="toc-bottom">
+      <p><b>23 sections, 1 plan, 60 secondes.</b> Chaque section est générée et personnalisée à partir de ton idée et de tes données. Aucune section n'est un copier-coller.</p>
+      <a class="toc-bottom-btn" href="#">Générer mon plan →</a>
+    </div>
+  </div>
+</section>
+
+<script>
+(function(){
+  const tabs = document.querySelectorAll('.toc-tab');
+  const items = document.querySelectorAll('.toc-item');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const filter = tab.dataset.filter;
+      items.forEach(item => {
+        if (filter === 'all' || item.dataset.cat === filter) {
+          item.classList.remove('hidden');
+        } else {
+          item.classList.add('hidden');
+        }
+      });
+      // Always show separator and bonus fillers when showing all
+      document.querySelectorAll('.toc-sep').forEach(s => {
+        s.style.display = (filter === 'all' || filter === 'Bonus') ? '' : 'none';
+      });
+    });
+  });
+})();
+</script>
+
+<!-- ════ NUMBERS — dark ════ -->
+<div class="nums-sec">
+  <div class="nums-inner">
+    <div class="num-block">
+      <div class="num-n">23<em> sections</em></div>
+      <div class="num-lbl">Stratégie, marché, finance, juridique, démarches — rien n'est laissé au hasard.</div>
+    </div>
+    <div class="num-block">
+      <div class="num-n">60<em>s</em></div>
+      <div class="num-lbl">Le temps de génération. Un plan complet pendant que tu bois ton café.</div>
+    </div>
+    <div class="num-block">
+      <div class="num-n">100<em> pts</em></div>
+      <div class="num-lbl">Le score de viabilité de ton projet — avant que tu dépenses un seul euro.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ TESTIMONIALS — dark ════ -->
+<section class="testim-sec lp-sec">
+  <div class="lp-wrap">
+    <div class="sec-head">
+      <span class="s-over on-dark">Ils ont lancé avec Eadee</span>
+      <h2 class="s-h2 dk">Des projets vrais. <em>Des résultats vrais.</em></h2>
+    </div>
+    <div class="testim-grid">
+      <article class="testim-c">
+        <div class="testim-mark">"</div>
+        <p class="testim-q">J'avais une idée claire mais aucune idée de comment la structurer. EADEE m'a sorti un plan complet en moins d'une minute. La BPI a validé mon prêt de 15 000€ sans difficulté.</p>
+        <div class="testim-meta">Conciergerie Airbnb · 58s · Score 91/100</div>
+        <div class="testim-by"><span class="testim-ph" style="background:oklch(0.55 0.10 30)">M</span><div class="testim-who"><b>Marie L.</b><span>34 ANS · LYON</span></div></div>
+      </article>
+      <article class="testim-c">
+        <div class="testim-mark">"</div>
+        <p class="testim-q">J'avais abandonné l'idée de me lancer à cause du business plan. EADEE m'a débloqué en 2 minutes. J'avais enfin quelque chose à montrer à ma conseillère Pôle Emploi.</p>
+        <div class="testim-meta">Dark kitchen healthy · 72s · Score 84/100</div>
+        <div class="testim-by"><span class="testim-ph" style="background:oklch(0.42 0.07 160)">S</span><div class="testim-who"><b>Sofiane B.</b><span>27 ANS · MARSEILLE</span></div></div>
+      </article>
+      <article class="testim-c">
+        <div class="testim-mark">"</div>
+        <p class="testim-q">Ce qui m'a le plus surpris c'est la qualité des projections financières. Structuré, cohérent — mon expert-comptable n'a eu qu'à valider au lieu de repartir de zéro.</p>
+        <div class="testim-meta">Cabinet coaching B2B · 65s · Score 88/100</div>
+        <div class="testim-by"><span class="testim-ph" style="background:oklch(0.38 0.08 250)">L</span><div class="testim-who"><b>Léa K.</b><span>41 ANS · NANTES</span></div></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ════ PRICING — light ════ -->
+<section class="pricing-sec lp-sec">
+  <div class="lp-wrap">
+    <div class="sec-head">
+      <span class="s-over on-light">Investissement</span>
+      <h2 class="s-h2">Simple. Transparent. <em>Sans surprise.</em></h2>
+    </div>
+    <div class="pricing-grid">
+      <div class="pc">
+        <div class="pc-badge">Solo</div>
+        <div class="pc-name">Solo</div>
+        <div class="pc-sub">1 génération complète</div>
+        <div class="pc-price-row"><span class="pc-strike">18,55€</span><span class="pc-price">12,99€</span></div>
+        <div class="pc-meta"><b>1 crédit</b> · 12,99€ / génération</div>
+        <a class="pc-btn" href="#">Acheter Solo</a>
+        <div class="pc-note">Paiement unique · Sans abonnement</div>
+      </div>
+      <div class="pc feat">
+        <div class="pc-badge">✦ Populaire</div>
+        <div class="pc-name">Pro</div>
+        <div class="pc-sub">Pack 3 générations</div>
+        <div class="pc-price-row"><span class="pc-strike">42,84€</span><span class="pc-price">29,99€</span></div>
+        <div class="pc-meta"><b>3 crédits</b> · 10,00€ / génération</div>
+        <a class="pc-btn" href="#">Acheter Pro</a>
+        <div class="pc-note">Paiement unique · Sans abonnement</div>
+      </div>
+      <div class="pc">
+        <div class="pc-badge">✦ Meilleure valeur</div>
+        <div class="pc-name">Empire</div>
+        <div class="pc-sub">Pack 8 générations</div>
+        <div class="pc-price-row"><span class="pc-strike">85,70€</span><span class="pc-price">59,99€</span></div>
+        <div class="pc-meta"><b>8 crédits</b> · 7,50€ / génération</div>
+        <a class="pc-btn" href="#">Acheter Empire</a>
+        <div class="pc-note">Paiement unique · Sans abonnement</div>
+      </div>
+    </div>
+    <div class="pricing-note"><b>Les 3 packs incluent exactement les mêmes fonctionnalités.</b> Seul le nombre de générations change — plus tu en achètes, moins tu paies par plan.</div>
+    <div class="pricing-tags">
+      <span>23 sections complètes</span><span>Score viabilité /100</span><span>Projections 3 ans</span><span>Emails rédigés</span><span>Expert Eadee 24h/24</span><span>Export PDF</span>
+    </div>
+  </div>
+</section>
+
+<!-- ════ FAQ — dark ════ -->
+<section class="faq-sec lp-sec">
+  <div class="lp-wrap">
+    <div class="sec-head">
+      <span class="s-over on-dark">Questions fréquentes</span>
+      <h2 class="s-h2 dk">Tout ce que tu veux savoir. <em>Avant de te lancer.</em></h2>
+    </div>
+    <div class="faq-list">
+      <details class="faq-q" open>
+        <summary>Le plan EADEE est-il vraiment complet ?</summary>
+        <div class="faq-a">Oui. 23 sections couvrent l'intégralité d'un business plan professionnel : stratégie, marché, finances, juridique, démarches, risques, plan d'action. Chaque section est générée et personnalisée à ton projet — aucune section générique ou vide.</div>
+      </details>
+      <details class="faq-q">
+        <summary>Mon plan sera-t-il pris au sérieux par une banque ou BPI France ?</summary>
+        <div class="faq-a">EADEE suit la structure standard demandée par les banques françaises et BPI France. Des entrepreneurs ont obtenu des financements avec un plan EADEE comme base de travail. Pour un RDV bancaire, fais valider les chiffres par un expert-comptable ou ta CCI — on t'indique les ressources gratuites dans chaque plan.</div>
+      </details>
+      <details class="faq-q">
+        <summary>Quelle différence avec ChatGPT ou un outil gratuit ?</summary>
+        <div class="faq-a">ChatGPT génère du texte. EADEE génère un business plan structuré selon les standards français : plan de financement équilibré, projections cohérentes, score de viabilité, tableau d'amortissement, checklist des démarches. C'est un outil spécialisé, pas un chatbot généraliste.</div>
+      </details>
+      <details class="faq-q">
+        <summary>Puis-je modifier le plan après génération ?</summary>
+        <div class="faq-a">Oui, entièrement. Chaque section est éditable. L'Expert Eadee peut aussi réécrire une section entière sur simple demande.</div>
+      </details>
+      <details class="faq-q">
+        <summary>C'est un abonnement ?</summary>
+        <div class="faq-a">Non. Chaque pack est un paiement unique. Tu achètes des crédits, tu les consommes quand tu veux, sans engagement, sans auto-renouvellement.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ════ FOOTER — dark ════ -->
+<footer class="lp-footer">
+  <div class="lp-wrap">
+    <div class="lp-foot-grid">
+      <div>
+        <a class="lp-foot-brand" href="#">
+          <div class="lp-foot-logo">
+            <svg viewBox="0 0 18 18" width="15" height="15" fill="none">
+              <rect x="2" y="2" width="14" height="2.5" rx="1.25" fill="white"/>
+              <rect x="2" y="7.75" width="8.5" height="2.5" rx="1.25" fill="oklch(0.57 0.145 34)"/>
+              <rect x="2" y="13.5" width="14" height="2.5" rx="1.25" fill="white"/>
+            </svg>
+          </div>
+          eadee
+        </a>
+        <p class="lp-foot-tagline">Le business plan intelligent. Pensé pour la France.</p>
+        <a class="lp-foot-email" href="mailto:contact@eadee.fr">contact@eadee.fr</a>
+      </div>
+      <div>
+        <div class="lp-foot-col-h">Produit</div>
+        <ul class="lp-foot-ul">
+          <li><a href="#">Fonctionnalités</a></li>
+          <li><a href="#">Tarifs</a></li>
+          <li><a href="#">FAQ</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="lp-foot-col-h">Légal</div>
+        <ul class="lp-foot-ul">
+          <li><a href="#">Mentions légales</a></li>
+          <li><a href="#">CGU / CGV</a></li>
+          <li><a href="#">Confidentialité</a></li>
+          <li><a href="#">Cookies</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="lp-foot-bottom">
+      <p class="lp-foot-legal">
+        EADEE — Tous droits réservés · Données hébergées en Europe · Conforme RGPD · <a href="mailto:contact@eadee.fr">contact@eadee.fr</a><br>
+        Plans générés par IA (Anthropic Claude). À valider par un professionnel avant tout engagement.
+      </p>
+      <div class="lp-foot-wm">eadee.</div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
