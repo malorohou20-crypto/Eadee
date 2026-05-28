@@ -163,6 +163,19 @@
       });
     });
 
+    /* 7. Anti-autofill dashName — readonly retiré au premier clic/focus */
+    ready(function () {
+      var dn = document.getElementById('dashName');
+      if (!dn) return;
+      function unlock() {
+        dn.removeAttribute('readonly');
+        dn.removeEventListener('focus',     unlock);
+        dn.removeEventListener('mousedown', unlock);
+      }
+      on(dn, 'focus',     unlock);
+      on(dn, 'mousedown', unlock);
+    });
+
   } /* END IS_DASH */
 
 
