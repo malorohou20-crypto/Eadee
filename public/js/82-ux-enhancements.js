@@ -235,7 +235,7 @@
     /* 9. Stats counter — count-up au scroll */
     ready(function () {
       if (reduced) return;
-      var nums = qsa('[data-count], .stat-big, .score-big');
+      var nums = qsa('[data-count]');
       if (!nums.length) return;
 
       var obs = new IntersectionObserver(function (entries) {
