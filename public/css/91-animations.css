@@ -75,6 +75,58 @@ select:focus-visible {
 
 /* ─── DASHBOARD ONLY ──────────────────────────────────────────────── */
 
+/* 5a. Gloss manquant — topbar + chat bubbles */
+.top-pill,
+.top-icon,
+.top-user,
+.msg.you .bb,
+.credits-cta,
+.toc-tab,
+.side-link {
+  overflow: hidden;
+  position: relative;
+}
+
+/* Gloss sweep sur ces éléments */
+.top-pill::after,
+.top-icon::after,
+.top-user::after,
+.msg.you .bb::after,
+.credits-cta::after,
+.toc-tab::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(
+    108deg,
+    transparent 12%,
+    oklch(1 0 0 / 0.14) 50%,
+    transparent 88%
+  );
+  transform: translateX(-150%) skewX(-12deg);
+  transition: transform 0.70s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Déclenchement hover */
+.top-pill:hover::after,
+.top-icon:hover::after,
+.top-user:hover::after,
+.msg.you .bb:hover::after,
+.credits-cta:hover::after,
+.toc-tab:hover::after {
+  transform: translateX(150%) skewX(-12deg);
+}
+
+/* Highlight bord-haut inset sur éléments sombres */
+.top-pill.pro,
+.top-user {
+  box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.12);
+}
+.msg.you .bb {
+  box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.14);
+}
+
 /* 5. Sidebar active pill */
 .side-link { position: relative; }
 .side-link::before {
