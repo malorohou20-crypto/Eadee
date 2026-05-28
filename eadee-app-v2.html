@@ -1007,14 +1007,7 @@
   --shadow-hover: 0 4px 18px -5px oklch(0 0 0 / 0.48);
 }
 
-/* 2 ── Kill shimmer sweep pseudo-elements */
-.card::after, .side-credits::after, .pack::after, .conv::after,
-.help-card::after, .dossier-card::after, .plan-icon::after, .chat-new::after,
-.btn::after, .chat-send::after, .top-drop-item::after,
-.filter-tabs button::after, .plan-row::after, .insp::after {
-  display: none !important;
-}
-.doc-btn::before { display: none !important; }
+/* 2 ── Gloss sweep conservé — display:none retiré */
 
 /* 3 ── Remove inset top-edge highlight; restore clean shadows */
 .card, .side-credits, .pack, .conv, .help-card, .dossier-card {
