@@ -1,1 +1,299 @@
-/* 91-animations.css — réservé pour la v2 */
+/* ══════════════════════════════════════════════════════════════════
+   91-animations.css  — UX animations cohérentes v2
+   Règles 100% basées sur les variables CSS existantes des deux pages.
+   Ne touche à aucune logique. Respecte prefers-reduced-motion.
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ─── SHARED ──────────────────────────────────────────────────────── */
+
+/* 1. Scrollbar custom */
+::-webkit-scrollbar            { width: 5px; height: 5px; }
+::-webkit-scrollbar-track      { background: transparent; }
+::-webkit-scrollbar-thumb      { background: var(--rule); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover{ background: var(--rule-2, var(--rule)); }
+*                              { scrollbar-width: thin; scrollbar-color: var(--rule) transparent; }
+
+/* 2. Focus ring unifié */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline-offset: 0;
+  border-radius: 6px;
+}
+
+/* 3. Ripple (injecté par JS sur .btn) */
+.ux-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.22;
+  transform: scale(0);
+  pointer-events: none;
+  animation: ux-ripple 0.52s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  z-index: 0;
+}
+@keyframes ux-ripple {
+  to { transform: scale(4); opacity: 0; }
+}
+
+/* 4. Scroll-reveal sur landing (classe .reveal ajoutée par JS) */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity  0.62s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.62s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: none;
+}
+.reveal-left  { transform: translateX(-32px) translateY(0) !important; }
+.reveal-right { transform: translateX(32px)  translateY(0) !important; }
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.94);
+  transition:
+    opacity  0.54s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.54s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+.reveal-scale.visible { opacity: 1; transform: scale(1); }
+
+/* Délais stagger */
+.reveal-d1 { transition-delay: 0.06s; }
+.reveal-d2 { transition-delay: 0.12s; }
+.reveal-d3 { transition-delay: 0.18s; }
+.reveal-d4 { transition-delay: 0.24s; }
+.reveal-d5 { transition-delay: 0.30s; }
+
+
+/* ─── DASHBOARD ONLY ──────────────────────────────────────────────── */
+
+/* 5. Sidebar active pill */
+.side-link { position: relative; }
+.side-link::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 50%;
+  transform: translateY(-50%) scaleY(0);
+  width: 3px; height: 56%;
+  border-radius: 0 2px 2px 0;
+  background: var(--accent);
+  opacity: 0;
+  transition:
+    transform 0.24s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity   0.18s ease;
+}
+.side-link.active::before {
+  transform: translateY(-50%) scaleY(1);
+  opacity: 1;
+}
+
+/* 6. Top-drop — entrée animée uniquement (sortie instantanée = OK) */
+.top-drop.open {
+  animation: top-drop-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes top-drop-in {
+  from { opacity: 0; transform: translateY(-10px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0)     scale(1); }
+}
+
+/* 7. Screen transitions (remplacement de screenIn/screenOut) */
+@keyframes screenIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes screenOut {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-8px); }
+}
+.screen.active {
+  animation: screenIn 0.32s cubic-bezier(0.22, 1, 0.36, 1) both !important;
+}
+
+/* 8. Gen button — breathing + loading shimmer */
+#dashGenBtn {
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform    0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow   0.18s ease,
+    opacity      0.15s ease;
+}
+#dashGenBtn:not(:disabled):not(.gen-loading):not(:active) {
+  animation: gen-breathe 3.4s ease-in-out infinite;
+}
+@keyframes gen-breathe {
+  0%, 100% { box-shadow: 0 0 0 0 oklch(0.568 0.145 34 / 0); }
+  52%       { box-shadow: 0 0 20px 3px oklch(0.568 0.145 34 / 0.30); }
+}
+#dashGenBtn:active:not(:disabled) {
+  animation: none !important;
+  transform: scale(0.96) translateY(1px) !important;
+}
+/* Shimmer de chargement */
+#dashGenBtn.gen-loading {
+  animation: none;
+  opacity: 0.72;
+  pointer-events: none;
+}
+#dashGenBtn.gen-loading::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 20%,
+    oklch(1 0 0 / 0.22) 50%,
+    transparent 80%
+  );
+  animation: gen-shimmer 1.0s linear infinite;
+  z-index: 2;
+}
+@keyframes gen-shimmer {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(100%); }
+}
+
+/* 9. Credits bar — transition largeur */
+.credits-bar i {
+  transition: width 1.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* 10. History cards stagger */
+.conv.ux-stagger {
+  opacity: 0;
+  transform: translateX(-10px);
+  transition:
+    opacity   0.30s ease,
+    transform 0.30s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.conv.ux-stagger.ux-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* 11. Topbar scroll shadow (dashboard) */
+.topbar.ux-scrolled {
+  box-shadow:
+    0 1px 0 var(--rule),
+    0 6px 24px -8px oklch(0.20 0.010 60 / 0.18);
+}
+
+/* 12. Toast — slide-in depuis le bas-droite */
+#v2-toast {
+  animation: v2-toast-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) both !important;
+}
+@keyframes v2-toast-in {
+  from { opacity: 0; transform: translateY(10px) translateX(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* 13. Input focus glow */
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  box-shadow: 0 0 0 3px oklch(0.568 0.145 34 / 0.18) !important;
+}
+
+/* 14. Pack click spring */
+.pack.ux-clicked {
+  animation: pack-spring 0.40s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes pack-spring {
+  0%   { transform: scale(0.96); }
+  55%  { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+
+/* ─── LANDING ONLY ────────────────────────────────────────────────── */
+
+/* 15. Landing topbar scroll shadow */
+.topbar.ux-scrolled {
+  box-shadow:
+    0 1px 0 var(--rule),
+    0 8px 28px -8px oklch(0.20 0.010 60 / 0.12);
+  backdrop-filter: saturate(160%) blur(12px);
+  -webkit-backdrop-filter: saturate(160%) blur(12px);
+}
+
+/* 16. Price cards — hover lift */
+.price {
+  transition:
+    background var(--dur-base) var(--ease-smooth),
+    transform  var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out) !important;
+}
+.price:not(.featured):hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 12px 40px -10px oklch(0.20 0.010 60 / 0.18),
+    0 1px 0 var(--rule);
+}
+
+/* 17. Process steps — entrance ligne */
+.step {
+  transition: border-right-color 0.28s ease;
+}
+
+/* 18. Testimonials — hover lift */
+.testim {
+  transition:
+    background var(--dur-base) var(--ease-smooth),
+    transform  var(--dur-base) var(--ease-out),
+    border-right-color 0.22s ease !important;
+}
+.testim:hover {
+  transform: translateY(-3px);
+}
+
+/* 19. Nav CTA button — shimmer périodique */
+.topbar-cta .btn-accent {
+  position: relative;
+  overflow: hidden;
+}
+.topbar-cta .btn-accent::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; bottom: 0;
+  width: 60%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    oklch(1 0 0 / 0.28),
+    transparent
+  );
+  animation: cta-sheen 3.6s ease-in-out 2s infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+@keyframes cta-sheen {
+  0%   { left: -100%; opacity: 1; }
+  28%  { left: 120%;  opacity: 1; }
+  100% { left: 120%;  opacity: 0; }
+}
+
+/* ─── PREFERS-REDUCED-MOTION ──────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal-scale            { transition: none !important; }
+  .ux-ripple               { animation: none !important; }
+  #dashGenBtn              { animation: none !important; }
+  #dashGenBtn.gen-loading::before { animation: none !important; }
+  .top-drop.open           { animation: none !important; }
+  .cta-sheen               { animation: none !important; }
+  .topbar-cta .btn-accent::before { animation: none !important; }
+  .screen.active           { animation: none !important; opacity: 1; }
+  .conv.ux-stagger         { transition: none !important; }
+  .credits-bar i           { transition: none !important; }
+  .pack.ux-clicked         { animation: none !important; }
+  * { transition-duration: 0.01ms !important;
+      animation-duration:  0.01ms !important;
+      animation-iteration-count: 1 !important; }
+}
