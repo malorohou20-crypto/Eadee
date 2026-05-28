@@ -235,7 +235,7 @@
     /* 9. Stats counter — count-up au scroll */
     ready(function () {
       if (reduced) return;
-      var nums = qsa('[data-count]');
+      var nums = qsa('[data-count], .score-big');
       if (!nums.length) return;
 
       var obs = new IntersectionObserver(function (entries) {
@@ -246,20 +246,35 @@
           if (el._uxCounted) return;
           el._uxCounted = true;
 
-          var raw     = el.getAttribute('data-count') || el.textContent;
-          var numRaw  = parseFloat(raw.replace(/[^\d.]/g, '')) || 0;
-          var isInt   = numRaw === Math.floor(numRaw);
-          var suffix  = raw.replace(/[\d.,]/g, '').replace(/^\s+|\s+$/g, '');
-          var dur     = 1100;
-          var start   = performance.now();
+          /* Pour .score-big, lire/écrire uniquement le nœud texte (préserve <sup>) */
+          var textNode = Array.prototype.filter.call(el.childNodes, function (n) {
+            return n.nodeType === 3;
+          })[0];
+
+          var raw    = el.getAttribute('data-count') ||
+                       (textNode ? textNode.textContent.trim() : el.textContent);
+          var numRaw = parseFloat(raw.replace(/[^\d.]/g, '')) || 0;
+          var isInt  = numRaw === Math.floor(numRaw);
+          var suffix = raw.replace(/[\d.,]/g, '').replace(/^\s+|\s+$/g, '');
+          var dur    = 1100;
+          var start  = performance.now();
 
           (function tick(now) {
-            var p = Math.min((now - start) / dur, 1);
-            var e = 1 - Math.pow(1 - p, 3); // ease-out cubic
-            var v = numRaw * e;
-            el.textContent = (isInt ? Math.round(v) : v.toFixed(1)) + suffix;
+            var p   = Math.min((now - start) / dur, 1);
+            var e   = 1 - Math.pow(1 - p, 3); // ease-out cubic
+            var v   = numRaw * e;
+            var str = (isInt ? Math.round(v) : v.toFixed(1)) + suffix;
+            if (textNode) {
+              textNode.textContent = str;
+            } else {
+              el.textContent = str;
+            }
             if (p < 1) requestAnimationFrame(tick);
-            else el.textContent = (isInt ? numRaw : numRaw.toFixed(1)) + suffix;
+            else {
+              var final = (isInt ? numRaw : numRaw.toFixed(1)) + suffix;
+              if (textNode) textNode.textContent = final;
+              else el.textContent = final;
+            }
           }(start));
         });
       }, { threshold: 0.6 });
