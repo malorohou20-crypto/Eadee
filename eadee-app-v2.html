@@ -258,7 +258,7 @@
   .field-head{display:flex;align-items:center;justify-content:space-between}
   .field label{font-size:13.5px;color:var(--ink)}
   .field label .req{color:var(--accent);margin-left:2px}
-  .field .examples{font-family:var(--sans);font-size:11px;color:var(--accent-ink);text-decoration:none;border-bottom:1px dashed var(--accent);padding-bottom:1px}
+  .field .examples{font-family:var(--sans);font-size:11px;color:var(--accent-ink);text-decoration:none}
   .field textarea, .field input[type=text]{
     font:inherit;font-size:14px;color:var(--ink);
     border:1px solid var(--rule);background:var(--paper);
@@ -1685,7 +1685,7 @@
                   <label>Nom du plan</label>
                   <span style="font-family:var(--sans);font-size:11px;color:var(--ink-3);letter-spacing:0.04em">optionnel</span>
                 </div>
-                <input id="dashName" type="text" placeholder="Ex: NestManager Lyon, Dark Kitchen Paris…" />
+                <input id="dashName" type="text" autocomplete="off" placeholder="Ex: NestManager Lyon, Dark Kitchen Paris…" />
               </div>
             </div>
 
@@ -1998,6 +1998,7 @@
           <!-- LEFT: packs + card form -->
           <div>
             <div class="pack" id="pack-solo" data-plan="solo" data-price="12.99" data-credits="1">
+              <span class="pack-best">★ Populaire</span>
               <span class="radio"></span>
               <div class="pack-body">
                 <div class="pack-name"><b>Solo</b><span class="pack-price">12,99€</span></div>
