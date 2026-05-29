@@ -1,0 +1,230 @@
+  /* Responsive */
+  @media (max-width:1024px){
+
+    .feature,.feature.reverse{grid-template-columns:1fr;gap:48px}
+    .feature.reverse .feature-text{order:1}
+    .feature.reverse .feature-visual{order:2}
+    .toc-grid{grid-template-columns:repeat(2,1fr)}
+    .testimonials{grid-template-columns:1fr}
+    .testim{border-right:0;border-bottom:1px solid var(--rule)}
+    .pricing{grid-template-columns:1fr}
+    .price{border-right:0;border-bottom:1px solid var(--rule)}
+    .foot-grid{grid-template-columns:1fr 1fr;gap:32px}
+    .section-head{grid-template-columns:1fr}
+    .process{grid-template-columns:1fr}
+    .step{border-right:0;border-bottom:1px solid var(--rule)}
+  }
+  @media (max-width:680px){
+    .wrap{padding:0 20px}
+    .topbar-inner{padding:12px 20px}
+    .nav{display:none}
+    section{padding:64px 0}
+    .toc-grid{grid-template-columns:1fr}
+    .trans-grid{grid-template-columns:1fr}
+    .trans-col + .trans-col{border-left:0;border-top:1px solid var(--rule)}
+    .foot-grid{grid-template-columns:1fr}
+    .cookie{left:12px;right:12px;max-width:none}
+    .foot-mark{display:none}
+  }
+
+  /* ——— SCROLL REVEAL ——— */
+  .reveal{opacity:0;transform:translateY(22px);transition:opacity .65s ease,transform .65s ease}
+  .reveal.visible{opacity:1;transform:translateY(0)}
+
+  /* ——— SECTION SOMBRE (data-theme="dark") ——— */
+  [data-theme="dark"] {
+    --bg:         oklch(0.097 0.010 56);
+    --bg-2:       oklch(0.138 0.012 56);
+    --paper:      oklch(0.158 0.012 57);
+    --ink:        oklch(0.88  0.025 68);
+    --ink-2:      oklch(0.70  0.018 65);
+    --ink-3:      oklch(0.48  0.012 60);
+    --ink-4:      oklch(0.32  0.010 60);
+    --rule:       oklch(0.22  0.008 58);
+    --rule-2:     oklch(0.30  0.008 58);
+    --accent-ink: oklch(0.76  0.15  40);
+    --green-bg:   oklch(0.20  0.05  145);
+    --shadow-lift:  0 4px 28px -4px rgba(0,0,0,0.55), 0 1px 0 var(--rule);
+    --shadow-hover: 0 8px 36px -8px rgba(0,0,0,0.65), 0 1px 0 var(--rule);
+    background: var(--bg);
+    color: var(--ink);
+  }
+  /* Overrides spécifiques composants sur fond sombre */
+  [data-theme="dark"] .process { border-top-color: oklch(0.30 0.008 58); }
+  [data-theme="dark"] .chart .bar.dim { background: var(--rule-2); }
+  [data-theme="dark"] .btn { box-shadow: none; }
+  [data-theme="dark"] .btn:hover { box-shadow: 0 6px 20px -6px rgba(0,0,0,0.5); }
+  [data-theme="dark"] .card {
+    box-shadow: 0 1px 0 var(--rule), 0 30px 60px -40px rgba(0,0,0,0.5);
+  }
+  [data-theme="dark"] .chat-row.user .chat-bubble {
+    background: oklch(0.58 0.14 35);
+    color: oklch(0.97 0.008 85);
+    border-color: oklch(0.58 0.14 35);
+  }
+  [data-theme="dark"] .pricing { border-color: oklch(0.86 0.012 75); background: oklch(0.99 0.008 90); }
+  [data-theme="dark"] .price:not(.featured) {
+    background: oklch(0.99 0.008 90);
+    border-color: oklch(0.86 0.012 75);
+    color: oklch(0.20 0.012 60);
+  }
+  [data-theme="dark"] .price:not(.featured):hover { background: oklch(0.945 0.014 82); }
+  [data-theme="dark"] .price:not(.featured) .price-name { color: oklch(0.20 0.012 60); }
+  [data-theme="dark"] .price:not(.featured) .price-sub  { color: oklch(0.52 0.012 60); }
+  [data-theme="dark"] .price:not(.featured) .price-big  { color: oklch(0.20 0.012 60); }
+  [data-theme="dark"] .price:not(.featured) .price-credit { color: oklch(0.34 0.012 60); }
+  [data-theme="dark"] .price:not(.featured) .price-meta { color: oklch(0.52 0.012 60); border-color: oklch(0.86 0.012 75); }
+  [data-theme="dark"] .price:not(.featured) .price-meta b { color: oklch(0.20 0.012 60); }
+  [data-theme="dark"] .price:not(.featured) .strike { color: oklch(0.74 0.010 70); }
+  [data-theme="dark"] .price:not(.featured) .price-badge { color: oklch(0.58 0.14 35); }
+  [data-theme="dark"] .price:not(.featured) .btn { border-color: oklch(0.20 0.012 60) !important; color: oklch(0.20 0.012 60); }
+  [data-theme="dark"] .price { border-color: oklch(0.86 0.012 75); }
+  [data-theme="dark"] .price.featured {
+    background: oklch(0.158 0.012 57);
+    border-color: oklch(0.52 0.14 35 / 0.5);
+    color: var(--ink);
+  }
+  [data-theme="dark"] .price.featured .price-name,
+  [data-theme="dark"] .price.featured .price-sub { color: var(--ink); }
+  [data-theme="dark"] .price.featured .price-meta { color: var(--ink-2); border-color: var(--rule); }
+  [data-theme="dark"] .price.featured .price-meta b { color: var(--ink); }
+  [data-theme="dark"] .price.featured .price-credit { color: var(--ink-2); }
+  [data-theme="dark"] .price.featured .price-big { color: var(--ink); }
+  [data-theme="dark"] .price.featured .strike { color: var(--ink-3); }
+  [data-theme="dark"] .price.featured .price-badge { color: oklch(0.72 0.12 40); }
+  [data-theme="dark"] .testim { border-color: var(--rule); }
+
+  /* ─── Reflet — gloss reflection effect ─────────────────── */
+
+  /* position + overflow sur tous les éléments */
+  .card, .testim, .toc-item, .price-foot, details.q { overflow: hidden; position: relative; }
+  .price, .step { overflow: hidden; } /* déjà position:relative */
+  .btn, .toc-tab { overflow: hidden; position: relative; }
+
+  /* Highlight bord-haut — surfaces sombres uniquement */
+  .price.featured,
+  .btn:not(.btn-ghost),
+  .toc-tab.active {
+    box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.22);
+  }
+
+  /* ── SWEEP SHIMMER — fond CLAIR (crème/blanc) ──
+     Opacité 50% : seule valeur visible sur fond clair */
+  .card::after,
+  .price:not(.featured)::after,
+  .testim::after,
+  .toc-item::after,
+  .step::after,
+  .price-foot::after,
+  details.q::after,
+  .toc-tab:not(.active)::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(
+      108deg,
+      transparent 12%,
+      oklch(1 0.01 80 / 0.52) 50%,
+      transparent 88%
+    );
+    transform: translateX(-150%) skewX(-12deg);
+    transition: transform 0.70s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    pointer-events: none; z-index: 1;
+  }
+
+  /* ── SWEEP SHIMMER — fond SOMBRE (encre/accent) ── */
+  .price.featured::after,
+  .btn:not(.btn-ghost)::after,
+  .toc-tab.active::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(
+      108deg,
+      transparent 12%,
+      oklch(1 0 0 / 0.26) 50%,
+      transparent 88%
+    );
+    transform: translateX(-150%) skewX(-12deg);
+    transition: transform 0.70s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    pointer-events: none; z-index: 1;
+  }
+
+  /* Ghost button (fond transparent) */
+  .btn.btn-ghost::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(108deg, transparent 12%, oklch(0.20 0.01 60 / 0.18) 50%, transparent 88%);
+    transform: translateX(-150%) skewX(-12deg);
+    transition: transform 0.70s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    pointer-events: none; z-index: 1;
+  }
+
+  /* Déclenchement hover */
+  .card:hover::after, .price:hover::after, .testim:hover::after,
+  .toc-item:hover::after, .step:hover::after, .price-foot:hover::after,
+  details.q:hover::after, .btn:hover::after, .toc-tab:hover::after {
+    transform: translateX(150%) skewX(-12deg);
+  }
+
+  /* ─── Contours — border glow on hover ─────────────────── */
+
+  /* Extensions de transition pour border-color */
+  .card      { transition: border-color 0.22s ease, box-shadow 0.22s ease; }
+  .step      { transition: border-right-color 0.22s ease; }
+  .testim    { transition: background var(--dur-base) var(--ease-smooth), border-right-color 0.22s ease; }
+  .toc-item  { transition: background .15s ease, border-right-color 0.22s ease, border-bottom-color 0.22s ease; }
+  .price     { transition: background var(--dur-base) var(--ease-smooth), border-right-color 0.22s ease; }
+  .toc-tab   { transition: border-color 0.18s ease, background 0.15s ease, color 0.15s ease; }
+  .price-foot{ transition: border-color 0.22s ease, box-shadow 0.22s ease; }
+  details.q  { transition: border-bottom-color 0.22s ease; }
+  .btn       { transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out), background var(--dur-fast) var(--ease-smooth), border-color 0.18s ease; }
+
+  /* Cards à bordure complète — glow flou, pas de ring dur */
+  .card:hover {
+    border-color: oklch(0.58 0.14 35 / 0.50);
+    box-shadow: 0 0 18px 0 oklch(0.58 0.14 35 / 0.14), 0 1px 0 var(--rule), 0 30px 60px -40px oklch(0.20 0.01 60 / 0.18);
+  }
+  .price-foot:hover {
+    border-color: oklch(0.58 0.14 35 / 0.44);
+    box-shadow: 0 0 14px 0 oklch(0.58 0.14 35 / 0.11);
+  }
+
+  /* Éléments à bordure partielle (grille) — border-color seulement */
+  .toc-item:hover {
+    border-right-color: oklch(0.58 0.14 35 / 0.50);
+    border-bottom-color: oklch(0.58 0.14 35 / 0.38);
+  }
+  .testim:hover    { border-right-color: oklch(0.58 0.14 35 / 0.52); }
+  .step:hover      { border-right-color: oklch(0.58 0.14 35 / 0.45); }
+  .price:not(.featured):hover { border-right-color: oklch(0.58 0.14 35 / 0.48); }
+  details.q:hover  { border-bottom-color: oklch(0.58 0.14 35 / 0.45); }
+
+  /* Onglets de filtre — border-color seulement */
+  .toc-tab:not(.active):hover { border-color: oklch(0.58 0.14 35 / 0.55); }
+  .toc-tab.active:hover {
+    box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.22), 0 0 14px 0 oklch(0.58 0.14 35 / 0.18);
+  }
+
+  /* Featured price — glow flou externe */
+  .price.featured:hover {
+    box-shadow: 0 0 20px 0 oklch(0.58 0.14 35 / 0.22), inset 0 1px 0 oklch(1 0 0 / 0.20);
+  }
+
+  /* Boutons — glow flou */
+  .btn:not(.btn-ghost):not(.btn-accent):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px -8px oklch(0.20 0.01 60 / 0.28), 0 0 14px 0 oklch(0.20 0.01 60 / 0.14), inset 0 1px 0 oklch(1 0 0 / 0.22);
+  }
+  .btn.btn-accent:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px -8px oklch(0.58 0.14 35 / 0.30), 0 0 16px 0 oklch(0.58 0.14 35 / 0.20), inset 0 1px 0 oklch(1 0 0 / 0.22);
+  }
+  .btn.btn-ghost:hover { border-color: oklch(0.58 0.14 35 / 0.45); }
+
+  /* Dark-mode overrides */
+  [data-theme="dark"] .btn:not(.btn-ghost):not(.btn-accent):hover {
+    box-shadow: 0 6px 20px -6px rgba(0,0,0,0.5), 0 0 14px 0 oklch(1 0 0 / 0.08);
+  }
+  [data-theme="dark"] .card:hover {
+    border-color: oklch(0.74 0.010 70 / 0.55);
+    box-shadow: 0 0 18px 0 oklch(1 0 0 / 0.06), 0 1px 0 var(--rule), 0 30px 60px -40px rgba(0,0,0,0.35);
+  }
