@@ -624,12 +624,6 @@
   .set-section label{font-family:var(--sans);font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);display:block;margin-bottom:6px}
   .set-foot{margin-top:18px;display:flex;justify-content:flex-end;gap:10px}
 
-  .ref-card{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;padding:18px 22px}
-  .ref-link{font-family:var(--sans);font-size:15px;color:var(--ink);background:var(--bg-2);border:1px dashed var(--rule);padding:10px 14px;border-radius:8px;display:inline-flex;align-items:center;gap:14px}
-  .ref-link b{font-weight:500;color:var(--accent-ink)}
-  .ref-stats{margin-top:14px;display:flex;gap:24px;font-family:var(--sans);font-size:12px;color:var(--ink-3);letter-spacing:0.04em}
-  .ref-stats b{color:var(--ink);font-weight:500}
-
   .danger{border-color:var(--red);background:var(--red-bg)}
   .danger .label{color:var(--red)}
   .danger .desc{color:var(--ink-2)}
@@ -2108,23 +2102,6 @@
               </div>
               <div class="set-foot">
                 <button class="btn" onclick="updatePassword()">Changer le mot de passe</button>
-              </div>
-            </div>
-
-            <!-- invite -->
-            <div class="card set-section ref-card" id="s-invite" style="display:none">
-              <span class="label">03 · Parrainage</span>
-              <h2 style="margin-top:8px">Inviter un ami</h2>
-              <p class="desc">Pour chaque ami qui crée un compte, vous recevez <b style="color:var(--ink);font-weight:500">1 crédit chacun</b>.</p>
-              <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-                <div class="ref-link"><b>eadee.fr/ref/</b>ALEX2024</div>
-                <button class="btn btn-ghost" onclick="navigator.clipboard.writeText('https://eadee.fr/ref/'+((window.user&&window.user.referral_code)||'EADEE')).then(()=>toast('Lien copié !','success')).catch(()=>toast('Copie non supportée','error'))">Copier</button>
-                <button class="btn" onclick="if(navigator.share){navigator.share({title:'EADEE',text:'Crée ton business plan en 60s avec EADEE',url:'https://eadee.fr/ref/'+((window.user&&window.user.referral_code)||'EADEE')})}else{toast('Partage non supporté sur ce navigateur','error')}">Partager</button>
-              </div>
-              <div class="ref-stats">
-                <span><b>0</b> amis invités</span>
-                <span><b>0</b> crédits gagnés</span>
-                <span><b>∞</b> crédits possibles</span>
               </div>
             </div>
 
