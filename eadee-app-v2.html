@@ -811,6 +811,19 @@
     color: var(--ink);
     box-shadow: 0 0 12px 0 oklch(0.57 0.145 34 / 0.22);
   }
+
+  /* ── Loading overlay génération ── */
+  #planLoadingOverlay{position:fixed;inset:0;z-index:9999;background:var(--paper,#13141a);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s ease}
+  #planLoadingOverlay.plo-visible{opacity:1;pointer-events:all}
+  .plo-inner{display:flex;flex-direction:column;align-items:center;gap:28px;padding:40px}
+  .plo-logo{font-family:'Fraunces',Georgia,serif;font-size:32px;font-weight:400;letter-spacing:.08em;color:var(--text,#ecedf2);opacity:.9}
+  .plo-spinner{width:56px;height:56px;position:relative}
+  .plo-ring{width:56px;height:56px;border-radius:50%;border:2px solid rgba(228,221,214,.1);border-top-color:var(--acid,#6b8fef);animation:plo-spin 1s linear infinite}
+  @keyframes plo-spin{to{transform:rotate(360deg)}}
+  .plo-status{font-family:'Geist',sans-serif;font-size:14px;color:rgba(228,221,214,.55);text-align:center;max-width:280px;line-height:1.6;min-height:44px;transition:opacity .3s}
+  .plo-bar-wrap{width:240px;height:2px;background:rgba(228,221,214,.08);border-radius:2px;overflow:hidden}
+  .plo-bar{height:100%;width:0%;background:var(--acid,#6b8fef);border-radius:2px;transition:width 1.8s ease}
+  .plo-hint{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(228,221,214,.2)}
 </style>
 <style>
 /* ── Documents annexes ─────────────────────────────── */

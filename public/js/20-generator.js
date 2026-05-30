@@ -232,10 +232,11 @@ async function generateDashPlan() {
   const time    = document.getElementById('dashTime').value;
 
   // UI state
-  document.getElementById('dashGenBtn').disabled = true;
+  document.getElementById('dashGenBtn').disabled = false;
   document.getElementById('dashEmptyState').style.display = 'none';
   document.getElementById('dashResult').style.display = 'none';
   setPreviewState('C');
+  showLoadingOverlay();
 
   let si = 0;
   const statusInterval = setInterval(() => {
@@ -284,9 +285,10 @@ async function generateDashPlan() {
     const text = data.content.map(i => i.text || '').join('');
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error('Réponse invalide — réessaie');
-    const plan = JSON.parse(jsonMatch[0]);
+    const plan = normalizePlanV3(JSON.parse(jsonMatch[0]));
 
     clearInterval(statusInterval);
+    hideLoadingOverlay();
     fillPlan(plan);
 
     currentResult = { ...plan, idea, date: new Date(), id: Date.now() };
@@ -328,6 +330,7 @@ async function generateDashPlan() {
 
   } catch(err) {
     clearInterval(statusInterval);
+    hideLoadingOverlay();
     stopGenSectionsAnim();
     setPreviewState('A');
     console.error('Erreur génération:', err);
@@ -1371,6 +1374,263 @@ function initPlanNav() {
     });
   }, { root: planContent, threshold: 0.2 });
   document.querySelectorAll('.plan-block[id]').forEach(b => observer.observe(b));
+}
+
+// ── LOADING OVERLAY ───────────────────────────────────────────────
+
+const _loadingMsgs = [
+  'Analyse de ton idée en profondeur…',
+  'Recherche du marché et des chiffres réels…',
+  'Identification des concurrents…',
+  'Modélisation financière mois par mois…',
+  'Construction du plan d\'action 90 jours…',
+  'Calcul du score de viabilité…',
+  'Finalisation du business plan complet…',
+];
+
+function showLoadingOverlay() {
+  let el = document.getElementById('planLoadingOverlay');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'planLoadingOverlay';
+    el.innerHTML = `
+      <div class="plo-inner">
+        <div class="plo-logo">Eadee</div>
+        <div class="plo-spinner"><div class="plo-ring"></div></div>
+        <div class="plo-status" id="ploStatus">${_loadingMsgs[0]}</div>
+        <div class="plo-bar-wrap"><div class="plo-bar" id="ploBar"></div></div>
+        <div class="plo-hint">Génération en cours — 30 à 60 secondes</div>
+      </div>`;
+    document.body.appendChild(el);
+  }
+  el.classList.add('plo-visible');
+
+  // Rotation des messages
+  let i = 0;
+  el._interval = setInterval(() => {
+    i = (i + 1) % _loadingMsgs.length;
+    const s = document.getElementById('ploStatus');
+    const b = document.getElementById('ploBar');
+    if (s) s.textContent = _loadingMsgs[i];
+    if (b) b.style.width = Math.min(95, (i + 1) / _loadingMsgs.length * 100) + '%';
+  }, 1800);
+}
+
+function hideLoadingOverlay() {
+  const el = document.getElementById('planLoadingOverlay');
+  if (!el) return;
+  clearInterval(el._interval);
+  el.classList.remove('plo-visible');
+}
+
+// ── NORMALISATION PLAN v3.0 → fillPlan (clés plates) ─────────────
+
+function normalizePlanV3(plan) {
+  if (!plan) return plan;
+
+  // Méta
+  plan.nom_business = plan.nom_business || plan.meta?.nom_business || plan._nom_business;
+  plan.tagline      = plan.tagline      || plan.meta?.tagline;
+  plan.pitch_30s    = plan.pitch_30s    || plan.meta?.pitch_30s;
+  plan.score_viabilite = plan.score_viabilite || plan.scores?.score_viabilite?.note || plan._score_viabilite;
+
+  // resume_executif : objet → string
+  if (plan.resume_executif && typeof plan.resume_executif === 'object') {
+    const re = plan.resume_executif;
+    plan.resume_executif = re.synthese_projet || re.description || JSON.stringify(re);
+  }
+
+  // porteur_projet : objet → string
+  if (plan.porteur_projet && typeof plan.porteur_projet === 'object') {
+    const pp = plan.porteur_projet;
+    plan.porteur_projet = pp.profil?.presentation || pp.presentation || JSON.stringify(pp.profil || pp);
+  }
+
+  // presentation_projet : objet → string
+  if (plan.presentation_projet && typeof plan.presentation_projet === 'object') {
+    const pr = plan.presentation_projet;
+    plan.presentation_projet = [pr.origine_idee, pr.probleme_resolu, pr.vision_3_ans].filter(Boolean).join(' ');
+  }
+
+  // marche : objet → clés plates
+  if (plan.marche && typeof plan.marche === 'object') {
+    const m = plan.marche;
+    plan.marche_taille            = plan.marche_taille            || m.taille_france;
+    plan.marche_croissance        = plan.marche_croissance        || m.taux_croissance;
+    plan.marche_part_cible        = plan.marche_part_cible        || m.part_marche_visee_an1;
+    plan.marche_clients_potentiels= plan.marche_clients_potentiels|| m.zone_chalandise;
+    plan.marche_analyse           = plan.marche_analyse           || m.analyse_sectorielle;
+  }
+
+  // concurrents : normaliser les champs
+  if (Array.isArray(plan.concurrents)) {
+    plan.concurrents = plan.concurrents.map(c => ({
+      ...c,
+      menace:      c.menace || c.niveau_menace,
+      prix_moyen:  c.prix_moyen || c.prix_indicatif,
+      description: c.description || [c.points_forts, c.points_faibles].filter(Boolean).join(' — '),
+    }));
+  }
+
+  // proposition_valeur : objet → string
+  if (plan.proposition_valeur && typeof plan.proposition_valeur === 'object') {
+    plan.proposition_valeur = plan.proposition_valeur.usp || JSON.stringify(plan.proposition_valeur);
+  }
+
+  // modele_economique : objet → string + offres
+  if (plan.modele_economique && typeof plan.modele_economique === 'object') {
+    const me = plan.modele_economique;
+    plan.offres = plan.offres || (me.offres || []).map(o => ({ nom: o.nom, description: o.description, prix: o.prix_ht || o.prix }));
+    plan.modele_economique = me.description || me.type || '';
+  }
+
+  // strategie_commerciale : objet → string
+  if (plan.strategie_commerciale && typeof plan.strategie_commerciale === 'object') {
+    const sc = plan.strategie_commerciale;
+    plan.strategie_commerciale = [sc.tunnel_vente, sc.strategie_prix].filter(Boolean).join(' — ');
+  }
+
+  // acquisition : {canaux:[]} → []
+  if (plan.acquisition && !Array.isArray(plan.acquisition) && plan.acquisition.canaux) {
+    plan.acquisition = plan.acquisition.canaux.map(c => ({ canal: c.canal, description: c.description, cac: c.cac_estime || c.cac }));
+  }
+
+  // aspects_juridiques : objet → string
+  if (plan.aspects_juridiques && typeof plan.aspects_juridiques === 'object') {
+    const aj = plan.aspects_juridiques;
+    plan.demarches_admin = plan.demarches_admin || aj.etapes_creation?.map(e => ({ etape: e.etape, delai: e.delai, cout: e.cout, lien: e.organisme }));
+    plan.aspects_juridiques = [
+      aj.statut_recommande && `Statut : ${aj.statut_recommande}`,
+      aj.justification,
+      aj.regime_fiscal && `Fiscal : ${aj.regime_fiscal}`,
+      aj.regime_social && `Social : ${aj.regime_social}`,
+    ].filter(Boolean).join('. ');
+  }
+
+  // demarches_admin fallback
+  plan.demarches_admin = plan.demarches_admin || plan.demarches_administratives;
+
+  // aspects_organisationnels : objet → string
+  if (plan.aspects_organisationnels && typeof plan.aspects_organisationnels === 'object') {
+    const ao = plan.aspects_organisationnels;
+    plan.outils = plan.outils || (ao.outils || []).map(o => ({ nom: o.outil, usage: o.usage, prix: o.cout_mensuel }));
+    plan.aspects_organisationnels = [
+      ao.structure_equipe && `Structure : ${ao.structure_equipe}`,
+      ao.locaux?.type && `Locaux : ${ao.locaux.type}`,
+    ].filter(Boolean).join('. ');
+  }
+
+  // finances_detail : objet → [{label, valeur}]
+  if (plan.finances_detail && !Array.isArray(plan.finances_detail)) {
+    const fd = plan.finances_detail;
+    plan.finances_detail = [
+      { label: 'Charges fixes/mois',   valeur: fd.total_charges_fixes },
+      { label: 'Taux marge brute',      valeur: fd.taux_marge_brute },
+      { label: 'Taux marge nette An 1', valeur: fd.taux_marge_nette_an1 },
+      { label: 'Taux marge nette An 3', valeur: fd.taux_marge_nette_an3 },
+    ].filter(f => f.valeur);
+  }
+
+  // scenarios
+  plan.scenarios = plan.scenarios || plan.projections_revenus?.scenarios;
+
+  // tresorerie
+  if (plan.tresorerie && typeof plan.tresorerie === 'object') {
+    const t = plan.tresorerie;
+    plan.tresorerie_detail    = plan.tresorerie_detail    || (t.recommandations || []).join(' ');
+    plan.tresorerie_mensuelle = plan.tresorerie_mensuelle || t.tableau_12_mois;
+    plan.tresorerie_soldes    = plan.tresorerie_soldes    || (t.tableau_12_mois || []).map(m => {
+      const v = (m.solde_cumule || '').replace(/[^0-9.\-]/g, '');
+      return parseFloat(v) || 0;
+    });
+  }
+
+  // rev_mx : jalons
+  if (plan.projections_revenus?.jalons) {
+    const jalons = plan.projections_revenus.jalons;
+    const getJ = (mois) => jalons.find(j => j.mois === mois)?.ca || '—';
+    plan.rev_m1  = plan.rev_m1  || getJ(1);
+    plan.rev_m3  = plan.rev_m3  || getJ(3);
+    plan.rev_m6  = plan.rev_m6  || getJ(6);
+    plan.rev_m12 = plan.rev_m12 || getJ(12);
+    plan.rev_m18 = plan.rev_m18 || getJ(18) || getJ(12);
+    plan.rev_m24 = plan.rev_m24 || getJ(24);
+    plan.rev_m36 = plan.rev_m36 || getJ(36);
+    plan.rev_mensuel = plan.rev_mensuel || (plan.projections_revenus.tableau_mensuel_an1 || []).map(m => parseFloat((m.ca_ht || '0').replace(/[^0-9.\-]/g, '')) || 0);
+  }
+
+  // investissements : {postes:[]} → [{label, montant}]
+  if (plan.investissements && !Array.isArray(plan.investissements) && plan.investissements.postes) {
+    const postes = plan.investissements.postes.map(p => ({ label: p.poste, montant: p.montant }));
+    if (plan.investissements.total) postes.push({ label: 'TOTAL INVESTISSEMENTS', montant: plan.investissements.total, total: true });
+    plan.investissements = postes;
+  }
+
+  // bilan_previsionnel : objet → string
+  if (plan.bilan_previsionnel && typeof plan.bilan_previsionnel === 'object') {
+    const bp = plan.bilan_previsionnel;
+    const a1 = bp.annee_1 || {};
+    plan.bilan_previsionnel = `An 1 — Actif : ${a1.actif?.total_actif || '—'} | Passif : ${a1.passif?.total_passif || '—'} | Autonomie financière : ${a1.ratios?.autonomie_financiere || '—'}. ${a1.ratios?.interpretation || ''}`;
+  }
+
+  // seuil_rentabilite : normaliser les sous-clés
+  if (plan.seuil_rentabilite && typeof plan.seuil_rentabilite === 'object') {
+    const sr = plan.seuil_rentabilite;
+    plan.seuil_rentabilite = {
+      ...sr,
+      charges_fixes_mensuelles: sr.charges_fixes_mensuelles || (Array.isArray(plan.finances_detail) && plan.finances_detail[0]?.valeur),
+      taux_marge_sur_cv:        sr.taux_marge_sur_cv        || sr.marge_securite_an1,
+      point_mort_ca:            sr.point_mort_ca            || sr.ca_seuil_mensuel,
+      break_even_mois:          sr.break_even_mois          || sr.mois_atteinte_prevu,
+      detail:                   sr.detail                   || sr.interpretation_bancaire,
+    };
+  }
+
+  // aides_subventions : {eligibles:[]} → []
+  if (plan.aides_subventions && !Array.isArray(plan.aides_subventions) && plan.aides_subventions.eligibles) {
+    plan.aides_subventions = plan.aides_subventions.eligibles.map(a => ({
+      nom: a.aide, montant: a.montant,
+      conditions: Array.isArray(a.conditions) ? a.conditions.join(', ') : a.conditions,
+      lien: a.demarche, applicable: true,
+    }));
+  }
+
+  // annexes_checklist : objet catégories → []
+  if (plan.annexes_checklist && !Array.isArray(plan.annexes_checklist)) {
+    const items = [];
+    Object.values(plan.annexes_checklist).forEach(cat => {
+      if (cat && typeof cat === 'object' && Array.isArray(cat.items)) {
+        cat.items.forEach(item => items.push(typeof item === 'string' ? item : item.document));
+      }
+    });
+    plan.annexes_checklist = items.filter(Boolean);
+  }
+
+  // kpis : objet → []
+  if (plan.kpis && !Array.isArray(plan.kpis)) {
+    plan.kpis = [
+      ...(plan.kpis.operationnels || []).map(k => ({ nom: k.kpi, cible: k.cible_m12 || k.cible_m3, frequence: k.comment_mesurer })),
+      ...(plan.kpis.financiers_bancaires || []).map(k => ({ nom: k.kpi, cible: k.valeur || k.cible, frequence: k.interpretation_bancaire })),
+    ];
+  }
+
+  // emails : templates_communication → clés plates
+  if (plan.templates_communication) {
+    const tc = plan.templates_communication;
+    plan.email_fournisseur = plan.email_fournisseur || tc.email_fournisseur;
+    plan.email_prospection = plan.email_prospection || tc.email_prospection_client;
+    plan.email_relance     = plan.email_relance     || tc.email_relance;
+  }
+
+  // actions 90j : {phases:[]} → []
+  if (!plan.actions && plan.plan_actions_90j?.phases) {
+    plan.actions = plan.plan_actions_90j.phases.map(p => ({
+      phase: p.semaine, titre: p.titre,
+      detail: (p.actions || []).join(', ') || p.livrable || '',
+    }));
+  }
+
+  return plan;
 }
 
 // ─────────────────────────────────────────────────────────────────
