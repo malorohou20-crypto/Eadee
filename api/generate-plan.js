@@ -11,7 +11,7 @@ import { fetchINSEEData } from './lib/insee.js';
 import { getKnowledgeContext } from './lib/knowledge.js';
 
 const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
-const MODEL = 'claude-sonnet-4-20250514';
+const MODEL = 'claude-sonnet-4-5-20241022';
 
 // ── SYSTEM PROMPT ─────────────────────────────────────────────────────
 
@@ -973,8 +973,13 @@ export default async function handler(req, res) {
 
     console.log(`[EADEE v3.0] Début — ${(formData.nom_projet || formData.description_projet).substring(0, 60)} [${isDiscovery ? 'DÉCOUVERTE' : 'COMPLET'}]`);
 
-    // ── Données INSEE ────────────────────────────────────────────────
-    const inseeData = await fetchINSEEData(formData.secteur, formData.zone_geo);
+    // ── Données INSEE (non bloquant) ─────────────────────────────────
+    let inseeData = null;
+    try {
+      inseeData = await fetchINSEEData(formData.secteur, formData.zone_geo);
+    } catch (inseeErr) {
+      console.warn(`[EADEE v3.0] INSEE failed (non-fatal): ${inseeErr.message}`);
+    }
     console.log(`[EADEE v3.0] INSEE: ${!!inseeData?.city} — ${Date.now() - startTime}ms`);
 
     formData._verifiedData = {
@@ -1010,21 +1015,37 @@ JSON uniquement, sans markdown.`;
       return res.status(200).json({ ...discData, content: [{ type: 'text', text: JSON.stringify(discPlan) }] });
     }
 
-    // ── GÉNÉRATION COMPLÈTE — Appel unique avec web search ───────────
+    // ── GÉNÉRATION COMPLÈTE — Appel Anthropic (web_search optionnel) ─
     const userPrompt = buildUserPrompt(formData);
 
-    console.log(`[EADEE v3.0] Appel Anthropic + web_search...`);
-
-    const resp = await callAnthropicAPI({
-      model: MODEL,
-      max_tokens: 16000,
-      temperature: 0.3,
-      tools: [{ type: 'web_search_20250305', name: 'web_search' }],
-      system: EADEE_SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: userPrompt }],
-    }, 'Main', AbortSignal.timeout(280000), {
-      'anthropic-beta': 'web-search-2025-03-05',
-    });
+    let resp;
+    // Essai avec web_search (beta) — fallback sans outils si 400
+    try {
+      console.log(`[EADEE v3.0] Appel Anthropic + web_search...`);
+      resp = await callAnthropicAPI({
+        model: MODEL,
+        max_tokens: 16000,
+        temperature: 0.3,
+        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+        system: EADEE_SYSTEM_PROMPT,
+        messages: [{ role: 'user', content: userPrompt }],
+      }, 'Main', AbortSignal.timeout(280000), {
+        'anthropic-beta': 'web-search-2025-03-05',
+      });
+    } catch (wsErr) {
+      if (wsErr.status === 400) {
+        console.warn(`[EADEE v3.0] web_search indisponible (${wsErr.message}) — fallback sans outils`);
+        resp = await callAnthropicAPI({
+          model: MODEL,
+          max_tokens: 16000,
+          temperature: 0.3,
+          system: EADEE_SYSTEM_PROMPT,
+          messages: [{ role: 'user', content: userPrompt }],
+        }, 'Main-fallback', AbortSignal.timeout(280000));
+      } else {
+        throw wsErr;
+      }
+    }
 
     const apiData    = await resp.json();
     const content    = apiData.content || [];
