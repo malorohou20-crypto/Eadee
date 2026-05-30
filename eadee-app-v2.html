@@ -2528,116 +2528,72 @@
 
     window._renderV2PlanResult = function(plan, container) {
       if (!plan || !container) return;
-      const score = (plan.scores && plan.scores.score_viabilite && plan.scores.score_viabilite.note) || plan.score_viabilite || '—';
-      const scoreColor = score >= 75 ? 'var(--green)' : score >= 50 ? 'var(--accent)' : 'var(--red)';
-      const esc = function(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
-      // Résoudre les marqueurs de fiabilité {{V:val|src}} → val
-      const resolveMarkers = function(s) { return String(s||'').replace(/\{\{[VEH]:(.*?)\|.*?\}\}/g,'$1'); };
-      // Nom du business (plusieurs variantes possibles selon version du prompt)
-      const planName = plan.nom_business || plan.nom_entreprise || plan.name || 'Business Plan';
 
-      // Concurrents
-      const concs = (plan.concurrents || []).map(c =>
-        `<div style="padding:14px 0;border-bottom:1px solid var(--rule)">
-          <b style="font-size:14.5px">${esc(c.nom)}</b>
-          <span style="float:right;font-family:var(--sans);font-size:11px;color:var(--ink-3);text-transform:uppercase">${esc(c.menace)}</span>
-          <p style="color:var(--ink-2);font-size:13.5px;margin:6px 0 0;line-height:1.5">${esc(c.description)}</p>
-        </div>`).join('');
+      // ── Rendu complet via buildAllSections (toutes les 20+ sections) ──
+      if (typeof buildAllSections === 'function') {
+        container.innerHTML = buildAllSections(plan);
 
-      // Actions 90 jours
-      const actions = (plan.actions || []).map(a =>
-        `<div style="display:grid;grid-template-columns:80px 1fr;gap:14px;padding:12px 0;border-bottom:1px solid var(--rule);align-items:start">
-          <span style="font-family:var(--sans);font-size:10.5px;color:var(--ink-3);letter-spacing:0.08em;padding-top:2px">${esc(a.phase)}</span>
-          <div><b style="font-size:14px">${esc(a.titre)}</b><p style="color:var(--ink-2);font-size:13px;margin:4px 0 0;line-height:1.45">${esc(a.detail)}</p></div>
-        </div>`).join('');
+        // Hero KPIs
+        if (typeof fillHeroKpis === 'function') fillHeroKpis(plan);
 
-      // Projections financières
-      const revs = [
-        ['M+1', plan.rev_m1], ['M+3', plan.rev_m3], ['M+6', plan.rev_m6],
-        ['An 1', plan.rev_m12], ['An 2', plan.rev_m24], ['An 3', plan.rev_m36]
-      ].filter(([,v]) => v).map(([k,v]) =>
-        `<div style="text-align:center;padding:16px 12px;border:1px solid var(--rule);border-radius:8px;background:var(--bg)">
-          <div style="font-family:var(--sans);font-size:10px;letter-spacing:0.12em;color:var(--ink-3);text-transform:uppercase;margin-bottom:6px">${k}</div>
-          <div style="font-family:var(--serif);font-size:22px;letter-spacing:-0.02em;color:var(--ink)">${esc(resolveMarkers(v))}</div>
-        </div>`).join('');
+        // Charts après injection DOM
+        setTimeout(function() {
+          var crescLabels = ['M1','M3','M6','An 1','1.5 an','An 2','An 3'];
+          var crescVals = ['rev_m1','rev_m3','rev_m6','rev_m12','rev_m18','rev_m24','rev_m36'].map(function(k) {
+            return typeof parseAmount === 'function' ? parseAmount(plan[k]) : parseFloat(String(plan[k]||'0').replace(/[^0-9.]/g,'')) || 0;
+          });
+          if (typeof drawCrescendoChart === 'function') drawCrescendoChart('crescendoChart', crescLabels, crescVals);
+          if (typeof drawRevenueChart === 'function') drawRevenueChart(plan.rev_mensuel || []);
+          if ((plan.concurrents||[]).length && typeof drawBarChart === 'function') {
+            drawBarChart('concChart', plan.concurrents.map(function(c){return c.nom.split(' ')[0];}),
+              plan.concurrents.map(function(c){return c.menace==='haute'?85:c.menace==='moyenne'?55:25;}), 'Menace');
+          }
+          var nonTotal = (plan.investissements||[]).filter(function(i){return !i.total;});
+          if (nonTotal.length && typeof drawDonutChart === 'function') {
+            drawDonutChart('investDonut',
+              nonTotal.map(function(i){return (i.label||'').replace(/^\d+\.\s*/,'').substring(0,20);}),
+              nonTotal.map(function(i){return (typeof parseAmount==='function'?parseAmount(i.montant):0)||1;}),
+              ['#c84b2f','#d4845a','#34d399','#fbbf24','#ef4444','#d4845a']);
+          }
+          if ((plan.tresorerie_soldes||[]).length && typeof drawCrescendoChart === 'function') {
+            drawCrescendoChart('tresoChart',
+              ['M1','M2','M3','M4','M5','M6','M7','M8','M9','M10','M11','M12'].slice(0, plan.tresorerie_soldes.length),
+              plan.tresorerie_soldes);
+          }
+        }, 250);
 
-      container.innerHTML = `
-        <div style="max-width:920px;margin:0 auto;padding:0 40px 80px">
-          <!-- En-tête plan -->
-          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-bottom:36px">
-            <div>
-              <span style="font-family:var(--sans);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--green);display:block;margin-bottom:8px">Plan généré ✓</span>
-              <h2 style="font-family:var(--serif);font-size:48px;line-height:1;letter-spacing:-0.022em;margin:0;font-weight:400">${esc(planName)}</h2>
-              <p style="font-family:var(--serif);font-style:italic;color:var(--ink-2);font-size:18px;margin:8px 0 0">${esc(plan.tagline || '')}</p>
-            </div>
-            <div style="text-align:center;flex:none;padding:20px 24px;background:var(--paper);border:1px solid var(--rule);border-radius:12px">
-              <div style="font-family:var(--sans);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px">Score viabilité</div>
-              <div style="font-family:var(--serif);font-size:64px;line-height:0.9;letter-spacing:-0.03em;color:${scoreColor}">${score}</div>
-              <div style="font-family:var(--sans);font-size:11px;color:var(--ink-3);margin-top:4px">/100</div>
-            </div>
-          </div>
+        // Post-render hooks
+        if (typeof renderTimeline90j === 'function') renderTimeline90j(plan.actions || [], 'dActions90j');
+        if (typeof fillDocumentsAnnexes === 'function') fillDocumentsAnnexes(plan);
+        if (typeof fillBancabilite === 'function') fillBancabilite(plan);
+        if (typeof applyReliabilityIndicators === 'function') applyReliabilityIndicators(container);
+        if (typeof animatePlanSections === 'function') setTimeout(animatePlanSections, 100);
+        if (typeof window.updateUsage === 'function') window.updateUsage();
+        return;
+      }
 
-          <!-- Pitch -->
-          ${plan.pitch_30s ? `<div style="padding:20px 24px;background:var(--accent-bg);border:1px solid oklch(0.52 0.12 35);border-radius:10px;margin-bottom:28px">
-            <div style="font-family:var(--sans);font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent-ink);margin-bottom:8px">Pitch 30s</div>
-            <p style="font-size:15px;color:var(--ink);margin:0;line-height:1.6">${esc(plan.pitch_30s)}</p>
-          </div>` : ''}
-
-          <!-- Résumé exécutif -->
-          ${plan.resume_executif ? `<div style="padding:24px;background:var(--paper);border:1px solid var(--rule);border-radius:12px;margin-bottom:28px">
-            <div style="font-family:var(--sans);font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:14px">Résumé exécutif</div>
-            <p style="font-size:14.5px;color:var(--ink-2);margin:0;line-height:1.65">${esc(plan.resume_executif)}</p>
-          </div>` : ''}
-
-          <!-- Projections financières -->
-          ${revs ? `<div style="padding:24px;background:var(--paper);border:1px solid var(--rule);border-radius:12px;margin-bottom:28px">
-            <div style="font-family:var(--sans);font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:14px">Projections de revenus</div>
-            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px">${revs}</div>
-          </div>` : ''}
-
-          <!-- Concurrents -->
-          ${concs ? `<div style="padding:24px;background:var(--paper);border:1px solid var(--rule);border-radius:12px;margin-bottom:28px">
-            <div style="font-family:var(--sans);font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:4px">Analyse concurrentielle</div>
-            ${concs}
-          </div>` : ''}
-
-          <!-- Plan 90 jours -->
-          ${actions ? `<div style="padding:24px;background:var(--paper);border:1px solid var(--rule);border-radius:12px;margin-bottom:28px">
-            <div style="font-family:var(--sans);font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:4px">Plan d'action 90 jours</div>
-            ${actions}
-          </div>` : ''}
-
-          <!-- Risques -->
-          ${(plan.risques||[]).length ? `<div style="padding:24px;background:var(--paper);border:1px solid var(--rule);border-radius:12px;margin-bottom:28px">
-            <div style="font-family:var(--sans);font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:14px">Risques &amp; mitigation</div>
-            ${(plan.risques||[]).map(r => {
-              const c = r.niveau==='élevé'?'var(--red)':r.niveau==='moyen'?'var(--accent)':'var(--green)';
-              return `<div style="display:grid;grid-template-columns:1fr auto;gap:12px;padding:12px 0;border-bottom:1px solid var(--rule)">
-                <div><b style="font-size:14px">${esc(r.titre)}</b><p style="color:var(--ink-2);font-size:13px;margin:4px 0 0">${esc(r.solution)}</p></div>
-                <span style="font-family:var(--sans);font-size:10px;text-transform:uppercase;color:${c};align-self:center">${esc(r.niveau)}</span>
-              </div>`;
-            }).join('')}
-          </div>` : ''}
-
-          <!-- Actions -->
-          <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap">
-            <button onclick="(function(){
-              var r=document.getElementById('dashPlanResult');
-              if(r)r.style.display='none';
-              var f=document.querySelector('.gen-grid');
-              if(f)f.style.display='';
-              var b=document.querySelector('.gen-banner');
-              if(b)b.style.display='';
-              var h=document.querySelector('.page-head');
-              if(h)h.style.display='';
-            })()" class="btn btn-ghost">← Nouveau plan</button>
-            <button onclick="window.copyPlan&&window.copyPlan()" class="btn btn-ghost">Copier le texte</button>
-            <button onclick="window.go&&window.go('expert')" class="btn btn-accent">Affiner avec l'Expert →</button>
-          </div>
-        </div>
-      `;
-
-      // Mettre à jour les crédits affichés
+      // ── Fallback simplifié si buildAllSections non dispo ──
+      var score = (plan.scores && plan.scores.score_viabilite && plan.scores.score_viabilite.note) || plan.score_viabilite || '—';
+      var scoreColor = score >= 75 ? 'var(--green)' : score >= 50 ? 'var(--accent)' : 'var(--red)';
+      var esc = function(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+      var resolveMarkers = function(s) { return String(s||'').replace(/\{\{[VEH]:(.*?)\|.*?\}\}/g,'$1'); };
+      var planName = plan.nom_business || plan.nom_entreprise || plan.name || 'Business Plan';
+      var concs = (plan.concurrents||[]).map(function(c) {
+        return '<div style="padding:14px 0;border-bottom:1px solid var(--rule)"><b>'+esc(c.nom)+'</b><span style="float:right;font-size:11px;color:var(--ink-3)">'+esc(c.menace)+'</span><p style="color:var(--ink-2);font-size:13.5px;margin:6px 0 0">'+esc(c.description)+'</p></div>';
+      }).join('');
+      var revs = [['M+1',plan.rev_m1],['M+3',plan.rev_m3],['M+6',plan.rev_m6],['An 1',plan.rev_m12],['An 2',plan.rev_m24],['An 3',plan.rev_m36]]
+        .filter(function(x){return x[1];}).map(function(x) {
+          return '<div style="text-align:center;padding:16px 12px;border:1px solid var(--rule);border-radius:8px;background:var(--bg)"><div style="font-size:10px;color:var(--ink-3);text-transform:uppercase;margin-bottom:6px">'+x[0]+'</div><div style="font-size:22px;color:var(--ink)">'+esc(resolveMarkers(x[1]))+'</div></div>';
+        }).join('');
+      container.innerHTML = '<div style="max-width:920px;margin:0 auto;padding:0 40px 80px">'
+        +'<div style="margin-bottom:36px"><span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--green)">Plan généré ✓</span>'
+        +'<h2 style="font-size:48px;font-family:var(--serif);font-weight:400;margin:8px 0 0">'+esc(planName)+'</h2>'
+        +(plan.tagline?'<p style="font-style:italic;color:var(--ink-2);font-size:18px;margin:8px 0 0">'+esc(plan.tagline)+'</p>':'')
+        +'<div style="margin-top:16px;font-size:32px;color:'+scoreColor+'">'+score+'/100</div></div>'
+        +(plan.resume_executif?'<p style="font-size:14.5px;color:var(--ink-2);line-height:1.65;margin-bottom:28px">'+esc(plan.resume_executif)+'</p>':'')
+        +(revs?'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;margin-bottom:28px">'+revs+'</div>':'')
+        +(concs?'<div style="margin-bottom:28px">'+concs+'</div>':'')
+        +'</div>';
       if (typeof window.updateUsage === 'function') window.updateUsage();
     };
   })();
