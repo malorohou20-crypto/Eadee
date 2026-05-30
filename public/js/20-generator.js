@@ -232,7 +232,7 @@ async function generateDashPlan() {
   const time    = document.getElementById('dashTime').value;
 
   // UI state
-  document.getElementById('dashGenBtn').disabled = false;
+  document.getElementById('dashGenBtn').disabled = true;
   document.getElementById('dashEmptyState').style.display = 'none';
   document.getElementById('dashResult').style.display = 'none';
   setPreviewState('C');
@@ -1588,11 +1588,52 @@ function normalizePlanV3(plan) {
 
   // aides_subventions : {eligibles:[]} → []
   if (plan.aides_subventions && !Array.isArray(plan.aides_subventions) && plan.aides_subventions.eligibles) {
-    plan.aides_subventions = plan.aides_subventions.eligibles.map(a => ({
-      nom: a.aide, montant: a.montant,
-      conditions: Array.isArray(a.conditions) ? a.conditions.join(', ') : a.conditions,
-      lien: a.demarche, applicable: true,
+    plan.aides_subventions = plan.aides_subventions.eligibles.map(a => {
+      // Extraire un domaine du texte demarche si possible
+      const urlMatch = (a.demarche || '').match(/([a-z0-9-]+\.[a-z]{2,}(?:\.[a-z]{2,})?)/i);
+      return {
+        nom: a.aide, montant: a.montant, priorite: a.priorite,
+        conditions: Array.isArray(a.conditions) ? a.conditions.join(', ') : a.conditions,
+        lien: urlMatch ? urlMatch[1] : null, applicable: true,
+      };
+    });
+  }
+
+  // risques : normaliser les champs (titre, niveau, solution)
+  if (Array.isArray(plan.risques)) {
+    plan.risques = plan.risques.map(r => ({
+      ...r,
+      titre:              r.titre              || r.risque,
+      niveau:             r.niveau             || r.impact          || r.probabilite,
+      solution:           r.solution           || r.solution_curative,
+      solution_preventive:r.solution_preventive,
+      signal_alarme:      r.signal_alarme,
     }));
+  }
+
+  // persona : normaliser les champs
+  if (plan.persona && typeof plan.persona === 'object') {
+    const p = plan.persona;
+    plan.persona = {
+      ...p,
+      nom:          p.nom          || p.nom_fictif,
+      douleurs:     p.douleurs     || p.probleme_principal || (Array.isArray(p.freins_achat) ? p.freins_achat.join(', ') : p.freins_achat) || '',
+      motivations:  typeof p.motivations === 'string' ? p.motivations : (Array.isArray(p.motivations) ? p.motivations.join(', ') : ''),
+      ou_le_trouver:p.ou_le_trouver|| p.canal_prefere     || '',
+    };
+  }
+
+  // demarches_admin : normaliser detail + lien
+  if (Array.isArray(plan.demarches_admin)) {
+    plan.demarches_admin = plan.demarches_admin.map(d => {
+      const urlMatch = (d.lien || d.organisme || '').match(/([a-z0-9-]+\.[a-z]{2,}(?:\.[a-z]{2,})?)/i);
+      return {
+        ...d,
+        delai:  d.delai  || d.delai_reel || '',
+        detail: d.detail || d.organisme  || '',
+        lien:   urlMatch ? urlMatch[1] : (d.lien || ''),
+      };
+    });
   }
 
   // annexes_checklist : objet catégories → []
