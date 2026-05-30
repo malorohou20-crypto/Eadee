@@ -289,12 +289,12 @@ async function generateDashPlan() {
 
     clearInterval(statusInterval);
     hideLoadingOverlay();
-    fillPlan(plan);
 
+    // ── 1. SAUVEGARDE D'ABORD (jamais bloquée par une erreur de rendu) ──
     currentResult = { ...plan, idea, date: new Date(), id: Date.now() };
     window.currentResult = currentResult; // expose pour _renderV2PlanResult
     plansHistory.unshift(currentResult);
-    localStorage.setItem('eadee_history', JSON.stringify(plansHistory));
+    try { localStorage.setItem('eadee_history', JSON.stringify(plansHistory)); } catch(e) { console.warn('localStorage save:', e); }
     userCredits = Math.max(0, userCredits - 1);
     updateUsage();
 
@@ -320,14 +320,19 @@ async function generateDashPlan() {
       if (userId) supabaseClient.from('profiles').update({ credits: userCredits }).eq('id', userId).then(() => {});
     }
 
+    // ── 2. RENDU (non-bloquant — une erreur ici ne perd plus le plan) ──
     stopGenSectionsAnim();
     setPreviewState(null);
     document.getElementById('dashGenerating').style.display = 'none';
     document.getElementById('dashResult').style.display = 'flex';
     toast('Business plan complet généré ✓', 'success');
 
+    // Le rendu réel se fait via _renderV2PlanResult (MutationObserver sur dashResult).
+    // fillPlan est un fallback legacy — non-bloquant.
+    try { if (typeof fillPlan === 'function') fillPlan(plan); } catch(e) { console.warn('fillPlan (non-fatal):', e); }
+
     // Animation fade-in séquentielle des sections
-    setTimeout(() => animatePlanSections(), 100);
+    try { setTimeout(() => animatePlanSections(), 100); } catch(e) {}
 
   } catch(err) {
     clearInterval(statusInterval);
