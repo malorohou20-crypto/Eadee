@@ -5,7 +5,7 @@
   ],
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/app", "destination": "/eadee-app-v2.html" },
+    { "source": "/app", "destination": "/eadee-app-v2" },
     { "source": "/((?!eadee-app-v2\\.html$|app$|blog(?:/.*)?$|robots\\.txt|sitemap\\.xml|favicon|apple-touch-icon).*)", "destination": "/index.html" }
   ],
   "functions": {
