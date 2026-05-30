@@ -1,5 +1,9 @@
 {
   "cleanUrls": true,
+  "redirects": [
+    { "source": "/eadee-app-v2", "destination": "/app", "permanent": true },
+    { "source": "/eadee-app-v2.html", "destination": "/app", "permanent": true }
+  ],
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/app", "destination": "/eadee-app-v2.html" },
