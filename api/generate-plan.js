@@ -11,7 +11,7 @@ import { fetchINSEEData } from './lib/insee.js';
 import { getKnowledgeContext } from './lib/knowledge.js';
 
 const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
-const MODEL = 'claude-sonnet-4-5-20241022';
+const MODEL = 'claude-sonnet-4-6';
 
 // ── SYSTEM PROMPT ─────────────────────────────────────────────────────
 
