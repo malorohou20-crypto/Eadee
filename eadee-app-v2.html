@@ -2545,7 +2545,7 @@
           if (typeof drawCrescendoChart === 'function') drawCrescendoChart('crescendoChart', crescLabels, crescVals);
           if (typeof drawRevenueChart === 'function') drawRevenueChart(plan.rev_mensuel || []);
           if ((plan.concurrents||[]).length && typeof drawBarChart === 'function') {
-            drawBarChart('concChart', plan.concurrents.map(function(c){return c.nom.split(' ')[0];}),
+            drawBarChart('concChart', plan.concurrents.map(function(c){return String(c.nom||'?').split(' ')[0];}),
               plan.concurrents.map(function(c){return c.menace==='haute'?85:c.menace==='moyenne'?55:25;}), 'Menace');
           }
           var nonTotal = (plan.investissements||[]).filter(function(i){return !i.total;});

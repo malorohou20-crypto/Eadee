@@ -1732,10 +1732,10 @@ function fillPlan(plan) {
       drawCrescendoChart('crescendoChart', crescLabels, crescVals);
       drawRevenueChart(plan.rev_mensuel || []);
       if (plan.concurrents?.length) {
-        drawBarChart('concChart', plan.concurrents.map(c => c.nom.split(' ')[0]), plan.concurrents.map(c => c.menace==='haute'?85:c.menace==='moyenne'?55:25), 'Menace');
+        drawBarChart('concChart', plan.concurrents.map(c => String(c.nom||'?').split(' ')[0]), plan.concurrents.map(c => c.menace==='haute'?85:c.menace==='moyenne'?55:25), 'Menace');
       }
       const nonTotal = (plan.investissements||[]).filter(i=>!i.total);
-      if (nonTotal.length) drawDonutChart('investDonut', nonTotal.map(i=>i.label.replace(/^\d+\.\s*/,'').substring(0,20)), nonTotal.map(i=>parseAmount(i.montant)||1), ['#c84b2f','#d4845a','#34d399','#fbbf24','#ef4444','#d4845a']);
+      if (nonTotal.length) drawDonutChart('investDonut', nonTotal.map(i=>String(i.label||'').replace(/^\d+\.\s*/,'').substring(0,20)), nonTotal.map(i=>parseAmount(i.montant)||1), ['#c84b2f','#d4845a','#34d399','#fbbf24','#ef4444','#d4845a']);
       if (plan.tresorerie_soldes?.length) drawCrescendoChart('tresoChart', ['M1','M2','M3','M4','M5','M6','M7','M8','M9','M10','M11','M12'].slice(0,plan.tresorerie_soldes.length), plan.tresorerie_soldes);
     }, 250);
 
@@ -1791,7 +1791,7 @@ function fillPlan(plan) {
       chartWrap.style.cssText = 'margin-top:16px;height:120px;';
       chartWrap.innerHTML = '<canvas id="concChart"></canvas>';
       concEl.appendChild(chartWrap);
-      const labels = plan.concurrents.map(c => c.nom.split(' ')[0]);
+      const labels = plan.concurrents.map(c => String(c.nom||'?').split(' ')[0]);
       const vals = plan.concurrents.map(c => c.menace === 'haute' ? 85 : c.menace === 'moyenne' ? 55 : 25);
       setTimeout(() => drawBarChart('concChart', labels, vals, 'Niveau de menace'), 200);
     }
