@@ -292,6 +292,7 @@ async function generateDashPlan() {
     fillPlan(plan);
 
     currentResult = { ...plan, idea, date: new Date(), id: Date.now() };
+    window.currentResult = currentResult; // expose pour _renderV2PlanResult
     plansHistory.unshift(currentResult);
     localStorage.setItem('eadee_history', JSON.stringify(plansHistory));
     userCredits = Math.max(0, userCredits - 1);
