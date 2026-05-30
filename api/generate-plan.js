@@ -133,9 +133,6 @@ ${data.aides_visees && data.aides_visees.length ? 'Aides visées          : ' + 
 ━━ DONNÉES MARCHÉ VÉRIFIÉES (INSEE) ━━
 ${JSON.stringify(data._verifiedData || {}, null, 2)}
 
-━━ KNOWLEDGE BASE EADEE ━━
-${kb}
-
 ━━ RÈGLES INTELLIGENTES ━━
 ${buildIntelligentRules(data)}
 
@@ -1024,7 +1021,7 @@ JSON uniquement, sans markdown.`;
       console.log(`[EADEE v3.0] Appel Anthropic + web_search...`);
       resp = await callAnthropicAPI({
         model: MODEL,
-        max_tokens: 16000,
+        max_tokens: 10000,
         temperature: 0.3,
         tools: [{ type: 'web_search_20250305', name: 'web_search' }],
         system: EADEE_SYSTEM_PROMPT,
@@ -1037,7 +1034,7 @@ JSON uniquement, sans markdown.`;
         console.warn(`[EADEE v3.0] web_search indisponible (${wsErr.message}) — fallback sans outils`);
         resp = await callAnthropicAPI({
           model: MODEL,
-          max_tokens: 16000,
+          max_tokens: 10000,
           temperature: 0.3,
           system: EADEE_SYSTEM_PROMPT,
           messages: [{ role: 'user', content: userPrompt }],
