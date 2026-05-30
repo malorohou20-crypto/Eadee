@@ -187,7 +187,12 @@ function openFromHistory(indexOrPlan) {
     if (!p && window.__historySnapshot) p = window.__historySnapshot[indexOrPlan];
   }
   if (!p) return;
+
+  // Normaliser si nécessaire (plans v3.0 bruts sauvegardés avant le fix)
+  if (typeof normalizePlanV3 === 'function') p = normalizePlanV3(p);
+
   currentResult = p;
+  window.currentResult = p; // expose pour _renderV2PlanResult / MutationObserver
 
   if (typeof window.go === 'function') { window.go('gen'); }
   else if (typeof showView === 'function') { showView('generator'); }
