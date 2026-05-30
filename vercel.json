@@ -2,7 +2,8 @@
   "cleanUrls": true,
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/((?!eadee-app-v2\\.html$|blog(?:/.*)?$|robots\\.txt|sitemap\\.xml|favicon|apple-touch-icon).*)", "destination": "/index.html" }
+    { "source": "/app", "destination": "/eadee-app-v2.html" },
+    { "source": "/((?!eadee-app-v2\\.html$|app$|blog(?:/.*)?$|robots\\.txt|sitemap\\.xml|favicon|apple-touch-icon).*)", "destination": "/index.html" }
   ],
   "functions": {
     "api/generate-plan.js": { "maxDuration": 300 }
